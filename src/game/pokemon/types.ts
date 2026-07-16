@@ -41,3 +41,10 @@ export type PokedexEntry = {
     shinyCaught: boolean;
     timesCaught: number;
 };
+
+export type PlayerPokemonState = {
+    speciesId: string;
+    level: number;
+    xp: number;
+    isShiny: boolean;
+};

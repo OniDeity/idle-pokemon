@@ -1,20 +1,16 @@
-import speciesJson from "data/pokemon/species.json";
 import type { ZoneDefinition } from "./zones";
-import type { EncounterTableEntry, SpeciesData } from "./types";
-
-const SPECIES = speciesJson as Record<string, SpeciesData>;
+import type { EncounterTableEntry } from "./types";
 
 const BASE_SHINY_CHANCE = 1 / 4096;
 
-export interface EncounterModifiers {
-    catchChanceMultiplier: number;
-    shinyChanceMultiplier: number;
-}
-
-export interface EncounterResult {
+export interface WildEncounter {
     speciesId: string;
     level: number;
     isShiny: boolean;
+}
+
+export interface EncounterResult extends WildEncounter {
+    battleWon: boolean;
     caught: boolean;
 }
 
@@ -42,17 +38,15 @@ export function rollCatch(captureRate: number, catchChanceMultiplier: number): b
     return Math.random() < Math.min(1, (captureRate / 255) * catchChanceMultiplier);
 }
 
-export function resolveEncounter(
+export function rollWildEncounter(
     zone: Pick<ZoneDefinition, "encounterTable">,
-    mods: EncounterModifiers
-): EncounterResult {
+    shinyChanceMultiplier: number
+): WildEncounter {
     const entry = pickWeightedSpecies(zone.encounterTable);
-    const species = SPECIES[entry.speciesId];
     return {
         speciesId: entry.speciesId,
         level: rollLevel(entry),
-        isShiny: rollShiny(mods.shinyChanceMultiplier),
-        caught: rollCatch(species.captureRate, mods.catchChanceMultiplier)
+        isShiny: rollShiny(shinyChanceMultiplier)
     };
 }
 

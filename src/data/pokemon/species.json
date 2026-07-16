@@ -1,4 +1,65 @@
 {
+  "1": {
+    "id": "1",
+    "name": "bulbasaur",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "captureRate": 45,
+    "baseStats": {
+      "hp": 45,
+      "attack": 49,
+      "defense": 49,
+      "specialAttack": 65,
+      "specialDefense": 65,
+      "speed": 45
+    },
+    "sprites": {
+      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png"
+    }
+  },
+  "4": {
+    "id": "4",
+    "name": "charmander",
+    "types": [
+      "fire"
+    ],
+    "captureRate": 45,
+    "baseStats": {
+      "hp": 39,
+      "attack": 52,
+      "defense": 43,
+      "specialAttack": 60,
+      "specialDefense": 50,
+      "speed": 65
+    },
+    "sprites": {
+      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
+      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/4.png"
+    }
+  },
+  "7": {
+    "id": "7",
+    "name": "squirtle",
+    "types": [
+      "water"
+    ],
+    "captureRate": 45,
+    "baseStats": {
+      "hp": 44,
+      "attack": 48,
+      "defense": 65,
+      "specialAttack": 50,
+      "specialDefense": 64,
+      "speed": 43
+    },
+    "sprites": {
+      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
+      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/7.png"
+    }
+  },
   "10": {
     "id": "10",
     "name": "caterpie",

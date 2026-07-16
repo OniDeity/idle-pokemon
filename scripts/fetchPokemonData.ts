@@ -18,6 +18,9 @@ const AREAS: { zoneId: string; slugs: string[] }[] = [
     { zoneId: "viridianForest", slugs: ["viridian-forest-area"] }
 ];
 
+// Starters never appear in a wild encounter table, so they're fetched unconditionally.
+const EXTRA_SPECIES = ["bulbasaur", "charmander", "squirtle"];
+
 interface PokemonEncounter {
     pokemon: { name: string; url: string };
     version_details: {
@@ -166,6 +169,9 @@ async function main() {
         for (const entry of table.entries) {
             speciesNames.add(entry.speciesId);
         }
+    }
+    for (const name of EXTRA_SPECIES) {
+        speciesNames.add(name);
     }
 
     console.log(`Fetching species data for ${speciesNames.size} species...`);

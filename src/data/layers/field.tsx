@@ -19,10 +19,18 @@ import Formula from "game/formulas/formulas";
 import { createLayer } from "game/layers";
 import { persistent } from "game/persistence";
 import {
+    computeBattlePower,
+    computeGearMultiplier,
+    computeXpGain,
+    resolveBattle
+} from "game/pokemon/battle";
+import {
     computeResearchPointsGain,
-    resolveEncounter,
+    rollCatch,
+    rollWildEncounter,
     type EncounterResult
 } from "game/pokemon/encounters";
+import { formatSpeciesName } from "game/pokemon/format";
 import { recordCatch, recordSeen, zoneProgress } from "game/pokemon/pokedex";
 import type { SpeciesData } from "game/pokemon/types";
 import { ROUTE_1, ROUTE_2, VIRIDIAN_FOREST, ZONES, type ZoneDefinition } from "game/pokemon/zones";
@@ -41,6 +49,7 @@ const SPECIES = speciesJson as Record<string, SpeciesData>;
 const BASE_SEARCH_DURATION = 5;
 
 interface EncounterLogEntry extends EncounterResult {
+    xpGained: number;
     timestamp: number;
 }
 
@@ -52,7 +61,7 @@ interface ZoneRuntime {
 }
 
 /** Converts a small DecimalSource (e.g. a repeatable's level count) into a plain JS number. */
-function toNum(value: DecimalSource): number {
+export function toNum(value: DecimalSource): number {
     return new Decimal(value).toNumber();
 }
 
@@ -99,6 +108,34 @@ const field = createLayer(id, () => {
         }
     }));
 
+    const battleAttack: Repeatable = createRepeatable(() => ({
+        limit: 5,
+        requirements: createCostRequirement(() => ({
+            resource: researchPoints,
+            cost: Formula.variable(battleAttack.amount).add(1).pow(1.5).mul(20)
+        })),
+        display: {
+            title: "Reinforced Harness",
+            description:
+                "Protective gear that boosts your Pokémon's battle power by 10% per level.",
+            showAmount: true
+        }
+    }));
+
+    const battleDefense: Repeatable = createRepeatable(() => ({
+        limit: 5,
+        requirements: createCostRequirement(() => ({
+            resource: researchPoints,
+            cost: Formula.variable(battleDefense.amount).add(1).pow(1.5).mul(25)
+        })),
+        display: {
+            title: "Padded Vest",
+            description:
+                "Protective gear that boosts your Pokémon's battle power by 10% per level.",
+            showAmount: true
+        }
+    }));
+
     const autoSearch = createUpgrade(() => ({
         requirements: createCostRequirement(() => ({
             resource: researchPoints,
@@ -118,27 +155,58 @@ const field = createLayer(id, () => {
         const searchAction = createAction(() => ({
             duration: () => BASE_SEARCH_DURATION / (1 + toNum(searchSpeed.amount.value) * 0.1),
             autoStart: () => autoSearch.bought.value,
-            canClick: () => unlockedZones.value[zone.id] === true,
+            canClick: () => unlockedZones.value[zone.id] === true && main.team.value.length > 0,
             display: {
                 title: `Search ${zone.name}`,
                 description: "Survey the area for wild Pokémon."
             },
             onClick() {
-                const result = resolveEncounter(zone, {
-                    catchChanceMultiplier: 1 + toNum(catchChance.amount.value) * 0.1,
-                    shinyChanceMultiplier: 1
-                });
-                recordSeen(main.pokedex, result.speciesId);
-                const isFirstCatch = result.caught
-                    ? recordCatch(main.pokedex, result.speciesId, result.isShiny)
+                const activePokemon = main.team.value[0];
+                if (activePokemon == null) {
+                    return;
+                }
+                const activeSpecies = SPECIES[activePokemon.speciesId];
+
+                const wild = rollWildEncounter(zone, 1);
+                const wildSpecies = SPECIES[wild.speciesId];
+
+                const gearMultiplier = computeGearMultiplier(
+                    toNum(battleAttack.amount.value),
+                    toNum(battleDefense.amount.value)
+                );
+                const playerPower = computeBattlePower(
+                    activeSpecies.baseStats,
+                    activePokemon.level,
+                    gearMultiplier
+                );
+                const wildPower = computeBattlePower(wildSpecies.baseStats, wild.level);
+                const battleWon = resolveBattle(playerPower, wildPower);
+
+                let caught = false;
+                let xpGained = 0;
+                if (battleWon) {
+                    xpGained = computeXpGain(wild.level);
+                    main.team.value = main.team.value.map((p, i) =>
+                        i === 0 ? { ...p, xp: p.xp + xpGained } : p
+                    );
+                    caught = rollCatch(
+                        wildSpecies.captureRate,
+                        1 + toNum(catchChance.amount.value) * 0.1
+                    );
+                }
+
+                recordSeen(main.pokedex, wild.speciesId);
+                const isFirstCatch = caught
+                    ? recordCatch(main.pokedex, wild.speciesId, wild.isShiny)
                     : false;
-                if (result.caught) {
+                const result: EncounterResult = { ...wild, battleWon, caught };
+                if (caught) {
                     researchPoints.value = Decimal.add(
                         researchPoints.value,
                         computeResearchPointsGain(result, isFirstCatch)
                     );
                 }
-                const entry: EncounterLogEntry = { ...result, timestamp: Date.now() };
+                const entry: EncounterLogEntry = { ...result, xpGained, timestamp: Date.now() };
                 lastEncounter.value = entry;
                 recentLog.value = [entry, ...recentLog.value].slice(0, 5);
             }
@@ -163,7 +231,27 @@ const field = createLayer(id, () => {
         }
     });
 
+    function describeOutcome(entry: EncounterLogEntry): string {
+        if (!entry.battleWon) {
+            return "Your Pokémon lost the battle — it got away.";
+        }
+        if (!entry.caught) {
+            return `Won the battle (+${entry.xpGained} XP), but it broke free!`;
+        }
+        return `Won the battle (+${entry.xpGained} XP) and caught it!`;
+    }
+
     function renderZoneTab(runtime: ZoneRuntime) {
+        if (main.team.value.length === 0) {
+            return (
+                <div>
+                    <h3>{runtime.zone.name}</h3>
+                    <p>
+                        🔒 Choose your starter Pokémon in the Field Log tab before you can search.
+                    </p>
+                </div>
+            );
+        }
         if (!unlockedZones.value[runtime.zone.id]) {
             return (
                 <div>
@@ -180,10 +268,10 @@ const field = createLayer(id, () => {
                 {render(runtime.searchAction)}
                 {last == null ? null : (
                     <div>
-                        Last encounter: {SPECIES[last.speciesId]?.name ?? last.speciesId} Lv.
+                        Last encounter:{" "}
+                        {formatSpeciesName(SPECIES[last.speciesId]?.name ?? last.speciesId)} Lv.
                         {last.level}
-                        {last.isShiny ? " ✨ SHINY!" : ""} —{" "}
-                        {last.caught ? "Caught!" : "It fled..."}
+                        {last.isShiny ? " ✨ SHINY!" : ""} — {describeOutcome(last)}
                     </div>
                 )}
                 <div>
@@ -234,7 +322,7 @@ const field = createLayer(id, () => {
                                         ?
                                     </div>
                                 )}
-                                <div>{entry?.seen ? species.name : "???"}</div>
+                                <div>{entry?.seen ? formatSpeciesName(species.name) : "???"}</div>
                                 {entry?.caught ? <div>Caught ×{entry.timesCaught}</div> : null}
                                 {entry?.shinyCaught ? <div>✨ Shiny!</div> : null}
                             </div>
@@ -295,6 +383,8 @@ const field = createLayer(id, () => {
         zoneRuntimes,
         searchSpeed,
         catchChance,
+        battleAttack,
+        battleDefense,
         autoSearch,
         tabFamily,
         reset,
@@ -304,7 +394,7 @@ const field = createLayer(id, () => {
                 <MainDisplay resource={researchPoints} color={color} />
                 {render(tabFamily)}
                 <br />
-                {renderCol(searchSpeed, catchChance, autoSearch)}
+                {renderCol(searchSpeed, catchChance, battleAttack, battleDefense, autoSearch)}
                 <br />
                 <div>
                     Pewter survey:{" "}
