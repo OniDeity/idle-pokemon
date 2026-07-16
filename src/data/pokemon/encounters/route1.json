@@ -1,0 +1,21 @@
+{
+  "zoneId": "route1",
+  "locationAreaSlugs": [
+    "kanto-route-1-area"
+  ],
+  "versionGroup": "red-blue",
+  "entries": [
+    {
+      "speciesId": "16",
+      "weight": 8.333333333333334,
+      "minLevel": 2,
+      "maxLevel": 5
+    },
+    {
+      "speciesId": "19",
+      "weight": 12.5,
+      "minLevel": 2,
+      "maxLevel": 4
+    }
+  ]
+}

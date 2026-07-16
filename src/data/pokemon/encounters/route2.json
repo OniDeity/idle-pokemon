@@ -1,0 +1,34 @@
+{
+  "zoneId": "route2",
+  "locationAreaSlugs": [
+    "kanto-route-2-south-towards-viridian-city",
+    "kanto-route-2-north-towards-pewter-city"
+  ],
+  "versionGroup": "red-blue",
+  "entries": [
+    {
+      "speciesId": "10",
+      "weight": 5,
+      "minLevel": 3,
+      "maxLevel": 5
+    },
+    {
+      "speciesId": "13",
+      "weight": 5,
+      "minLevel": 3,
+      "maxLevel": 5
+    },
+    {
+      "speciesId": "16",
+      "weight": 15,
+      "minLevel": 3,
+      "maxLevel": 5
+    },
+    {
+      "speciesId": "19",
+      "weight": 10,
+      "minLevel": 2,
+      "maxLevel": 5
+    }
+  ]
+}

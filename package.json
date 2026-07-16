@@ -12,7 +12,8 @@
     "testw": "vitest",
     "serve": "vite preview --host",
     "lint": "eslint src --max-warnings 0",
-    "lint:fix": "eslint --fix --max-warnings 0 src"
+    "lint:fix": "eslint --fix --max-warnings 0 src",
+    "fetch:pokemon": "tsx scripts/fetchPokemonData.ts"
   },
   "dependencies": {
     "@fontsource/material-icons": "^5.1.0",
@@ -52,6 +53,7 @@
     "eslint": "^8.57.0",
     "jsdom": "^24.0.0",
     "prettier": "^3.2.5",
+    "tsx": "^4.23.1",
     "typescript": "~5.5.4",
     "vitest": "^1.4.0",
     "vue-tsc": "^2.0.6"

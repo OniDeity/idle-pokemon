@@ -1,0 +1,145 @@
+{
+  "10": {
+    "id": "10",
+    "name": "caterpie",
+    "types": [
+      "bug"
+    ],
+    "captureRate": 255,
+    "baseStats": {
+      "hp": 45,
+      "attack": 30,
+      "defense": 35,
+      "specialAttack": 20,
+      "specialDefense": 20,
+      "speed": 45
+    },
+    "sprites": {
+      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png",
+      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/10.png"
+    }
+  },
+  "11": {
+    "id": "11",
+    "name": "metapod",
+    "types": [
+      "bug"
+    ],
+    "captureRate": 120,
+    "baseStats": {
+      "hp": 50,
+      "attack": 20,
+      "defense": 55,
+      "specialAttack": 25,
+      "specialDefense": 25,
+      "speed": 30
+    },
+    "sprites": {
+      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/11.png",
+      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/11.png"
+    }
+  },
+  "13": {
+    "id": "13",
+    "name": "weedle",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "captureRate": 255,
+    "baseStats": {
+      "hp": 40,
+      "attack": 35,
+      "defense": 30,
+      "specialAttack": 20,
+      "specialDefense": 20,
+      "speed": 50
+    },
+    "sprites": {
+      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/13.png",
+      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/13.png"
+    }
+  },
+  "14": {
+    "id": "14",
+    "name": "kakuna",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "captureRate": 120,
+    "baseStats": {
+      "hp": 45,
+      "attack": 25,
+      "defense": 50,
+      "specialAttack": 25,
+      "specialDefense": 25,
+      "speed": 35
+    },
+    "sprites": {
+      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/14.png",
+      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/14.png"
+    }
+  },
+  "16": {
+    "id": "16",
+    "name": "pidgey",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "captureRate": 255,
+    "baseStats": {
+      "hp": 40,
+      "attack": 45,
+      "defense": 40,
+      "specialAttack": 35,
+      "specialDefense": 35,
+      "speed": 56
+    },
+    "sprites": {
+      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/16.png",
+      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/16.png"
+    }
+  },
+  "19": {
+    "id": "19",
+    "name": "rattata",
+    "types": [
+      "normal"
+    ],
+    "captureRate": 255,
+    "baseStats": {
+      "hp": 30,
+      "attack": 56,
+      "defense": 35,
+      "specialAttack": 25,
+      "specialDefense": 35,
+      "speed": 72
+    },
+    "sprites": {
+      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/19.png",
+      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/19.png"
+    }
+  },
+  "25": {
+    "id": "25",
+    "name": "pikachu",
+    "types": [
+      "electric"
+    ],
+    "captureRate": 190,
+    "baseStats": {
+      "hp": 35,
+      "attack": 55,
+      "defense": 40,
+      "specialAttack": 50,
+      "specialDefense": 50,
+      "speed": 90
+    },
+    "sprites": {
+      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
+      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/25.png"
+    }
+  }
+}

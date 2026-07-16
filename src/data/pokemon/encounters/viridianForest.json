@@ -1,0 +1,39 @@
+{
+  "zoneId": "viridianForest",
+  "locationAreaSlugs": [
+    "viridian-forest-area"
+  ],
+  "versionGroup": "red-blue",
+  "entries": [
+    {
+      "speciesId": "10",
+      "weight": 12.5,
+      "minLevel": 3,
+      "maxLevel": 5
+    },
+    {
+      "speciesId": "11",
+      "weight": 11.25,
+      "minLevel": 4,
+      "maxLevel": 6
+    },
+    {
+      "speciesId": "13",
+      "weight": 12.5,
+      "minLevel": 3,
+      "maxLevel": 5
+    },
+    {
+      "speciesId": "14",
+      "weight": 11.25,
+      "minLevel": 4,
+      "maxLevel": 6
+    },
+    {
+      "speciesId": "25",
+      "weight": 2.5,
+      "minLevel": 3,
+      "maxLevel": 5
+    }
+  ]
+}

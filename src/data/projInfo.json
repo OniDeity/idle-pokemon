@@ -17,7 +17,7 @@
 	"useHeader": true,
 	"banner": null,
 	"logo": "",
-	"initialTabs": [ "main" ],
+	"initialTabs": [ "main", "field" ],
 
 	"maxTickLength": 3600,
 	"offlineLimit": 1,

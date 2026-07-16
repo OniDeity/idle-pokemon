@@ -1,93 +1,39 @@
-import Node from "components/Node.vue";
-import Spacer from "components/layout/Spacer.vue";
-import { createResource, trackBest, trackOOMPS, trackTotal } from "features/resources/resource";
-import { branchedResetPropagation, createTree, Tree } from "features/trees/tree";
 import type { Layer } from "game/layers";
 import { createLayer } from "game/layers";
-import { noPersist } from "game/persistence";
-import player, { Player } from "game/player";
-import type { DecimalSource } from "util/bignum";
-import Decimal, { format, formatTime } from "util/bignum";
-import { render } from "util/vue";
-import { computed, toRaw } from "vue";
-import prestige from "./layers/prestige";
+import { persistent } from "game/persistence";
+import type { Player } from "game/player";
+import type { PokedexEntry } from "game/pokemon/types";
+import { computed } from "vue";
+import field from "./layers/field";
 
 /**
  * @hidden
  */
-export const main = createLayer("main", layer => {
-    const points = createResource<DecimalSource>(10);
-    const best = trackBest(points);
-    const total = trackTotal(points);
+export const main = createLayer("main", () => {
+    // Permanent, cluster-spanning progress. Never included in any layer's `thingsToReset` -
+    // this is what "surviving a badge-reset" means for the player.
+    const pokedex = persistent<Record<string, PokedexEntry>>({});
+    const badgesEarned = persistent<number>(0);
 
-    const pointGain = computed(() => {
-        // eslint-disable-next-line prefer-const
-        let gain = new Decimal(1);
-        return gain;
-    });
-    layer.on("update", diff => {
-        points.value = Decimal.add(points.value, Decimal.times(pointGain.value, diff));
-    });
-    const oomps = trackOOMPS(points, pointGain);
+    const seenCount = computed(() => Object.values(pokedex.value).filter(e => e.seen).length);
+    const caughtCount = computed(() => Object.values(pokedex.value).filter(e => e.caught).length);
+    const shinyCount = computed(
+        () => Object.values(pokedex.value).filter(e => e.shinyCaught).length
+    );
 
-    // Note: Casting as generic tree to avoid recursive type definitions
-    const tree = createTree(() => ({
-        nodes: noPersist([[prestige.treeNode]]),
-        branches: [],
-        onReset() {
-            points.value = toRaw(tree.resettingNode.value) === toRaw(prestige.treeNode) ? 0 : 10;
-            best.value = points.value;
-            total.value = points.value;
-        },
-        resetPropagation: branchedResetPropagation
-    })) as Tree;
-
-    // Note: layers don't _need_ a reference to everything,
-    //  but I'd recommend it over trying to remember what does and doesn't need to be included.
-    // Officially all you need are anything with persistency or that you want to access elsewhere
     return {
-        name: "Tree",
-        links: tree.links,
+        name: "Field Log",
+        pokedex,
+        badgesEarned,
         display: () => (
             <>
-                {player.devSpeed === 0 ? (
-                    <div>
-                        Game Paused
-                        <Node id="paused" />
-                    </div>
-                ) : null}
-                {player.devSpeed != null && player.devSpeed !== 0 && player.devSpeed !== 1 ? (
-                    <div>
-                        Dev Speed: {format(player.devSpeed)}x
-                        <Node id="devspeed" />
-                    </div>
-                ) : null}
-                {player.offlineTime != null && player.offlineTime !== 0 ? (
-                    <div>
-                        Offline Time: {formatTime(player.offlineTime)}
-                        <Node id="offline" />
-                    </div>
-                ) : null}
-                <div>
-                    {Decimal.lt(points.value, "1e1000") ? <span>You have </span> : null}
-                    <h2>{format(points.value)}</h2>
-                    {Decimal.lt(points.value, "1e1e6") ? <span> points</span> : null}
-                </div>
-                {Decimal.gt(pointGain.value, 0) ? (
-                    <div>
-                        ({oomps.value})
-                        <Node id="oomps" />
-                    </div>
-                ) : null}
-                <Spacer />
-                {render(tree)}
+                <h2>Kanto Field Survey</h2>
+                <div>Research authorizations: {badgesEarned.value}</div>
+                <div>Species documented: {seenCount.value}</div>
+                <div>Species caught: {caughtCount.value}</div>
+                <div>Shiny specimens: {shinyCount.value}</div>
             </>
-        ),
-        points,
-        best,
-        total,
-        oomps,
-        tree
+        )
     };
 });
 
@@ -98,7 +44,7 @@ export const main = createLayer("main", layer => {
 export const getInitialLayers = (
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     player: Partial<Player>
-): Array<Layer> => [main, prestige];
+): Array<Layer> => [main, field];
 
 /**
  * A computed ref whose value is true whenever the game is over.
