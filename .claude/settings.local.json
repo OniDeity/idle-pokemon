@@ -4,7 +4,10 @@
       "PowerShell(node -v)",
       "PowerShell(npm -v)",
       "PowerShell(winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements)",
-      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); node -v; npm -v)"
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); node -v; npm -v)",
+      "PowerShell(Get-Command npm)",
+      "PowerShell(Get-Command node)",
+      "Bash(ls \"/c/Program Files/nodejs\" 2>&1)"
     ]
   }
 }
