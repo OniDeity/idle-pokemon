@@ -97,7 +97,8 @@ const layer = createLayer(id, () => {
             dexCaught: dex.caughtCount.value,
             shinyCaught: dex.shinyCount.value,
             newSpecies: newSpecies.value.length,
-            firstClear: clearCount(main.region.value) === 0
+            firstClear: clearCount(main.region.value) === 0,
+            rematch: main.rematch.value
         })
     );
 
@@ -193,6 +194,9 @@ const layer = createLayer(id, () => {
                             {dex.shinyCount.value * 2} · New to the Hall of Fame:{" "}
                             {newSpecies.value.length} × {FAME_PER_NEW_SPECIES}
                             {clearCount(region.id) === 0 ? " · First clear ×1.5" : ""}
+                            {main.rematch.value > 1
+                                ? ` · Rematch ×${main.rematch.value.toFixed(1)}`
+                                : ""}
                         </div>
                         {newSpecies.value.length > 0 ? (
                             <div class="pk-hof-team">

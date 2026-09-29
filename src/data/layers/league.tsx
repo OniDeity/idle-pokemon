@@ -208,7 +208,7 @@ const layer = createLayer(id, () => {
                     {renderNav(true)}
                     <h2 class="pk-layer-title">{region.name} League</h2>
                     <div class="pk-badge-case">
-                        {region.trials.map(gym => (
+                        {main.trials.value.map(gym => (
                             <BadgeIcon
                                 gym={gym}
                                 earned={main.badges.value >= gym.badgeNumber}
@@ -216,13 +216,20 @@ const layer = createLayer(id, () => {
                             />
                         ))}
                     </div>
+                    {main.rematch.value > 1 ? (
+                        <p class="pk-warning">
+                            Rematch: you've cleared {region.name} before, so every trainer here is{" "}
+                            {Math.round((main.rematch.value - 1) * 100)}% stronger, and the Hall of
+                            Fame pays ×{main.rematch.value.toFixed(1)} Fame.
+                        </p>
+                    ) : null}
                     <p class="pk-small pk-muted">
                         Trainer battles are one-on-one: you automatically send out your best matchup
                         against each opponent, and switch when a Pokémon faints. Party order breaks
                         ties. Every forecast is exact.
                     </p>
                     <Panel title={`${region.name} ${region.trialNoun}`}>
-                        {region.trials.map(renderTrial)}
+                        {main.trials.value.map(renderTrial)}
                     </Panel>
                     {renderFinale()}
                     <Panel title="Level caps">

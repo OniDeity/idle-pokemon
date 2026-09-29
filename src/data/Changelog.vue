@@ -5,6 +5,35 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.1 Islands &amp; Legends</summary>
+                <ul>
+                    <li class="feature">
+                        Orange Islands and Sevii Islands journeys, each with their own trials and
+                        finale
+                    </li>
+                    <li class="feature">
+                        Ten anime-exclusive Kanto locations and giant-Pokémon boss fights
+                    </li>
+                    <li class="feature">
+                        Pokédex expanded to 251, with Johto Pokémon, Lugia, Ho-Oh and the legendary
+                        beasts
+                    </li>
+                    <li class="feature">
+                        Choose your region after each Hall of Fame; new Pokémon in the Hall earn
+                        extra Fame
+                    </li>
+                    <li class="feature">
+                        Automation: shopping, gifts, evolution, party building, travel and
+                        challenges
+                    </li>
+                    <li class="feature">Portrait layout for phones</li>
+                    <li class="balancing">
+                        Slower, steadier pacing: about a day for a first clear; rematches get
+                        tougher
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.0 Kanto Reborn</summary>
                 A ground-up rebuild of the game.
                 <ul>

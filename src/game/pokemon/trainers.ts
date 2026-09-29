@@ -40,9 +40,9 @@ export interface GymDefinition extends TrainerDefinition {
  * leaders are much stronger than their levels suggest, so catching new Pokémon at wild levels
  * isn't enough on its own; the Elite Four's higher levels carry the difficulty at the end.
  */
-const GYM_STRENGTHS = [0.9, 1.5, 2.1, 2.6, 3.0, 3.3, 3.6, 3.9];
-const ELITE_FOUR_STRENGTH = 2.8;
-const CHAMPION_STRENGTH = 3.0;
+const GYM_STRENGTHS = [0.75, 1.3, 1.8, 2.2, 2.55, 2.8, 3.05, 3.3];
+const ELITE_FOUR_STRENGTH = 2.4;
+const CHAMPION_STRENGTH = 2.55;
 
 /** Seconds allowed per trainer battle: a base plus a little per Pokémon on the team. */
 export function timeLimit(teamSize: number) {

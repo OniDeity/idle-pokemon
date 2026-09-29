@@ -564,6 +564,8 @@ export interface FameInputs {
     newSpecies: number;
     /** True the first time this region is cleared. */
     firstClear: boolean;
+    /** Rematch strength of the region's trainers; tougher rematches pay more. */
+    rematch?: number;
 }
 
 /** Fame for enshrining a team. New faces in the Hall of Fame are worth the most. */
@@ -574,7 +576,9 @@ export function fameGain(input: FameInputs): number {
         input.shinyCaught * 2 +
         input.newSpecies * FAME_PER_NEW_SPECIES;
     const multiplier =
-        (input.firstClear ? 1.5 : 1) * (hasMilestone(input.dexCaught, "Rainbow Wing") ? 1.25 : 1);
+        (input.firstClear ? 1.5 : 1) *
+        (input.rematch ?? 1) *
+        (hasMilestone(input.dexCaught, "Rainbow Wing") ? 1.25 : 1);
     return Math.max(1, Math.floor(base * multiplier));
 }
 

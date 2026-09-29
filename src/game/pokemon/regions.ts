@@ -95,6 +95,22 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
 
 export const REGION_LIST: RegionDefinition[] = Object.values(REGIONS);
 
+/** Trainers get tougher each time you've cleared their region, like rematches in the games. */
+export const REMATCH_STRENGTH_PER_CLEAR = 0.15;
+export const MAX_REMATCH_CLEARS = 5;
+
+export function rematchMultiplier(clears: number): number {
+    return 1 + REMATCH_STRENGTH_PER_CLEAR * Math.min(clears, MAX_REMATCH_CLEARS);
+}
+
+/** A trainer as they'll appear after the player has cleared their region `clears` times. */
+export function withRematch<T extends TrainerDefinition>(trainer: T, clears: number): T {
+    const multiplier = rematchMultiplier(clears);
+    return multiplier === 1
+        ? trainer
+        : { ...trainer, statMultiplier: trainer.statMultiplier * multiplier };
+}
+
 export function levelCap(region: RegionDefinition, trialsCleared: number, cleared: boolean) {
     const caps = region.levelCaps;
     return cleared ? caps[caps.length - 1] : caps[Math.min(trialsCleared, caps.length - 2)];

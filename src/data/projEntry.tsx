@@ -25,7 +25,7 @@ import type { SpecialEncounter } from "game/pokemon/specials";
 import { LEGENDARY_TIME_LIMIT } from "game/pokemon/specials";
 import type { BattlerStats } from "game/pokemon/stats";
 import { levelForXp, maxHp, xpForLevel } from "game/pokemon/stats";
-import { levelCap, REGIONS } from "game/pokemon/regions";
+import { levelCap, REGIONS, rematchMultiplier, withRematch } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
 import type { RegionId } from "game/pokemon/zones";
 import { rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
@@ -184,8 +184,16 @@ export const main = createLayer("main", layer => {
     );
     const partyBattlers = computed<PartyBattler[]>(() => partyIds.value.map(id => battlerFor(id)));
     const inTrainerBattle = computed(() => battle.value.kind === "trainer");
-    const finale = computed(() => regionDef.value.finale(starter.value));
-    const nextTrial = computed(() => regionDef.value.trials[badges.value]);
+    /** How many times this region has been cleared before; trainers scale up on rematches. */
+    const rematchClears = computed(() => hof.clearCount(region.value));
+    const rematch = computed(() => rematchMultiplier(rematchClears.value));
+    const trials = computed((): GymDefinition[] =>
+        regionDef.value.trials.map(t => withRematch(t, rematchClears.value))
+    );
+    const finale = computed((): TrainerDefinition[] =>
+        regionDef.value.finale(starter.value).map(t => withRematch(t, rematchClears.value))
+    );
+    const nextTrial = computed(() => trials.value[badges.value]);
     /** The trainers standing between the player and progress: the next trial, or the finale. */
     const nextTrainers = computed((): TrainerDefinition[] =>
         nextTrial.value != null ? [nextTrial.value] : champion.value ? [] : finale.value
@@ -502,8 +510,9 @@ export const main = createLayer("main", layer => {
         startSearch();
     }
 
-    function challengeGym(gym: GymDefinition) {
-        if (badges.value !== gym.badgeNumber - 1 || !regionDef.value.trials.includes(gym)) return;
+    function challengeGym(requested: GymDefinition) {
+        const gym = trials.value[requested.badgeNumber - 1];
+        if (gym == null || gym.id !== requested.id || badges.value !== gym.badgeNumber - 1) return;
         startTrainerBattle({
             label: regionDef.value.id === "sevii" ? gym.title : `${gym.name}'s Gym battle`,
             trainers: [gym],
@@ -800,6 +809,8 @@ export const main = createLayer("main", layer => {
         starter,
         region,
         regionDef,
+        trials,
+        rematch,
         martTier,
         finale,
         nextTrial,

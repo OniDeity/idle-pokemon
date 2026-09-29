@@ -27,7 +27,7 @@ import { getSpecies } from "../src/game/pokemon/data";
 import type { BallId, KeyItemId } from "../src/game/pokemon/items";
 import { AUTO_BALL_ORDER, BALLS, LINK_CABLE_PRICE, STONES } from "../src/game/pokemon/items";
 import type { RegionDefinition } from "../src/game/pokemon/regions";
-import { levelCap, REGIONS } from "../src/game/pokemon/regions";
+import { levelCap, REGIONS, rematchMultiplier, withRematch } from "../src/game/pokemon/regions";
 import { SPECIAL_ENCOUNTERS } from "../src/game/pokemon/specials";
 import { levelForXp, maxHp, xpForLevel, xpYield } from "../src/game/pokemon/stats";
 import type { TrainerDefinition } from "../src/game/pokemon/trainers";
@@ -128,8 +128,11 @@ function runJourney(region: RegionDefinition, starter: number) {
         level: o.level,
         multiplier: memberMultiplier(false, dex.get(o.id) ?? 1)
     });
+    const rematchClears = clears[region.id] ?? 0;
     const nextTrainers = (): TrainerDefinition[] =>
-        badges < region.trials.length ? [region.trials[badges]] : region.finale(starter);
+        (badges < region.trials.length ? [region.trials[badges]] : region.finale(starter)).map(t =>
+            withRematch(t, rematchClears)
+        );
 
     function chooseParty(): Owned[] {
         const targets = nextTrainers().flatMap(trainerTeam);
@@ -249,7 +252,8 @@ function runJourney(region: RegionDefinition, starter: number) {
                         dexCaught: dex.size,
                         shinyCaught: 0,
                         newSpecies: team.filter(id => !enshrined.has(id)).length,
-                        firstClear: (clears[region.id] ?? 0) === 0
+                        firstClear: (clears[region.id] ?? 0) === 0,
+                        rematch: rematchMultiplier(rematchClears)
                     });
                     team.forEach(id => enshrined.add(id));
                     clears[region.id] = (clears[region.id] ?? 0) + 1;

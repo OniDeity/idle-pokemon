@@ -251,7 +251,7 @@ export const ORANGE_TRIALS: GymDefinition[] = [
         badge: "Coral-Eye Badge",
         badgeNumber: 1,
         specialty: "water",
-        statMultiplier: 1,
+        statMultiplier: 1.25,
         team: [
             { id: 117, level: 18 },
             { id: 9, level: 20 }
@@ -268,7 +268,7 @@ export const ORANGE_TRIALS: GymDefinition[] = [
         badge: "Sea Ruby Badge",
         badgeNumber: 2,
         specialty: "ground",
-        statMultiplier: 1.25,
+        statMultiplier: 1.55,
         team: [
             { id: 31, level: 26 },
             { id: 74, level: 24 },
@@ -286,7 +286,7 @@ export const ORANGE_TRIALS: GymDefinition[] = [
         badge: "Spike Shell Badge",
         badgeNumber: 3,
         specialty: null,
-        statMultiplier: 1.5,
+        statMultiplier: 1.9,
         team: [
             { id: 125, level: 32 },
             { id: 121, level: 32 },
@@ -304,7 +304,7 @@ export const ORANGE_TRIALS: GymDefinition[] = [
         badge: "Jade Star Badge",
         badgeNumber: 4,
         specialty: null,
-        statMultiplier: 1.75,
+        statMultiplier: 2.2,
         team: [
             { id: 65, level: 38 },
             { id: 105, level: 38 }
@@ -332,7 +332,7 @@ export function orangeFinale(): TrainerDefinition[] {
             specialty: null,
             team,
             timeLimit: 30 + team.length * 15,
-            statMultiplier: 2.2,
+            statMultiplier: 2.75,
             prizeMoney: 48 * 100,
             quote: "No one has taken the Winner's Cup from me. Not once."
         }
