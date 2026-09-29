@@ -46,10 +46,7 @@ export const Sprite = component<{
     extraClass?: string;
 }>(props => {
     const size = props.size ?? 64;
-    let url = spriteUrl(props.id, props.shiny);
-    if (props.back) {
-        url = url.replace("firered-leafgreen/", "firered-leafgreen/back/");
-    }
+    const url = spriteUrl(props.id, props.shiny, props.back);
     return (
         <img
             class={["pk-sprite", props.silhouette ? "pk-silhouette" : "", props.extraClass ?? ""]}

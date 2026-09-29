@@ -1,3 +1,4 @@
+import { assetUrl } from "./assets";
 import type { StoneId } from "./data";
 
 export type BallId = "pokeBall" | "greatBall" | "ultraBall" | "masterBall";
@@ -14,10 +15,8 @@ export interface BallDefinition {
     sprite: string;
 }
 
-const ITEM_SPRITES = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items";
-
 export function itemSprite(slug: string): string {
-    return `${ITEM_SPRITES}/${slug}.png`;
+    return assetUrl(`items/${slug}.png`);
 }
 
 export const BALLS: Record<BallId, BallDefinition> = {

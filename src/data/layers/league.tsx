@@ -4,6 +4,7 @@
  */
 import { main } from "data/projEntry";
 import { createLayer } from "game/layers";
+import { assetUrl } from "game/pokemon/assets";
 import type { TrainerBattleOutcome } from "game/pokemon/balance";
 import { simulateTrainerBattle } from "game/pokemon/balance";
 import { getSpecies } from "game/pokemon/data";
@@ -22,9 +23,8 @@ import {
     TypeBadge
 } from "../ui/components";
 
-const BADGE_SPRITES = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/badges";
 export function badgeSprite(n: number) {
-    return `${BADGE_SPRITES}/${n}.png`;
+    return assetUrl(`badges/${n}.png`);
 }
 
 const id = "league";

@@ -1,3 +1,4 @@
+import { assetUrl } from "./assets";
 import encountersJson from "data/pokemon/encounters.json";
 import speciesJson from "data/pokemon/species.json";
 import typeChartJson from "data/pokemon/typeChart.json";
@@ -82,11 +83,12 @@ export function getSpecies(id: number): Species {
     return species;
 }
 
-const SPRITE_BASE =
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-iii/firered-leafgreen";
-
-export function spriteUrl(id: number, shiny = false): string {
-    return `${SPRITE_BASE}/${shiny ? "shiny/" : ""}${id}.png`;
+export function spriteUrl(id: number, shiny = false, back = false): string {
+    return assetUrl(
+        `pokemon/versions/generation-iii/firered-leafgreen/${back ? "back/" : ""}${
+            shiny ? "shiny/" : ""
+        }${id}.png`
+    );
 }
 
 /** Damage multiplier of an attack of the given type against a defender with the given types. */

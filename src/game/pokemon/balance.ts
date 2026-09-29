@@ -4,6 +4,7 @@
  */
 import type { Species } from "./data";
 import type { KeyItemId } from "./items";
+import { itemSprite } from "./items";
 import type { BattlerStats } from "./stats";
 import { attacksPerSecond, damagePerHit, maxHp, TRAINER_IV } from "./stats";
 import type { TrainerDefinition } from "./trainers";
@@ -43,69 +44,67 @@ export interface DexMilestone {
     sprite: string;
 }
 
-const ITEMS = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items";
-
 /** Rewards Professor Oak's aides hand out as the Pokédex fills. Never lost on Hall of Fame. */
 export const DEX_MILESTONES: DexMilestone[] = [
     {
         caught: 10,
         name: "Exp. Share",
         description: "+25% experience.",
-        sprite: `${ITEMS}/exp-share.png`
+        sprite: itemSprite("exp-share")
     },
     {
         caught: 20,
         name: "Amulet Coin",
         description: "+50% Pokédollars from battles.",
-        sprite: `${ITEMS}/amulet-coin.png`
+        sprite: itemSprite("amulet-coin")
     },
     {
         caught: 30,
         name: "Ball Restocker",
         description: "Automatically buys balls when you run low (if you can afford them).",
-        sprite: `${ITEMS}/poke-ball.png`
+        sprite: itemSprite("poke-ball")
     },
     {
         caught: 40,
         name: "Lucky Egg",
         description: "+50% experience.",
-        sprite: `${ITEMS}/lucky-egg.png`
+        sprite: itemSprite("lucky-egg")
     },
     {
         caught: 60,
         name: "Scope Lens",
         description: "+25% damage.",
-        sprite: `${ITEMS}/scope-lens.png`
+        sprite: itemSprite("scope-lens")
     },
     {
         caught: 80,
         name: "Nugget Stash",
         description: "+50% Pokédollars from battles.",
-        sprite: `${ITEMS}/nugget.png`
+        sprite: itemSprite("nugget")
     },
     {
         caught: 100,
         name: "Oak's Letter",
         description: "+50% damage and +10% catch chance.",
-        sprite: `${ITEMS}/oaks-letter.png`
+        sprite: itemSprite("oaks-letter")
     },
     {
         caught: 120,
         name: "Silph Scope",
         description: "+50% experience and Pokédollars.",
-        sprite: `${ITEMS}/silph-scope.png`
+        sprite: itemSprite("silph-scope")
     },
     {
         caught: 150,
         name: "Mew",
         description: "Professor Oak entrusts you with the mythical Mew.",
-        sprite: `${ITEMS}/old-sea-map.png`
+        sprite: itemSprite("old-sea-map")
     },
     {
         caught: 151,
         name: "Shiny Charm",
         description: "Shiny Pokémon appear three times as often.",
-        sprite: `${ITEMS}/shiny-charm.png`
+        sprite: itemSprite("shiny-charm")
     }
 ];
 
@@ -138,7 +137,7 @@ export const MART_UPGRADES = {
         costGrowth: 1.5,
         maxLevel: 40,
         badgesRequired: 0,
-        sprite: `${ITEMS}/protein.png`
+        sprite: itemSprite("protein")
     },
     rareCandy: {
         id: "rareCandy",
@@ -148,7 +147,7 @@ export const MART_UPGRADES = {
         costGrowth: 1.5,
         maxLevel: 30,
         badgesRequired: 1,
-        sprite: `${ITEMS}/rare-candy.png`
+        sprite: itemSprite("rare-candy")
     },
     payDay: {
         id: "payDay",
@@ -158,7 +157,7 @@ export const MART_UPGRADES = {
         costGrowth: 1.55,
         maxLevel: 25,
         badgesRequired: 1,
-        sprite: `${ITEMS}/coin-case.png`
+        sprite: itemSprite("coin-case")
     },
     iron: {
         id: "iron",
@@ -168,7 +167,7 @@ export const MART_UPGRADES = {
         costGrowth: 1.5,
         maxLevel: 40,
         badgesRequired: 0,
-        sprite: `${ITEMS}/iron.png`
+        sprite: itemSprite("iron")
     },
     repel: {
         id: "repel",
@@ -178,7 +177,7 @@ export const MART_UPGRADES = {
         costGrowth: 2.2,
         maxLevel: 5,
         badgesRequired: 2,
-        sprite: `${ITEMS}/max-repel.png`
+        sprite: itemSprite("max-repel")
     }
 } satisfies Record<string, UpgradeDefinition>;
 export type MartUpgradeId = keyof typeof MART_UPGRADES;
@@ -196,7 +195,7 @@ export const HOF_UPGRADES = {
         costGrowth: 1.6,
         maxLevel: 50,
         badgesRequired: 0,
-        sprite: `${ITEMS}/x-attack.png`
+        sprite: itemSprite("x-attack")
     },
     wisdom: {
         id: "wisdom",
@@ -206,7 +205,7 @@ export const HOF_UPGRADES = {
         costGrowth: 1.6,
         maxLevel: 50,
         badgesRequired: 0,
-        sprite: `${ITEMS}/exp-share.png`
+        sprite: itemSprite("exp-share")
     },
     fortune: {
         id: "fortune",
@@ -216,7 +215,7 @@ export const HOF_UPGRADES = {
         costGrowth: 1.6,
         maxLevel: 50,
         badgesRequired: 0,
-        sprite: `${ITEMS}/nugget.png`
+        sprite: itemSprite("nugget")
     },
     scout: {
         id: "scout",
@@ -226,7 +225,7 @@ export const HOF_UPGRADES = {
         costGrowth: 2,
         maxLevel: 5,
         badgesRequired: 0,
-        sprite: `${ITEMS}/dowsing-machine.png`
+        sprite: itemSprite("dowsing-machine")
     },
     catcher: {
         id: "catcher",
@@ -236,7 +235,7 @@ export const HOF_UPGRADES = {
         costGrowth: 1.8,
         maxLevel: 10,
         badgesRequired: 0,
-        sprite: `${ITEMS}/great-ball.png`
+        sprite: itemSprite("great-ball")
     },
     shinyHunter: {
         id: "shinyHunter",
@@ -246,7 +245,7 @@ export const HOF_UPGRADES = {
         costGrowth: 2,
         maxLevel: 10,
         badgesRequired: 0,
-        sprite: `${ITEMS}/shiny-stone.png`
+        sprite: itemSprite("shiny-stone")
     },
     headStart: {
         id: "headStart",
@@ -256,7 +255,7 @@ export const HOF_UPGRADES = {
         costGrowth: 2,
         maxLevel: 3,
         badgesRequired: 0,
-        sprite: `${ITEMS}/rare-candy.png`
+        sprite: itemSprite("rare-candy")
     }
 } satisfies Record<string, UpgradeDefinition>;
 export type HofUpgradeId = keyof typeof HOF_UPGRADES;
