@@ -1440,3 +1440,17 @@
         padding-left: 0;
     }
 }
+
+/* ---------- Start over ---------- */
+
+.pk-journey .pk-reset {
+    margin: 18px 0 6px;
+    text-align: center;
+}
+
+.pk-journey .pk-reset-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}

@@ -7,6 +7,7 @@ import hof from "data/layers/hof";
 import type { BallMode, BattleState, CatchMode, LogEntry } from "data/projEntry";
 import { main } from "data/projEntry";
 import player from "game/player";
+import settings from "game/settings";
 import { AUTOMATIONS, catchChance } from "game/pokemon/balance";
 import { DEX_SIZE, getSpecies } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
@@ -14,6 +15,8 @@ import { BALLS } from "game/pokemon/items";
 import { maxHp, xpForLevel } from "game/pokemon/stats";
 import { REGION_LIST, startersFor } from "game/pokemon/regions";
 import { formatTime } from "util/bignum";
+import { hardReset } from "util/save";
+import { ref } from "vue";
 import {
     BadgeIcon,
     Bar,
@@ -550,6 +553,45 @@ function renderStatus() {
     return notices.length > 0 ? <div class="pk-notice">{notices.join(" · ")}</div> : null;
 }
 
+/** Two-step confirmation for wiping the save. */
+const confirmingReset = ref(false);
+
+/** Starts a brand-new save and deletes the old one, so nothing is left behind. */
+async function startOver() {
+    confirmingReset.value = false;
+    const oldId = player.id;
+    await hardReset();
+    localStorage.removeItem(oldId);
+    settings.saves = settings.saves.filter(id => id !== oldId);
+}
+
+function renderResetFooter() {
+    return (
+        <div class="pk-reset">
+            {confirmingReset.value ? (
+                <>
+                    <p class="pk-warning">
+                        Start over from scratch? This erases everything: your journey, the Pokédex,
+                        Fame, upgrades and the Hall of Fame. It can't be undone.
+                    </p>
+                    <div class="pk-reset-actions">
+                        <Button kind="danger" onClick={() => void startOver()}>
+                            Erase everything
+                        </Button>
+                        <Button kind="ghost" onClick={() => (confirmingReset.value = false)}>
+                            Keep playing
+                        </Button>
+                    </div>
+                </>
+            ) : (
+                <Button kind="ghost" onClick={() => (confirmingReset.value = true)}>
+                    Start over…
+                </Button>
+            )}
+        </div>
+    );
+}
+
 export function renderJourney() {
     return (
         <div class="pk-journey">
@@ -571,6 +613,7 @@ export function renderJourney() {
                     {renderLog()}
                 </>
             )}
+            {renderResetFooter()}
         </div>
     );
 }

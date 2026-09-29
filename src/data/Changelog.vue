@@ -49,6 +49,9 @@
                     <li class="feature">
                         Effort: experience past the level cap becomes a growing damage bonus
                     </li>
+                    <li class="feature">
+                        "Start over…" at the bottom of the journey panel wipes all progress
+                    </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="balancing">
                         Slower, steadier pacing: about a day for a first clear; rematches get
