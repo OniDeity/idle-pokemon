@@ -24,7 +24,7 @@ export const BALLS: Record<BallId, BallDefinition> = {
         id: "pokeBall",
         name: "Poké Ball",
         catchMultiplier: 1,
-        price: 25,
+        price: 20,
         badgesRequired: 0,
         sprite: itemSprite("poke-ball")
     },
@@ -32,7 +32,7 @@ export const BALLS: Record<BallId, BallDefinition> = {
         id: "greatBall",
         name: "Great Ball",
         catchMultiplier: 1.5,
-        price: 150,
+        price: 100,
         badgesRequired: 2,
         sprite: itemSprite("great-ball")
     },
@@ -40,7 +40,7 @@ export const BALLS: Record<BallId, BallDefinition> = {
         id: "ultraBall",
         name: "Ultra Ball",
         catchMultiplier: 2,
-        price: 600,
+        price: 300,
         badgesRequired: 4,
         sprite: itemSprite("ultra-ball")
     },
@@ -69,37 +69,44 @@ export const STONES: Record<StoneId, StoneDefinition> = {
     moonStone: {
         id: "moonStone",
         name: "Moon Stone",
-        price: 3000,
+        price: 2000,
         badgesRequired: 1,
         sprite: itemSprite("moon-stone")
     },
     fireStone: {
         id: "fireStone",
         name: "Fire Stone",
-        price: 5000,
+        price: 3000,
         badgesRequired: 3,
         sprite: itemSprite("fire-stone")
     },
     waterStone: {
         id: "waterStone",
         name: "Water Stone",
-        price: 5000,
+        price: 3000,
         badgesRequired: 3,
         sprite: itemSprite("water-stone")
     },
     thunderStone: {
         id: "thunderStone",
         name: "Thunder Stone",
-        price: 5000,
+        price: 3000,
         badgesRequired: 3,
         sprite: itemSprite("thunder-stone")
     },
     leafStone: {
         id: "leafStone",
         name: "Leaf Stone",
-        price: 5000,
+        price: 3000,
         badgesRequired: 3,
         sprite: itemSprite("leaf-stone")
+    },
+    sunStone: {
+        id: "sunStone",
+        name: "Sun Stone",
+        price: 3000,
+        badgesRequired: 4,
+        sprite: itemSprite("sun-stone")
     }
 };
 
@@ -158,4 +165,4 @@ export const KEY_ITEMS: Record<KeyItemId, KeyItemDefinition> = {
     }
 };
 
-export const LINK_CABLE_PRICE = 20000;
+export const LINK_CABLE_PRICE = 10000;

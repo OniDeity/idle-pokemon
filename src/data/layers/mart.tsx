@@ -11,6 +11,7 @@ import type { BallId } from "game/pokemon/items";
 import { BALLS, KEY_ITEMS, LINK_CABLE_PRICE, STONES } from "game/pokemon/items";
 import { computed } from "vue";
 import type { NavNode } from "../ui/nav";
+import { mobileClasses, renderNav } from "../ui/nav";
 import { Button, formatMoney, ItemIcon, Panel } from "../ui/components";
 
 const id = "mart";
@@ -26,13 +27,13 @@ const layer = createLayer(id, () => {
 
     function buyUpgrade(upgrade: UpgradeDefinition & { id: MartUpgradeId }) {
         const current = level(upgrade.id);
-        if (current >= upgrade.maxLevel || main.badges.value < upgrade.badgesRequired) return;
+        if (current >= upgrade.maxLevel || main.martTier.value < upgrade.badgesRequired) return;
         if (!main.spend(upgradeCost(upgrade, current))) return;
         levels.value = { ...levels.value, [upgrade.id]: current + 1 };
     }
 
     function buyLinkCable() {
-        if (main.keyItems.value.linkCable || main.badges.value < 3) return;
+        if (main.keyItems.value.linkCable || main.martTier.value < 3) return;
         if (!main.spend(LINK_CABLE_PRICE)) return;
         main.grantKeyItem("linkCable");
     }
@@ -56,7 +57,7 @@ const layer = createLayer(id, () => {
     function renderBall(ball: BallId) {
         const def = BALLS[ball];
         const price = def.price;
-        const unlocked = main.badges.value >= def.badgesRequired;
+        const unlocked = main.martTier.value >= def.badgesRequired;
         return (
             <div class={["pk-shop-row", unlocked ? "" : "locked"]}>
                 <ItemIcon src={def.sprite} alt={def.name} />
@@ -87,7 +88,7 @@ const layer = createLayer(id, () => {
 
     function renderUpgrade(upgrade: UpgradeDefinition & { id: MartUpgradeId }) {
         const current = level(upgrade.id);
-        const unlocked = main.badges.value >= upgrade.badgesRequired;
+        const unlocked = main.martTier.value >= upgrade.badgesRequired;
         const maxed = current >= upgrade.maxLevel;
         const cost = upgradeCost(upgrade, current);
         return (
@@ -124,10 +125,14 @@ const layer = createLayer(id, () => {
         color,
         minWidth: 480,
         minimizable: false,
+        classes: mobileClasses(id),
         levels,
+        buyUpgrade,
+        buyLinkCable,
         nav,
         display: () => (
             <div class="pk-layer">
+                {renderNav(true)}
                 <h2 class="pk-layer-title">Poké Mart</h2>
                 <div class="pk-money-big">{formatMoney(main.money.value)}</div>
 
@@ -151,13 +156,15 @@ const layer = createLayer(id, () => {
 
                 <Panel title="Celadon Dept. Store">
                     {Object.values(STONES).map(stone => {
-                        const unlocked = main.badges.value >= stone.badgesRequired;
+                        const unlocked = main.martTier.value >= stone.badgesRequired;
                         return (
                             <div class={["pk-shop-row", unlocked ? "" : "locked"]}>
                                 <ItemIcon src={stone.sprite} alt={stone.name} />
                                 <div class="pk-shop-info">
                                     <b>{stone.name}</b>{" "}
-                                    <span class="pk-muted">×{main.stones.value[stone.id]}</span>
+                                    <span class="pk-muted">
+                                        ×{main.stones.value[stone.id] ?? 0}
+                                    </span>
                                     <div class="pk-small">
                                         {unlocked
                                             ? "Use from the Party screen to evolve certain Pokémon."
@@ -178,17 +185,17 @@ const layer = createLayer(id, () => {
                             </div>
                         );
                     })}
-                    <div class={["pk-shop-row", main.badges.value >= 3 ? "" : "locked"]}>
+                    <div class={["pk-shop-row", main.martTier.value >= 3 ? "" : "locked"]}>
                         <ItemIcon src={KEY_ITEMS.linkCable.sprite} alt="Link Cable" />
                         <div class="pk-shop-info">
                             <b>Link Cable</b>
                             <div class="pk-small">
-                                {main.badges.value >= 3
+                                {main.martTier.value >= 3
                                     ? KEY_ITEMS.linkCable.description
                                     : "Stocked after 3 badges"}
                             </div>
                         </div>
-                        {main.badges.value >= 3 ? (
+                        {main.martTier.value >= 3 ? (
                             <Button
                                 kind="primary"
                                 disabled={

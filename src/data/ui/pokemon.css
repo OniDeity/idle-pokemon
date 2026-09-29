@@ -135,6 +135,24 @@
     transition: filter 0.3s;
 }
 
+.pk-emblem {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 30% 70% 30% 70%;
+    background: radial-gradient(circle at 35% 30%, #fff8 0%, transparent 45%), var(--emblem);
+    color: #fff;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25) inset;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.pk-emblem.unearned {
+    filter: grayscale(1) brightness(0.45);
+}
+
 .pk-badge-img.unearned {
     filter: grayscale(1) brightness(0.35);
 }
@@ -1269,6 +1287,123 @@
 
 .pk-cap.current {
     outline: 2px solid var(--layer-color);
+}
+
+/* ---------- Regions & HoF ---------- */
+
+.pk-regions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+    text-align: left;
+}
+
+.pk-region {
+    font: inherit;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 2px solid var(--pk-line);
+    border-left: 6px solid var(--region-color);
+    background: var(--raised-background);
+    cursor: pointer;
+    text-align: left;
+}
+
+.pk-region.selected {
+    border-color: var(--region-color);
+    box-shadow: 0 0 0 1px var(--region-color) inset;
+}
+
+.pk-region:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pk-fame-preview {
+    background: var(--pk-soft);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 8px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pk-hof-mon.new {
+    outline: 2px solid #facc15;
+}
+
+.pk-anime-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #7c3aed;
+    color: #fff;
+    vertical-align: middle;
+}
+
+/* ---------- Phones: one screen at a time, portrait, no sideways scrolling ---------- */
+
+.pk-nav-mobile {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .tabs-container {
+        overflow-x: hidden !important;
+    }
+    .tabs-container > .tab {
+        min-width: 0 !important;
+        flex-basis: 100% !important;
+        width: 100% !important;
+        max-width: 100vw;
+    }
+    .tabs-container > .tab.pk-mobile-hidden {
+        display: none !important;
+    }
+    .pk-nav-desktop {
+        display: none;
+    }
+    .pk-nav-mobile {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        gap: 4px;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        margin: 0 -12px 8px;
+        padding: 6px 8px;
+        background: var(--background);
+        border-bottom: 1px solid var(--pk-line);
+    }
+    .pk-nav-mobile .pk-nav-node {
+        width: auto;
+        flex: 1;
+        height: 46px;
+        border-radius: 12px;
+        min-width: 0;
+    }
+    .pk-nav-mobile .pk-nav-letter {
+        font-size: 16px;
+    }
+    .pk-nav-mobile .pk-nav-label {
+        font-size: 8.5px;
+    }
+    .pk-layer,
+    .pk-journey {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
 }
 
 @media (max-width: 640px) {

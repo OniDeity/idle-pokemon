@@ -11,8 +11,9 @@ import {
 import { DEX_SIZE, getSpecies, PRE_EVOLUTION, SPECIES, typeEffectiveness } from "game/pokemon/data";
 import { MEW_ID, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
-import { championFor, ELITE_FOUR, GYMS, LEVEL_CAPS } from "game/pokemon/trainers";
-import { activePools, allZoneSpecies, rollEncounter, ZONES } from "game/pokemon/zones";
+import { REGION_LIST, REGIONS } from "game/pokemon/regions";
+import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
+import { activePools, allZoneSpecies, rollEncounter, ZONES, zonesIn } from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
 
 function party(...members: [number, number][]): PartyBattler[] {
@@ -20,8 +21,8 @@ function party(...members: [number, number][]): PartyBattler[] {
 }
 
 describe("data", () => {
-    test("has all 151 Kanto species in order", () => {
-        expect(DEX_SIZE).toBe(151);
+    test("has species #1-251 in order", () => {
+        expect(DEX_SIZE).toBe(251);
         SPECIES.forEach((species, i) => expect(species.id).toBe(i + 1));
     });
 
@@ -41,7 +42,9 @@ describe("data", () => {
                 }
             }
         }
-        const missing = SPECIES.filter(s => !obtainable.has(s.id)).map(s => s.name);
+        REGION_LIST.forEach(r => r.starters.forEach(id => obtainable.add(id)));
+        // Every Kanto species, and every Johto species' evolution line we added, can be found.
+        const missing = SPECIES.filter(s => s.id <= 151 && !obtainable.has(s.id)).map(s => s.name);
         expect(missing).toEqual([]);
     });
 
@@ -53,11 +56,41 @@ describe("data", () => {
         }
     });
 
-    test("level caps and gym order increase", () => {
-        for (let i = 1; i < LEVEL_CAPS.length; i++) {
-            expect(LEVEL_CAPS[i]).toBeGreaterThan(LEVEL_CAPS[i - 1]);
+    test("every region is well-formed", () => {
+        for (const region of REGION_LIST) {
+            const caps = region.levelCaps;
+            expect(caps.length).toBe(region.trials.length + 2);
+            for (let i = 1; i < caps.length; i++) {
+                expect(caps[i]).toBeGreaterThan(caps[i - 1]);
+            }
+            region.trials.forEach((trial, i) => expect(trial.badgeNumber).toBe(i + 1));
+            expect(region.finale(region.starters[0]).length).toBeGreaterThan(0);
+            expect(zonesIn(region.id).length).toBeGreaterThan(5);
+            // Something to catch from the very start.
+            expect(zonesIn(region.id)[0].badgesRequired).toBe(0);
+            region.starters.forEach(id => expect(getSpecies(id).id).toBe(id));
         }
-        GYMS.forEach((gym, i) => expect(gym.badgeNumber).toBe(i + 1));
+    });
+
+    test("every zone has encounters with valid species and levels", () => {
+        const ids = new Set(ZONES.map(z => z.id));
+        expect(ids.size).toBe(ZONES.length);
+        for (const zone of ZONES) {
+            const species = allZoneSpecies(zone.id);
+            expect(species.length, zone.id).toBeGreaterThan(0);
+            species.forEach(id => expect(id).toBeLessThanOrEqual(DEX_SIZE));
+        }
+    });
+
+    test("specials belong to a region and point at real zones", () => {
+        const ids = new Set(SPECIAL_ENCOUNTERS.map(s => s.id));
+        expect(ids.size).toBe(SPECIAL_ENCOUNTERS.length);
+        for (const special of SPECIAL_ENCOUNTERS) {
+            expect(REGIONS[special.region]).toBeDefined();
+            if (special.kind === "legendary") {
+                expect(ZONES.some(z => z.id === special.zoneId)).toBe(true);
+            }
+        }
     });
 });
 
@@ -128,7 +161,7 @@ describe("battles", () => {
         const { damage, hp } = computeBonuses({
             dexCaught: 120,
             shinyCaught: 0,
-            mart: { protein: 20, iron: 20 },
+            mart: { protein: 50, iron: 50 },
             hof: {},
             keyItems: {}
         });

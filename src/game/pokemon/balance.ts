@@ -6,14 +6,14 @@ import type { Species } from "./data";
 import type { KeyItemId } from "./items";
 import { itemSprite } from "./items";
 import type { BattlerStats } from "./stats";
-import { attacksPerSecond, damagePerHit, maxHp, TRAINER_IV } from "./stats";
+import { attacksPerSecond, damagePerHit, maxHp, TRAINER_IV, xpYield } from "./stats";
 import type { TrainerDefinition } from "./trainers";
 import { getSpecies } from "./data";
 
 /** Seconds spent looking for the next wild Pokémon. */
 export const BASE_SEARCH_TIME = 2;
 /** Global experience rate. The mainline curves are tuned for ~1 battle a minute, not ~20. */
-export const XP_RATE = 0.04;
+export const XP_RATE = 0.0025;
 export const BASE_SHINY_CHANCE = 1 / 4096;
 /** Each extra catch of a species makes that species hit harder, up to a cap. */
 export const DUPLICATE_BONUS_PER_CATCH = 0.02;
@@ -21,12 +21,21 @@ export const DUPLICATE_BONUS_MAX_CATCHES = 25;
 /** Shiny Pokémon are a little stronger, too. */
 export const SHINY_DAMAGE_BONUS = 1.2;
 /** Every species registered as caught boosts the whole party's damage. */
-export const DEX_DAMAGE_BONUS_PER_SPECIES = 0.01;
+export const DEX_DAMAGE_BONUS_PER_SPECIES = 0.003;
 /** Max stock of each ball type; also where auto-restock tops up to. */
 export const BALL_RESTOCK_TARGET = 20;
 
 export function moneyYield(level: number): number {
-    return 3 + level * 2;
+    return 2 + level * 0.5;
+}
+
+/**
+ * Experience for defeating a Pokémon. Low-level opponents give up to 4× extra, fading out by
+ * level 20, so the first hours move quickly without making the late game trivial.
+ */
+export function battleXp(defeated: BattlerStats, trainerOwned = false): number {
+    const earlyBoost = 1 + 3 * Math.max(0, (20 - defeated.level) / 20);
+    return xpYield(defeated, trainerOwned) * earlyBoost;
 }
 
 /** Chance a thrown ball catches a defeated wild Pokémon. Softened from the mainline formula. */
@@ -49,13 +58,13 @@ export const DEX_MILESTONES: DexMilestone[] = [
     {
         caught: 10,
         name: "Exp. Share",
-        description: "+25% experience.",
+        description: "+15% experience.",
         sprite: itemSprite("exp-share")
     },
     {
         caught: 20,
         name: "Amulet Coin",
-        description: "+50% Pokédollars from battles.",
+        description: "+25% Pokédollars from battles.",
         sprite: itemSprite("amulet-coin")
     },
     {
@@ -67,31 +76,31 @@ export const DEX_MILESTONES: DexMilestone[] = [
     {
         caught: 40,
         name: "Lucky Egg",
-        description: "+50% experience.",
+        description: "+25% experience.",
         sprite: itemSprite("lucky-egg")
     },
     {
         caught: 60,
         name: "Scope Lens",
-        description: "+25% damage.",
+        description: "+10% damage.",
         sprite: itemSprite("scope-lens")
     },
     {
         caught: 80,
         name: "Nugget Stash",
-        description: "+50% Pokédollars from battles.",
+        description: "+25% Pokédollars from battles.",
         sprite: itemSprite("nugget")
     },
     {
         caught: 100,
         name: "Oak's Letter",
-        description: "+50% damage and +10% catch chance.",
+        description: "+20% damage and +10% catch chance.",
         sprite: itemSprite("oaks-letter")
     },
     {
         caught: 120,
         name: "Silph Scope",
-        description: "+50% experience and Pokédollars.",
+        description: "+20% experience and Pokédollars.",
         sprite: itemSprite("silph-scope")
     },
     {
@@ -105,6 +114,18 @@ export const DEX_MILESTONES: DexMilestone[] = [
         name: "Shiny Charm",
         description: "Shiny Pokémon appear three times as often.",
         sprite: itemSprite("shiny-charm")
+    },
+    {
+        caught: 175,
+        name: "Rainbow Wing",
+        description: "+25% Fame from every Hall of Fame entry.",
+        sprite: itemSprite("rainbow-wing")
+    },
+    {
+        caught: 200,
+        name: "Silver Wing",
+        description: "+20% damage and experience.",
+        sprite: itemSprite("silver-wing")
     }
 ];
 
@@ -134,8 +155,8 @@ export const MART_UPGRADES = {
         name: "Protein",
         description: "+5% damage per level.",
         baseCost: 300,
-        costGrowth: 1.5,
-        maxLevel: 40,
+        costGrowth: 1.3,
+        maxLevel: 200,
         badgesRequired: 0,
         sprite: itemSprite("protein")
     },
@@ -164,8 +185,8 @@ export const MART_UPGRADES = {
         name: "Iron",
         description: "+5% party HP per level.",
         baseCost: 300,
-        costGrowth: 1.5,
-        maxLevel: 40,
+        costGrowth: 1.3,
+        maxLevel: 200,
         badgesRequired: 0,
         sprite: itemSprite("iron")
     },
@@ -190,9 +211,9 @@ export const HOF_UPGRADES = {
     power: {
         id: "power",
         name: "Champion's Might",
-        description: "+25% damage and party HP per level.",
-        baseCost: 1,
-        costGrowth: 1.6,
+        description: "+10% damage and party HP per level.",
+        baseCost: 5,
+        costGrowth: 1.5,
         maxLevel: 50,
         badgesRequired: 0,
         sprite: itemSprite("x-attack")
@@ -200,9 +221,9 @@ export const HOF_UPGRADES = {
     wisdom: {
         id: "wisdom",
         name: "Veteran's Wisdom",
-        description: "+25% experience per level.",
-        baseCost: 1,
-        costGrowth: 1.6,
+        description: "+10% experience per level.",
+        baseCost: 5,
+        costGrowth: 1.5,
         maxLevel: 50,
         badgesRequired: 0,
         sprite: itemSprite("exp-share")
@@ -210,9 +231,9 @@ export const HOF_UPGRADES = {
     fortune: {
         id: "fortune",
         name: "Sponsorship",
-        description: "+25% Pokédollars per level.",
-        baseCost: 1,
-        costGrowth: 1.6,
+        description: "+10% Pokédollars per level.",
+        baseCost: 5,
+        costGrowth: 1.5,
         maxLevel: 50,
         badgesRequired: 0,
         sprite: itemSprite("nugget")
@@ -290,23 +311,25 @@ export function computeBonuses(input: BonusInputs): Bonuses {
     const damage =
         (1 + dexCaught * DEX_DAMAGE_BONUS_PER_SPECIES) *
         (1 + 0.05 * lvl(mart.protein)) *
-        (milestone("Scope Lens") ? 1.25 : 1) *
-        (milestone("Oak's Letter") ? 1.5 : 1) *
-        (1 + 0.25 * lvl(hof.power));
-    const hp = (1 + 0.05 * lvl(mart.iron)) * (1 + 0.25 * lvl(hof.power));
+        (milestone("Scope Lens") ? 1.1 : 1) *
+        (milestone("Oak's Letter") ? 1.2 : 1) *
+        (milestone("Silver Wing") ? 1.2 : 1) *
+        (1 + 0.1 * lvl(hof.power));
+    const hp = (1 + 0.05 * lvl(mart.iron)) * (1 + 0.1 * lvl(hof.power));
     const xp =
         XP_RATE *
         (1 + 0.1 * lvl(mart.rareCandy)) *
-        (milestone("Exp. Share") ? 1.25 : 1) *
-        (milestone("Lucky Egg") ? 1.5 : 1) *
-        (milestone("Silph Scope") ? 1.5 : 1) *
-        (1 + 0.25 * lvl(hof.wisdom));
+        (milestone("Exp. Share") ? 1.15 : 1) *
+        (milestone("Lucky Egg") ? 1.25 : 1) *
+        (milestone("Silph Scope") ? 1.2 : 1) *
+        (milestone("Silver Wing") ? 1.2 : 1) *
+        (1 + 0.1 * lvl(hof.wisdom));
     const money =
         (1 + 0.1 * lvl(mart.payDay)) *
-        (milestone("Amulet Coin") ? 1.5 : 1) *
-        (milestone("Nugget Stash") ? 1.5 : 1) *
-        (milestone("Silph Scope") ? 1.5 : 1) *
-        (1 + 0.25 * lvl(hof.fortune));
+        (milestone("Amulet Coin") ? 1.25 : 1) *
+        (milestone("Nugget Stash") ? 1.25 : 1) *
+        (milestone("Silph Scope") ? 1.2 : 1) *
+        (1 + 0.1 * lvl(hof.fortune));
     const catchBonus = (milestone("Oak's Letter") ? 1.1 : 1) * (1 + 0.1 * lvl(hof.catcher));
     const shiny = (milestone("Shiny Charm") ? 3 : 1) * (1 + 0.5 * lvl(hof.shinyHunter));
     const searchTime =
@@ -532,12 +555,91 @@ export function simulateTrainerBattle(
     };
 }
 
-/** Fame earned by entering the Hall of Fame. */
-export function fameGain(dexCaught: number, shinyCaught: number, timesEntered: number): number {
-    const base = 3 + Math.floor(dexCaught / 5) + shinyCaught * 2;
-    // A little diminishing so repeat runs don't need to be perfect, but still pay off.
-    return Math.max(1, Math.floor(base * (timesEntered === 0 ? 1.5 : 1)));
+export interface FameInputs {
+    /** The region's base Fame. */
+    regionFame: number;
+    dexCaught: number;
+    shinyCaught: number;
+    /** Species in the clearing team that have never been enshrined before. */
+    newSpecies: number;
+    /** True the first time this region is cleared. */
+    firstClear: boolean;
 }
+
+/** Fame for enshrining a team. New faces in the Hall of Fame are worth the most. */
+export function fameGain(input: FameInputs): number {
+    const base =
+        input.regionFame +
+        Math.floor(input.dexCaught / 5) +
+        input.shinyCaught * 2 +
+        input.newSpecies * FAME_PER_NEW_SPECIES;
+    const multiplier =
+        (input.firstClear ? 1.5 : 1) * (hasMilestone(input.dexCaught, "Rainbow Wing") ? 1.25 : 1);
+    return Math.max(1, Math.floor(base * multiplier));
+}
+
+export const FAME_PER_NEW_SPECIES = 5;
+
+export type AutomationId =
+    "autoShop" | "autoClaim" | "autoEvolve" | "autoParty" | "autoTravel" | "autoChallenge";
+
+export interface AutomationDefinition {
+    id: AutomationId;
+    name: string;
+    description: string;
+    cost: number;
+    sprite: string;
+}
+
+/** One-time Fame purchases that play parts of the game for you. Each can be toggled off. */
+export const AUTOMATIONS: AutomationDefinition[] = [
+    {
+        id: "autoShop",
+        name: "Shopping List",
+        description:
+            "Keeps your balls stocked and buys the cheapest Poké Mart upgrade when you can easily afford it.",
+        cost: 5,
+        sprite: itemSprite("coin-case")
+    },
+    {
+        id: "autoClaim",
+        name: "Pokégear Contacts",
+        description: "Collects gifts and makes in-game trades as soon as they're available.",
+        cost: 5,
+        sprite: itemSprite("town-map")
+    },
+    {
+        id: "autoEvolve",
+        name: "Evolution Planner",
+        description:
+            "Uses evolution stones and the Link Cable on new evolutions, buying them when you can afford it.",
+        cost: 8,
+        sprite: itemSprite("moon-stone")
+    },
+    {
+        id: "autoParty",
+        name: "Team Strategist",
+        description: "Keeps the six Pokémon that best counter your next opponent in your party.",
+        cost: 10,
+        sprite: itemSprite("exp-share")
+    },
+    {
+        id: "autoTravel",
+        name: "Travel Planner",
+        description:
+            "Moves to the best zone: the newest area with Pokémon you haven't caught this journey, or the toughest one your team handles.",
+        cost: 12,
+        sprite: itemSprite("bicycle")
+    },
+    {
+        id: "autoChallenge",
+        name: "League Pass",
+        description:
+            "Challenges the next Gym, quest or finale as soon as the forecast says you'll win.",
+        cost: 15,
+        sprite: itemSprite("gold-teeth")
+    }
+];
 
 export function speciesPower(species: Species): number {
     const [hp, atk, def, spa, spd, spe] = species.baseStats;

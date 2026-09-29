@@ -23,7 +23,8 @@ export type PokemonType =
     | "dark"
     | "fairy";
 
-export type StoneId = "moonStone" | "fireStone" | "thunderStone" | "waterStone" | "leafStone";
+export type StoneId =
+    "moonStone" | "fireStone" | "thunderStone" | "waterStone" | "leafStone" | "sunStone";
 
 export type GrowthRate = "slow" | "medium" | "fast" | "mediumSlow" | "erratic" | "fluctuating";
 
@@ -73,6 +74,11 @@ for (const species of SPECIES) {
     for (const evolution of species.evolutions) {
         PRE_EVOLUTION[evolution.into] = species.id;
     }
+}
+
+/** Shorthand for hand-authored encounter tables. Weight is relative within its pool. */
+export function enc(id: number, minLevel: number, maxLevel: number, weight = 10): EncounterEntry {
+    return { id, minLevel, maxLevel, weight };
 }
 
 export function getSpecies(id: number): Species {

@@ -3,9 +3,11 @@
  * All of them set `inheritAttrs = false` so passed props (like onClick) aren't also
  * applied to the root element by Vue's attribute fallthrough.
  */
+import { assetUrl } from "game/pokemon/assets";
 import type { PokemonType } from "game/pokemon/data";
 import { formatDexNumber, getSpecies, spriteUrl, TYPE_COLORS } from "game/pokemon/data";
 import { format } from "util/bignum";
+import type { GymDefinition } from "game/pokemon/trainers";
 import type { FunctionalComponent } from "vue";
 import "./pokemon.css";
 
@@ -151,3 +153,42 @@ export const Stat = component<{ label: string; value: string | number }>(props =
         <span class="pk-stat-value">{props.value}</span>
     </div>
 ));
+
+/** A trial's badge: the real sprite for Kanto, a colored emblem everywhere else. */
+export const BadgeIcon = component<{ gym: GymDefinition; earned: boolean; size?: number }>(
+    props => {
+        const size = props.size ?? 32;
+        const { gym } = props;
+        if (gym.badgeIcon != null) {
+            return (
+                <img
+                    class={["pk-badge-img", props.earned ? "" : "unearned"]}
+                    src={assetUrl(gym.badgeIcon)}
+                    alt={gym.badge}
+                    title={gym.badge}
+                    width={size}
+                    height={size}
+                />
+            );
+        }
+        const color = gym.specialty != null ? TYPE_COLORS[gym.specialty] : "#94a3b8";
+        return (
+            <span
+                class={["pk-emblem", props.earned ? "" : "unearned"]}
+                title={gym.badge}
+                style={{
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    "--emblem": color,
+                    fontSize: `${size * 0.45}px`
+                }}
+            >
+                {gym.badge
+                    .split(/[\s-]+/)
+                    .map(word => word[0])
+                    .join("")
+                    .slice(0, 2)}
+            </span>
+        );
+    }
+);

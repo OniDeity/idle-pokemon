@@ -10,6 +10,7 @@ import { STONES } from "game/pokemon/items";
 import { attacksPerSecond, maxHp, statAtLevel, xpForLevel } from "game/pokemon/stats";
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
+import { mobileClasses, renderNav } from "../ui/nav";
 import {
     Bar,
     Button,
@@ -49,7 +50,7 @@ const layer = createLayer(id, () => {
             manualEvolutions(sid).some(
                 e =>
                     !main.owns(e.into) &&
-                    ((e.method === "stone" && main.stones.value[e.stone!] > 0) ||
+                    ((e.method === "stone" && (main.stones.value[e.stone!] ?? 0) > 0) ||
                         (e.method === "trade" && main.keyItems.value.linkCable === true))
             )
         )
@@ -85,7 +86,7 @@ const layer = createLayer(id, () => {
                         );
                     } else if (evo.method === "stone") {
                         const stone = STONES[evo.stone!];
-                        const have = main.stones.value[stone.id];
+                        const have = main.stones.value[stone.id] ?? 0;
                         action = (
                             <Button
                                 kind="primary"
@@ -248,11 +249,13 @@ const layer = createLayer(id, () => {
         color,
         minWidth: 480,
         minimizable: false,
+        classes: mobileClasses(id),
         nav,
         display: () => {
             if (main.starter.value === 0) {
                 return (
                     <div class="pk-layer">
+                        {renderNav(true)}
                         <h2 class="pk-layer-title">Party</h2>
                         <p class="pk-muted">Choose your starter first!</p>
                     </div>
@@ -264,6 +267,7 @@ const layer = createLayer(id, () => {
                     : main.partyIds.value[0];
             return (
                 <div class="pk-layer">
+                    {renderNav(true)}
                     <h2 class="pk-layer-title">Party</h2>
                     {main.inTrainerBattle.value ? (
                         <p class="pk-warning">

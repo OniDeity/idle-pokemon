@@ -1,4 +1,8 @@
 import type { KeyItemId } from "./items";
+import { KANTO_ANIME_SPECIALS } from "./kantoAnime";
+import { ORANGE_SPECIALS } from "./orange";
+import { SEVII_SPECIALS } from "./sevii";
+import type { RegionId } from "./zones";
 
 /**
  * Pokémon that don't show up in wild grass: gifts, in-game trades, Game Corner prizes, and
@@ -8,6 +12,7 @@ export type SpecialEncounter =
     | {
           kind: "gift";
           id: string;
+          region: RegionId;
           speciesId: number;
           level: number;
           place: string;
@@ -19,6 +24,7 @@ export type SpecialEncounter =
     | {
           kind: "trade";
           id: string;
+          region: RegionId;
           speciesId: number;
           level: number;
           place: string;
@@ -30,6 +36,7 @@ export type SpecialEncounter =
     | {
           kind: "legendary";
           id: string;
+          region: RegionId;
           speciesId: number;
           level: number;
           /** Zone the legendary is found in. */
@@ -43,7 +50,9 @@ export type SpecialEncounter =
           text: string;
       };
 
-export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
+type WithoutRegion<T> = T extends unknown ? Omit<T, "region"> : never;
+
+const KANTO_SPECIALS: WithoutRegion<SpecialEncounter>[] = [
     {
         kind: "trade",
         id: "route2Trade",
@@ -61,7 +70,7 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
         level: 5,
         place: "Mt. Moon Pokémon Center",
         badgesRequired: 1,
-        price: 500,
+        price: 300,
         text: '"I\'ve got a deal for you. A secret Pokémon, just ₽500!"'
     },
     {
@@ -142,15 +151,15 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
     },
     ...(
         [
-            [63, 9, 3600],
-            [35, 8, 10000],
-            [30, 17, 24000],
-            [147, 18, 56000],
-            [123, 25, 110000],
-            [127, 25, 110000],
-            [137, 26, 200000]
+            [63, 9, 1500],
+            [35, 8, 4000],
+            [30, 17, 10000],
+            [147, 18, 22000],
+            [123, 25, 45000],
+            [127, 25, 45000],
+            [137, 26, 80000]
         ] as const
-    ).map(([speciesId, level, price]): SpecialEncounter => ({
+    ).map(([speciesId, level, price]): WithoutRegion<SpecialEncounter> => ({
         kind: "gift",
         id: `gameCorner${speciesId}`,
         speciesId,
@@ -310,7 +319,51 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
         badgesRequired: 8,
         postGame: true,
         text: "It was created by a scientist after years of horrific gene-splicing experiments."
+    },
+    {
+        kind: "legendary",
+        id: "raikou",
+        speciesId: 243,
+        level: 50,
+        zoneId: "route10",
+        place: "Roaming Kanto (Route 10)",
+        badgesRequired: 8,
+        postGame: true,
+        strength: 2.3,
+        text: "A legendary beast that crackles like thunder races across Kanto."
+    },
+    {
+        kind: "legendary",
+        id: "entei",
+        speciesId: 244,
+        level: 50,
+        zoneId: "route8",
+        place: "Roaming Kanto (Route 8)",
+        badgesRequired: 8,
+        postGame: true,
+        strength: 2.3,
+        text: "A legendary beast born of volcanic fire roams the land."
+    },
+    {
+        kind: "legendary",
+        id: "suicune",
+        speciesId: 245,
+        level: 50,
+        zoneId: "route24",
+        place: "Roaming Kanto (Route 24)",
+        badgesRequired: 8,
+        postGame: true,
+        strength: 2.3,
+        text: "A legendary beast that purifies water glides over the rivers."
     }
+];
+
+/** Every special encounter in every region. */
+export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
+    ...KANTO_SPECIALS.map(special => ({ ...special, region: "kanto" }) as SpecialEncounter),
+    ...KANTO_ANIME_SPECIALS,
+    ...ORANGE_SPECIALS,
+    ...SEVII_SPECIALS
 ];
 
 /** Seconds allowed to defeat a legendary before it flees. */

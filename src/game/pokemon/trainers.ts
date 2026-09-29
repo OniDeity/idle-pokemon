@@ -24,8 +24,10 @@ export interface TrainerDefinition {
 export interface GymDefinition extends TrainerDefinition {
     town: string;
     badge: string;
-    /** 1-8; also the index into the PokeAPI badge sprites. */
+    /** Order within the region, starting at 1. */
     badgeNumber: number;
+    /** Sprite path (see assets.ts) for the badge, if it has one. */
+    badgeIcon?: string;
     /** Key items awarded alongside the badge. */
     keyItems: KeyItemId[];
     /** Balls awarded alongside the badge. */
@@ -33,13 +35,24 @@ export interface GymDefinition extends TrainerDefinition {
     rewardText: string;
 }
 
-const GYM_STRENGTH_PER_BADGE = 0.2;
-const ELITE_FOUR_STRENGTH = 2.5;
-const CHAMPION_STRENGTH = 2.7;
+/**
+ * Stat multipliers for Kanto's trainers, tuned with scripts/simulateProgression.ts. Mid-game
+ * leaders are much stronger than their levels suggest, so catching new Pokémon at wild levels
+ * isn't enough on its own; the Elite Four's higher levels carry the difficulty at the end.
+ */
+const GYM_STRENGTHS = [0.9, 1.5, 2.1, 2.6, 3.0, 3.3, 3.6, 3.9];
+const ELITE_FOUR_STRENGTH = 2.8;
+const CHAMPION_STRENGTH = 3.0;
 
 /** Seconds allowed per trainer battle: a base plus a little per Pokémon on the team. */
-function timeLimit(teamSize: number) {
+export function timeLimit(teamSize: number) {
     return 30 + teamSize * 15;
+}
+
+/** Builds a Gym-style trial with an explicit strength, for regions other than Kanto. */
+export function trial(options: Omit<GymDefinition, "timeLimit" | "prizeMoney">): GymDefinition {
+    const ace = Math.max(...options.team.map(p => p.level));
+    return { timeLimit: timeLimit(options.team.length), prizeMoney: ace * 50, ...options };
 }
 
 function gym(
@@ -48,8 +61,9 @@ function gym(
     const ace = Math.max(...options.team.map(p => p.level));
     return {
         timeLimit: timeLimit(options.team.length),
-        statMultiplier: 0.8 + GYM_STRENGTH_PER_BADGE * options.badgeNumber,
-        prizeMoney: ace * 150,
+        statMultiplier: GYM_STRENGTHS[options.badgeNumber - 1],
+        badgeIcon: `badges/${options.badgeNumber}.png`,
+        prizeMoney: ace * 50,
         ...options
     };
 }
@@ -208,7 +222,7 @@ function eliteFour(
     return {
         timeLimit: timeLimit(options.team.length),
         statMultiplier: ELITE_FOUR_STRENGTH,
-        prizeMoney: ace * 200,
+        prizeMoney: ace * 70,
         ...options
     };
 }
@@ -314,14 +328,7 @@ export function championFor(playerStarter: number): TrainerDefinition {
         team,
         timeLimit: timeLimit(team.length),
         statMultiplier: CHAMPION_STRENGTH,
-        prizeMoney: 65 * 300,
+        prizeMoney: 65 * 100,
         quote: "I'm the most powerful trainer in the world!"
     };
-}
-
-/** Maximum level party Pokémon can reach with the given number of badges (index 9 = Champion). */
-export const LEVEL_CAPS = [20, 26, 32, 38, 46, 50, 54, 58, 65, 100];
-
-export function levelCap(badges: number, champion: boolean): number {
-    return champion ? LEVEL_CAPS[9] : LEVEL_CAPS[Math.min(badges, 8)];
 }

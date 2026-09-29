@@ -4,18 +4,18 @@
  */
 import dex from "data/layers/dex";
 import hof from "data/layers/hof";
-import { badgeSprite } from "data/layers/league";
 import type { BallMode, BattleState, CatchMode, LogEntry } from "data/projEntry";
-import { main, openLayer } from "data/projEntry";
+import { main } from "data/projEntry";
 import player from "game/player";
-import { catchChance } from "game/pokemon/balance";
+import { AUTOMATIONS, catchChance } from "game/pokemon/balance";
 import { DEX_SIZE, getSpecies } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
 import { BALLS } from "game/pokemon/items";
 import { maxHp, xpForLevel } from "game/pokemon/stats";
-import { GYMS } from "game/pokemon/trainers";
+import { REGION_LIST } from "game/pokemon/regions";
 import { formatTime } from "util/bignum";
 import {
+    BadgeIcon,
     Bar,
     Button,
     formatDuration,
@@ -24,8 +24,7 @@ import {
     Sprite,
     TypeBadges
 } from "./components";
-
-const STARTERS = [1, 4, 7];
+import { openLayer, renderNav } from "./nav";
 
 const CAVES = new Set([
     "mtMoon",
@@ -33,11 +32,50 @@ const CAVES = new Set([
     "diglettsCave",
     "seafoamIslands",
     "victoryRoad",
-    "ceruleanCave"
+    "ceruleanCave",
+    "grampaCanyon",
+    "mtEmber",
+    "icefallCave",
+    "lostCave",
+    "alteringCave",
+    "sevaultCanyon",
+    "canyonEntrance",
+    "navelIsland"
 ]);
-const FORESTS = new Set(["viridianForest", "safariZone"]);
-const BUILDINGS = new Set(["pokemonTower", "powerPlant", "pokemonMansion"]);
-const SEAS = new Set(["route19", "route20", "route21"]);
+const FORESTS = new Set([
+    "viridianForest",
+    "safariZone",
+    "hiddenVillage",
+    "berryForest",
+    "patternBush",
+    "pinkanIsland",
+    "murcottIsland",
+    "valenciaIsland"
+]);
+const BUILDINGS = new Set([
+    "pokemonTower",
+    "powerPlant",
+    "pokemonMansion",
+    "pokemonTech",
+    "gringeyCity",
+    "darkCity",
+    "maidensPeak",
+    "pokemopolis",
+    "moroIsland",
+    "tanobyRuins"
+]);
+const SEAS = new Set([
+    "route19",
+    "route20",
+    "route21",
+    "billsLighthouse",
+    "portaVista",
+    "chrysanthemumIsland",
+    "fourIsland",
+    "waterLabyrinth",
+    "resortGorgeous",
+    "treasureBeach"
+]);
 
 function terrain(state: BattleState): string {
     if (state.kind === "trainer") {
@@ -59,17 +97,8 @@ function renderHud() {
                 {formatMoney(main.money.value)}
             </div>
             <div class="pk-hud-badges" title={`${main.badges.value} badges`}>
-                {GYMS.map(gym => (
-                    <img
-                        class={[
-                            "pk-badge-img",
-                            main.badges.value >= gym.badgeNumber ? "" : "unearned"
-                        ]}
-                        src={badgeSprite(gym.badgeNumber)}
-                        alt={gym.badge}
-                        width={18}
-                        height={18}
-                    />
+                {main.regionDef.value.trials.map(gym => (
+                    <BadgeIcon gym={gym} earned={main.badges.value >= gym.badgeNumber} size={18} />
                 ))}
                 {main.champion.value ? <span title="Champion">🏆</span> : null}
             </div>
@@ -88,42 +117,50 @@ function renderHud() {
     );
 }
 
-function renderNav() {
-    const open = player.tabs[1];
-    return (
-        <nav class="pk-nav">
-            {main.nav.map(node => (
-                <button
-                    class={[
-                        "pk-nav-node",
-                        open === node.id ? "open" : "",
-                        node.glow.value ? "glow" : ""
-                    ]}
-                    style={{ "--node-color": node.color }}
-                    disabled={!node.enabled.value}
-                    title={node.enabled.value ? node.label : "Locked"}
-                    onClick={() => openLayer(node.id)}
-                >
-                    <span class="pk-nav-letter">{node.letter}</span>
-                    <span class="pk-nav-label">{node.label}</span>
-                </button>
-            ))}
-        </nav>
-    );
-}
-
 function renderStarterSelect() {
     const again = hof.timesEntered.value > 0;
+    const region = main.regionDef.value;
     return (
         <div class="pk-starter-select">
-            <h2>{again ? "A new journey begins" : "Welcome to the world of Pokémon!"}</h2>
-            <p>
-                {again
-                    ? "Professor Oak has three Poké Balls ready again. Your Pokédex remembers everything."
-                    : "Professor Oak needs help completing the Pokédex. Choose your first partner — you'll find the other two later on your journey."}
-            </p>
+            <h2>
+                {again ? "Where will your next journey begin?" : "Welcome to the world of Pokémon!"}
+            </h2>
+            {again ? (
+                <div class="pk-regions">
+                    {REGION_LIST.map(r => {
+                        const unlocked = hof.regionUnlocked(r.id);
+                        const clears = hof.clearCount(r.id);
+                        return (
+                            <button
+                                class={["pk-region", region.id === r.id ? "selected" : ""]}
+                                style={{ "--region-color": r.color }}
+                                disabled={!unlocked}
+                                onClick={() => main.chooseRegion(r.id)}
+                            >
+                                <b>{r.name}</b>
+                                <span class="pk-small">
+                                    {unlocked
+                                        ? r.blurb
+                                        : `Clear ${REGION_LIST.find(x => x.id === r.requires)?.name} first.`}
+                                </span>
+                                <span class="pk-small pk-muted">
+                                    {clears > 0
+                                        ? `Cleared ${clears}×`
+                                        : "Never cleared (first clear ×1.5 Fame)"}{" "}
+                                    · starters Lv. {r.startLevel}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            ) : (
+                <p>
+                    Professor Oak needs help completing the Pokédex. Choose your first partner.
+                    You'll find the other two later on your journey.
+                </p>
+            )}
             <div class="pk-starters">
-                {STARTERS.map(id => (
+                {region.starters.map(id => (
                     <button class="pk-starter" onClick={() => main.chooseStarter(id)}>
                         <Sprite id={id} size={96} />
                         <b>{getSpecies(id).name}</b>
@@ -131,10 +168,12 @@ function renderStarterSelect() {
                     </button>
                 ))}
             </div>
-            <p class="pk-small pk-muted">
-                Tip: Brock's Rock types are tough for Charmander, but Bulbasaur and Squirtle make
-                short work of them.
-            </p>
+            {region.id === "kanto" ? (
+                <p class="pk-small pk-muted">
+                    Tip: Brock's Rock types are tough for Charmander, but Bulbasaur and Squirtle
+                    make short work of them.
+                </p>
+            ) : null}
         </div>
     );
 }
@@ -437,6 +476,20 @@ function renderControls() {
                     <span class="pk-small pk-muted">{Math.round(chance * 100)}% catch</span>
                 ) : null}
             </div>
+            {AUTOMATIONS.some(a => hof.automationsOwned.value[a.id]) ? (
+                <div class="pk-control-row">
+                    <span class="pk-control-label">Auto</span>
+                    {AUTOMATIONS.filter(a => hof.automationsOwned.value[a.id]).map(a => (
+                        <Button
+                            kind={hof.automationsOn.value[a.id] ? "primary" : "ghost"}
+                            title={a.description}
+                            onClick={() => hof.toggleAutomation(a.id)}
+                        >
+                            {a.name}
+                        </Button>
+                    ))}
+                </div>
+            ) : null}
             {main.balls.value.masterBall > 0 ? (
                 <label class="pk-small pk-check">
                     <input
@@ -500,9 +553,10 @@ function renderStatus() {
 export function renderJourney() {
     return (
         <div class="pk-journey">
+            {renderNav(true)}
             {renderHud()}
             {renderStatus()}
-            {renderNav()}
+            {renderNav(false)}
             {main.starter.value === 0 ? (
                 renderStarterSelect()
             ) : (

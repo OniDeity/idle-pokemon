@@ -2,11 +2,11 @@ import type { Layer } from "game/layers";
 import { createLayer } from "game/layers";
 import { persistent } from "game/persistence";
 import type { Player } from "game/player";
-import player from "game/player";
 import type { Bonuses, PartyBattler, TrainerBattleState } from "game/pokemon/balance";
 import {
     BALL_RESTOCK_TARGET,
     BASE_SHINY_CHANCE,
+    battleXp,
     bestMatchup,
     catchChance,
     computeBonuses,
@@ -24,10 +24,11 @@ import { BALLS, KEY_ITEMS, STONES } from "game/pokemon/items";
 import type { SpecialEncounter } from "game/pokemon/specials";
 import { LEGENDARY_TIME_LIMIT } from "game/pokemon/specials";
 import type { BattlerStats } from "game/pokemon/stats";
-import { levelForXp, maxHp, xpForLevel, xpYield } from "game/pokemon/stats";
+import { levelForXp, maxHp, xpForLevel } from "game/pokemon/stats";
+import { levelCap, REGIONS } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
-import { championFor, ELITE_FOUR, levelCap } from "game/pokemon/trainers";
-import { rollEncounter, ZONES_BY_ID } from "game/pokemon/zones";
+import type { RegionId } from "game/pokemon/zones";
+import { rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
 import { computed, ref } from "vue";
 import { useToast } from "vue-toastification";
 import dex from "./layers/dex";
@@ -36,7 +37,10 @@ import league from "./layers/league";
 import map from "./layers/map";
 import mart from "./layers/mart";
 import party from "./layers/party";
+import { runAutomation } from "./automation";
 import { renderJourney } from "./ui/journey";
+import type { NavNode } from "./ui/nav";
+import { mobileClasses } from "./ui/nav";
 
 export type BoxEntry = {
     level: number;
@@ -96,6 +100,8 @@ export function notify(text: string, kind: "success" | "info" | "warning" | "err
 /** Iteration guard for offline catch-up: stop simulating after this many encounters per tick. */
 const MAX_ENCOUNTERS_PER_TICK = 5000;
 const LOG_LENGTH = 40;
+/** Seconds of game time between automation decisions. */
+const AUTOMATION_INTERVAL = 2;
 
 /**
  * @hidden
@@ -109,6 +115,7 @@ export const main = createLayer("main", layer => {
     const money = persistent<number>(0);
     const box = persistent<Record<string, BoxEntry>>({}, false);
     const partyIds = persistent<number[]>([], false);
+    const region = persistent<RegionId>("kanto", false);
     const zoneId = persistent<string>("route1", false);
     const badges = persistent<number>(0);
     const champion = persistent<boolean>(false, false);
@@ -128,7 +135,8 @@ export const main = createLayer("main", layer => {
             fireStone: 0,
             waterStone: 0,
             thunderStone: 0,
-            leafStone: 0
+            leafStone: 0,
+            sunStone: 0
         },
         false
     );
@@ -138,6 +146,8 @@ export const main = createLayer("main", layer => {
     const useMasterBallOnLegendaries = persistent<boolean>(true, false);
     const runTime = persistent<number>(0);
     const battlesWon = persistent<number>(0);
+    /** The party that cleared the region's finale this journey, for the Hall of Fame. */
+    const clearTeam = persistent<number[]>([], false);
 
     // Transient state: rebuilt on load.
     const battle = ref<BattleState>({ kind: "search", remaining: 1, total: 1 });
@@ -165,11 +175,21 @@ export const main = createLayer("main", layer => {
             keyItems: keyItems.value
         })
     );
-    const cap = computed(() => levelCap(badges.value, champion.value));
-    const zone = computed(() => ZONES_BY_ID[zoneId.value] ?? ZONES_BY_ID.route1);
+    const regionDef = computed(() => REGIONS[region.value] ?? REGIONS.kanto);
+    const cap = computed(() => levelCap(regionDef.value, badges.value, champion.value));
+    /** Badge-equivalent progress used to decide what the Poké Mart stocks. */
+    const martTier = computed(() => badges.value + regionDef.value.shopTier);
+    const zone = computed(
+        () => ZONES_BY_ID[zoneId.value] ?? zonesIn(regionDef.value.id)[0] ?? ZONES_BY_ID.route1
+    );
     const partyBattlers = computed<PartyBattler[]>(() => partyIds.value.map(id => battlerFor(id)));
     const inTrainerBattle = computed(() => battle.value.kind === "trainer");
-    const champ = computed(() => championFor(starter.value));
+    const finale = computed(() => regionDef.value.finale(starter.value));
+    const nextTrial = computed(() => regionDef.value.trials[badges.value]);
+    /** The trainers standing between the player and progress: the next trial, or the finale. */
+    const nextTrainers = computed((): TrainerDefinition[] =>
+        nextTrial.value != null ? [nextTrial.value] : champion.value ? [] : finale.value
+    );
 
     function battlerFor(id: number): PartyBattler {
         const entry = box.value[id];
@@ -210,7 +230,12 @@ export const main = createLayer("main", layer => {
             setBoxEntry(id, { ...existing, shiny: true });
         }
         if (firstEver) {
-            notify(`${species.name} was registered in the Pokédex!`, "success");
+            addLog({
+                kind: "levelup",
+                text: `New Pokédex entry: ${species.name}!`,
+                speciesId: id,
+                shiny
+            });
         }
         return existing == null;
     }
@@ -232,6 +257,13 @@ export const main = createLayer("main", layer => {
         if (i === -1 || j < 0 || j >= list.length) return;
         [list[i], list[j]] = [list[j], list[i]];
         partyIds.value = list;
+    }
+    function setParty(ids: number[]) {
+        if (inTrainerBattle.value) return;
+        const valid = [...new Set(ids)].filter(owns).slice(0, 6);
+        if (valid.length === 0) return;
+        if (valid.join() === partyIds.value.join()) return;
+        partyIds.value = valid;
     }
     function swapIntoParty(outId: number, inId: number) {
         if (inTrainerBattle.value || !owns(inId) || partyIds.value.includes(inId)) return;
@@ -262,9 +294,9 @@ export const main = createLayer("main", layer => {
         const evolution = getSpecies(fromId).evolutions.find(
             e => e.method === "stone" && e.stone === stone
         );
-        if (evolution == null || stones.value[stone] <= 0 || owns(evolution.into)) return;
+        if (evolution == null || (stones.value[stone] ?? 0) <= 0 || owns(evolution.into)) return;
         if (!owns(fromId) || inTrainerBattle.value) return;
-        stones.value = { ...stones.value, [stone]: stones.value[stone] - 1 };
+        stones.value = { ...stones.value, [stone]: (stones.value[stone] ?? 0) - 1 };
         evolve(fromId, evolution.into, ` with a ${STONES[stone].name}`);
     }
 
@@ -315,15 +347,15 @@ export const main = createLayer("main", layer => {
 
     function buyBalls(id: BallId, count: number) {
         const price = BALLS[id].price;
-        if (price == null || badges.value < BALLS[id].badgesRequired) return;
+        if (price == null || martTier.value < BALLS[id].badgesRequired) return;
         if (!spend(price * count)) return;
         balls.value = { ...balls.value, [id]: balls.value[id] + count };
         warnedNoBalls = false;
     }
 
     function buyStone(id: StoneId) {
-        if (badges.value < STONES[id].badgesRequired || !spend(STONES[id].price)) return;
-        stones.value = { ...stones.value, [id]: stones.value[id] + 1 };
+        if (martTier.value < STONES[id].badgesRequired || !spend(STONES[id].price)) return;
+        stones.value = { ...stones.value, [id]: (stones.value[id] ?? 0) + 1 };
     }
 
     function grantKeyItem(id: KeyItemId) {
@@ -404,7 +436,7 @@ export const main = createLayer("main", layer => {
         const species = getSpecies(wild.speciesId);
         battlesWon.value++;
         money.value += moneyYield(wild.level) * bonuses.value.money;
-        gainXp(xpYield({ species, level: wild.level }) * bonuses.value.xp);
+        gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp);
 
         if (shouldTryCatch(wild)) {
             const ball = chooseBall(species.captureRate, wild.shiny);
@@ -471,9 +503,9 @@ export const main = createLayer("main", layer => {
     }
 
     function challengeGym(gym: GymDefinition) {
-        if (badges.value !== gym.badgeNumber - 1) return;
+        if (badges.value !== gym.badgeNumber - 1 || !regionDef.value.trials.includes(gym)) return;
         startTrainerBattle({
-            label: `${gym.name}'s Gym battle`,
+            label: regionDef.value.id === "sevii" ? gym.title : `${gym.name}'s Gym battle`,
             trainers: [gym],
             onWin() {
                 badges.value = gym.badgeNumber;
@@ -484,7 +516,10 @@ export const main = createLayer("main", layer => {
                         [id]: balls.value[id as BallId] + (count ?? 0)
                     };
                 }
-                const text = `You earned the ${gym.badge}!`;
+                const text =
+                    regionDef.value.trialNoun === "badges"
+                        ? `You earned the ${gym.badge}!`
+                        : `Quest complete: ${gym.badge}!`;
                 addLog({ kind: "badge", text });
                 showFlash(text, "badge");
                 notify(`🏅 ${text}`, "success");
@@ -492,20 +527,21 @@ export const main = createLayer("main", layer => {
         });
     }
 
-    function challengeLeague() {
-        if (badges.value < 8) return;
+    function challengeFinale() {
+        if (badges.value < regionDef.value.trials.length) return;
         startTrainerBattle({
-            label: "The Pokémon League",
-            trainers: [...ELITE_FOUR, champ.value],
+            label: regionDef.value.finaleName,
+            trainers: finale.value,
             onWin() {
                 const first = !champion.value;
                 champion.value = true;
                 if (first) {
+                    clearTeam.value = [...partyIds.value];
                     hof.recordChampionTeam(partyIds.value.map(id => ({ id, ...box.value[id] })));
                 }
                 const text = first
-                    ? "You defeated Blue and became the Pokémon League Champion!"
-                    : "You defended your title as Champion!";
+                    ? `You conquered the ${regionDef.value.finaleName}! The Hall of Fame awaits.`
+                    : `You defended your title at the ${regionDef.value.finaleName}!`;
                 addLog({ kind: "badge", text });
                 showFlash("Champion!", "badge");
                 notify(`🏆 ${text}`, "success");
@@ -514,7 +550,7 @@ export const main = createLayer("main", layer => {
     }
 
     function challengeLegendary(special: Extract<SpecialEncounter, { kind: "legendary" }>) {
-        if (owns(special.speciesId) || !specialAvailable(special)) return;
+        if (claimedSpecials.value[special.id] || !specialAvailable(special)) return;
         const species = getSpecies(special.speciesId);
         startTrainerBattle({
             label: `Wild ${species.name}`,
@@ -546,6 +582,7 @@ export const main = createLayer("main", layer => {
                     bonuses.value.catch
                 );
                 if (Math.random() < chance) {
+                    claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
                     receivePokemon(special.speciesId, special.level, false);
                     const text = `You caught ${species.name}!`;
                     addLog({ kind: "catch", text, speciesId: special.speciesId });
@@ -583,7 +620,7 @@ export const main = createLayer("main", layer => {
         }
         // XP for every Pokémon on the defeated team.
         for (const enemy of current.enemies) {
-            gainXp(xpYield(enemy, true) * bonuses.value.xp);
+            gainXp(battleXp(enemy, true) * bonuses.value.xp);
         }
         const nextIndex = current.index + 1;
         if (nextIndex < current.trainers.length) {
@@ -656,13 +693,21 @@ export const main = createLayer("main", layer => {
         }
     }
 
+    let automationTimer = 0;
     layer.on("update", diff => {
         if (starter.value === 0 || partyIds.value.length === 0) return;
         runTime.value += diff;
         let remaining = diff;
         let encounters = 0;
         while (remaining > 1e-9 && encounters++ < MAX_ENCOUNTERS_PER_TICK) {
+            const before = remaining;
             remaining = advance(remaining);
+            // Automation decides in game time, so offline catch-up plays out like live play.
+            automationTimer -= before - remaining;
+            if (automationTimer <= 0) {
+                automationTimer = AUTOMATION_INTERVAL;
+                runAutomation();
+            }
         }
     });
 
@@ -671,7 +716,12 @@ export const main = createLayer("main", layer => {
     // ------------------------------------------------------------------
     function zoneUnlocked(id: string) {
         const z = ZONES_BY_ID[id];
-        return z != null && badges.value >= z.badgesRequired && (!z.postGame || champion.value);
+        return (
+            z != null &&
+            z.region === region.value &&
+            badges.value >= z.badgesRequired &&
+            (!z.postGame || champion.value)
+        );
     }
 
     function travel(id: string) {
@@ -681,7 +731,7 @@ export const main = createLayer("main", layer => {
     }
 
     function specialAvailable(special: SpecialEncounter) {
-        if (badges.value < special.badgesRequired) return false;
+        if (special.region !== region.value || badges.value < special.badgesRequired) return false;
         if (special.kind === "legendary") {
             if (special.postGame && !champion.value) return false;
             if (special.keyItem != null && !keyItems.value[special.keyItem]) return false;
@@ -708,14 +758,26 @@ export const main = createLayer("main", layer => {
         showFlash(text, "catch");
     }
 
+    /** Picks where the next journey happens. Only possible before choosing a starter. */
+    function chooseRegion(id: RegionId) {
+        const def = REGIONS[id];
+        if (starter.value !== 0 || def == null || !hof.regionUnlocked(id)) return;
+        region.value = id;
+    }
+
     function chooseStarter(id: number) {
-        if (starter.value !== 0) return;
+        const def = regionDef.value;
+        if (starter.value !== 0 || !def.starters.includes(id)) return;
         starter.value = id;
-        const level = 5 + 5 * (hof.levels.value.headStart ?? 0);
+        zoneId.value = zonesIn(def.id)[0].id;
+        def.startingKeyItems.forEach(
+            item => (keyItems.value = { ...keyItems.value, [item]: true })
+        );
+        const level = def.startLevel + 5 * (hof.levels.value.headStart ?? 0);
         receivePokemon(id, level, false);
         addLog({
             kind: "info",
-            text: `Professor Oak: "${getSpecies(id).name}! A fine choice. Now go — the Pokédex awaits!"`
+            text: `${getSpecies(id).name}, I choose you! Your ${def.name} journey begins.`
         });
         startSearch();
     }
@@ -728,13 +790,21 @@ export const main = createLayer("main", layer => {
         warnedNoBalls = false;
     }
 
-    const nav = [map.nav, party.nav, mart.nav, league.nav, dex.nav, hof.nav];
+    const nav: NavNode[] = [map.nav, party.nav, mart.nav, league.nav, dex.nav, hof.nav];
 
     return {
         name: "Journey",
         minWidth: 440,
         minimizable: false,
+        classes: mobileClasses("main"),
         starter,
+        region,
+        regionDef,
+        martTier,
+        finale,
+        nextTrial,
+        nextTrainers,
+        clearTeam,
         money,
         box,
         partyIds,
@@ -756,7 +826,6 @@ export const main = createLayer("main", layer => {
         bonuses,
         cap,
         zone,
-        champ,
         partyBattlers,
         inTrainerBattle,
         nav,
@@ -767,6 +836,7 @@ export const main = createLayer("main", layer => {
         removeFromParty,
         moveInParty,
         swapIntoParty,
+        setParty,
         evolveWithStone,
         evolveByTrade,
         buyBalls,
@@ -774,13 +844,14 @@ export const main = createLayer("main", layer => {
         grantKeyItem,
         spend,
         challengeGym,
-        challengeLeague,
+        challengeFinale,
         forfeit,
         travel,
         zoneUnlocked,
         specialAvailable,
         claimSpecial,
         chooseStarter,
+        chooseRegion,
         resetTransient,
         addLog,
         display: () => renderJourney()
@@ -789,10 +860,7 @@ export const main = createLayer("main", layer => {
 
 export type MainLayer = typeof main;
 
-/** Opens a layer in the right-hand pane, like clicking its tree node. */
-export function openLayer(id: string) {
-    player.tabs.splice(1, Infinity, id);
-}
+export { openLayer } from "./ui/nav";
 
 /**
  * Given a player save data object being loaded, return a list of layers that should currently be enabled.

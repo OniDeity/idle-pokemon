@@ -1,7 +1,7 @@
 /**
  * Regenerates the static Pokémon data the game ships with:
- *   - src/data/pokemon/species.json     All 151 Kanto species (stats, types, catch rate, evolutions)
- *   - src/data/pokemon/encounters.json  Red/Blue wild encounter pools for every zone in the game
+ *   - src/data/pokemon/species.json     Species #1-251 (stats, types, catch rate, evolutions)
+ *   - src/data/pokemon/encounters.json  Wild encounter pools: Red/Blue for Kanto, FireRed/LeafGreen for Sevii
  *   - src/data/pokemon/typeChart.json   Non-neutral type matchups
  *
  * Source: the PokeAPI CSV dump on GitHub (https://github.com/PokeAPI/pokeapi/tree/master/data/v2/csv).
@@ -13,8 +13,9 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const CSV_BASE = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv";
-const MAX_DEX = 151;
+const MAX_DEX = 251;
 const RED_BLUE_VERSION_IDS = new Set(["1", "2"]);
+const FRLG_VERSION_IDS = new Set(["10", "11"]);
 const ENGLISH = "9";
 
 /**
@@ -97,6 +98,59 @@ const ZONE_AREAS: Record<string, [string, string][]> = {
     ]
 };
 
+/** Sevii Islands zones use FireRed/LeafGreen data (the islands aren't in Red/Blue). */
+const SEVII_ZONE_AREAS: Record<string, [string, string][]> = {
+    kindleRoad: [["kindle-road", ""]],
+    treasureBeach: [["treasure-beach", ""]],
+    mtEmber: [
+        ["mt-ember", ""],
+        ["mt-ember", "inside"],
+        ["mt-ember", "cave"],
+        ["mt-ember", "1f-cave-behind-team-rocket"],
+        ["mt-ember", "b1f"],
+        ["mt-ember", "b2f"],
+        ["mt-ember", "b3f"]
+    ],
+    capeBrink: [["cape-brink", ""]],
+    bondBridge: [["bond-bridge", ""]],
+    threeIslePort: [["three-isle-port", ""]],
+    berryForest: [["berry-forest", ""]],
+    fourIsland: [["four-island", ""]],
+    icefallCave: [
+        ["icefall-cave", "entrance"],
+        ["icefall-cave", "1f"],
+        ["icefall-cave", "b1f"],
+        ["icefall-cave", "waterfall"]
+    ],
+    resortGorgeous: [["resort-gorgeous", ""]],
+    waterLabyrinth: [["water-labyrinth", ""]],
+    memorialPillar: [["memorial-pillar", ""]],
+    lostCave: [
+        "room-1",
+        "room-2",
+        "room-3",
+        "room-4",
+        "room-5",
+        "room-6",
+        "room-7",
+        "room-8",
+        "room-9",
+        "room-10",
+        "item-rooms"
+    ].map(a => ["lost-cave", a] as [string, string]),
+    waterPath: [["water-path", ""]],
+    ruinValley: [["ruin-valley", ""]],
+    greenPath: [["green-path", ""]],
+    outcastIsland: [["outcast-island", ""]],
+    patternBush: [["pattern-bush", ""]],
+    alteringCave: ["a", "b", "c", "d", "e", "f", "g", "h", "i"].map(
+        a => ["kanto-altering-cave", a] as [string, string]
+    ),
+    canyonEntrance: [["canyon-entrance", ""]],
+    sevaultCanyon: [["sevault-canyon", ""]],
+    tanobyRuins: [["tanoby-ruins", ""]]
+};
+
 const POOL_BY_METHOD: Record<string, string> = {
     walk: "walk",
     surf: "surf",
@@ -110,7 +164,8 @@ const STONE_BY_ITEM_ID: Record<string, string> = {
     "82": "fireStone",
     "83": "thunderStone",
     "84": "waterStone",
-    "85": "leafStone"
+    "85": "leafStone",
+    "80": "sunStone"
 };
 
 const GROWTH_RATES: Record<string, string> = {
@@ -202,6 +257,7 @@ async function main() {
     }
 
     const preEvolutionOf = new Map(speciesRows.map(r => [r.id, r.evolves_from_species_id]));
+    const babies = new Set(speciesRows.filter(r => r.is_baby === "1").map(r => r.id));
     const evolutions = new Map<number, Evolution[]>();
     const seenEvolutions = new Set<string>();
     for (const r of evolutionRows) {
@@ -214,8 +270,12 @@ async function main() {
         seenEvolutions.add(key);
 
         let evolution: Evolution;
-        if (r.evolution_trigger_id === "1") {
+        if (r.evolution_trigger_id === "1" && r.minimum_level !== "") {
             evolution = { into, method: "level", level: Number(r.minimum_level) };
+        } else if (r.evolution_trigger_id === "1" && r.minimum_happiness !== "") {
+            // Friendship evolutions become level evolutions: babies grow up fast, others at 30.
+            const baby = babies.has(String(from));
+            evolution = { into, method: "level", level: baby ? 15 : 30 };
         } else if (r.evolution_trigger_id === "2") {
             evolution = { into, method: "trade" };
         } else if (r.evolution_trigger_id === "3" && STONE_BY_ITEM_ID[r.trigger_item_id]) {
@@ -260,7 +320,13 @@ async function main() {
     const slots = new Map(slotRows.map(r => [r.id, r]));
 
     const zoneByArea = new Map<string, string>();
-    for (const [zoneId, areas] of Object.entries(ZONE_AREAS)) {
+    const zoneVersions = new Map<string, Set<string>>();
+    const allZones = { ...ZONE_AREAS, ...SEVII_ZONE_AREAS };
+    for (const [zoneId, areas] of Object.entries(allZones)) {
+        zoneVersions.set(
+            zoneId,
+            zoneId in SEVII_ZONE_AREAS ? FRLG_VERSION_IDS : RED_BLUE_VERSION_IDS
+        );
         for (const [location, area] of areas) {
             const id = areaKey.get(`${locationId.get(location)}/${area}`);
             if (id == null) throw new Error(`Unknown location area ${location}/${area}`);
@@ -271,8 +337,8 @@ async function main() {
     type Acc = { weight: number; minLevel: number; maxLevel: number };
     const pools: Record<string, Record<string, Map<number, Acc>>> = {};
     for (const r of encounterRows) {
-        if (!RED_BLUE_VERSION_IDS.has(r.version_id)) continue;
         const zoneId = zoneByArea.get(r.location_area_id);
+        if (zoneId == null || !zoneVersions.get(zoneId)?.has(r.version_id)) continue;
         const slot = slots.get(r.encounter_slot_id);
         const pool = POOL_BY_METHOD[methodName.get(slot?.encounter_method_id ?? "") ?? ""];
         const id = Number(r.pokemon_id);
@@ -288,7 +354,7 @@ async function main() {
     }
 
     const encounters = Object.fromEntries(
-        Object.keys(ZONE_AREAS).map(zoneId => [
+        Object.keys(allZones).map(zoneId => [
             zoneId,
             Object.fromEntries(
                 Object.entries(pools[zoneId] ?? {}).map(([pool, entries]) => [

@@ -13,10 +13,12 @@ import {
 import type { Species } from "game/pokemon/data";
 import { DEX_SIZE, getSpecies, PRE_EVOLUTION, SPECIES } from "game/pokemon/data";
 import { STONES } from "game/pokemon/items";
+import { REGION_LIST, REGIONS } from "game/pokemon/regions";
 import { MEW_ID, MEW_REQUIREMENT, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { allZoneSpecies, ZONES } from "game/pokemon/zones";
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
+import { mobileClasses, renderNav } from "../ui/nav";
 import {
     Bar,
     Button,
@@ -37,14 +39,16 @@ export type DexEntry = {
 
 const EMPTY: DexEntry = { seen: false, caught: false, shiny: false, timesCaught: 0 };
 
-type Filter = "all" | "caught" | "missing" | "shiny";
+type Filter = "all" | "caught" | "missing" | "shiny" | "kanto" | "johto";
 
 /** Where a species can be found: wild zones, specials, or by evolving something. */
 function locationsOf(id: number): string[] {
     const places: string[] = [];
     for (const zone of ZONES) {
         if (allZoneSpecies(zone.id).includes(id)) {
-            places.push(zone.name);
+            places.push(
+                `${REGIONS[zone.region].name}: ${zone.name}${zone.anime ? " (anime)" : ""}`
+            );
         }
     }
     for (const special of SPECIAL_ENCOUNTERS) {
@@ -57,7 +61,7 @@ function locationsOf(id: number): string[] {
                       : special.price != null
                         ? `₽${special.price.toLocaleString("en-US")}`
                         : "gift";
-            places.push(`${special.place} — ${how}`);
+            places.push(`${REGIONS[special.region].name}: ${special.place} (${how})`);
         }
     }
     const pre = PRE_EVOLUTION[id];
@@ -74,8 +78,13 @@ function locationsOf(id: number): string[] {
     if (id === MEW_ID) {
         places.push(`Professor Oak's reward for ${MEW_REQUIREMENT} species caught`);
     }
-    if ([1, 4, 7].includes(id)) {
-        places.push("Starter Pokémon");
+    for (const region of REGION_LIST) {
+        if (region.starters.includes(id)) {
+            places.push(`Starter Pokémon for a ${region.name} journey`);
+        }
+    }
+    if (places.length === 0) {
+        places.push("Not found in any region yet.");
     }
     return places;
 }
@@ -156,6 +165,10 @@ const layer = createLayer(id, () => {
                     return !e.caught;
                 case "shiny":
                     return e.shiny;
+                case "kanto":
+                    return s.id <= 151;
+                case "johto":
+                    return s.id > 151;
                 default:
                     return true;
             }
@@ -227,7 +240,9 @@ const layer = createLayer(id, () => {
         ["all", "All"],
         ["caught", "Caught"],
         ["missing", "Missing"],
-        ["shiny", "Shiny"]
+        ["shiny", "Shiny"],
+        ["kanto", "#1–151"],
+        ["johto", "#152–251"]
     ];
 
     return {
@@ -235,6 +250,7 @@ const layer = createLayer(id, () => {
         color,
         minWidth: 480,
         minimizable: false,
+        classes: mobileClasses(id),
         entries,
         seenCount,
         caughtCount,
@@ -247,6 +263,7 @@ const layer = createLayer(id, () => {
         nav,
         display: () => (
             <div class="pk-layer">
+                {renderNav(true)}
                 <h2 class="pk-layer-title">Pokédex</h2>
                 <div class="pk-dex-summary">
                     <div>

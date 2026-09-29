@@ -9,9 +9,10 @@ import { KEY_ITEMS } from "game/pokemon/items";
 import type { SpecialEncounter } from "game/pokemon/specials";
 import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import type { ZoneDefinition } from "game/pokemon/zones";
-import { allZoneSpecies, availableZoneSpecies, typicalLevel, ZONES } from "game/pokemon/zones";
+import { allZoneSpecies, availableZoneSpecies, typicalLevel, zonesIn } from "game/pokemon/zones";
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
+import { mobileClasses, renderNav } from "../ui/nav";
 import { Button, formatMoney, Panel, Sprite } from "../ui/components";
 import dex from "./dex";
 
@@ -19,12 +20,12 @@ type Tab = "zones" | "specials";
 
 const id = "map";
 const layer = createLayer(id, () => {
-    const name = "Kanto";
+    const name = "Map";
     const color = "#22C55E";
     const tab = ref<Tab>("zones");
 
     const claimableSpecials = computed(() =>
-        SPECIAL_ENCOUNTERS.filter(
+        regionSpecials().filter(
             s =>
                 main.specialAvailable(s) &&
                 !main.claimedSpecials.value[s.id] &&
@@ -43,10 +44,16 @@ const layer = createLayer(id, () => {
         enabled: computed((): boolean => true)
     };
 
+    function regionSpecials() {
+        return SPECIAL_ENCOUNTERS.filter(s => s.region === main.region.value);
+    }
+
     function tierLabel(badges: number, postGame?: boolean) {
-        if (postGame) return "After becoming Champion";
-        if (badges === 0) return "Pallet Town & Viridian City";
-        return `After ${badges} badge${badges === 1 ? "" : "s"}`;
+        const region = main.regionDef.value;
+        if (postGame) return `After the ${region.finaleName}`;
+        if (badges === 0) return "Starting area";
+        const noun = region.trialNoun.replace(/s$/, "");
+        return `After ${badges} ${badges === 1 ? noun : region.trialNoun}`;
     }
 
     function renderZone(zone: ZoneDefinition) {
@@ -62,7 +69,9 @@ const layer = createLayer(id, () => {
             <div class={["pk-zone", current ? "current" : "", unlocked ? "" : "locked"]}>
                 <div class="pk-zone-head">
                     <div>
-                        <b>{zone.name}</b> <span class="pk-muted pk-small">~Lv. {level}</span>
+                        <b>{zone.name}</b>{" "}
+                        {zone.anime ? <span class="pk-anime-tag">Anime</span> : null}{" "}
+                        <span class="pk-muted pk-small">~Lv. {level}</span>
                         <div class="pk-small pk-muted">{zone.blurb}</div>
                     </div>
                     {unlocked ? (
@@ -118,7 +127,7 @@ const layer = createLayer(id, () => {
 
     function renderZones() {
         const tiers = new Map<string, ZoneDefinition[]>();
-        for (const zone of ZONES) {
+        for (const zone of zonesIn(main.region.value)) {
             const key = tierLabel(zone.badgesRequired, zone.postGame);
             tiers.set(key, [...(tiers.get(key) ?? []), zone]);
         }
@@ -147,12 +156,16 @@ const layer = createLayer(id, () => {
                     {missingItem && special.kind === "legendary"
                         ? `Needs the ${KEY_ITEMS[special.keyItem!].name}`
                         : special.kind === "legendary" && special.postGame
-                          ? "Champions only"
-                          : `${special.badgesRequired} badge${special.badgesRequired === 1 ? "" : "s"}`}
+                          ? `After the ${main.regionDef.value.finaleName}`
+                          : `${special.badgesRequired} ${main.regionDef.value.trialNoun}`}
                 </span>
             );
-        } else if (owned || claimed) {
-            action = <span class="pk-small pk-done">✔ {owned ? "In your box" : "Done"}</span>;
+        } else if (claimed || (owned && special.kind !== "legendary")) {
+            action = (
+                <span class="pk-small pk-done">
+                    ✔ {special.kind === "legendary" ? "Caught" : owned ? "In your box" : "Done"}
+                </span>
+            );
         } else if (special.kind === "trade") {
             const has = main.owns(special.wants);
             action = (
@@ -204,10 +217,12 @@ const layer = createLayer(id, () => {
         color,
         minWidth: 480,
         minimizable: false,
+        classes: mobileClasses(id),
         nav,
         display: () => (
             <div class="pk-layer">
-                <h2 class="pk-layer-title">Kanto</h2>
+                {renderNav(true)}
+                <h2 class="pk-layer-title">{main.regionDef.value.name}</h2>
                 <div class="pk-filter-row">
                     <Button
                         kind={tab.value === "zones" ? "primary" : "ghost"}
@@ -233,7 +248,7 @@ const layer = createLayer(id, () => {
                             Some Pokémon never appear in the wild. Trades only require showing the
                             requested Pokémon — you keep yours.
                         </p>
-                        {SPECIAL_ENCOUNTERS.map(renderSpecial)}
+                        {regionSpecials().map(renderSpecial)}
                     </Panel>
                 )}
             </div>

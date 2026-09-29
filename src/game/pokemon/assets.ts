@@ -12,5 +12,6 @@ declare global {
 
 /** @param path A path inside the sprites repo, e.g. "items/poke-ball.png". */
 export function assetUrl(path: string): string {
-    return window.__PK_ASSETS?.[path] ?? `${SPRITES_BASE}/${path}`;
+    const bundled = typeof window === "undefined" ? undefined : window.__PK_ASSETS?.[path];
+    return bundled ?? `${SPRITES_BASE}/${path}`;
 }

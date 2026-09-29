@@ -1,19 +1,31 @@
 import type { EncounterEntry, EncounterPoolId } from "./data";
 import { ENCOUNTERS } from "./data";
 import type { KeyItemId } from "./items";
+import { KANTO_ANIME_ZONES } from "./kantoAnime";
+import { ORANGE_ZONES } from "./orange";
+import { SEVII_ZONES } from "./sevii";
+
+export type RegionId = "kanto" | "orange" | "sevii";
+
+export type ZonePools = Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 
 export interface ZoneDefinition {
     id: string;
     name: string;
-    /** Badges needed to travel here. */
+    region: RegionId;
+    /** Badges (or the region's equivalent trials) needed to travel here. */
     badgesRequired: number;
-    /** Requires beating the Champion. */
+    /** Requires clearing the region's finale. */
     postGame?: boolean;
+    /** A location that only appears in the animated series. */
+    anime?: boolean;
     blurb: string;
+    /** Hand-authored encounter pools; zones without them use the generated game data. */
+    encounters?: ZonePools;
 }
 
-/** Every explorable zone, in the order the player reaches them. */
-export const ZONES: ZoneDefinition[] = [
+/** Kanto zones from the games, in the order the player reaches them. */
+const KANTO_GAME_ZONES: Omit<ZoneDefinition, "region">[] = [
     {
         id: "route1",
         name: "Route 1",
@@ -223,6 +235,21 @@ export const ZONES: ZoneDefinition[] = [
     }
 ];
 
+const KANTO_ZONES: ZoneDefinition[] = [
+    ...KANTO_GAME_ZONES.map((zone): ZoneDefinition => ({ ...zone, region: "kanto" })),
+    ...KANTO_ANIME_ZONES
+    // Stable sort keeps story order within each badge tier, anime locations last.
+].sort(
+    (a, b) => a.badgesRequired - b.badgesRequired || Number(!!a.postGame) - Number(!!b.postGame)
+);
+
+/** Every explorable zone in every region. */
+export const ZONES: ZoneDefinition[] = [...KANTO_ZONES, ...ORANGE_ZONES, ...SEVII_ZONES];
+
+export function zonesIn(region: RegionId): ZoneDefinition[] {
+    return ZONES.filter(zone => zone.region === region);
+}
+
 export const ZONES_BY_ID: Record<string, ZoneDefinition> = Object.fromEntries(
     ZONES.map(zone => [zone.id, zone])
 );
@@ -247,8 +274,13 @@ export interface ActivePool {
  * The encounter pools the player can currently access in a zone.
  * Fishing combines every rod the player owns into one pool; each rod contributes equally.
  */
+/** A zone's encounter pools, hand-authored or generated. */
+export function zonePools(zoneId: string): ZonePools {
+    return ZONES_BY_ID[zoneId]?.encounters ?? ENCOUNTERS[zoneId] ?? {};
+}
+
 export function activePools(zoneId: string, keyItems: Partial<Record<KeyItemId, boolean>>) {
-    const pools = ENCOUNTERS[zoneId] ?? {};
+    const pools = zonePools(zoneId);
     const result: ActivePool[] = [];
     if (pools.walk != null && pools.walk.length > 0) {
         result.push({ kind: "walk", share: POOL_SHARE.walk, entries: pools.walk });
@@ -274,7 +306,7 @@ export function activePools(zoneId: string, keyItems: Partial<Record<KeyItemId, 
 /** Every species that can appear in a zone with any equipment, for completion tracking. */
 export function allZoneSpecies(zoneId: string): number[] {
     const ids = new Set<number>();
-    for (const entries of Object.values(ENCOUNTERS[zoneId] ?? {})) {
+    for (const entries of Object.values(zonePools(zoneId))) {
         entries?.forEach(e => ids.add(e.id));
     }
     return [...ids].sort((a, b) => a - b);
@@ -333,7 +365,7 @@ export function rollEncounter(
 
 /** The average wild level in a zone's walking (or surfing) pool, used for recommendations. */
 export function typicalLevel(zoneId: string): number {
-    const pools = ENCOUNTERS[zoneId] ?? {};
+    const pools = zonePools(zoneId);
     const entries = pools.walk ?? pools.surf ?? [];
     const total = entries.reduce((sum, e) => sum + e.weight, 0);
     if (total === 0) {

@@ -1,16 +1,20 @@
 /**
- * Headless balance simulator. Plays a first run from starter to Champion with a reasonable
- * (not optimal) strategy, and prints when each milestone is reached. Use it after touching
- * anything in src/game/pokemon/balance.ts, trainers.ts, or zones.ts.
+ * Headless balance simulator. Plays a campaign of journeys (each from starter to the region's
+ * finale) with a sensible strategy, carrying the Pokédex and Fame upgrades between journeys
+ * like the real game, and prints when each milestone is reached.
+ * Run it after touching anything in src/game/pokemon/balance.ts, trainers.ts, or a region file.
  *
- * Usage: npx tsx scripts/simulateProgression.ts [starterId=4] [seed=1]
+ * Usage: npx tsx scripts/simulateProgression.ts [regions=kanto,kanto,orange,sevii] [seed=1]
+ *   Each region may name a starter, e.g. "kanto:4,orange:25".
  */
-import type { BonusInputs, PartyBattler } from "../src/game/pokemon/balance";
+import type { BonusInputs, HofUpgradeId, PartyBattler } from "../src/game/pokemon/balance";
 import {
-    BALL_RESTOCK_TARGET,
+    battleXp,
     catchChance,
     computeBonuses,
-    MART_UPGRADES,
+    fameGain,
+    HOF_UPGRADE_LIST,
+    MART_UPGRADE_LIST,
     memberDps,
     memberMultiplier,
     moneyYield,
@@ -20,15 +24,20 @@ import {
     wildDps
 } from "../src/game/pokemon/balance";
 import { getSpecies } from "../src/game/pokemon/data";
-import type { KeyItemId } from "../src/game/pokemon/items";
+import type { BallId, KeyItemId } from "../src/game/pokemon/items";
 import { AUTO_BALL_ORDER, BALLS, LINK_CABLE_PRICE, STONES } from "../src/game/pokemon/items";
+import type { RegionDefinition } from "../src/game/pokemon/regions";
+import { levelCap, REGIONS } from "../src/game/pokemon/regions";
 import { SPECIAL_ENCOUNTERS } from "../src/game/pokemon/specials";
 import { levelForXp, maxHp, xpForLevel, xpYield } from "../src/game/pokemon/stats";
 import type { TrainerDefinition } from "../src/game/pokemon/trainers";
-import { championFor, ELITE_FOUR, GYMS, levelCap } from "../src/game/pokemon/trainers";
-import { availableZoneSpecies, rollEncounter, ZONES } from "../src/game/pokemon/zones";
+import type { RegionId } from "../src/game/pokemon/zones";
+import { availableZoneSpecies, rollEncounter, zonesIn } from "../src/game/pokemon/zones";
 
-const starter = Number(process.argv[2] ?? 4);
+const plan = (process.argv[2] ?? "kanto,kanto,orange,sevii").split(",").map(part => {
+    const [region, starter] = part.split(":");
+    return { region: region as RegionId, starter: starter != null ? Number(starter) : undefined };
+});
 let seed = Number(process.argv[3] ?? 1);
 function rng() {
     // mulberry32
@@ -39,231 +48,288 @@ function rng() {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 
+// Tuning knobs for balance experiments (defaults leave the game data untouched):
+//   XPF=0.5 MF=0.5     multiply experience / Pokédollars from wild battles
+//   KANTO_GYMS=1,1.2,… override Kanto Gym strengths; KANTO_E4=2.6 KANTO_CHAMP=3
+const XPF = Number(process.env.XPF ?? 1);
+const MF = Number(process.env.MF ?? 1);
+if (process.env.KANTO_GYMS != null) {
+    process.env.KANTO_GYMS.split(",").forEach((v, i) => {
+        REGIONS.kanto.trials[i].statMultiplier = Number(v);
+    });
+}
+if (process.env.KANTO_E4 != null || process.env.KANTO_CHAMP != null) {
+    const original = REGIONS.kanto.finale;
+    REGIONS.kanto.finale = starter =>
+        original(starter).map((t, i, all) => ({
+            ...t,
+            statMultiplier:
+                i === all.length - 1
+                    ? Number(process.env.KANTO_CHAMP ?? t.statMultiplier)
+                    : Number(process.env.KANTO_E4 ?? t.statMultiplier)
+        }));
+}
+
+//   SCALE_orange=1.5   multiply every trial and finale strength in a region
+for (const region of Object.values(REGIONS)) {
+    const scale = Number(process.env[`SCALE_${region.id}`] ?? 1);
+    if (scale === 1) continue;
+    region.trials.forEach(t => (t.statMultiplier *= scale));
+    const original = region.finale;
+    region.finale = starter =>
+        original(starter).map(t => ({ ...t, statMultiplier: t.statMultiplier * scale }));
+}
+
+// Permanent state, kept across journeys.
+const dex = new Map<number, number>(); // species → times caught
+let fame = 0;
+const hof: Partial<Record<HofUpgradeId, number>> = {};
+const enshrined = new Set<number>();
+const clears: Partial<Record<RegionId, number>> = {};
+let totalTime = 0;
+
 interface Owned {
     id: number;
     xp: number;
     level: number;
-    timesCaught: number;
 }
 
-const owned = new Map<number, Owned>();
-let badges = 0;
-let champion = false;
-let money = 0;
-let time = 0;
-const mart: Record<string, number> = {};
-const keyItems: Partial<Record<KeyItemId, boolean>> = {};
-const balls: Record<string, number> = { pokeBall: 5 };
-const claimedSpecials = new Set<string>();
+function runJourney(region: RegionDefinition, starter: number) {
+    const owned = new Map<number, Owned>();
+    let badges = 0;
+    let cleared = false;
+    let money = 0;
+    let time = 0;
+    const mart: Record<string, number> = {};
+    const keyItems: Partial<Record<KeyItemId, boolean>> = {};
+    region.startingKeyItems.forEach(k => (keyItems[k] = true));
+    const balls: Partial<Record<BallId, number>> = { pokeBall: 10 };
+    const claimed = new Set<string>();
+    const tier = () => badges + region.shopTier;
+    const cap = () => levelCap(region, badges, cleared);
 
-function addPokemon(id: number, level: number) {
-    const existing = owned.get(id);
-    if (existing) {
-        existing.timesCaught++;
-        return;
+    function catchSpecies(id: number, level: number) {
+        dex.set(id, (dex.get(id) ?? 0) + 1);
+        if (owned.has(id)) return;
+        const lvl = Math.min(level, cap());
+        owned.set(id, { id, level: lvl, xp: xpForLevel(getSpecies(id).growthRate, lvl) });
     }
-    const growth = getSpecies(id).growthRate;
-    owned.set(id, { id, level, xp: xpForLevel(growth, level), timesCaught: 1 });
-}
-addPokemon(starter, 5);
+    catchSpecies(starter, region.startLevel + 5 * (hof.headStart ?? 0));
 
-function bonusInputs(): BonusInputs {
-    return { dexCaught: owned.size, shinyCaught: 0, mart, hof: {}, keyItems };
-}
-
-function battler(o: Owned): PartyBattler {
-    return {
+    const bonusInputs = (): BonusInputs => ({
+        dexCaught: dex.size,
+        shinyCaught: 0,
+        mart,
+        hof,
+        keyItems
+    });
+    const battler = (o: Owned): PartyBattler => ({
         species: getSpecies(o.id),
         level: o.level,
-        multiplier: memberMultiplier(false, o.timesCaught)
-    };
-}
+        multiplier: memberMultiplier(false, dex.get(o.id) ?? 1)
+    });
+    const nextTrainers = (): TrainerDefinition[] =>
+        badges < region.trials.length ? [region.trials[badges]] : region.finale(starter);
 
-function nextTrainer(): TrainerDefinition[] {
-    if (badges < 8) return [GYMS[badges]];
-    return [...ELITE_FOUR, championFor(starter)];
-}
+    function chooseParty(): Owned[] {
+        const targets = nextTrainers().flatMap(trainerTeam);
+        const damage = computeBonuses(bonusInputs()).damage;
+        const score = (o: Owned) =>
+            targets.reduce((sum, t) => sum + memberDps(battler(o), t, damage) / maxHp(t), 0);
+        return [...owned.values()].sort((a, b) => score(b) - score(a)).slice(0, 6);
+    }
 
-/** Picks the 6 owned Pokémon that deal the most damage to the next trainer's team. */
-function chooseParty(): Owned[] {
-    const targets = nextTrainer().flatMap(trainerTeam);
-    const damage = computeBonuses(bonusInputs()).damage;
-    const score = (o: Owned) =>
-        targets.reduce((sum, t) => sum + memberDps(battler(o), t, damage) / maxHp(t), 0);
-    return [...owned.values()].sort((a, b) => score(b) - score(a)).slice(0, 6);
-}
-
-function evolve(o: Owned) {
-    const species = getSpecies(o.id);
-    for (const evo of species.evolutions) {
-        let ok = false;
-        if (evo.method === "level" && o.level >= (evo.level ?? 101)) ok = true;
-        if (evo.method === "trade" && keyItems.linkCable) ok = true;
-        if (evo.method === "stone" && evo.stone && badges >= STONES[evo.stone].badgesRequired) {
-            const price = STONES[evo.stone].price;
-            if (!owned.has(evo.into) && money > price * 2) {
-                money -= price;
-                ok = true;
+    function evolve(o: Owned) {
+        for (const evo of getSpecies(o.id).evolutions) {
+            if (owned.has(evo.into)) continue;
+            let ok = evo.method === "level" && o.level >= (evo.level ?? 101);
+            if (evo.method === "trade" && keyItems.linkCable) ok = true;
+            if (evo.method === "stone" && evo.stone && tier() >= STONES[evo.stone].badgesRequired) {
+                const price = STONES[evo.stone].price;
+                if (money > price * 3) {
+                    money -= price;
+                    ok = true;
+                }
+            }
+            if (ok) {
+                owned.set(evo.into, { ...o, id: evo.into });
+                if (!dex.has(evo.into)) dex.set(evo.into, 1);
             }
         }
-        if (ok && !owned.has(evo.into)) {
-            owned.set(evo.into, { ...o, id: evo.into, timesCaught: 1 });
+    }
+
+    function claimSpecials() {
+        for (const s of SPECIAL_ENCOUNTERS) {
+            if (s.region !== region.id || claimed.has(s.id) || badges < s.badgesRequired) continue;
+            if (s.kind === "legendary" || owned.has(s.speciesId)) continue;
+            if (s.kind === "trade" && !owned.has(s.wants)) continue;
+            if (s.kind === "gift" && s.price != null) {
+                if (money < s.price * 2) continue;
+                money -= s.price;
+            }
+            claimed.add(s.id);
+            catchSpecies(s.speciesId, s.level);
         }
     }
-}
 
-function claimSpecials() {
-    for (const s of SPECIAL_ENCOUNTERS) {
-        if (claimedSpecials.has(s.id) || badges < s.badgesRequired) continue;
-        if (s.kind === "legendary") continue;
-        if (s.kind === "trade" && !owned.has(s.wants)) continue;
-        if (s.kind === "gift" && s.price != null) {
-            if (money < s.price * 2) continue;
-            money -= s.price;
+    function shop() {
+        for (;;) {
+            const options = MART_UPGRADE_LIST.filter(
+                u => tier() >= u.badgesRequired && (mart[u.id] ?? 0) < u.maxLevel
+            )
+                .map(u => ({ u, cost: upgradeCost(u, mart[u.id] ?? 0) }))
+                .sort((a, b) => a.cost - b.cost);
+            const best = options[0];
+            if (!best || money < best.cost * 2) break;
+            money -= best.cost;
+            mart[best.u.id] = (mart[best.u.id] ?? 0) + 1;
         }
-        claimedSpecials.add(s.id);
-        addPokemon(s.speciesId, s.level);
+        if (!keyItems.linkCable && tier() >= 3 && money > LINK_CABLE_PRICE * 3) {
+            money -= LINK_CABLE_PRICE;
+            keyItems.linkCable = true;
+        }
     }
+
+    function zoneScore(zoneId: string, party: Owned[]): number {
+        const bonuses = computeBonuses(bonusInputs());
+        const members = party.map(battler);
+        let xpPerSec = 0;
+        const samples = 30;
+        for (let i = 0; i < samples; i++) {
+            const e = rollEncounter(zoneId, keyItems, rng);
+            if (!e) return 0;
+            const target = { species: getSpecies(e.speciesId), level: e.level };
+            const t = bonuses.searchTime + maxHp(target) / wildDps(members, target, bonuses.damage);
+            xpPerSec += xpYield(target) / t;
+        }
+        const uncaught = availableZoneSpecies(zoneId, keyItems).filter(id => !owned.has(id)).length;
+        return (xpPerSec / samples) * (1 + 0.3 * uncaught);
+    }
+
+    const unlockedZones = () =>
+        zonesIn(region.id).filter(z => badges >= z.badgesRequired && (!z.postGame || cleared));
+
+    const log = (msg: string) =>
+        console.log(
+            `  ${((totalTime + time) / 3600).toFixed(1).padStart(5)}h total, ${(time / 3600)
+                .toFixed(2)
+                .padStart(5)}h run  ${msg}  [dex ${dex.size}, ₽${Math.floor(money)}]`
+        );
+
+    let party = chooseParty();
+    let zone = zonesIn(region.id)[0].id;
+    let step = 0;
+    const MAX_TIME = 80 * 3600;
+
+    while (!cleared && time < MAX_TIME) {
+        if (step % 150 === 0) {
+            claimSpecials();
+            shop();
+            party = chooseParty();
+            zone = unlockedZones().reduce((best, z) =>
+                zoneScore(z.id, party) > zoneScore(best.id, party) ? z : best
+            ).id;
+            const { damage, hp } = computeBonuses(bonusInputs());
+            const trainers = nextTrainers();
+            const members = party.map(battler);
+            if (trainers.every(t => simulateTrainerBattle(members, t, damage, hp).won)) {
+                for (const t of trainers) money += t.prizeMoney;
+                const summary = party.map(o => `${getSpecies(o.id).name} ${o.level}`).join(", ");
+                if (badges < region.trials.length) {
+                    const trial = region.trials[badges];
+                    badges++;
+                    trial.keyItems.forEach(k => (keyItems[k] = true));
+                    log(`${trial.name} (${summary})`);
+                } else {
+                    cleared = true;
+                    log(`Cleared the ${region.finaleName} (${summary})`);
+                    const team = party.map(o => o.id);
+                    const gain = fameGain({
+                        regionFame: region.fame,
+                        dexCaught: dex.size,
+                        shinyCaught: 0,
+                        newSpecies: team.filter(id => !enshrined.has(id)).length,
+                        firstClear: (clears[region.id] ?? 0) === 0
+                    });
+                    team.forEach(id => enshrined.add(id));
+                    clears[region.id] = (clears[region.id] ?? 0) + 1;
+                    fame += gain;
+                    console.log(`  +${gain} Fame`);
+                }
+                step++;
+                continue;
+            }
+        }
+        step++;
+
+        const bonuses = computeBonuses(bonusInputs());
+        const e = rollEncounter(zone, keyItems, rng);
+        if (!e) break;
+        const target = { species: getSpecies(e.speciesId), level: e.level };
+        time +=
+            bonuses.searchTime +
+            maxHp(target) / wildDps(party.map(battler), target, bonuses.damage);
+        money += moneyYield(e.level) * bonuses.money * MF;
+
+        const gained = battleXp(target) * bonuses.xp * XPF;
+        for (const o of party) {
+            const growth = getSpecies(o.id).growthRate;
+            o.xp = Math.min(o.xp + gained, xpForLevel(growth, cap()));
+            o.level = levelForXp(growth, o.xp, cap());
+            evolve(o);
+        }
+
+        if (!owned.has(e.speciesId)) {
+            let ball = AUTO_BALL_ORDER.find(b => (balls[b] ?? 0) > 0);
+            if (ball == null) {
+                ball = AUTO_BALL_ORDER.find(
+                    b =>
+                        tier() >= BALLS[b].badgesRequired &&
+                        money >= (BALLS[b].price ?? Infinity) * 5
+                );
+                if (ball != null) {
+                    const price = BALLS[ball].price ?? 0;
+                    const count = Math.min(20, Math.floor(money / price));
+                    money -= count * price;
+                    balls[ball] = count;
+                }
+            }
+            if (ball != null) {
+                balls[ball] = (balls[ball] ?? 0) - 1;
+                const chance = catchChance(
+                    target.species.captureRate,
+                    BALLS[ball].catchMultiplier,
+                    bonuses.catch
+                );
+                if (rng() < chance) catchSpecies(e.speciesId, e.level);
+            }
+        }
+    }
+    if (!cleared) log("Timed out.");
+    totalTime += time;
+    return time;
 }
 
-function buyUpgrades() {
+function spendFame() {
     for (;;) {
-        const options = Object.values(MART_UPGRADES)
-            .filter(u => badges >= u.badgesRequired && (mart[u.id] ?? 0) < u.maxLevel)
-            .map(u => ({ u, cost: upgradeCost(u, mart[u.id] ?? 0) }))
+        const options = HOF_UPGRADE_LIST.filter(u => (hof[u.id] ?? 0) < u.maxLevel)
+            .map(u => ({ u, cost: upgradeCost(u, hof[u.id] ?? 0) }))
             .sort((a, b) => a.cost - b.cost);
         const best = options[0];
-        if (!best || money < best.cost + 200) break;
-        money -= best.cost;
-        mart[best.u.id] = (mart[best.u.id] ?? 0) + 1;
-    }
-    if (!keyItems.linkCable && badges >= 3 && money > LINK_CABLE_PRICE * 2) {
-        money -= LINK_CABLE_PRICE;
-        keyItems.linkCable = true;
+        if (!best || fame < best.cost) break;
+        fame -= best.cost;
+        hof[best.u.id] = (hof[best.u.id] ?? 0) + 1;
     }
 }
 
-function zoneScore(zoneId: string, party: Owned[]): number {
-    const bonuses = computeBonuses(bonusInputs());
-    const members = party.map(battler);
-    let xpPerSec = 0;
-    const samples = 30;
-    for (let i = 0; i < samples; i++) {
-        const enc = rollEncounter(zoneId, keyItems, rng);
-        if (!enc) return 0;
-        const target = { species: getSpecies(enc.speciesId), level: enc.level };
-        const t = bonuses.searchTime + maxHp(target) / wildDps(members, target, bonuses.damage);
-        xpPerSec += xpYield(target) / t;
-    }
-    const uncaught = availableZoneSpecies(zoneId, keyItems).filter(id => !owned.has(id)).length;
-    return (xpPerSec / samples) * (1 + 0.3 * uncaught);
-}
-
-function unlockedZones() {
-    return ZONES.filter(z => badges >= z.badgesRequired && (!z.postGame || champion));
-}
-
-const log = (msg: string) =>
-    console.log(
-        `${(time / 3600).toFixed(2).padStart(6)}h  ${msg}  [dex ${owned.size}, ₽${Math.floor(
-            money
-        )}]`
-    );
-
-let party = chooseParty();
-let zone = "route1";
-let step = 0;
-const MAX_TIME = 40 * 3600;
-
-while (!champion && time < MAX_TIME) {
-    if (step % 150 === 0) {
-        claimSpecials();
-        buyUpgrades();
-        party = chooseParty();
-        const zones = unlockedZones();
-        zone = zones.reduce((best, z) =>
-            zoneScore(z.id, party) > zoneScore(best.id, party) ? z : best
-        ).id;
-        // Try the next trainer(s).
-        const { damage, hp } = computeBonuses(bonusInputs());
-        const trainers = nextTrainer();
-        const members = party.map(battler);
-        if (process.env.DEBUG)
-            console.log(
-                trainers.map(t => [
-                    t.name,
-                    damage,
-                    hp,
-                    JSON.stringify(simulateTrainerBattle(members, t, damage, hp))
-                ])
-            );
-        if (trainers.every(t => simulateTrainerBattle(members, t, damage, hp).won)) {
-            for (const t of trainers) money += t.prizeMoney;
-            if (badges < 8) {
-                const gym = GYMS[badges];
-                badges++;
-                gym.keyItems.forEach(k => (keyItems[k] = true));
-                log(
-                    `Beat ${gym.name} (party: ${party
-                        .map(o => `${getSpecies(o.id).name} ${o.level}`)
-                        .join(", ")})`
-                );
-            } else {
-                champion = true;
-                log(
-                    `Became Champion (party: ${party
-                        .map(o => `${getSpecies(o.id).name} ${o.level}`)
-                        .join(", ")})`
-                );
-            }
-            continue;
-        }
-    }
-    step++;
-
-    const bonuses = computeBonuses(bonusInputs());
-    const enc = rollEncounter(zone, keyItems, rng);
-    if (!enc) break;
-    const target = { species: getSpecies(enc.speciesId), level: enc.level };
-    const dps = wildDps(party.map(battler), target, bonuses.damage);
-    time += bonuses.searchTime + maxHp(target) / dps;
-    money += moneyYield(enc.level) * bonuses.money;
-
-    const cap = levelCap(badges, champion);
-    const gained = xpYield(target) * bonuses.xp;
-    for (const o of party) {
-        const growth = getSpecies(o.id).growthRate;
-        o.xp = Math.min(o.xp + gained, xpForLevel(growth, cap));
-        o.level = levelForXp(growth, o.xp, cap);
-        evolve(o);
-    }
-
-    if (!owned.has(enc.speciesId)) {
-        const ballId =
-            AUTO_BALL_ORDER.find(b => (balls[b] ?? 0) > 0) ??
-            AUTO_BALL_ORDER.find(
-                b => badges >= BALLS[b].badgesRequired && money >= (BALLS[b].price ?? Infinity)
-            );
-        if (ballId) {
-            if ((balls[ballId] ?? 0) === 0) {
-                const price = BALLS[ballId].price ?? 0;
-                const count = Math.min(BALL_RESTOCK_TARGET, Math.floor(money / price));
-                money -= count * price;
-                balls[ballId] = count;
-            }
-            balls[ballId]--;
-            const p = catchChance(
-                target.species.captureRate,
-                BALLS[ballId].catchMultiplier,
-                bonuses.catch
-            );
-            if (rng() < p) addPokemon(enc.speciesId, enc.level);
-        }
-    }
-}
-
-log(champion ? "Done." : "Timed out.");
-const missing = [];
-for (let id = 1; id <= 151; id++) if (!owned.has(id)) missing.push(getSpecies(id).name);
-console.log(`Missing (${missing.length}): ${missing.join(", ")}`);
-console.log(`Mart upgrades: ${JSON.stringify(mart)}`);
+const summary: string[] = [];
+plan.forEach(({ region: id, starter }, i) => {
+    const region = REGIONS[id];
+    const choice = starter ?? region.starters[i % region.starters.length];
+    console.log(`Journey ${i + 1}: ${region.name} with ${getSpecies(choice).name}`);
+    const time = runJourney(region, choice);
+    summary.push(`#${i + 1} ${region.name}: ${(time / 3600).toFixed(1)}h`);
+    spendFame();
+    console.log(`  Fame upgrades: ${JSON.stringify(hof)}`);
+});
+console.log(summary.join(" | "));
