@@ -1,5 +1,5 @@
 import type { EncounterEntry, EncounterPoolId } from "./data";
-import { enc, ENCOUNTERS, femaleForm, magikarpPatterns } from "./data";
+import { enc, ENCOUNTERS, femaleForm, magikarpPatterns, WILD_VARIANTS } from "./data";
 import type { KeyItemId } from "./items";
 import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
@@ -284,7 +284,9 @@ export interface ActivePool {
 const EXTRA_ENCOUNTERS: Record<string, ZonePools> = {
     // Pokémon Yellow's Surfing Pikachu rides the waves off the Seafoam Islands.
     route19: { surf: [enc(3100, 20, 30, 3)] },
-    route20: { surf: [enc(3100, 20, 30, 3)] }
+    route20: { surf: [enc(3100, 20, 30, 3)] },
+    // Puka, the Alola-bias Pikachu that rode the Humungadunga off Seafoam Island.
+    seafoamIslands: { walk: [enc(7014, 30, 33, 12)] }
 };
 
 export function zonePools(zoneId: string): ZonePools {
@@ -385,6 +387,13 @@ export function rollEncounter(
     // Species with visible gender differences show up as their female form genderRate/8 of the time.
     const female = femaleForm(entry.id);
     let speciesId = female != null && rng() < female.genderRate / 8 ? female.id : entry.id;
+    const cosmetic = WILD_VARIANTS[speciesId];
+    if (cosmetic != null && rng() < cosmetic.chance) {
+        speciesId = pickWeighted(
+            cosmetic.variants.map(([id, weight]) => ({ id, weight })),
+            rng
+        ).id;
+    }
     if (speciesId === 129 && rodLevel > 0 && rng() < PATTERN_CHANCE) {
         // The Gold pattern is ten times rarer than the rest.
         const patterns = magikarpPatterns(rodLevel);

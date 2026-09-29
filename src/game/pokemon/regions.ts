@@ -92,7 +92,7 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         finale: () => seviiFinale(),
         levelCaps: [38, 44, 48, 52, 56, 64, 100],
         fame: 15,
-        requires: "kanto"
+        requires: "orange"
     }
 };
 

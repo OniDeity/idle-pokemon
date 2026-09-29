@@ -30,6 +30,7 @@ export const ORANGE_ZONES: ZoneDefinition[] = [
                 enc(2020, 8, 10, 5),
                 enc(2012, 8, 10, 4),
                 enc(2070, 8, 10, 4),
+                enc(2044, 8, 11, 4),
                 enc(2045, 10, 12, 2)
             ],
             surf: [enc(72, 5, 10, 70), enc(98, 5, 10, 30)]

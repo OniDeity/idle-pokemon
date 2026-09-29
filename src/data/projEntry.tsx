@@ -19,7 +19,7 @@ import {
     trainerTeam
 } from "game/pokemon/balance";
 import type { StoneId } from "game/pokemon/data";
-import { femaleForm, getSpecies } from "game/pokemon/data";
+import { ALTERNATE_EVOLUTIONS, femaleForm, getSpecies } from "game/pokemon/data";
 import type { BallId, KeyItemId } from "game/pokemon/items";
 import { BALLS, KEY_ITEMS, STONES } from "game/pokemon/items";
 import type { SpecialEncounter } from "game/pokemon/specials";
@@ -322,14 +322,16 @@ export const main = createLayer("main", layer => {
     /**
      * What an evolution produces. Evolving keeps the original, so once you own the regular
      * evolution, evolving again from a Pokémon without its own female form gives the female one
-     * (Ivysaur → Venusaur, then Venusaur ♀). Female forms evolve into female forms directly.
+     * (Ivysaur → Venusaur, then Venusaur ♀), then any alternate evolution (Pineco → Forretress,
+     * then Shulker Forretress). Female forms evolve into female forms directly.
      */
     function evolutionTarget(fromId: number, into: number): number {
-        const female = femaleForm(into);
-        if (female == null || !owns(into)) return into;
-        const from = getSpecies(fromId);
-        if (from.variant != null || femaleForm(fromId) != null) return into;
-        return female.id;
+        if (!owns(into) || getSpecies(fromId).variant != null) return into;
+        const candidates = [
+            femaleForm(fromId) == null ? femaleForm(into)?.id : undefined,
+            ...(ALTERNATE_EVOLUTIONS[into] ?? [])
+        ].filter((id): id is number => id != null);
+        return candidates.find(id => !owns(id)) ?? into;
     }
 
     function evolveWithStone(fromId: number, stone: StoneId) {

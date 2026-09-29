@@ -39,6 +39,14 @@
                         Rod Fame upgrade
                     </li>
                     <li class="feature">
+                        Fan favorites from Cobblemon: Arbok hood patterns, Heart-Marked Wooper,
+                        Mooshtanks, Shulker Forretress, Alola-bias Pikachu, Valencian Gloom and
+                        Bellossom
+                    </li>
+                    <li class="feature">
+                        Regions unlock in order: Kanto, the Orange Islands, then the Sevii Islands
+                    </li>
+                    <li class="feature">
                         Effort: experience past the level cap becomes a growing damage bonus
                     </li>
                     <li class="feature">Portrait layout for phones</li>

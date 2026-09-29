@@ -12,12 +12,14 @@ import {
 } from "game/pokemon/balance";
 import type { Species } from "game/pokemon/data";
 import {
+    ALTERNATE_EVOLUTIONS,
     DEX_SIZE,
     getSpecies,
     isVariant,
     PRE_EVOLUTION,
     SPECIES,
-    VARIANT_SPECIES
+    VARIANT_SPECIES,
+    WILD_VARIANTS
 } from "game/pokemon/data";
 import { STONES } from "game/pokemon/items";
 import { REGION_LIST, REGIONS } from "game/pokemon/regions";
@@ -74,6 +76,24 @@ function locationsOf(id: number): string[] {
             places.push(`${REGIONS[special.region].name}: ${special.place} (${how})`);
         }
     }
+    for (const [base, { chance, variants }] of Object.entries(WILD_VARIANTS)) {
+        if (variants.some(([variantId]) => variantId === id)) {
+            const share = variants.find(([v]) => v === id)![1];
+            const total = variants.reduce((sum, [, w]) => sum + w, 0);
+            const percent = Math.max(1, Math.round(chance * (share / total) * 100));
+            places.push(
+                `About ${percent}% of wild ${getSpecies(Number(base)).name} look like this`
+            );
+        }
+    }
+    for (const [into, alternates] of Object.entries(ALTERNATE_EVOLUTIONS)) {
+        const pre = PRE_EVOLUTION[Number(into)];
+        if (alternates.includes(id) && pre != null) {
+            places.push(
+                `Evolve a second ${getSpecies(pre).name} once you own ${getSpecies(Number(into)).name}`
+            );
+        }
+    }
     if (species.rodTier != null && species.baseSpecies === 129) {
         places.push(
             `Any Magikarp you meet, once Roddy's Old Rod (Hall of Fame) reaches level ${species.rodTier}`
@@ -125,6 +145,12 @@ function obtainable(id: number, depth = 0): boolean {
     const species = getSpecies(id);
     const wildId = species.variant === "female" ? species.baseSpecies! : id;
     if (species.rodTier != null && species.baseSpecies === 129) return true;
+    for (const [base, { variants }] of Object.entries(WILD_VARIANTS)) {
+        if (variants.some(([v]) => v === id)) return obtainable(Number(base), depth + 1);
+    }
+    for (const [into, alternates] of Object.entries(ALTERNATE_EVOLUTIONS)) {
+        if (alternates.includes(id)) return obtainable(Number(into), depth + 1);
+    }
     if (
         ZONES.some(zone => allZoneSpecies(zone.id).includes(wildId)) ||
         SPECIAL_ENCOUNTERS.some(s => s.speciesId === id) ||
@@ -388,8 +414,9 @@ const layer = createLayer(id, () => {
 
                 {filter.value === "variants" ? (
                     <p class="pk-small pk-muted">
-                        Anime variants, regional and official forms, female forms and Magikarp Jump
-                        patterns. {FUTURE_VARIANTS} more forms arrive with regions still to come.
+                        Anime variants, regional and official forms, female forms, Magikarp Jump
+                        patterns and fan favorites from Cobblemon. {FUTURE_VARIANTS} more forms
+                        arrive with regions still to come.
                     </p>
                 ) : null}
                 <div class="pk-dex-layout">

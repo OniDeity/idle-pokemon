@@ -1,3 +1,4 @@
+import { existsSync } from "fs";
 import type { PartyBattler } from "game/pokemon/balance";
 import {
     catchChance,
@@ -17,7 +18,8 @@ import {
     SPECIES,
     typeEffectiveness,
     VARIANT_SPECIES,
-    variantFilter
+    variantFilter,
+    WILD_VARIANTS
 } from "game/pokemon/data";
 import { MEW_ID, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
@@ -109,7 +111,7 @@ describe("data", () => {
         const anime = VARIANT_SPECIES.filter(v =>
             ["pinkan", "valencian", "unique"].includes(v.variant!)
         );
-        expect(anime.length).toBe(31);
+        expect(anime.length).toBe(33);
         anime
             .filter(v => v.accessory == null)
             .forEach(v => expect(variantFilter(v.id), v.name).toBeDefined());
@@ -340,5 +342,37 @@ describe("pacing mechanics", () => {
         expect(strengthMultiplier(0, 1)).toBe(1);
         expect(strengthMultiplier(0, 2)).toBeCloseTo(1.3);
         expect(strengthMultiplier(1, 2)).toBeCloseTo(1.15);
+    });
+});
+
+describe("Cobblemon variants", () => {
+    test("every variant drawn by the game has all four sprites", () => {
+        for (const species of VARIANT_SPECIES.filter(s => s.localSprite)) {
+            for (const folder of ["", "back/", "shiny/", "back/shiny/"]) {
+                const file = `public/sprites/pokemon/${folder}${species.spriteKey}.png`;
+                expect(existsSync(file), file).toBe(true);
+            }
+        }
+    });
+
+    test("wild Arbok sometimes show other hood patterns", () => {
+        const rng = mulberry(5);
+        const seen = new Set<number>();
+        for (let i = 0; i < 3000; i++) {
+            const rolled = rollEncounter("route23", {}, rng);
+            if (rolled != null && getSpecies(rolled.speciesId).baseSpecies === 24) {
+                seen.add(rolled.speciesId);
+            }
+        }
+        expect(seen.size).toBeGreaterThan(3);
+        expect(WILD_VARIANTS[24].variants.every(([id]) => getSpecies(id).baseSpecies === 24)).toBe(
+            true
+        );
+    });
+
+    test("regions unlock in order: Kanto, then the Orange Islands, then Sevii", () => {
+        expect(REGIONS.kanto.requires).toBeUndefined();
+        expect(REGIONS.orange.requires).toBe("kanto");
+        expect(REGIONS.sevii.requires).toBe("orange");
     });
 });

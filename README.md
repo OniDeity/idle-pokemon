@@ -23,7 +23,12 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   and arrive with their regions.
 - **Magikarp Jump patterns**: all 32 patterns (and their Gyarados, colored after Cobblemon's
   Gyarados Jump Patterns), hooked with the Roddy's Old Rod Fame upgrade.
-- **Pacing**: each region's first clear takes about a day of active play (10-13 hours) in any order;
+- **Cobblemon fan favorites**: Arbok's hood patterns, Heart-Marked Wooper, the Mooshtanks,
+  Shulker Forretress, Alola-bias Pikachu and Valencian Gloom and Bellossom, following the
+  [Cobblemon wiki](https://wiki.cobblemon.com/index.php/Pok%C3%A9mon/Unique_Forms).
+- **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands; Johto comes next,
+  unlocked by completing the Pokédex.
+- **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
   trainers in regions you haven't cleared grow tougher (Renown) as you conquer others,
   and rematches in cleared regions go faster. Experience past the level cap becomes Effort, a
   growing damage bonus, so a tough trainer is never a hard wall.
