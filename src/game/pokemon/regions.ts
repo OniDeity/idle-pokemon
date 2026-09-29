@@ -111,9 +111,25 @@ export function rematchMultiplier(clears: number): number {
     return 1 + REMATCH_STRENGTH_PER_CLEAR * Math.min(clears, MAX_REMATCH_CLEARS);
 }
 
-/** A trainer as they'll appear after the player has cleared their region `clears` times. */
-export function withRematch<T extends TrainerDefinition>(trainer: T, clears: number): T {
-    const multiplier = rematchMultiplier(clears);
+/**
+ * Renown: regions you haven't cleared yet have heard of your Hall of Fame entries, and their
+ * trainers prepare harder for each other region you've conquered beyond the first. This keeps a
+ * first clear about a day long however much Fame you've built up.
+ */
+export const RENOWN_STRENGTH_PER_REGION = 0.3;
+
+/**
+ * How much stronger a region's trainers are: rematch strength once it has been cleared, renown
+ * before that.
+ */
+export function strengthMultiplier(clears: number, otherRegionsCleared: number): number {
+    return clears > 0
+        ? rematchMultiplier(clears)
+        : 1 + RENOWN_STRENGTH_PER_REGION * Math.max(0, otherRegionsCleared - 1);
+}
+
+/** A trainer scaled by a region strength multiplier. */
+export function withStrength<T extends TrainerDefinition>(trainer: T, multiplier: number): T {
     return multiplier === 1
         ? trainer
         : { ...trainer, statMultiplier: trainer.statMultiplier * multiplier };

@@ -12,6 +12,7 @@ import {
     battleXp,
     catchChance,
     computeBonuses,
+    effortMultiplier,
     fameGain,
     HOF_UPGRADE_LIST,
     MART_UPGRADE_LIST,
@@ -23,11 +24,11 @@ import {
     upgradeCost,
     wildDps
 } from "../src/game/pokemon/balance";
-import { getSpecies } from "../src/game/pokemon/data";
+import { getSpecies, hallOfFameId } from "../src/game/pokemon/data";
 import type { BallId, KeyItemId } from "../src/game/pokemon/items";
 import { AUTO_BALL_ORDER, BALLS, LINK_CABLE_PRICE, STONES } from "../src/game/pokemon/items";
 import type { RegionDefinition } from "../src/game/pokemon/regions";
-import { levelCap, REGIONS, rematchMultiplier, withRematch } from "../src/game/pokemon/regions";
+import { levelCap, REGIONS, strengthMultiplier, withStrength } from "../src/game/pokemon/regions";
 import { SPECIAL_ENCOUNTERS } from "../src/game/pokemon/specials";
 import { levelForXp, maxHp, xpForLevel, xpYield } from "../src/game/pokemon/stats";
 import type { TrainerDefinition } from "../src/game/pokemon/trainers";
@@ -83,7 +84,11 @@ for (const region of Object.values(REGIONS)) {
 }
 
 // Permanent state, kept across journeys.
-const dex = new Map<number, number>(); // species → times caught
+const dex = new Map<number, number>(); // species or form → times caught
+/** Regular species caught, as the Pokédex counts them (a form fills in its species). */
+function dexCaught(): number {
+    return new Set([...dex.keys()].map(id => getSpecies(id).baseSpecies ?? id)).size;
+}
 let fame = 0;
 const hof: Partial<Record<HofUpgradeId, number>> = {};
 const enshrined = new Set<number>();
@@ -94,6 +99,7 @@ interface Owned {
     id: number;
     xp: number;
     level: number;
+    effort: number;
 }
 
 function runJourney(region: RegionDefinition, starter: number) {
@@ -114,12 +120,17 @@ function runJourney(region: RegionDefinition, starter: number) {
         dex.set(id, (dex.get(id) ?? 0) + 1);
         if (owned.has(id)) return;
         const lvl = Math.min(level, cap());
-        owned.set(id, { id, level: lvl, xp: xpForLevel(getSpecies(id).growthRate, lvl) });
+        owned.set(id, {
+            id,
+            level: lvl,
+            xp: xpForLevel(getSpecies(id).growthRate, lvl),
+            effort: 0
+        });
     }
     catchSpecies(starter, region.startLevel + 5 * (hof.headStart ?? 0));
 
     const bonusInputs = (): BonusInputs => ({
-        dexCaught: dex.size,
+        dexCaught: dexCaught(),
         shinyCaught: 0,
         mart,
         hof,
@@ -128,12 +139,20 @@ function runJourney(region: RegionDefinition, starter: number) {
     const battler = (o: Owned): PartyBattler => ({
         species: getSpecies(o.id),
         level: o.level,
-        multiplier: memberMultiplier(false, dex.get(o.id) ?? 1)
+        multiplier:
+            memberMultiplier(false, dex.get(o.id) ?? 1) *
+            effortMultiplier(getSpecies(o.id).growthRate, o.level, o.effort)
     });
     const rematchClears = clears[region.id] ?? 0;
+    const others = Object.keys(clears).filter(r => r !== region.id).length;
+    //   RENOWN=0.3        override renown strength per region cleared
+    const strength =
+        process.env.RENOWN != null && rematchClears === 0
+            ? 1 + Number(process.env.RENOWN) * Math.max(0, others - 1)
+            : strengthMultiplier(rematchClears, others);
     const nextTrainers = (): TrainerDefinition[] =>
         (badges < region.trials.length ? [region.trials[badges]] : region.finale(starter)).map(t =>
-            withRematch(t, rematchClears)
+            withStrength(t, strength)
         );
 
     function chooseParty(): Owned[] {
@@ -218,7 +237,7 @@ function runJourney(region: RegionDefinition, starter: number) {
         console.log(
             `  ${((totalTime + time) / 3600).toFixed(1).padStart(5)}h total, ${(time / 3600)
                 .toFixed(2)
-                .padStart(5)}h run  ${msg}  [dex ${dex.size}, ₽${Math.floor(money)}]`
+                .padStart(5)}h run  ${msg}  [dex ${dexCaught()}, ₽${Math.floor(money)}]`
         );
 
     let party = chooseParty();
@@ -251,13 +270,14 @@ function runJourney(region: RegionDefinition, starter: number) {
                     const team = party.map(o => o.id);
                     const gain = fameGain({
                         regionFame: region.fame,
-                        dexCaught: dex.size,
+                        dexCaught: dexCaught(),
                         shinyCaught: 0,
-                        newSpecies: team.filter(id => !enshrined.has(id)).length,
+                        newSpecies: new Set(team.map(hallOfFameId).filter(id => !enshrined.has(id)))
+                            .size,
                         firstClear: (clears[region.id] ?? 0) === 0,
-                        rematch: rematchMultiplier(rematchClears)
+                        rematch: strength
                     });
-                    team.forEach(id => enshrined.add(id));
+                    team.forEach(id => enshrined.add(hallOfFameId(id)));
                     clears[region.id] = (clears[region.id] ?? 0) + 1;
                     fame += gain;
                     console.log(`  +${gain} Fame`);
@@ -269,7 +289,7 @@ function runJourney(region: RegionDefinition, starter: number) {
         step++;
 
         const bonuses = computeBonuses(bonusInputs());
-        const e = rollEncounter(zone, keyItems, rng);
+        const e = rollEncounter(zone, keyItems, rng, hof.roddysRod ?? 0);
         if (!e) break;
         const target = { species: getSpecies(e.speciesId), level: e.level };
         time +=
@@ -280,7 +300,9 @@ function runJourney(region: RegionDefinition, starter: number) {
         const gained = battleXp(target) * bonuses.xp * XPF;
         for (const o of party) {
             const growth = getSpecies(o.id).growthRate;
-            o.xp = Math.min(o.xp + gained, xpForLevel(growth, cap()));
+            const maxXp = xpForLevel(growth, cap());
+            o.effort += Math.max(0, o.xp + gained - maxXp);
+            o.xp = Math.min(o.xp + gained, maxXp);
             o.level = levelForXp(growth, o.xp, cap());
             evolve(o);
         }

@@ -2,11 +2,11 @@
  * Every tunable number that shapes progression lives here, so the game and the balance
  * simulator (scripts/simulateProgression.ts) always agree.
  */
-import type { Species } from "./data";
+import type { GrowthRate, Species } from "./data";
 import type { KeyItemId } from "./items";
 import { itemSprite } from "./items";
 import type { BattlerStats } from "./stats";
-import { attacksPerSecond, damagePerHit, maxHp, TRAINER_IV, xpYield } from "./stats";
+import { attacksPerSecond, damagePerHit, maxHp, TRAINER_IV, xpForLevel, xpYield } from "./stats";
 import type { TrainerDefinition } from "./trainers";
 import { getSpecies } from "./data";
 
@@ -268,6 +268,17 @@ export const HOF_UPGRADES = {
         badgesRequired: 0,
         sprite: itemSprite("shiny-stone")
     },
+    roddysRod: {
+        id: "roddysRod",
+        name: "Roddy's Old Rod",
+        description:
+            "Roddy Tackle from Magikarp Jump tunes up your rod: Magikarp can bite with Magikarp Jump patterns. Each level hooks the next rod's patterns.",
+        baseCost: 3,
+        costGrowth: 2,
+        maxLevel: 7,
+        badgesRequired: 0,
+        sprite: itemSprite("old-rod")
+    },
     headStart: {
         id: "headStart",
         name: "Head Start",
@@ -357,6 +368,19 @@ export interface PartyBattler extends BattlerStats {
 export function memberMultiplier(shiny: boolean, timesCaught: number): number {
     const extraCatches = Math.min(Math.max(0, timesCaught - 1), DUPLICATE_BONUS_MAX_CATCHES);
     return (shiny ? SHINY_DAMAGE_BONUS : 1) * (1 + extraCatches * DUPLICATE_BONUS_PER_CATCH);
+}
+
+/**
+ * Experience earned at the level cap isn't wasted: it becomes Effort, a damage bonus of +25%
+ * per square root of a level's worth of experience. Grinding against a tough trainer always
+ * makes progress, just more slowly the longer it goes on.
+ */
+export const EFFORT_BONUS = 0.25;
+export function effortMultiplier(growthRate: GrowthRate, level: number, effort: number): number {
+    if (effort <= 0) return 1;
+    const from = Math.min(level, 99);
+    const perLevel = Math.max(1, xpForLevel(growthRate, from + 1) - xpForLevel(growthRate, from));
+    return 1 + EFFORT_BONUS * Math.sqrt(effort / perLevel);
 }
 
 /** Damage per second each party member deals to the target. */

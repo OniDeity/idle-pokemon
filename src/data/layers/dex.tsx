@@ -74,6 +74,11 @@ function locationsOf(id: number): string[] {
             places.push(`${REGIONS[special.region].name}: ${special.place} (${how})`);
         }
     }
+    if (species.rodTier != null && species.baseSpecies === 129) {
+        places.push(
+            `Any Magikarp you meet, once Roddy's Old Rod (Hall of Fame) reaches level ${species.rodTier}`
+        );
+    }
     if (species.variant === "female" && PRE_EVOLUTION[id] == null) {
         const pre = PRE_EVOLUTION[wildId];
         if (pre != null) {
@@ -119,6 +124,7 @@ function obtainable(id: number, depth = 0): boolean {
     if (depth > 4) return false;
     const species = getSpecies(id);
     const wildId = species.variant === "female" ? species.baseSpecies! : id;
+    if (species.rodTier != null && species.baseSpecies === 129) return true;
     if (
         ZONES.some(zone => allZoneSpecies(zone.id).includes(wildId)) ||
         SPECIAL_ENCOUNTERS.some(s => s.speciesId === id) ||
@@ -382,8 +388,8 @@ const layer = createLayer(id, () => {
 
                 {filter.value === "variants" ? (
                     <p class="pk-small pk-muted">
-                        Anime variants, regional and official forms, and female forms.{" "}
-                        {FUTURE_VARIANTS} more forms arrive with regions still to come.
+                        Anime variants, regional and official forms, female forms and Magikarp Jump
+                        patterns. {FUTURE_VARIANTS} more forms arrive with regions still to come.
                     </p>
                 ) : null}
                 <div class="pk-dex-layout">

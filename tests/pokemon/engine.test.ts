@@ -2,6 +2,7 @@ import type { PartyBattler } from "game/pokemon/balance";
 import {
     catchChance,
     computeBonuses,
+    effortMultiplier,
     initialTrainerBattle,
     memberDps,
     simulateTrainerBattle,
@@ -11,6 +12,7 @@ import {
 import {
     DEX_SIZE,
     getSpecies,
+    magikarpPatterns,
     PRE_EVOLUTION,
     SPECIES,
     typeEffectiveness,
@@ -19,7 +21,7 @@ import {
 } from "game/pokemon/data";
 import { MEW_ID, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
-import { REGION_LIST, REGIONS } from "game/pokemon/regions";
+import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
 import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
 import { activePools, allZoneSpecies, rollEncounter, ZONES, zonesIn } from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
@@ -284,5 +286,59 @@ describe("encounters", () => {
         const mewtwo = catchChance(3, 2);
         expect(mewtwo).toBeGreaterThan(0);
         expect(mewtwo).toBeLessThan(0.1);
+    });
+});
+
+describe("Magikarp Jump patterns", () => {
+    test("every pattern has a Magikarp, and all but Gold a matching Gyarados", () => {
+        const magikarp = magikarpPatterns(7);
+        expect(magikarp.length).toBe(32);
+        expect(magikarpPatterns(1).length).toBe(6);
+        for (const form of magikarp) {
+            const into = form.evolutions[0].into;
+            if (form.spriteKey === "129-gold") {
+                expect(into).toBe(130);
+            } else {
+                expect(getSpecies(into).spriteKey).toBe(form.spriteKey!.replace("129-", "130-"));
+                expect(PRE_EVOLUTION[into]).toBe(form.id);
+            }
+        }
+    });
+
+    test("Magikarp only bite with patterns once Roddy's Old Rod has a level", () => {
+        const rng = mulberry(3);
+        const zone = "route6";
+        const keys = { oldRod: true };
+        const patterned = (rodLevel: number) => {
+            const seen = new Set<number>();
+            for (let i = 0; i < 4000; i++) {
+                const rolled = rollEncounter(zone, keys, rng, rodLevel);
+                if (rolled != null && getSpecies(rolled.speciesId).rodTier != null) {
+                    seen.add(rolled.speciesId);
+                }
+            }
+            return seen;
+        };
+        expect(patterned(0).size).toBe(0);
+        const tierOne = patterned(1);
+        expect(tierOne.size).toBeGreaterThan(3);
+        tierOne.forEach(id => expect(getSpecies(id).rodTier).toBe(1));
+    });
+});
+
+describe("pacing mechanics", () => {
+    test("Effort grows with the square root of experience past the cap", () => {
+        expect(effortMultiplier("medium", 50, 0)).toBe(1);
+        const oneLevel = xpForLevel("medium", 51) - xpForLevel("medium", 50);
+        expect(effortMultiplier("medium", 50, oneLevel)).toBeCloseTo(1.25);
+        expect(effortMultiplier("medium", 50, oneLevel * 4)).toBeCloseTo(1.5);
+        expect(effortMultiplier("medium", 100, oneLevel)).toBeGreaterThan(1);
+    });
+
+    test("renown toughens first clears; rematches take over once cleared", () => {
+        expect(strengthMultiplier(0, 0)).toBe(1);
+        expect(strengthMultiplier(0, 1)).toBe(1);
+        expect(strengthMultiplier(0, 2)).toBeCloseTo(1.3);
+        expect(strengthMultiplier(1, 2)).toBeCloseTo(1.15);
     });
 });

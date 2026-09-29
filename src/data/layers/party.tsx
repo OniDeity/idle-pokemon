@@ -3,7 +3,7 @@
  */
 import { main } from "data/projEntry";
 import { createLayer } from "game/layers";
-import { memberMultiplier } from "game/pokemon/balance";
+import { memberMultiplier, effortMultiplier } from "game/pokemon/balance";
 import type { Evolution } from "game/pokemon/data";
 import { getSpecies } from "game/pokemon/data";
 import { STONES } from "game/pokemon/items";
@@ -166,6 +166,14 @@ const layer = createLayer(id, () => {
                     <Stat
                         label="Bonus"
                         value={`×${memberMultiplier(entry.shiny, dex.timesCaught(speciesId)).toFixed(2)}`}
+                    />
+                    <Stat
+                        label="Effort"
+                        value={`+${Math.round(
+                            (effortMultiplier(species.growthRate, entry.level, entry.effort ?? 0) -
+                                1) *
+                                100
+                        )}%`}
                     />
                 </div>
                 <div class="pk-detail-actions">

@@ -10,8 +10,12 @@ declare global {
     }
 }
 
-/** @param path A path inside the sprites repo, e.g. "items/poke-ball.png". */
+/**
+ * @param path A path inside the sprites repo, e.g. "items/poke-ball.png", or "local/…" for a
+ *   sprite shipped in the game's own public/sprites folder.
+ */
 export function assetUrl(path: string): string {
     const bundled = typeof window === "undefined" ? undefined : window.__PK_ASSETS?.[path];
-    return bundled ?? `${SPRITES_BASE}/${path}`;
+    if (bundled != null) return bundled;
+    return path.startsWith("local/") ? `./sprites/${path.slice(6)}` : `${SPRITES_BASE}/${path}`;
 }

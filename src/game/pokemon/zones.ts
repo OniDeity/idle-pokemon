@@ -1,5 +1,5 @@
 import type { EncounterEntry, EncounterPoolId } from "./data";
-import { enc, ENCOUNTERS, femaleForm } from "./data";
+import { enc, ENCOUNTERS, femaleForm, magikarpPatterns } from "./data";
 import type { KeyItemId } from "./items";
 import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
@@ -361,10 +361,17 @@ function pickWeighted<T extends { weight: number }>(entries: T[], rng: () => num
     return entries[entries.length - 1];
 }
 
+/** Chance a Magikarp bites with a Magikarp Jump pattern once Roddy's Old Rod has a level. */
+export const PATTERN_CHANCE = 0.3;
+
+/**
+ * @param rodLevel Level of the Roddy's Old Rod Fame upgrade; Magikarp may then have patterns.
+ */
 export function rollEncounter(
     zoneId: string,
     keyItems: Partial<Record<KeyItemId, boolean>>,
-    rng: () => number = Math.random
+    rng: () => number = Math.random,
+    rodLevel = 0
 ): RolledEncounter | null {
     const pools = activePools(zoneId, keyItems);
     if (pools.length === 0) {
@@ -377,7 +384,15 @@ export function rollEncounter(
     const entry = pickWeighted(pool.entries, rng);
     // Species with visible gender differences show up as their female form genderRate/8 of the time.
     const female = femaleForm(entry.id);
-    const speciesId = female != null && rng() < female.genderRate / 8 ? female.id : entry.id;
+    let speciesId = female != null && rng() < female.genderRate / 8 ? female.id : entry.id;
+    if (speciesId === 129 && rodLevel > 0 && rng() < PATTERN_CHANCE) {
+        // The Gold pattern is ten times rarer than the rest.
+        const patterns = magikarpPatterns(rodLevel);
+        speciesId = pickWeighted(
+            patterns.map(p => ({ id: p.id, weight: p.spriteKey === "129-gold" ? 0.1 : 1 })),
+            rng
+        ).id;
+    }
     return {
         speciesId,
         level: entry.minLevel + Math.floor(rng() * (entry.maxLevel - entry.minLevel + 1)),

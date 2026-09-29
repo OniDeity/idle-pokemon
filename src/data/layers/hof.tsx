@@ -17,7 +17,7 @@ import {
     upgradeCost
 } from "game/pokemon/balance";
 import type { UpgradeDefinition } from "game/pokemon/balance";
-import { getSpecies } from "game/pokemon/data";
+import { getSpecies, hallOfFameId } from "game/pokemon/data";
 import { REGIONS } from "game/pokemon/regions";
 import type { RegionId } from "game/pokemon/zones";
 import { computed } from "vue";
@@ -73,11 +73,12 @@ const layer = createLayer(id, () => {
     }
 
     function isEnshrined(speciesId: number) {
+        const key = hallOfFameId(speciesId);
         return (
-            enshrined.value[speciesId] === true ||
+            enshrined.value[key] === true ||
             // Entries from finished journeys count too (older saves didn't track this set).
             entries.value.some(
-                e => e.run <= timesEntered.value && e.team.some(p => p.id === speciesId)
+                e => e.run <= timesEntered.value && e.team.some(p => hallOfFameId(p.id) === key)
             )
         );
     }
@@ -89,7 +90,14 @@ const layer = createLayer(id, () => {
         return entry?.team.map(p => p.id) ?? main.partyIds.value;
     });
 
-    const newSpecies = computed((): number[] => clearingTeam.value.filter(id => !isEnshrined(id)));
+    /** Team members never enshrined before (a Gyarados and a Gyarados ♀ count once). */
+    const newSpecies = computed((): number[] =>
+        clearingTeam.value.filter(
+            (id, i, team) =>
+                !isEnshrined(id) &&
+                team.findIndex(other => hallOfFameId(other) === hallOfFameId(id)) === i
+        )
+    );
 
     const pendingFame = computed((): number =>
         fameGain({
@@ -127,7 +135,7 @@ const layer = createLayer(id, () => {
         entries.value = entries.value.map(e => (e.run === run ? { ...e, fame: gain } : e));
         enshrined.value = {
             ...enshrined.value,
-            ...Object.fromEntries(clearingTeam.value.map(id => [id, true]))
+            ...Object.fromEntries(clearingTeam.value.map(id => [hallOfFameId(id), true]))
         };
         clears.value = { ...clears.value, [region]: clearCount(region) + 1 };
         fame.value += gain;
@@ -195,7 +203,7 @@ const layer = createLayer(id, () => {
                             {newSpecies.value.length} × {FAME_PER_NEW_SPECIES}
                             {clearCount(region.id) === 0 ? " · First clear ×1.5" : ""}
                             {main.rematch.value > 1
-                                ? ` · Rematch ×${main.rematch.value.toFixed(1)}`
+                                ? ` · ${main.rematchClears.value > 0 ? "Rematch" : "Renown"} ×${main.rematch.value.toFixed(1)}`
                                 : ""}
                         </div>
                         {newSpecies.value.length > 0 ? (

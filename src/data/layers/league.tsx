@@ -218,9 +218,12 @@ const layer = createLayer(id, () => {
                     </div>
                     {main.rematch.value > 1 ? (
                         <p class="pk-warning">
-                            Rematch: you've cleared {region.name} before, so every trainer here is{" "}
-                            {Math.round((main.rematch.value - 1) * 100)}% stronger, and the Hall of
-                            Fame pays ×{main.rematch.value.toFixed(1)} Fame.
+                            {main.rematchClears.value > 0
+                                ? `Rematch: you've cleared ${region.name} before`
+                                : `Renown: word of your other Hall of Fame entries has reached ${region.name}`}
+                            , so every trainer here is {Math.round((main.rematch.value - 1) * 100)}%
+                            stronger, and the Hall of Fame pays ×{main.rematch.value.toFixed(1)}{" "}
+                            Fame.
                         </p>
                     ) : null}
                     <p class="pk-small pk-muted">

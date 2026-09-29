@@ -167,7 +167,7 @@ export const SEVII_TRIALS: GymDefinition[] = [
         badge: "Ruby",
         badgeNumber: 1,
         specialty: "poison",
-        statMultiplier: 1.15,
+        statMultiplier: 3.15,
         team: [
             { id: 20, level: 34 },
             { id: 109, level: 35 },
@@ -185,7 +185,7 @@ export const SEVII_TRIALS: GymDefinition[] = [
         badge: "Lostelle's Thanks",
         badgeNumber: 2,
         specialty: "psychic",
-        statMultiplier: 1.5,
+        statMultiplier: 4.1,
         team: [{ id: 97, level: 40 }],
         keyItems: [],
         rewardText: "Lostelle is safe. The ferry's route opens to Four Island.",
@@ -199,7 +199,7 @@ export const SEVII_TRIALS: GymDefinition[] = [
         badge: "Lorelei's Trust",
         badgeNumber: 3,
         specialty: "poison",
-        statMultiplier: 1.6,
+        statMultiplier: 4.4,
         team: [
             { id: 42, level: 42 },
             { id: 89, level: 43 },
@@ -217,7 +217,7 @@ export const SEVII_TRIALS: GymDefinition[] = [
         badge: "Warehouse Key",
         badgeNumber: 4,
         specialty: "poison",
-        statMultiplier: 1.75,
+        statMultiplier: 4.8,
         team: [
             { id: 89, level: 46 },
             { id: 24, level: 47 },
@@ -236,7 +236,7 @@ export const SEVII_TRIALS: GymDefinition[] = [
         badge: "Sapphire",
         badgeNumber: 5,
         specialty: "electric",
-        statMultiplier: 1.95,
+        statMultiplier: 5.35,
         team: [
             { id: 101, level: 50 },
             { id: 82, level: 50 },
@@ -290,7 +290,7 @@ export function seviiFinale(): TrainerDefinition[] {
         specialty: null,
         team,
         timeLimit: 30 + team.length * 15,
-        statMultiplier: 2.2 + i * 0.22,
+        statMultiplier: 2.75 + i * 0.275,
         prizeMoney: Math.max(...team.map(p => p.level)) * 80,
         quote:
             i === 2

@@ -13,6 +13,7 @@ import {
     initialTrainerBattle,
     memberDps,
     memberMultiplier,
+    effortMultiplier,
     moneyYield,
     stepTrainerBattle,
     trainerTeam
@@ -28,9 +29,9 @@ import { levelForXp, maxHp, xpForLevel } from "game/pokemon/stats";
 import {
     levelCap,
     REGIONS,
-    rematchMultiplier,
     startersFor,
-    withRematch
+    strengthMultiplier,
+    withStrength
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
 import type { RegionId } from "game/pokemon/zones";
@@ -52,6 +53,8 @@ export type BoxEntry = {
     level: number;
     xp: number;
     shiny: boolean;
+    /** Experience earned at the level cap, which becomes a damage bonus (see effortMultiplier). */
+    effort?: number;
 };
 
 export type CatchMode = "new" | "all" | "off";
@@ -192,12 +195,22 @@ export const main = createLayer("main", layer => {
     const inTrainerBattle = computed(() => battle.value.kind === "trainer");
     /** How many times this region has been cleared before; trainers scale up on rematches. */
     const rematchClears = computed(() => hof.clearCount(region.value));
-    const rematch = computed(() => rematchMultiplier(rematchClears.value));
+    /** Other regions already cleared, which make a region's first clear tougher (renown). */
+    const otherRegionsCleared = computed(
+        () =>
+            (Object.keys(REGIONS) as RegionId[]).filter(
+                r => r !== region.value && hof.clearCount(r) > 0
+            ).length
+    );
+    /** Trainer strength (and Fame) multiplier from rematches or renown. */
+    const rematch = computed(() =>
+        strengthMultiplier(rematchClears.value, otherRegionsCleared.value)
+    );
     const trials = computed((): GymDefinition[] =>
-        regionDef.value.trials.map(t => withRematch(t, rematchClears.value))
+        regionDef.value.trials.map(t => withStrength(t, rematch.value))
     );
     const finale = computed((): TrainerDefinition[] =>
-        regionDef.value.finale(starter.value).map(t => withRematch(t, rematchClears.value))
+        regionDef.value.finale(starter.value).map(t => withStrength(t, rematch.value))
     );
     const nextTrial = computed(() => trials.value[badges.value]);
     /** The trainers standing between the player and progress: the next trial, or the finale. */
@@ -210,7 +223,9 @@ export const main = createLayer("main", layer => {
         return {
             species: getSpecies(id),
             level: entry?.level ?? 1,
-            multiplier: memberMultiplier(entry?.shiny ?? false, dex.timesCaught(id))
+            multiplier:
+                memberMultiplier(entry?.shiny ?? false, dex.timesCaught(id)) *
+                effortMultiplier(getSpecies(id).growthRate, entry?.level ?? 1, entry?.effort ?? 0)
         };
     }
 
@@ -292,7 +307,7 @@ export const main = createLayer("main", layer => {
         if (from == null || owns(intoId)) return;
         const into = getSpecies(intoId);
         const xp = Math.max(from.xp, xpForLevel(into.growthRate, from.level));
-        setBoxEntry(intoId, { level: from.level, xp, shiny: from.shiny });
+        setBoxEntry(intoId, { level: from.level, xp, shiny: from.shiny, effort: from.effort });
         dex.markCaught(intoId, from.shiny, false);
         // Trainer battles use a snapshot of the party, so swapping here is always safe.
         if (partyIds.value.includes(fromId)) {
@@ -343,15 +358,16 @@ export const main = createLayer("main", layer => {
             if (entry == null) continue;
             const species = getSpecies(id);
             const maxXp = xpForLevel(species.growthRate, levelCap);
-            if (entry.xp >= maxXp) continue;
             const xp = Math.min(entry.xp + amount, maxXp);
+            const overflow = Math.max(0, entry.xp + amount - maxXp);
             const level = levelForXp(species.growthRate, xp, levelCap);
-            setBoxEntry(id, { ...entry, xp, level });
+            const effort = (entry.effort ?? 0) + overflow;
+            setBoxEntry(id, { ...entry, xp, level, effort });
             if (level > entry.level) {
                 if (level === levelCap) {
                     addLog({
                         kind: "levelup",
-                        text: `${species.name} reached the level cap (Lv. ${level}).`,
+                        text: `${species.name} reached the level cap (Lv. ${level}). Further experience builds Effort.`,
                         speciesId: id,
                         shiny: entry.shiny
                     });
@@ -432,7 +448,12 @@ export const main = createLayer("main", layer => {
     }
 
     function spawnWild() {
-        const rolled = rollEncounter(zoneId.value, keyItems.value);
+        const rolled = rollEncounter(
+            zoneId.value,
+            keyItems.value,
+            Math.random,
+            hof.levels.value.roddysRod ?? 0
+        );
         if (rolled == null) {
             startSearch();
             return;
@@ -832,6 +853,7 @@ export const main = createLayer("main", layer => {
         regionDef,
         trials,
         rematch,
+        rematchClears,
         martTier,
         finale,
         nextTrial,

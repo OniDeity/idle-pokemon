@@ -21,6 +21,12 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   visible gender differences, Partner Pikachu and Eevee starters, and Ash's Original Cap
   Pikachu. Regional forms (Alolan, Galarian, Hisuian, Paldean) and other caps are in the data
   and arrive with their regions.
+- **Magikarp Jump patterns**: all 32 patterns (and their Gyarados, colored after Cobblemon's
+  Gyarados Jump Patterns), hooked with the Roddy's Old Rod Fame upgrade.
+- **Pacing**: each region's first clear takes about a day of active play (10-13 hours) in any order;
+  trainers in regions you haven't cleared grow tougher (Renown) as you conquer others,
+  and rematches in cleared regions go faster. Experience past the level cap becomes Effort, a
+  growing damage bonus, so a tough trainer is never a hard wall.
 - **Wild battles run automatically.** Your trainer sends out the party member with the best
   type matchup. Every win pays Pokédollars and gives XP to the whole party.
 - **Catching** uses real capture rates. Catch _new_ species only, _all_ of them (extra catches
