@@ -17,6 +17,7 @@
                 <Toggle :title="showHealthWarningTitle" v-model="showHealthWarning" v-if="!projInfo.disableHealthWarning" />
                 <Toggle :title="autosaveTitle" v-model="autosave" />
                 <FeedbackButton v-if="!autosave" class="button save-button" @click="save()">Manually save</FeedbackButton>
+                <ResetProgress />
             </div>
             <div v-if="isTab('appearance')">
                 <Select :title="themeTitle" :options="themes" v-model="theme" />
@@ -31,6 +32,7 @@
 <script setup lang="tsx">
 import projInfo from "data/projInfo.json";
 import rawThemes from "data/themes";
+import { ResetProgress } from "data/ui/reset";
 import player from "game/player";
 import settings, { settingFields } from "game/settings";
 import { camelToTitle, Direction } from "util/common";

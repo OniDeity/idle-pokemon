@@ -49,18 +49,16 @@
                     <li class="feature">
                         Effort: experience past the level cap becomes a growing damage bonus
                     </li>
-                    <li class="feature">
-                        "Start over…" at the bottom of the journey panel wipes all progress
-                    </li>
+                    <li class="feature">Settings → Behaviour → "Start over…" wipes all progress</li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="balancing">
                         Slower, steadier pacing: about a day for a first clear; rematches get
                         tougher
                     </li>
                     <li class="balancing">
-                        Renown: regions you haven't cleared get tougher for each other region
-                        you've conquered, so every first clear takes a similar time; Sevii quests
-                        are much tougher
+                        Renown: regions you haven't cleared get tougher for each other region you've
+                        conquered, so every first clear takes a similar time; Sevii quests are much
+                        tougher
                     </li>
                 </ul>
             </details>

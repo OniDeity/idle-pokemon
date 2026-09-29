@@ -16,7 +16,8 @@
    Undo that inside the game UI. These come first, so later single-class rules still win. */
 
 .pk-layer *,
-.pk-journey * {
+.pk-journey *,
+.pk-settings-section * {
     margin: 0;
     transition-duration: 0s;
     font-weight: inherit;
@@ -1441,16 +1442,26 @@
     }
 }
 
-/* ---------- Start over ---------- */
+/* ---------- Start over (Settings modal) ---------- */
 
-.pk-journey .pk-reset {
-    margin: 18px 0 6px;
-    text-align: center;
+.pk-settings-section.pk-reset {
+    margin: 16px 0 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--outline);
+    text-align: left;
 }
 
-.pk-journey .pk-reset-actions {
+.pk-reset .option-title {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.pk-reset .pk-warning {
+    margin-bottom: 8px;
+}
+
+.pk-reset-actions {
     display: flex;
     gap: 8px;
-    justify-content: center;
     flex-wrap: wrap;
 }
