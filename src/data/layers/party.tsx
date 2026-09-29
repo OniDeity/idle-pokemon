@@ -49,7 +49,7 @@ const layer = createLayer(id, () => {
         boxIds.value.some(sid =>
             manualEvolutions(sid).some(
                 e =>
-                    !main.owns(e.into) &&
+                    !main.owns(main.evolutionTarget(sid, e.into)) &&
                     ((e.method === "stone" && (main.stones.value[e.stone!] ?? 0) > 0) ||
                         (e.method === "trade" && main.keyItems.value.linkCable === true))
             )
@@ -73,8 +73,8 @@ const layer = createLayer(id, () => {
         return (
             <div class="pk-evolutions">
                 {species.evolutions.map(evo => {
-                    const into = getSpecies(evo.into);
-                    const done = main.owns(evo.into);
+                    const into = getSpecies(main.evolutionTarget(speciesId, evo.into));
+                    const done = main.owns(into.id);
                     let action;
                     if (done) {
                         action = <span class="pk-small pk-done">✔ Owned</span>;
@@ -112,12 +112,8 @@ const layer = createLayer(id, () => {
                     }
                     return (
                         <div class="pk-evolution">
-                            <Sprite
-                                id={evo.into}
-                                size={40}
-                                silhouette={!dex.entry(evo.into).seen}
-                            />
-                            <span>{dex.entry(evo.into).seen ? into.name : "???"}</span>
+                            <Sprite id={into.id} size={40} silhouette={!dex.entry(into.id).seen} />
+                            <span>{dex.entry(into.id).seen ? into.name : "???"}</span>
                             {action}
                         </div>
                     );

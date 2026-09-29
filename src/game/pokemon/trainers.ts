@@ -308,6 +308,22 @@ const RIVAL_STARTER: Record<number, { starter: number; others: TrainerPokemon[] 
             { id: 130, level: 61 },
             { id: 59, level: 63 }
         ]
+    },
+    // Partner Pikachu: Blue's Eevee evolved, as in Pokémon Yellow.
+    10158: {
+        starter: 135,
+        others: [
+            { id: 59, level: 61 },
+            { id: 130, level: 63 }
+        ]
+    },
+    // Partner Eevee: the rival took the Pikachu.
+    10159: {
+        starter: 26,
+        others: [
+            { id: 103, level: 61 },
+            { id: 130, level: 63 }
+        ]
     }
 };
 

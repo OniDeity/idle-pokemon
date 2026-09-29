@@ -1,5 +1,6 @@
 import { assetUrl } from "./assets";
 import encountersJson from "data/pokemon/encounters.json";
+import formsJson from "data/pokemon/forms.json";
 import speciesJson from "data/pokemon/species.json";
 import typeChartJson from "data/pokemon/typeChart.json";
 
@@ -47,12 +48,40 @@ export interface Species {
     growthRate: GrowthRate;
     legendary: boolean;
     evolutions: Evolution[];
-    /** For variant forms (Pinkan, Valencian, ...): the regular species they're based on. */
+    /** -1 for genderless, otherwise the chance of being female in eighths. */
+    genderRate: number;
+    genderDifferences: boolean;
+    /** For alternate forms: the regular species they're based on. */
     baseSpecies?: number;
     variant?: VariantKind;
+    /**
+     * The region a form is native to. Forms from regions that aren't in the game yet exist in the
+     * data but aren't placed anywhere, so they arrive with their region.
+     */
+    nativeRegion?: string | null;
+    /** Sprite path under sprites/pokemon, e.g. "25", "10091", "201-b" or "female/25". */
+    spriteKey?: string;
+    /** A small emoji drawn over the sprite, for variants that differ by a prop. */
+    accessory?: string;
 }
 
-export type VariantKind = "pinkan" | "valencian" | "unique";
+/**
+ * Kinds of alternate form: anime variants (Pinkan, Valencian, unique individuals), gender
+ * differences, official regional forms, and other official forms (Unown letters, Pikachu caps).
+ */
+export type VariantKind = "pinkan" | "valencian" | "unique" | "female" | "regional" | "official";
+
+interface FormData {
+    id: number;
+    speciesId: number;
+    identifier: string;
+    name: string;
+    region: string | null;
+    sprite: string;
+    types: PokemonType[];
+    baseStats: Species["baseStats"];
+    baseExp: number;
+}
 
 export interface EncounterEntry {
     id: number;
@@ -112,30 +141,86 @@ function variant(
     };
 }
 
-export const VARIANT_SPECIES: Species[] = [
+/** Offset added to a species id for its female form (for species with gender differences). */
+export const FEMALE_OFFSET = 5000;
+const REGIONAL_SUFFIX = /-(alola|galar|hisui|paldea)/;
+
+const ANIME_VARIANTS: Species[] = [
     ...PINKAN.map(id => variant(id, 1000 + id, "pinkan", `Pinkan ${SPECIES[id - 1].name}`)),
     ...VALENCIAN.map(id =>
         variant(id, 2000 + id, "valencian", `Valencian ${SPECIES[id - 1].name}`)
     ),
     // Made of glass: no longer weak to Water, but Fire cracks it.
     variant(95, 3095, "unique", "Crystal Onix", { types: ["ice"], captureRate: 10 }),
-    variant(12, 3012, "unique", "Pink Butterfree", { captureRate: 25 })
+    variant(12, 3012, "unique", "Pink Butterfree", { captureRate: 25 }),
+    // Pokémon Yellow's surfing minigame and Pokémon Stadium's balloon Pikachu.
+    variant(25, 3100, "unique", "Surfing Pikachu", { accessory: "🏄", captureRate: 45 }),
+    variant(25, 3101, "unique", "Flying Pikachu", { accessory: "🎈", captureRate: 45 })
 ];
 
-// A variant evolves into the same variant of its evolution when one exists, else the regular one.
-for (const form of VARIANT_SPECIES) {
-    if (form.variant === "unique") continue;
-    const offset = form.id - form.baseSpecies!;
-    form.evolutions = SPECIES[form.baseSpecies! - 1].evolutions.map(evolution => {
-        const into = evolution.into + offset;
-        return VARIANT_SPECIES.some(v => v.id === into) ? { ...evolution, into } : evolution;
-    });
-}
+const OFFICIAL_FORMS: (Species & { identifier: string })[] = (formsJson as FormData[]).map(f => {
+    const base = SPECIES[f.speciesId - 1];
+    const regional = REGIONAL_SUFFIX.test(f.identifier);
+    return {
+        ...base,
+        id: f.id,
+        identifier: f.identifier,
+        name: f.name,
+        types: f.types,
+        baseStats: f.baseStats,
+        baseExp: f.baseExp,
+        baseSpecies: f.speciesId,
+        variant: regional ? "regional" : "official",
+        nativeRegion: f.region,
+        spriteKey: f.sprite,
+        genderDifferences: false,
+        evolutions: []
+    };
+});
+
+const FEMALE_FORMS: Species[] = SPECIES.filter(s => s.genderDifferences && s.genderRate > 0).map(
+    s => ({
+        ...s,
+        id: FEMALE_OFFSET + s.id,
+        name: `${s.name} ♀`,
+        baseSpecies: s.id,
+        variant: "female",
+        spriteKey: `female/${s.id}`,
+        genderDifferences: false,
+        evolutions: []
+    })
+);
+
+/** Every alternate form, whether or not it's placed in a region yet. */
+export const VARIANT_SPECIES: Species[] = [...ANIME_VARIANTS, ...OFFICIAL_FORMS, ...FEMALE_FORMS];
 
 const SPECIES_BY_ID = new Map<number, Species>(
     [...SPECIES, ...VARIANT_SPECIES].map(species => [species.id, species])
 );
 export const ALL_SPECIES: Species[] = [...SPECIES, ...VARIANT_SPECIES];
+
+// Evolutions: a form evolves into the matching form of its evolution when one exists (Pinkan
+// Rhyhorn → Pinkan Rhydon, Alolan Rattata → Alolan Raticate, female Pikachu → female Raichu),
+// otherwise into the regular species. Unique individuals and cosmetic forms don't evolve.
+for (const form of VARIANT_SPECIES) {
+    if (form.variant === "unique" || form.variant === "official") continue;
+    const baseEvolutions = SPECIES[form.baseSpecies! - 1].evolutions;
+    form.evolutions = baseEvolutions.map(evolution => {
+        let into: number | undefined;
+        if (form.variant === "regional") {
+            const suffix = (form as Species & { identifier: string }).identifier.match(
+                REGIONAL_SUFFIX
+            )?.[0];
+            into = OFFICIAL_FORMS.find(
+                f => f.baseSpecies === evolution.into && f.identifier.endsWith(suffix ?? "?")
+            )?.id;
+        } else {
+            const offset = form.id - form.baseSpecies!;
+            into = SPECIES_BY_ID.has(evolution.into + offset) ? evolution.into + offset : undefined;
+        }
+        return into != null ? { ...evolution, into } : evolution;
+    });
+}
 
 export function isVariant(id: number): boolean {
     return id > DEX_SIZE;
@@ -143,6 +228,15 @@ export function isVariant(id: number): boolean {
 
 export function variantFilter(id: number): string | undefined {
     return VARIANT_FILTERS[id];
+}
+
+export function spriteAccessory(id: number): string | undefined {
+    return SPECIES_BY_ID.get(id)?.accessory;
+}
+
+/** The female form a wild Pokémon of this species appears as, if it has one. */
+export function femaleForm(speciesId: number): Species | undefined {
+    return SPECIES_BY_ID.get(FEMALE_OFFSET + speciesId);
 }
 export const TYPE_CHART = typeChartJson as Partial<
     Record<PokemonType, Partial<Record<PokemonType, number>>>
@@ -173,13 +267,17 @@ export function getSpecies(id: number): Species {
     return species;
 }
 
+/**
+ * Sprites come from PokeAPI's default set, the only one that covers every form (Unown letters,
+ * caps, regional forms, female differences) in one consistent style.
+ */
+export function spriteKey(id: number): string {
+    const species = SPECIES_BY_ID.get(id);
+    return species?.spriteKey ?? String(species?.baseSpecies ?? id);
+}
+
 export function spriteUrl(id: number, shiny = false, back = false): string {
-    id = SPECIES_BY_ID.get(id)?.baseSpecies ?? id;
-    return assetUrl(
-        `pokemon/versions/generation-iii/firered-leafgreen/${back ? "back/" : ""}${
-            shiny ? "shiny/" : ""
-        }${id}.png`
-    );
+    return assetUrl(`pokemon/${back ? "back/" : ""}${shiny ? "shiny/" : ""}${spriteKey(id)}.png`);
 }
 
 /** Damage multiplier of an attack of the given type against a defender with the given types. */

@@ -30,6 +30,10 @@
                     <li class="feature">
                         Pinkan and Valencian variants, the Crystal Onix and the Pink Butterfree
                     </li>
+                    <li class="feature">
+                        Alternate forms: all 28 Unown, female forms, Partner Pikachu and Eevee,
+                        Original Cap Pikachu, and Surfing and Flying Pikachu
+                    </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="balancing">
                         Slower, steadier pacing: about a day for a first clear; rematches get

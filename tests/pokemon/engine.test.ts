@@ -24,6 +24,15 @@ import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
 import { activePools, allZoneSpecies, rollEncounter, ZONES, zonesIn } from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
 
+function mulberry(seed: number): () => number {
+    return () => {
+        seed = (seed + 0x6d2b79f5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
 function party(...members: [number, number][]): PartyBattler[] {
     return members.map(([id, level]) => ({ species: getSpecies(id), level, multiplier: 1 }));
 }
@@ -91,22 +100,71 @@ describe("data", () => {
     });
 
     test("variant forms point at real species and evolve sensibly", () => {
-        expect(VARIANT_SPECIES.length).toBe(29);
         for (const form of VARIANT_SPECIES) {
             expect(getSpecies(form.baseSpecies!).id).toBe(form.baseSpecies);
-            expect(variantFilter(form.id)).toBeDefined();
             form.evolutions.forEach(e => expect(getSpecies(e.into)).toBeDefined());
         }
+        const anime = VARIANT_SPECIES.filter(v =>
+            ["pinkan", "valencian", "unique"].includes(v.variant!)
+        );
+        expect(anime.length).toBe(31);
+        anime
+            .filter(v => v.accessory == null)
+            .forEach(v => expect(variantFilter(v.id), v.name).toBeDefined());
         // Pinkan Rhyhorn stays pink when it evolves; Pinkan Caterpie becomes a regular Metapod.
         expect(getSpecies(1111).evolutions[0].into).toBe(1112);
         expect(getSpecies(1010).evolutions[0].into).toBe(11);
-        // Every variant can be found somewhere.
+        // Alolan Rattata becomes Alolan Raticate; female Pikachu becomes female Raichu.
+        expect(getSpecies(10091).evolutions[0].into).toBe(10092);
+        expect(getSpecies(5025).evolutions.map(e => e.into)).toEqual([5026]);
+        // All 28 Unown and the regional forms of every Kanto and Johto species are in the data.
+        expect(VARIANT_SPECIES.filter(v => v.baseSpecies === 201).length).toBe(28);
+        expect(VARIANT_SPECIES.filter(v => v.variant === "regional").length).toBeGreaterThan(40);
+    });
+
+    test("forms are only placed in the regions they belong to", () => {
         const found = new Set([
             ...ZONES.flatMap(z => allZoneSpecies(z.id)),
             ...SPECIAL_ENCOUNTERS.map(s => s.speciesId),
-            ...VARIANT_SPECIES.flatMap(v => v.evolutions.map(e => e.into))
+            ...REGION_LIST.flatMap(r => [...r.starters, ...(r.partnerStarters ?? [])])
         ]);
-        expect(VARIANT_SPECIES.filter(v => !found.has(v.id)).map(v => v.name)).toEqual([]);
+        // Plus anything those evolve into.
+        for (const id of found) getSpecies(id).evolutions.forEach(e => found.add(e.into));
+        // Every anime variant and every Kanto form can be found; Unown letters are in Tanoby.
+        const shouldBeFound = VARIANT_SPECIES.filter(
+            v =>
+                ["pinkan", "valencian", "unique"].includes(v.variant!) ||
+                v.nativeRegion === "kanto" ||
+                v.baseSpecies === 201
+        );
+        expect(shouldBeFound.filter(v => !found.has(v.id)).map(v => v.name)).toEqual([]);
+        // Forms from regions not in the game yet (Alola, Galar, Hoenn caps...) wait for them.
+        const early = VARIANT_SPECIES.filter(
+            v =>
+                v.nativeRegion != null &&
+                !["kanto", "johto"].includes(v.nativeRegion) &&
+                found.has(v.id)
+        );
+        expect(early.map(v => v.name)).toEqual([]);
+        for (const special of SPECIAL_ENCOUNTERS) {
+            const form = getSpecies(special.speciesId);
+            if (form.nativeRegion === "kanto") expect(special.region).toBe("kanto");
+        }
+    });
+
+    test("wild Pokémon with gender differences are sometimes female", () => {
+        let female = 0;
+        let rolls = 0;
+        const rng = mulberry(7);
+        for (let i = 0; i < 2000; i++) {
+            const rolled = rollEncounter("viridianForest", {}, rng);
+            if (rolled == null) continue;
+            if (getSpecies(rolled.speciesId).baseSpecies === 25) female++;
+            if (rolled.speciesId === 25 || getSpecies(rolled.speciesId).baseSpecies === 25) rolls++;
+        }
+        expect(rolls).toBeGreaterThan(0);
+        expect(female / rolls).toBeGreaterThan(0.3);
+        expect(female / rolls).toBeLessThan(0.7);
     });
 
     test("specials belong to a region and point at real zones", () => {
@@ -213,7 +271,8 @@ describe("encounters", () => {
         for (let i = 0; i < 200; i++) {
             const encounter = rollEncounter("viridianForest", {});
             expect(encounter).not.toBeNull();
-            expect(allowed.has(encounter!.speciesId)).toBe(true);
+            const species = getSpecies(encounter!.speciesId);
+            expect(allowed.has(species.baseSpecies ?? species.id)).toBe(true);
             expect(encounter!.level).toBeGreaterThanOrEqual(3);
             expect(encounter!.level).toBeLessThanOrEqual(6);
         }

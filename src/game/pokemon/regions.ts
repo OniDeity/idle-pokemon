@@ -16,6 +16,8 @@ export interface RegionDefinition {
     blurb: string;
     color: string;
     starters: number[];
+    /** Extra starters offered once the region has been cleared (Let's Go's partner Pokémon). */
+    partnerStarters?: number[];
     startLevel: number;
     /** Key items the player already has when the journey starts. */
     startingKeyItems: KeyItemId[];
@@ -42,6 +44,7 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         blurb: "Eight Gyms, the Elite Four, and the anime's hidden corners of Kanto.",
         color: "#DC0A2D",
         starters: [1, 4, 7],
+        partnerStarters: [10158, 10159],
         startLevel: 5,
         startingKeyItems: [],
         shopTier: 0,
@@ -92,6 +95,11 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         requires: "kanto"
     }
 };
+
+/** The starters on offer for a journey, given how many times the region has been cleared. */
+export function startersFor(region: RegionDefinition, clears: number): number[] {
+    return clears > 0 ? [...region.starters, ...(region.partnerStarters ?? [])] : region.starters;
+}
 
 export const REGION_LIST: RegionDefinition[] = Object.values(REGIONS);
 

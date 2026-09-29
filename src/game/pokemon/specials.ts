@@ -19,6 +19,7 @@ export type SpecialEncounter =
           badgesRequired: number;
           /** Pokédollar price; omitted for free gifts. */
           price?: number;
+          postGame?: boolean;
           text: string;
       }
     | {
@@ -31,6 +32,7 @@ export type SpecialEncounter =
           badgesRequired: number;
           /** The species the NPC wants to see (you keep yours — they just need to meet it). */
           wants: number;
+          postGame?: boolean;
           text: string;
       }
     | {

@@ -10,6 +10,7 @@ import {
     getSpecies,
     spriteUrl,
     TYPE_COLORS,
+    spriteAccessory,
     variantFilter
 } from "game/pokemon/data";
 import { format } from "util/bignum";
@@ -55,7 +56,7 @@ export const Sprite = component<{
 }>(props => {
     const size = props.size ?? 64;
     const url = spriteUrl(props.id, props.shiny, props.back);
-    return (
+    const img = (
         <img
             class={["pk-sprite", props.silhouette ? "pk-silhouette" : "", props.extraClass ?? ""]}
             style={props.silhouette ? undefined : { filter: variantFilter(props.id) }}
@@ -66,6 +67,17 @@ export const Sprite = component<{
             loading="lazy"
             draggable={false}
         />
+    );
+    // Variants that differ by a prop (a surfboard, balloons) get it drawn in the corner.
+    const accessory = props.silhouette ? undefined : spriteAccessory(props.id);
+    if (accessory == null) return img;
+    return (
+        <span class="pk-sprite-wrap">
+            {img}
+            <span class="pk-sprite-accessory" style={{ fontSize: `${Math.round(size * 0.32)}px` }}>
+                {accessory}
+            </span>
+        </span>
     );
 });
 

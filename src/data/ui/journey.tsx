@@ -12,7 +12,7 @@ import { DEX_SIZE, getSpecies } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
 import { BALLS } from "game/pokemon/items";
 import { maxHp, xpForLevel } from "game/pokemon/stats";
-import { REGION_LIST } from "game/pokemon/regions";
+import { REGION_LIST, startersFor } from "game/pokemon/regions";
 import { formatTime } from "util/bignum";
 import {
     BadgeIcon,
@@ -160,7 +160,7 @@ function renderStarterSelect() {
                 </p>
             )}
             <div class="pk-starters">
-                {region.starters.map(id => (
+                {startersFor(region, hof.clearCount(region.id)).map(id => (
                     <button class="pk-starter" onClick={() => main.chooseStarter(id)}>
                         <Sprite id={id} size={96} />
                         <b>{getSpecies(id).name}</b>

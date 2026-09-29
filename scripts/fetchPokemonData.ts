@@ -3,6 +3,8 @@
  *   - src/data/pokemon/species.json     Species #1-251 (stats, types, catch rate, evolutions)
  *   - src/data/pokemon/encounters.json  Wild encounter pools: Red/Blue for Kanto, FireRed/LeafGreen for Sevii
  *   - src/data/pokemon/typeChart.json   Non-neutral type matchups
+ *   - src/data/pokemon/forms.json       Official alternate forms of #1-251 (regional forms, Pikachu
+ *                                       caps, partner Pokémon, Unown letters, Spiky-eared Pichu)
  *
  * Source: the PokeAPI CSV dump on GitHub (https://github.com/PokeAPI/pokeapi/tree/master/data/v2/csv).
  * Reading the CSVs directly means one request per table instead of hundreds of REST calls.
@@ -215,7 +217,9 @@ async function main() {
         slotRows,
         methodRows,
         areaRows,
-        locationRows
+        locationRows,
+        formRows,
+        formNameRows
     ] = await Promise.all(
         [
             "pokemon_species",
@@ -230,7 +234,9 @@ async function main() {
             "encounter_slots",
             "encounter_methods",
             "location_areas",
-            "locations"
+            "locations",
+            "pokemon_forms",
+            "pokemon_form_names"
         ].map(fetchCsv)
     );
 
@@ -298,6 +304,9 @@ async function main() {
             captureRate: Number(r.capture_rate),
             growthRate: GROWTH_RATES[r.growth_rate_id] ?? "medium",
             legendary: r.is_legendary === "1" || r.is_mythical === "1",
+            // -1 = genderless, otherwise eighths female.
+            genderRate: Number(r.gender_rate),
+            genderDifferences: r.has_gender_differences === "1",
             evolutions: evolutions.get(Number(r.id)) ?? []
         }))
         .sort((a, b) => a.id - b.id);
@@ -372,6 +381,62 @@ async function main() {
         ])
     );
 
+    // Official alternate forms. Battle-only forms (Mega, Gigantamax, Totem) are left out: they
+    // belong to future regions' battle mechanics, not to catching.
+    const speciesOfPokemon = new Map(pokemonRows.map(r => [r.id, Number(r.species_id)]));
+    const formsByPokemon = new Map(formRows.map(r => [r.id, r]));
+    const englishFormName = new Map(
+        formNameRows
+            .filter(r => r.local_language_id === ENGLISH)
+            .map(r => [formsByPokemon.get(r.pokemon_form_id)?.identifier ?? "", r])
+    );
+    const REGION_OF_FORM: [RegExp, string][] = [
+        [/-alola$/, "alola"],
+        [/-galar$/, "galar"],
+        [/-hisui$/, "hisui"],
+        [/-paldea/, "paldea"],
+        [/-original-cap$/, "kanto"],
+        [/-world-cap$/, "galar"],
+        [/-hoenn-cap$|-rock-star|-belle|-pop-star|-phd|-libre|-cosplay/, "hoenn"],
+        [/-sinnoh-cap$/, "sinnoh"],
+        [/-unova-cap$/, "unova"],
+        [/-kalos-cap$/, "kalos"],
+        [/-(alola|partner)-cap$/, "alola"],
+        [/-starter$/, "kanto"],
+        [/^unown-/, "johto"],
+        [/-spiky-eared$/, "johto"]
+    ];
+    const forms = formRows
+        .filter(r => r.form_identifier !== "" && r.is_battle_only === "0" && r.is_mega === "0")
+        .filter(r => !/gmax|totem/.test(r.identifier))
+        .map(r => ({ r, species: speciesOfPokemon.get(r.pokemon_id) ?? 0 }))
+        .filter(({ species }) => species > 0 && species <= MAX_DEX)
+        .map(({ r, species }, i) => {
+            const pokemonId = Number(r.pokemon_id);
+            const names = englishFormName.get(r.identifier);
+            // Forms that are their own Pokémon (regional forms, caps) keep PokeAPI's id; forms that
+            // only change looks (Unown letters) get ids from 4000.
+            const ownPokemon = pokemonId > 10000;
+            const baseName = displayName.get(String(species)) ?? r.identifier;
+            return {
+                id: ownPokemon ? pokemonId : 4000 + i,
+                speciesId: species,
+                identifier: r.identifier,
+                name:
+                    names?.pokemon_name || `${baseName} (${names?.form_name ?? r.form_identifier})`,
+                region: REGION_OF_FORM.find(([pattern]) => pattern.test(r.identifier))?.[1] ?? null,
+                // Unown A is the default Unown sprite; the repo has no front "201-a".
+                sprite: ownPokemon
+                    ? String(pokemonId)
+                    : r.form_identifier === "a"
+                      ? String(species)
+                      : `${species}-${r.form_identifier}`,
+                types: typesById.get(r.pokemon_id) ?? typesById.get(String(species)) ?? ["normal"],
+                baseStats: statsById.get(r.pokemon_id) ?? statsById.get(String(species)),
+                baseExp: baseExp.get(r.pokemon_id) || baseExp.get(String(species)) || 50
+            };
+        });
+
     const dataDir = path.resolve(import.meta.dirname, "../src/data/pokemon");
     await mkdir(dataDir, { recursive: true });
     await writeFile(path.join(dataDir, "species.json"), JSON.stringify(species, null, 1) + "\n");
@@ -379,6 +444,7 @@ async function main() {
         path.join(dataDir, "encounters.json"),
         JSON.stringify(encounters, null, 1) + "\n"
     );
+    await writeFile(path.join(dataDir, "forms.json"), JSON.stringify(forms, null, 1) + "\n");
     await writeFile(
         path.join(dataDir, "typeChart.json"),
         JSON.stringify(typeChart, null, 1) + "\n"

@@ -155,7 +155,7 @@ const layer = createLayer(id, () => {
                     🔒{" "}
                     {missingItem && special.kind === "legendary"
                         ? `Needs the ${KEY_ITEMS[special.keyItem!].name}`
-                        : special.kind === "legendary" && special.postGame
+                        : special.postGame === true
                           ? `After the ${main.regionDef.value.finaleName}`
                           : `${special.badgesRequired} ${main.regionDef.value.trialNoun}`}
                 </span>

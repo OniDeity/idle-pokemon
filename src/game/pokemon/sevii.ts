@@ -3,6 +3,7 @@
  * "trials" follow the islands' post-game story (Team Rocket and the Ruby & Sapphire quest),
  * ending at the Trainer Tower on Seven Island.
  */
+import { enc } from "./data";
 import type { SpecialEncounter } from "./specials";
 import type { GymDefinition, TrainerDefinition } from "./trainers";
 import { trial } from "./trainers";
@@ -143,7 +144,17 @@ export const SEVII_ZONES: ZoneDefinition[] = [
         id: "tanobyRuins",
         name: "Tanoby Ruins",
         badgesRequired: 5,
-        blurb: "Seven ancient chambers covered in strange markings."
+        blurb: "The islets and sea around the seven ancient chambers."
+    }),
+    zone({
+        id: "tanobyChambers",
+        name: "Tanoby Chambers",
+        badgesRequired: 5,
+        blurb: "With the Network Machine fixed, Unown of every letter drift through the chambers.",
+        encounters: {
+            // Unown A-Z (4000-4025) are equally common; ! and ? (4026-4027) are rare.
+            walk: Array.from({ length: 28 }, (_, i) => enc(4000 + i, 25, 25, i < 26 ? 10 : 3))
+        }
     })
 ];
 
@@ -310,16 +321,6 @@ export const SEVII_SPECIALS: SpecialEncounter[] = [
         place: "Water Labyrinth",
         badgesRequired: 3,
         text: "An old man's Pokémon found an Egg. He's sure you'll raise it well."
-    },
-    {
-        kind: "gift",
-        id: "tanobyUnown",
-        region: "sevii",
-        speciesId: 201,
-        level: 25,
-        place: "Tanoby Chambers",
-        badgesRequired: 5,
-        text: "Once the Network Machine is fixed, Unown appear in the seven chambers."
     },
     {
         kind: "legendary",

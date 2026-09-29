@@ -18,14 +18,20 @@ import {
     trainerTeam
 } from "game/pokemon/balance";
 import type { StoneId } from "game/pokemon/data";
-import { getSpecies } from "game/pokemon/data";
+import { femaleForm, getSpecies } from "game/pokemon/data";
 import type { BallId, KeyItemId } from "game/pokemon/items";
 import { BALLS, KEY_ITEMS, STONES } from "game/pokemon/items";
 import type { SpecialEncounter } from "game/pokemon/specials";
 import { LEGENDARY_TIME_LIMIT } from "game/pokemon/specials";
 import type { BattlerStats } from "game/pokemon/stats";
 import { levelForXp, maxHp, xpForLevel } from "game/pokemon/stats";
-import { levelCap, REGIONS, rematchMultiplier, withRematch } from "game/pokemon/regions";
+import {
+    levelCap,
+    REGIONS,
+    rematchMultiplier,
+    startersFor,
+    withRematch
+} from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
 import type { RegionId } from "game/pokemon/zones";
 import { rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
@@ -298,21 +304,36 @@ export const main = createLayer("main", layer => {
         notify(text, "success");
     }
 
+    /**
+     * What an evolution produces. Evolving keeps the original, so once you own the regular
+     * evolution, evolving again from a Pokémon without its own female form gives the female one
+     * (Ivysaur → Venusaur, then Venusaur ♀). Female forms evolve into female forms directly.
+     */
+    function evolutionTarget(fromId: number, into: number): number {
+        const female = femaleForm(into);
+        if (female == null || !owns(into)) return into;
+        const from = getSpecies(fromId);
+        if (from.variant != null || femaleForm(fromId) != null) return into;
+        return female.id;
+    }
+
     function evolveWithStone(fromId: number, stone: StoneId) {
         const evolution = getSpecies(fromId).evolutions.find(
             e => e.method === "stone" && e.stone === stone
         );
-        if (evolution == null || (stones.value[stone] ?? 0) <= 0 || owns(evolution.into)) return;
-        if (!owns(fromId) || inTrainerBattle.value) return;
+        if (evolution == null || (stones.value[stone] ?? 0) <= 0) return;
+        const into = evolutionTarget(fromId, evolution.into);
+        if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
         stones.value = { ...stones.value, [stone]: (stones.value[stone] ?? 0) - 1 };
-        evolve(fromId, evolution.into, ` with a ${STONES[stone].name}`);
+        evolve(fromId, into, ` with a ${STONES[stone].name}`);
     }
 
     function evolveByTrade(fromId: number) {
         const evolution = getSpecies(fromId).evolutions.find(e => e.method === "trade");
-        if (evolution == null || !keyItems.value.linkCable || owns(evolution.into)) return;
-        if (!owns(fromId) || inTrainerBattle.value) return;
-        evolve(fromId, evolution.into, " over the Link Cable");
+        if (evolution == null || !keyItems.value.linkCable) return;
+        const into = evolutionTarget(fromId, evolution.into);
+        if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
+        evolve(fromId, into, " over the Link Cable");
     }
 
     function gainXp(amount: number) {
@@ -337,7 +358,7 @@ export const main = createLayer("main", layer => {
                 }
                 for (const evolution of species.evolutions) {
                     if (evolution.method === "level" && level >= (evolution.level ?? Infinity)) {
-                        evolve(id, evolution.into, "");
+                        evolve(id, evolutionTarget(id, evolution.into), "");
                     }
                 }
             }
@@ -741,8 +762,8 @@ export const main = createLayer("main", layer => {
 
     function specialAvailable(special: SpecialEncounter) {
         if (special.region !== region.value || badges.value < special.badgesRequired) return false;
+        if (special.postGame === true && !champion.value) return false;
         if (special.kind === "legendary") {
-            if (special.postGame && !champion.value) return false;
             if (special.keyItem != null && !keyItems.value[special.keyItem]) return false;
         }
         return true;
@@ -776,7 +797,7 @@ export const main = createLayer("main", layer => {
 
     function chooseStarter(id: number) {
         const def = regionDef.value;
-        if (starter.value !== 0 || !def.starters.includes(id)) return;
+        if (starter.value !== 0 || !startersFor(def, hof.clearCount(def.id)).includes(id)) return;
         starter.value = id;
         zoneId.value = zonesIn(def.id)[0].id;
         def.startingKeyItems.forEach(
@@ -841,6 +862,7 @@ export const main = createLayer("main", layer => {
         inTrainerBattle,
         nav,
         owns,
+        evolutionTarget,
         battlerFor,
         receivePokemon,
         addToParty,

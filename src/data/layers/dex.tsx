@@ -51,8 +51,11 @@ type Filter = "all" | "caught" | "missing" | "shiny" | "kanto" | "johto" | "vari
 /** Where a species can be found: wild zones, specials, or by evolving something. */
 function locationsOf(id: number): string[] {
     const places: string[] = [];
+    const species = getSpecies(id);
+    // Female forms turn up wherever their species does.
+    const wildId = species.variant === "female" ? species.baseSpecies! : id;
     for (const zone of ZONES) {
-        if (allZoneSpecies(zone.id).includes(id)) {
+        if (allZoneSpecies(zone.id).includes(wildId)) {
             places.push(
                 `${REGIONS[zone.region].name}: ${zone.name}${zone.anime ? " (anime)" : ""}`
             );
@@ -69,6 +72,14 @@ function locationsOf(id: number): string[] {
                         ? `₽${special.price.toLocaleString("en-US")}`
                         : "gift";
             places.push(`${REGIONS[special.region].name}: ${special.place} (${how})`);
+        }
+    }
+    if (species.variant === "female" && PRE_EVOLUTION[id] == null) {
+        const pre = PRE_EVOLUTION[wildId];
+        if (pre != null) {
+            places.push(
+                `Evolve a second ${getSpecies(pre).name} once you own ${species.name.replace(" ♀", "")}`
+            );
         }
     }
     const pre = PRE_EVOLUTION[id];
@@ -89,12 +100,40 @@ function locationsOf(id: number): string[] {
         if (region.starters.includes(id)) {
             places.push(`Starter Pokémon for a ${region.name} journey`);
         }
+        if (region.partnerStarters?.includes(id)) {
+            places.push(`Partner starter for a ${region.name} journey, once you've cleared it`);
+        }
     }
     if (places.length === 0) {
-        places.push("Not found in any region yet.");
+        places.push(
+            species.nativeRegion != null && !(species.nativeRegion in REGIONS)
+                ? `Arrives with the ${species.nativeRegion[0].toUpperCase()}${species.nativeRegion.slice(1)} region.`
+                : "Not found in any region yet."
+        );
     }
     return places;
 }
+
+/** Whether a form can be obtained in the regions that exist so far. */
+function obtainable(id: number, depth = 0): boolean {
+    if (depth > 4) return false;
+    const species = getSpecies(id);
+    const wildId = species.variant === "female" ? species.baseSpecies! : id;
+    if (
+        ZONES.some(zone => allZoneSpecies(zone.id).includes(wildId)) ||
+        SPECIAL_ENCOUNTERS.some(s => s.speciesId === id) ||
+        REGION_LIST.some(r => r.starters.includes(id) || r.partnerStarters?.includes(id))
+    ) {
+        return true;
+    }
+    const pre =
+        PRE_EVOLUTION[id] ?? (species.variant === "female" ? PRE_EVOLUTION[wildId] : undefined);
+    return pre != null && obtainable(pre, depth + 1);
+}
+
+/** Forms placed in the game so far; the rest arrive with their regions. */
+const PLACED_VARIANTS = VARIANT_SPECIES.filter(v => obtainable(v.id));
+const FUTURE_VARIANTS = VARIANT_SPECIES.length - PLACED_VARIANTS.length;
 
 const id = "dex";
 const layer = createLayer(id, () => {
@@ -115,7 +154,7 @@ const layer = createLayer(id, () => {
     const caughtCount = computed(() => list.value.filter(e => e.caught).length);
     const shinyCount = computed(() => list.value.filter(e => e.shiny).length);
     const variantCaught = computed(
-        () => VARIANT_SPECIES.filter(v => entries.value[v.id]?.caught === true).length
+        () => PLACED_VARIANTS.filter(v => entries.value[v.id]?.caught === true).length
     );
 
     function entry(speciesId: number): DexEntry {
@@ -131,6 +170,15 @@ const layer = createLayer(id, () => {
     /** Registers a catch. Returns true the first time a species is ever caught. */
     function markCaught(speciesId: number, shiny: boolean, countsAsCatch = true) {
         const e = entry(speciesId);
+        // A form also fills in its species' entry: a Pinkan Pikachu is still a Pikachu.
+        const base = getSpecies(speciesId).baseSpecies;
+        if (base != null && !entry(base).caught) {
+            const b = entry(base);
+            entries.value = {
+                ...entries.value,
+                [base]: { ...b, seen: true, caught: true, shiny: b.shiny || shiny }
+            };
+        }
         entries.value = {
             ...entries.value,
             [speciesId]: {
@@ -171,7 +219,7 @@ const layer = createLayer(id, () => {
     };
 
     const visibleSpecies = computed(() =>
-        (filter.value === "variants" ? VARIANT_SPECIES : SPECIES).filter(s => {
+        (filter.value === "variants" ? PLACED_VARIANTS : SPECIES).filter(s => {
             const e = entry(s.id);
             switch (filter.value) {
                 case "caught":
@@ -288,7 +336,7 @@ const layer = createLayer(id, () => {
                     <div>
                         Seen <b>{seenCount.value}</b> · Caught <b>{caughtCount.value}</b> /{" "}
                         {DEX_SIZE} · Shiny <b>{shinyCount.value}</b> · Variants{" "}
-                        <b>{variantCaught.value}</b> / {VARIANT_SPECIES.length}
+                        <b>{variantCaught.value}</b> / {PLACED_VARIANTS.length}
                     </div>
                     <Bar value={caughtCount.value} max={DEX_SIZE} kind="progress" />
                     <div class="pk-muted">
@@ -332,6 +380,12 @@ const layer = createLayer(id, () => {
                     ))}
                 </div>
 
+                {filter.value === "variants" ? (
+                    <p class="pk-small pk-muted">
+                        Anime variants, regional and official forms, and female forms.{" "}
+                        {FUTURE_VARIANTS} more forms arrive with regions still to come.
+                    </p>
+                ) : null}
                 <div class="pk-dex-layout">
                     <div class="pk-dex-grid">
                         {visibleSpecies.value.map(species => {

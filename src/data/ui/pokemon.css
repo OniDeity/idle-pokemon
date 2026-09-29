@@ -120,6 +120,23 @@
     user-select: none;
 }
 
+.pk-sprite-wrap {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+    vertical-align: middle;
+}
+
+.pk-layer .pk-sprite-accessory,
+.pk-journey .pk-sprite-accessory {
+    position: absolute;
+    right: 4%;
+    bottom: 4%;
+    margin: 0;
+    line-height: 1;
+    pointer-events: none;
+}
+
 .pk-silhouette {
     filter: brightness(0) opacity(0.45);
 }
@@ -593,7 +610,8 @@
     z-index: 0;
 }
 
-.pk-platform .pk-sprite {
+.pk-platform .pk-sprite,
+.pk-platform .pk-sprite-wrap {
     position: relative;
     z-index: 1;
 }

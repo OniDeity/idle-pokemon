@@ -832,5 +832,26 @@ export const KANTO_ANIME_SPECIALS: SpecialEncounter[] = [
         postGame: true,
         strength: 2.6,
         text: "A colossal Alakazam, guardian of Pokémopolis, stands in your way."
+    },
+    {
+        kind: "gift",
+        id: "themeParkPikachu",
+        region: "kanto",
+        speciesId: 3101,
+        level: 25,
+        place: "Pokémon Theme Park",
+        badgesRequired: 4,
+        text: "A Pikachu clinging to a bunch of balloons drifts down and decides to stay."
+    },
+    {
+        kind: "gift",
+        id: "originalCapPikachu",
+        region: "kanto",
+        speciesId: 10094,
+        level: 50,
+        place: "Pallet Town",
+        badgesRequired: 8,
+        postGame: true,
+        text: "A Pikachu wearing a familiar red cap is waiting outside Professor Oak's lab."
     }
 ];

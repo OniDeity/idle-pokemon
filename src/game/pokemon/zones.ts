@@ -1,5 +1,5 @@
 import type { EncounterEntry, EncounterPoolId } from "./data";
-import { ENCOUNTERS } from "./data";
+import { enc, ENCOUNTERS, femaleForm } from "./data";
 import type { KeyItemId } from "./items";
 import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
@@ -280,8 +280,22 @@ export interface ActivePool {
  * Fishing combines every rod the player owns into one pool; each rod contributes equally.
  */
 /** A zone's encounter pools, hand-authored or generated. */
+/** Additions to the generated game encounters. */
+const EXTRA_ENCOUNTERS: Record<string, ZonePools> = {
+    // Pokémon Yellow's Surfing Pikachu rides the waves off the Seafoam Islands.
+    route19: { surf: [enc(3100, 20, 30, 3)] },
+    route20: { surf: [enc(3100, 20, 30, 3)] }
+};
+
 export function zonePools(zoneId: string): ZonePools {
-    return ZONES_BY_ID[zoneId]?.encounters ?? ENCOUNTERS[zoneId] ?? {};
+    const pools = ZONES_BY_ID[zoneId]?.encounters ?? ENCOUNTERS[zoneId] ?? {};
+    const extra = EXTRA_ENCOUNTERS[zoneId];
+    if (extra == null) return pools;
+    const merged: ZonePools = { ...pools };
+    for (const [pool, entries] of Object.entries(extra) as [EncounterPoolId, EncounterEntry[]][]) {
+        merged[pool] = [...(pools[pool] ?? []), ...entries];
+    }
+    return merged;
 }
 
 export function activePools(zoneId: string, keyItems: Partial<Record<KeyItemId, boolean>>) {
@@ -361,8 +375,11 @@ export function rollEncounter(
         rng
     );
     const entry = pickWeighted(pool.entries, rng);
+    // Species with visible gender differences show up as their female form genderRate/8 of the time.
+    const female = femaleForm(entry.id);
+    const speciesId = female != null && rng() < female.genderRate / 8 ? female.id : entry.id;
     return {
-        speciesId: entry.id,
+        speciesId,
         level: entry.minLevel + Math.floor(rng() * (entry.maxLevel - entry.minLevel + 1)),
         kind: pool.kind
     };

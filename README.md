@@ -15,7 +15,12 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   and Drake's Winner's Cup), and the Sevii Islands from FireRed/LeafGreen (Team Rocket, the
   Ruby & Sapphire quest and the Trainer Tower). Each first clear is tuned for about a day of play.
 - **Anime variants**: 20 Pinkan Pokémon on Pinkan Island, 7 Valencian Pokémon on Valencia
-  Island, the Crystal Onix and the Pink Butterfree, each with its own Pokédex entry.
+  Island, the Crystal Onix, the Pink Butterfree, and Surfing and Flying Pikachu, each with
+  its own Pokédex entry.
+- **Alternate forms**: all 28 Unown in the Tanoby Chambers, female forms of every species with
+  visible gender differences, Partner Pikachu and Eevee starters, and Ash's Original Cap
+  Pikachu. Regional forms (Alolan, Galarian, Hisuian, Paldean) and other caps are in the data
+  and arrive with their regions.
 - **Wild battles run automatically.** Your trainer sends out the party member with the best
   type matchup. Every win pays Pokédollars and gives XP to the whole party.
 - **Catching** uses real capture rates. Catch _new_ species only, _all_ of them (extra catches

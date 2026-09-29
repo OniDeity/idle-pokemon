@@ -74,7 +74,7 @@ function autoEvolve() {
     for (const key of Object.keys(main.box.value)) {
         const id = Number(key);
         for (const evolution of getSpecies(id).evolutions) {
-            if (main.owns(evolution.into)) continue;
+            if (main.owns(main.evolutionTarget(id, evolution.into))) continue;
             if (evolution.method === "stone" && evolution.stone != null) {
                 const stone = STONES[evolution.stone];
                 if ((main.stones.value[stone.id] ?? 0) === 0) {
