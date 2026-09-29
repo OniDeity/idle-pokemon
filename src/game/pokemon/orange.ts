@@ -17,15 +17,20 @@ export const ORANGE_ZONES: ZoneDefinition[] = [
         id: "valenciaIsland",
         name: "Valencia Island",
         badgesRequired: 0,
-        blurb: "Professor Ivy's island lab, where your Orange Islands journey begins.",
+        blurb: "Professor Ivy's island, where the Pokémon grow in unusual colors.",
         encounters: {
             walk: [
                 enc(10, 3, 6, 20),
-                enc(12, 7, 10, 10),
-                enc(43, 4, 8, 20),
-                enc(46, 4, 8, 15),
-                enc(16, 4, 8, 20),
-                enc(102, 6, 9, 15)
+                enc(43, 4, 8, 15),
+                enc(16, 4, 8, 15),
+                enc(102, 6, 9, 10),
+                enc(2046, 4, 8, 15),
+                enc(2029, 4, 8, 10),
+                enc(2032, 4, 8, 10),
+                enc(2020, 8, 10, 5),
+                enc(2012, 8, 10, 4),
+                enc(2070, 8, 10, 4),
+                enc(2045, 10, 12, 2)
             ],
             surf: [enc(72, 5, 10, 70), enc(98, 5, 10, 30)]
         }
@@ -116,17 +121,28 @@ export const ORANGE_ZONES: ZoneDefinition[] = [
         id: "pinkanIsland",
         name: "Pinkan Island",
         badgesRequired: 2,
-        blurb: "A protected island where Pinkan Berries tint every Pokémon pink.",
+        blurb: "A protected reserve where Pinkan Berries turn every Pokémon pink.",
         encounters: {
             walk: [
-                enc(103, 22, 26, 15),
-                enc(111, 22, 26, 15),
-                enc(33, 21, 25, 15),
-                enc(56, 21, 25, 15),
-                enc(25, 20, 24, 15),
-                enc(12, 21, 25, 10),
-                enc(70, 21, 25, 10),
-                enc(35, 20, 24, 5)
+                enc(1010, 20, 23, 10),
+                enc(1013, 20, 23, 10),
+                enc(1016, 20, 24, 10),
+                enc(1019, 20, 24, 10),
+                enc(1029, 21, 25, 8),
+                enc(1032, 21, 25, 8),
+                enc(1046, 21, 25, 8),
+                enc(1048, 21, 25, 8),
+                enc(1050, 21, 25, 8),
+                enc(1056, 21, 25, 8),
+                enc(1069, 21, 25, 8),
+                enc(1103, 23, 26, 6),
+                enc(1111, 23, 26, 6),
+                enc(1085, 24, 26, 4),
+                enc(1047, 25, 27, 3),
+                enc(1057, 25, 27, 3),
+                enc(1045, 25, 27, 2),
+                enc(1034, 26, 28, 2),
+                enc(1112, 26, 28, 2)
             ]
         }
     }),
@@ -242,6 +258,234 @@ export const ORANGE_ZONES: ZoneDefinition[] = [
     })
 ];
 
+type Row = [id: number, minLevel: number, maxLevel: number, weight?: number];
+
+function island(
+    id: string,
+    name: string,
+    badgesRequired: number,
+    blurb: string,
+    walk: Row[],
+    extra: Partial<ZoneDefinition> = {}
+): ZoneDefinition {
+    return zone({
+        id,
+        name,
+        badgesRequired,
+        blurb,
+        encounters: { walk: walk.map(([sid, min, max, weight]) => enc(sid, min, max, weight)) },
+        ...extra
+    });
+}
+
+/** The rest of the Orange Archipelago from Bulbapedia's list of anime-exclusive locations. */
+export const MORE_ORANGE_ZONES: ZoneDefinition[] = [
+    island(
+        "kinnowIsland",
+        "Kinnow Island",
+        1,
+        "Port of the Pokémon Showboat and its traveling stars.",
+        [
+            [54, 12, 17, 25],
+            [60, 12, 17, 20],
+            [118, 12, 17, 20],
+            [90, 12, 17, 15],
+            [61, 17, 18, 5],
+            [55, 17, 18, 4]
+        ]
+    ),
+    island(
+        "mandarinNorth",
+        "Mandarin Island North",
+        1,
+        "A town where a strange device turned Pokémon against their Trainers.",
+        [
+            [25, 12, 17, 20],
+            [19, 12, 17, 20],
+            [81, 12, 17, 20],
+            [100, 12, 17, 20],
+            [20, 16, 18, 8],
+            [125, 17, 18, 2]
+        ]
+    ),
+    island(
+        "ghostShip",
+        "Ghost Ship",
+        1,
+        "A sunken wreck off Moro Island, crewed by Ghost Pokémon.",
+        [
+            [92, 15, 19, 35],
+            [200, 15, 19, 20],
+            [41, 15, 19, 25],
+            [93, 19, 20, 8],
+            [94, 20, 21, 2]
+        ]
+    ),
+    island("goldenIsland", "Golden Island", 2, "An island whose people worship Meowth as a god.", [
+        [52, 20, 25, 35],
+        [27, 20, 25, 20],
+        [108, 20, 25, 15],
+        [53, 25, 27, 8],
+        [28, 25, 27, 5]
+    ]),
+    island(
+        "sevenGrapefruitIslands",
+        "Seven Grapefruit Islands",
+        2,
+        "Seven fruit-covered isles where a Snorlax once ate everything.",
+        [
+            [43, 20, 25, 20],
+            [69, 20, 25, 20],
+            [102, 20, 25, 15],
+            [191, 20, 25, 15],
+            [204, 20, 25, 15],
+            [12, 22, 26, 10],
+            [143, 26, 28, 1]
+        ]
+    ),
+    island("trovitopolis", "Trovitopolis", 2, "A tourist city stalked by a mystery Pokémon.", [
+        [88, 22, 27, 25],
+        [109, 22, 27, 25],
+        [96, 22, 27, 25],
+        [89, 27, 28, 5],
+        [110, 27, 28, 5]
+    ]),
+    island(
+        "fairchildIsland",
+        "Fairchild Island",
+        3,
+        "Where a Trainer bound for glory challenged Ash.",
+        [
+            [25, 28, 33, 20],
+            [35, 28, 33, 20],
+            [39, 28, 33, 20],
+            [60, 28, 33, 15],
+            [61, 32, 34, 8],
+            [26, 33, 34, 3],
+            [36, 33, 34, 3]
+        ]
+    ),
+    island(
+        "cleopatraIsland",
+        "Cleopatra Island",
+        3,
+        "A frozen shore where Charizard needed warming up.",
+        [
+            [77, 28, 33, 20],
+            [58, 28, 33, 20],
+            [126, 30, 34, 8],
+            [240, 28, 32, 8],
+            [4, 28, 32, 3],
+            [5, 32, 34, 2],
+            [220, 28, 33, 20]
+        ]
+    ),
+    island(
+        "ascorbiaIsland",
+        "Ascorbia Island",
+        3,
+        "Two villages feuding over the island's only spring.",
+        [
+            [60, 28, 33, 20],
+            [61, 30, 34, 15],
+            [54, 28, 33, 20],
+            [118, 28, 33, 20],
+            [7, 28, 32, 3],
+            [62, 34, 35, 2],
+            [186, 34, 35, 2]
+        ]
+    ),
+    island(
+        "butwalIsland",
+        "Butwal Island",
+        3,
+        "Home of a feast-loving cook and his hungry Pokémon.",
+        [
+            [52, 28, 33, 20],
+            [108, 28, 33, 20],
+            [241, 28, 33, 20],
+            [128, 28, 33, 15],
+            [143, 33, 34, 2]
+        ]
+    ),
+    island("rindIsland", "Rind Island", 3, "Where a wacky Pokémon Watcher studied Bug Pokémon.", [
+        [123, 28, 33, 15],
+        [127, 28, 33, 15],
+        [12, 28, 33, 20],
+        [15, 28, 33, 20],
+        [214, 30, 34, 8],
+        [48, 28, 33, 20]
+    ]),
+    island("tarrocoIsland", "Tarroco Island", 4, "Where Lapras rejoined its herd.", [
+        [131, 36, 42, 15],
+        [130, 38, 42, 10],
+        [117, 36, 42, 20],
+        [91, 36, 42, 15],
+        [73, 36, 42, 20],
+        [226, 36, 42, 15]
+    ]),
+    island(
+        "hamlinIsland",
+        "Hamlin Island",
+        4,
+        "Its tunnels hide a sleeping Snorlax and Diglett galore.",
+        [
+            [50, 36, 40, 25],
+            [51, 38, 42, 20],
+            [74, 36, 42, 20],
+            [75, 38, 42, 15],
+            [143, 42, 43, 2]
+        ]
+    ),
+    island(
+        "fireIsland",
+        "Fire Island",
+        4,
+        "Home of the Titan of Fire.",
+        [
+            [58, 50, 55, 25],
+            [59, 55, 58, 5],
+            [77, 50, 55, 25],
+            [78, 55, 58, 8],
+            [126, 52, 56, 15],
+            [218, 50, 55, 20]
+        ],
+        { postGame: true }
+    ),
+    island(
+        "iceIsland",
+        "Ice Island",
+        4,
+        "Home of the Titan of Ice.",
+        [
+            [86, 50, 55, 20],
+            [87, 55, 58, 8],
+            [91, 52, 56, 15],
+            [124, 52, 56, 15],
+            [220, 50, 55, 20],
+            [221, 55, 58, 8],
+            [225, 50, 55, 14]
+        ],
+        { postGame: true }
+    ),
+    island(
+        "lightningIsland",
+        "Lightning Island",
+        4,
+        "Home of the Titan of Lightning.",
+        [
+            [25, 50, 55, 20],
+            [26, 55, 58, 8],
+            [125, 52, 56, 15],
+            [135, 55, 58, 4],
+            [179, 50, 55, 20],
+            [180, 52, 56, 15],
+            [181, 56, 58, 4]
+        ],
+        { postGame: true }
+    )
+];
+
 export const ORANGE_TRIALS: GymDefinition[] = [
     trial({
         id: "cissy",
@@ -251,7 +495,7 @@ export const ORANGE_TRIALS: GymDefinition[] = [
         badge: "Coral-Eye Badge",
         badgeNumber: 1,
         specialty: "water",
-        statMultiplier: 1.25,
+        statMultiplier: 2.5,
         team: [
             { id: 117, level: 18 },
             { id: 9, level: 20 }
@@ -268,7 +512,7 @@ export const ORANGE_TRIALS: GymDefinition[] = [
         badge: "Sea Ruby Badge",
         badgeNumber: 2,
         specialty: "ground",
-        statMultiplier: 1.55,
+        statMultiplier: 3.1,
         team: [
             { id: 31, level: 26 },
             { id: 74, level: 24 },
@@ -286,7 +530,7 @@ export const ORANGE_TRIALS: GymDefinition[] = [
         badge: "Spike Shell Badge",
         badgeNumber: 3,
         specialty: null,
-        statMultiplier: 1.9,
+        statMultiplier: 3.8,
         team: [
             { id: 125, level: 32 },
             { id: 121, level: 32 },
@@ -304,7 +548,7 @@ export const ORANGE_TRIALS: GymDefinition[] = [
         badge: "Jade Star Badge",
         badgeNumber: 4,
         specialty: null,
-        statMultiplier: 2.2,
+        statMultiplier: 4.4,
         team: [
             { id: 65, level: 38 },
             { id: 105, level: 38 }
@@ -332,7 +576,7 @@ export function orangeFinale(): TrainerDefinition[] {
             specialty: null,
             team,
             timeLimit: 30 + team.length * 15,
-            statMultiplier: 2.75,
+            statMultiplier: 4.7,
             prizeMoney: 48 * 100,
             quote: "No one has taken the Winner's Cup from me. Not once."
         }
@@ -340,6 +584,18 @@ export function orangeFinale(): TrainerDefinition[] {
 }
 
 export const ORANGE_SPECIALS: SpecialEncounter[] = [
+    {
+        kind: "legendary",
+        id: "crystalOnix",
+        region: "orange",
+        speciesId: 3095,
+        level: 35,
+        zoneId: "sunburstIsland",
+        place: "Sunburst Island",
+        badgesRequired: 1,
+        strength: 1.9,
+        text: "An Onix made of living glass. Water can't hurt it, but fire might crack it."
+    },
     {
         kind: "gift",
         id: "ivyVileplume",
@@ -386,11 +642,11 @@ export const ORANGE_SPECIALS: SpecialEncounter[] = [
         kind: "gift",
         id: "pinkanPikachu",
         region: "orange",
-        speciesId: 25,
+        speciesId: 1025,
         level: 20,
         place: "Pinkan Island",
         badgesRequired: 2,
-        text: "Officer Jenny lets you take one of the island's friendly Pikachu."
+        text: "Officer Jenny trusts you with one of the reserve's pink Pikachu."
     },
     {
         kind: "trade",
@@ -421,7 +677,7 @@ export const ORANGE_SPECIALS: SpecialEncounter[] = [
         region: "orange",
         speciesId: 146,
         level: 55,
-        zoneId: "shamoutiIsland",
+        zoneId: "fireIsland",
         place: "Fire Island",
         badgesRequired: 4,
         postGame: true,
@@ -434,7 +690,7 @@ export const ORANGE_SPECIALS: SpecialEncounter[] = [
         region: "orange",
         speciesId: 144,
         level: 55,
-        zoneId: "shamoutiIsland",
+        zoneId: "iceIsland",
         place: "Ice Island",
         badgesRequired: 4,
         postGame: true,
@@ -447,7 +703,7 @@ export const ORANGE_SPECIALS: SpecialEncounter[] = [
         region: "orange",
         speciesId: 145,
         level: 55,
-        zoneId: "shamoutiIsland",
+        zoneId: "lightningIsland",
         place: "Lightning Island",
         badgesRequired: 4,
         postGame: true,

@@ -5,7 +5,13 @@
  */
 import { assetUrl } from "game/pokemon/assets";
 import type { PokemonType } from "game/pokemon/data";
-import { formatDexNumber, getSpecies, spriteUrl, TYPE_COLORS } from "game/pokemon/data";
+import {
+    formatDexNumber,
+    getSpecies,
+    spriteUrl,
+    TYPE_COLORS,
+    variantFilter
+} from "game/pokemon/data";
 import { format } from "util/bignum";
 import type { GymDefinition } from "game/pokemon/trainers";
 import type { FunctionalComponent } from "vue";
@@ -52,6 +58,7 @@ export const Sprite = component<{
     return (
         <img
             class={["pk-sprite", props.silhouette ? "pk-silhouette" : "", props.extraClass ?? ""]}
+            style={props.silhouette ? undefined : { filter: variantFilter(props.id) }}
             src={url}
             alt={props.silhouette ? "Unknown Pokémon" : getSpecies(props.id).name}
             width={size}

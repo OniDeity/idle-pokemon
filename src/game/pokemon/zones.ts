@@ -1,8 +1,8 @@
 import type { EncounterEntry, EncounterPoolId } from "./data";
 import { ENCOUNTERS } from "./data";
 import type { KeyItemId } from "./items";
-import { KANTO_ANIME_ZONES } from "./kantoAnime";
-import { ORANGE_ZONES } from "./orange";
+import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
+import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
 import { SEVII_ZONES } from "./sevii";
 
 export type RegionId = "kanto" | "orange" | "sevii";
@@ -237,14 +237,19 @@ const KANTO_GAME_ZONES: Omit<ZoneDefinition, "region">[] = [
 
 const KANTO_ZONES: ZoneDefinition[] = [
     ...KANTO_GAME_ZONES.map((zone): ZoneDefinition => ({ ...zone, region: "kanto" })),
-    ...KANTO_ANIME_ZONES
+    ...KANTO_ANIME_ZONES,
+    ...MORE_KANTO_ANIME_ZONES
     // Stable sort keeps story order within each badge tier, anime locations last.
 ].sort(
     (a, b) => a.badgesRequired - b.badgesRequired || Number(!!a.postGame) - Number(!!b.postGame)
 );
 
+const ORANGE_ALL: ZoneDefinition[] = [...ORANGE_ZONES, ...MORE_ORANGE_ZONES].sort(
+    (a, b) => a.badgesRequired - b.badgesRequired || Number(!!a.postGame) - Number(!!b.postGame)
+);
+
 /** Every explorable zone in every region. */
-export const ZONES: ZoneDefinition[] = [...KANTO_ZONES, ...ORANGE_ZONES, ...SEVII_ZONES];
+export const ZONES: ZoneDefinition[] = [...KANTO_ZONES, ...ORANGE_ALL, ...SEVII_ZONES];
 
 export function zonesIn(region: RegionId): ZoneDefinition[] {
     return ZONES.filter(zone => zone.region === region);

@@ -8,7 +8,15 @@ import {
     stepTrainerBattle,
     trainerTeam
 } from "game/pokemon/balance";
-import { DEX_SIZE, getSpecies, PRE_EVOLUTION, SPECIES, typeEffectiveness } from "game/pokemon/data";
+import {
+    DEX_SIZE,
+    getSpecies,
+    PRE_EVOLUTION,
+    SPECIES,
+    typeEffectiveness,
+    VARIANT_SPECIES,
+    variantFilter
+} from "game/pokemon/data";
 import { MEW_ID, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { REGION_LIST, REGIONS } from "game/pokemon/regions";
@@ -78,8 +86,27 @@ describe("data", () => {
         for (const zone of ZONES) {
             const species = allZoneSpecies(zone.id);
             expect(species.length, zone.id).toBeGreaterThan(0);
-            species.forEach(id => expect(id).toBeLessThanOrEqual(DEX_SIZE));
+            species.forEach(id => expect(getSpecies(id).id).toBe(id));
         }
+    });
+
+    test("variant forms point at real species and evolve sensibly", () => {
+        expect(VARIANT_SPECIES.length).toBe(29);
+        for (const form of VARIANT_SPECIES) {
+            expect(getSpecies(form.baseSpecies!).id).toBe(form.baseSpecies);
+            expect(variantFilter(form.id)).toBeDefined();
+            form.evolutions.forEach(e => expect(getSpecies(e.into)).toBeDefined());
+        }
+        // Pinkan Rhyhorn stays pink when it evolves; Pinkan Caterpie becomes a regular Metapod.
+        expect(getSpecies(1111).evolutions[0].into).toBe(1112);
+        expect(getSpecies(1010).evolutions[0].into).toBe(11);
+        // Every variant can be found somewhere.
+        const found = new Set([
+            ...ZONES.flatMap(z => allZoneSpecies(z.id)),
+            ...SPECIAL_ENCOUNTERS.map(s => s.speciesId),
+            ...VARIANT_SPECIES.flatMap(v => v.evolutions.map(e => e.into))
+        ]);
+        expect(VARIANT_SPECIES.filter(v => !found.has(v.id)).map(v => v.name)).toEqual([]);
     });
 
     test("specials belong to a region and point at real zones", () => {

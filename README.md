@@ -9,10 +9,13 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 
 ## How it plays
 
-- **Journeys through three regions.** Kanto (with 10 anime-exclusive locations like Porta
-  Vista, Maiden's Peak and Pokémopolis), the Orange Islands from the anime (the Orange Crew and
-  Drake's Winner's Cup), and the Sevii Islands from FireRed/LeafGreen (Team Rocket, the
+- **Journeys through three regions.** Kanto (plus 52 anime-exclusive locations from
+  [Bulbapedia's list](https://bulbapedia.bulbagarden.net/wiki/List_of_animated_series-exclusive_locations),
+  from Porta Vista to the Tree of Beginning), the Orange Islands (29 islands, the Orange Crew
+  and Drake's Winner's Cup), and the Sevii Islands from FireRed/LeafGreen (Team Rocket, the
   Ruby & Sapphire quest and the Trainer Tower). Each first clear is tuned for about a day of play.
+- **Anime variants**: 20 Pinkan Pokémon on Pinkan Island, 7 Valencian Pokémon on Valencia
+  Island, the Crystal Onix and the Pink Butterfree, each with its own Pokédex entry.
 - **Wild battles run automatically.** Your trainer sends out the party member with the best
   type matchup. Every win pays Pokédollars and gives XP to the whole party.
 - **Catching** uses real capture rates. Catch _new_ species only, _all_ of them (extra catches

@@ -71,13 +71,15 @@ if (process.env.KANTO_E4 != null || process.env.KANTO_CHAMP != null) {
 }
 
 //   SCALE_orange=1.5   multiply every trial and finale strength in a region
+//   FINALE_orange=1.2  override the finale's multiplier separately
 for (const region of Object.values(REGIONS)) {
     const scale = Number(process.env[`SCALE_${region.id}`] ?? 1);
-    if (scale === 1) continue;
+    const finaleScale = Number(process.env[`FINALE_${region.id}`] ?? scale);
+    if (scale === 1 && finaleScale === 1) continue;
     region.trials.forEach(t => (t.statMultiplier *= scale));
     const original = region.finale;
     region.finale = starter =>
-        original(starter).map(t => ({ ...t, statMultiplier: t.statMultiplier * scale }));
+        original(starter).map(t => ({ ...t, statMultiplier: t.statMultiplier * finaleScale }));
 }
 
 // Permanent state, kept across journeys.

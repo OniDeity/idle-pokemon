@@ -11,7 +11,14 @@ import {
     memberMultiplier
 } from "game/pokemon/balance";
 import type { Species } from "game/pokemon/data";
-import { DEX_SIZE, getSpecies, PRE_EVOLUTION, SPECIES } from "game/pokemon/data";
+import {
+    DEX_SIZE,
+    getSpecies,
+    isVariant,
+    PRE_EVOLUTION,
+    SPECIES,
+    VARIANT_SPECIES
+} from "game/pokemon/data";
 import { STONES } from "game/pokemon/items";
 import { REGION_LIST, REGIONS } from "game/pokemon/regions";
 import { MEW_ID, MEW_REQUIREMENT, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
@@ -39,7 +46,7 @@ export type DexEntry = {
 
 const EMPTY: DexEntry = { seen: false, caught: false, shiny: false, timesCaught: 0 };
 
-type Filter = "all" | "caught" | "missing" | "shiny" | "kanto" | "johto";
+type Filter = "all" | "caught" | "missing" | "shiny" | "kanto" | "johto" | "variants";
 
 /** Where a species can be found: wild zones, specials, or by evolving something. */
 function locationsOf(id: number): string[] {
@@ -98,10 +105,18 @@ const layer = createLayer(id, () => {
     const filter = ref<Filter>("all");
     const selected = ref<number>(1);
 
-    const list = computed(() => Object.values(entries.value));
+    /** Regular species only; variants are counted separately. */
+    const list = computed(() =>
+        Object.entries(entries.value)
+            .filter(([key]) => !isVariant(Number(key)))
+            .map(([, e]) => e)
+    );
     const seenCount = computed(() => list.value.filter(e => e.seen).length);
     const caughtCount = computed(() => list.value.filter(e => e.caught).length);
     const shinyCount = computed(() => list.value.filter(e => e.shiny).length);
+    const variantCaught = computed(
+        () => VARIANT_SPECIES.filter(v => entries.value[v.id]?.caught === true).length
+    );
 
     function entry(speciesId: number): DexEntry {
         return entries.value[speciesId] ?? EMPTY;
@@ -156,7 +171,7 @@ const layer = createLayer(id, () => {
     };
 
     const visibleSpecies = computed(() =>
-        SPECIES.filter(s => {
+        (filter.value === "variants" ? VARIANT_SPECIES : SPECIES).filter(s => {
             const e = entry(s.id);
             switch (filter.value) {
                 case "caught":
@@ -167,6 +182,8 @@ const layer = createLayer(id, () => {
                     return e.shiny;
                 case "kanto":
                     return s.id <= 151;
+                case "variants":
+                    return true;
                 case "johto":
                     return s.id > 151;
                 default:
@@ -242,7 +259,8 @@ const layer = createLayer(id, () => {
         ["missing", "Missing"],
         ["shiny", "Shiny"],
         ["kanto", "#1–151"],
-        ["johto", "#152–251"]
+        ["johto", "#152–251"],
+        ["variants", "Variants"]
     ];
 
     return {
@@ -254,6 +272,7 @@ const layer = createLayer(id, () => {
         entries,
         seenCount,
         caughtCount,
+        variantCaught,
         shinyCount,
         markSeen,
         markCaught,
@@ -268,7 +287,8 @@ const layer = createLayer(id, () => {
                 <div class="pk-dex-summary">
                     <div>
                         Seen <b>{seenCount.value}</b> · Caught <b>{caughtCount.value}</b> /{" "}
-                        {DEX_SIZE} · Shiny <b>{shinyCount.value}</b>
+                        {DEX_SIZE} · Shiny <b>{shinyCount.value}</b> · Variants{" "}
+                        <b>{variantCaught.value}</b> / {VARIANT_SPECIES.length}
                     </div>
                     <Bar value={caughtCount.value} max={DEX_SIZE} kind="progress" />
                     <div class="pk-muted">
@@ -332,7 +352,9 @@ const layer = createLayer(id, () => {
                                         shiny={e.shiny}
                                         silhouette={!e.seen}
                                     />
-                                    <span class="pk-dex-cell-num">{species.id}</span>
+                                    <span class="pk-dex-cell-num">
+                                        {species.baseSpecies ?? species.id}
+                                    </span>
                                     {e.shiny ? <span class="pk-dex-cell-shiny">✨</span> : null}
                                 </button>
                             );

@@ -12,7 +12,8 @@
                         finale
                     </li>
                     <li class="feature">
-                        Ten anime-exclusive Kanto locations and giant-Pokémon boss fights
+                        52 anime-exclusive Kanto locations, 29 Orange Islands, giant-Pokémon boss
+                        fights and Mew at the Tree of Beginning
                     </li>
                     <li class="feature">
                         Pokédex expanded to 251, with Johto Pokémon, Lugia, Ho-Oh and the legendary
@@ -25,6 +26,9 @@
                     <li class="feature">
                         Automation: shopping, gifts, evolution, party building, travel and
                         challenges
+                    </li>
+                    <li class="feature">
+                        Pinkan and Valencian variants, the Crystal Onix and the Pink Butterfree
                     </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="balancing">
