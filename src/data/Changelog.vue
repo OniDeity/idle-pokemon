@@ -5,14 +5,26 @@
         </template>
         <template v-slot:body>
             <details open>
-                <summary>v0.0 Initial Commit - <time>2021-09-04</time></summary>
-                This is the first release :D
+                <summary>v2.0 Kanto Reborn</summary>
+                A ground-up rebuild of the game.
                 <ul>
-                    <li class="feature">Did everything</li>
-                    <li class="fix">Had some fun</li>
-                    <li class="breaking">Removed everything</li>
-                    <li class="balancing">Created some bugs to fix later</li>
+                    <li class="feature">
+                        All 151 Pokémon, 36 zones, fishing, Surf, gifts, trades and legendaries
+                    </li>
+                    <li class="feature">Live battle scene with automatic best-matchup switching</li>
+                    <li class="feature">
+                        8 Gyms, the Elite Four and the Champion, with exact battle forecasts
+                    </li>
+                    <li class="feature">
+                        Evolution by level, stone and trade; a six-Pokémon party and PC box
+                    </li>
+                    <li class="feature">Pokédex milestones and the Hall of Fame prestige layer</li>
+                    <li class="breaking">Saves from v0.1 are not carried over</li>
                 </ul>
+            </details>
+            <details>
+                <summary>v0.1 Route 1</summary>
+                Route 1 to Brock vertical slice.
             </details>
         </template>
     </Modal>

@@ -1,27 +1,27 @@
 {
-	"$schema": "./projInfo-schema.json",
+    "$schema": "./projInfo-schema.json",
 
-	"title": "Idle Pokemon",
-	"description": "An idle Pokemon game, starting in Kanto.",
-	"id": "idle-pokemon-kanto",
-	"author": "Onide",
-	"discordName": "",
-	"discordLink": "",
+    "title": "Idle Pokemon",
+    "description": "An idle Pokémon adventure through Kanto: catch all 151, earn 8 badges, conquer the League.",
+    "id": "idle-pokemon-kanto-v2",
+    "author": "Onide",
+    "discordName": "",
+    "discordLink": "",
 
-	"versionNumber": "0.1",
-	"versionTitle": "Route 1",
+    "versionNumber": "2.0",
+    "versionTitle": "Kanto Reborn",
 
-	"allowGoBack": true,
-	"defaultShowSmall": false,
-	"defaultDecimalsShown": 2,
-	"useHeader": true,
-	"banner": null,
-	"logo": "",
-	"initialTabs": [ "main", "field" ],
+    "allowGoBack": false,
+    "defaultShowSmall": false,
+    "defaultDecimalsShown": 2,
+    "useHeader": true,
+    "banner": null,
+    "logo": "",
+    "initialTabs": ["main", "map"],
 
-	"maxTickLength": 3600,
-	"offlineLimit": 1,
-	"enablePausing": true,
-	"exportEncoding": "base64",
-	"disableHealthWarning": false
+    "maxTickLength": 3600,
+    "offlineLimit": 12,
+    "enablePausing": true,
+    "exportEncoding": "base64",
+    "disableHealthWarning": false
 }

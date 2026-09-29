@@ -1,210 +1,327 @@
+/**
+ * Regenerates the static Pokémon data the game ships with:
+ *   - src/data/pokemon/species.json     All 151 Kanto species (stats, types, catch rate, evolutions)
+ *   - src/data/pokemon/encounters.json  Red/Blue wild encounter pools for every zone in the game
+ *   - src/data/pokemon/typeChart.json   Non-neutral type matchups
+ *
+ * Source: the PokeAPI CSV dump on GitHub (https://github.com/PokeAPI/pokeapi/tree/master/data/v2/csv).
+ * Reading the CSVs directly means one request per table instead of hundreds of REST calls.
+ *
+ * Usage: npm run fetch:pokemon
+ */
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { EncounterTableEntry, EncounterTableJSON, SpeciesData } from "../src/game/pokemon/types";
 
-const API_BASE = "https://pokeapi.co/api/v2";
-const VERSIONS = ["red", "blue"];
-const METHOD = "walk";
+const CSV_BASE = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv";
+const MAX_DEX = 151;
+const RED_BLUE_VERSION_IDS = new Set(["1", "2"]);
+const ENGLISH = "9";
 
-const AREAS: { zoneId: string; slugs: string[] }[] = [
-    { zoneId: "route1", slugs: ["kanto-route-1-area"] },
-    {
-        zoneId: "route2",
-        slugs: [
-            "kanto-route-2-south-towards-viridian-city",
-            "kanto-route-2-north-towards-pewter-city"
-        ]
-    },
-    { zoneId: "viridianForest", slugs: ["viridian-forest-area"] }
-];
+/**
+ * Game zone id → [location identifier, location-area identifier] pairs from PokeAPI.
+ * Multi-floor dungeons are merged into one zone. Keep in sync with src/game/pokemon/zones.ts.
+ */
+const ZONE_AREAS: Record<string, [string, string][]> = {
+    route1: [["kanto-route-1", ""]],
+    route22: [["kanto-route-22", ""]],
+    route2: [["kanto-route-2", "south-towards-viridian-city"]],
+    viridianForest: [["viridian-forest", ""]],
+    route3: [["kanto-route-3", ""]],
+    mtMoon: [
+        ["mt-moon", "1f"],
+        ["mt-moon", "b1f"],
+        ["mt-moon", "b2f"]
+    ],
+    route4: [["kanto-route-4", ""]],
+    route24: [["kanto-route-24", ""]],
+    route25: [["kanto-route-25", ""]],
+    route5: [["kanto-route-5", ""]],
+    route6: [["kanto-route-6", ""]],
+    route11: [["kanto-route-11", ""]],
+    diglettsCave: [["digletts-cave", ""]],
+    route9: [["kanto-route-9", ""]],
+    route10: [["kanto-route-10", ""]],
+    rockTunnel: [
+        ["rock-tunnel", "b1f"],
+        ["rock-tunnel", "b2f"]
+    ],
+    route8: [["kanto-route-8", ""]],
+    route7: [["kanto-route-7", ""]],
+    pokemonTower: [
+        ["pokemon-tower", "3f"],
+        ["pokemon-tower", "4f"],
+        ["pokemon-tower", "5f"],
+        ["pokemon-tower", "6f"],
+        ["pokemon-tower", "7f"]
+    ],
+    route12: [["kanto-route-12", ""]],
+    route13: [["kanto-route-13", ""]],
+    route14: [["kanto-route-14", ""]],
+    route15: [["kanto-route-15", ""]],
+    route16: [["kanto-route-16", ""]],
+    route17: [["kanto-route-17", ""]],
+    route18: [["kanto-route-18", ""]],
+    safariZone: [
+        ["kanto-safari-zone", "middle"],
+        ["kanto-safari-zone", "area-1-east"],
+        ["kanto-safari-zone", "area-2-north"],
+        ["kanto-safari-zone", "area-3-west"]
+    ],
+    powerPlant: [["kanto-power-plant", ""]],
+    route19: [["kanto-sea-route-19", ""]],
+    route20: [["kanto-sea-route-20", ""]],
+    seafoamIslands: [
+        ["seafoam-islands", "1f"],
+        ["seafoam-islands", "b1f"],
+        ["seafoam-islands", "b2f"],
+        ["seafoam-islands", "b3f"],
+        ["seafoam-islands", "b4f"]
+    ],
+    pokemonMansion: [
+        ["pokemon-mansion", "1f"],
+        ["pokemon-mansion", "2f"],
+        ["pokemon-mansion", "3f"],
+        ["pokemon-mansion", "b1f"]
+    ],
+    route21: [["kanto-sea-route-21", ""]],
+    route23: [["kanto-route-23", ""]],
+    victoryRoad: [
+        ["kanto-victory-road-2", "1f"],
+        ["kanto-victory-road-2", "2f"],
+        ["kanto-victory-road-2", "3f"]
+    ],
+    ceruleanCave: [
+        ["cerulean-cave", "1f"],
+        ["cerulean-cave", "2f"],
+        ["cerulean-cave", "b1f"]
+    ]
+};
 
-// Starters never appear in a wild encounter table, so they're fetched unconditionally.
-const EXTRA_SPECIES = ["bulbasaur", "charmander", "squirtle"];
+const POOL_BY_METHOD: Record<string, string> = {
+    walk: "walk",
+    surf: "surf",
+    "old-rod": "oldRod",
+    "good-rod": "goodRod",
+    "super-rod": "superRod"
+};
 
-interface PokemonEncounter {
-    pokemon: { name: string; url: string };
-    version_details: {
-        version: { name: string };
-        max_chance: number;
-        encounter_details: {
-            chance: number;
-            method: { name: string };
-            min_level: number;
-            max_level: number;
-        }[];
-    }[];
-}
+const STONE_BY_ITEM_ID: Record<string, string> = {
+    "81": "moonStone",
+    "82": "fireStone",
+    "83": "thunderStone",
+    "84": "waterStone",
+    "85": "leafStone"
+};
 
-interface LocationAreaResponse {
-    pokemon_encounters: PokemonEncounter[];
-}
+const GROWTH_RATES: Record<string, string> = {
+    "1": "slow",
+    "2": "medium",
+    "3": "fast",
+    "4": "mediumSlow",
+    "5": "erratic",
+    "6": "fluctuating"
+};
 
-interface SpeciesResponse {
-    id: number;
-    capture_rate: number;
-}
+type Row = Record<string, string>;
 
-interface PokemonResponse {
-    types: { type: { name: string } }[];
-    stats: { stat: { name: string }; base_stat: number }[];
-    sprites: { front_default: string | null; front_shiny: string | null };
-}
-
-async function fetchJson<T>(url: string): Promise<T> {
-    const res = await fetch(url);
+async function fetchCsv(table: string): Promise<Row[]> {
+    const res = await fetch(`${CSV_BASE}/${table}.csv`);
     if (!res.ok) {
-        throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+        throw new Error(`Failed to fetch ${table}.csv: ${res.status} ${res.statusText}`);
     }
-    return (await res.json()) as T;
+    const [header, ...lines] = (await res.text()).trim().split(/\r?\n/);
+    const keys = header.split(",");
+    // None of the tables we read have quoted commas in the columns we use.
+    return lines.map(line => {
+        const values = line.split(",");
+        return Object.fromEntries(keys.map((k, i) => [k, values[i] ?? ""]));
+    });
 }
 
-interface AggregatedEncounter {
-    speciesName: string;
-    weight: number;
-    minLevel: number;
-    maxLevel: number;
-}
-
-async function fetchAreaEncounters(slug: string): Promise<AggregatedEncounter[]> {
-    const data = await fetchJson<LocationAreaResponse>(`${API_BASE}/location-area/${slug}`);
-    const results: AggregatedEncounter[] = [];
-
-    for (const encounter of data.pokemon_encounters) {
-        const chances: number[] = [];
-        let minLevel = Infinity;
-        let maxLevel = -Infinity;
-
-        for (const versionDetail of encounter.version_details) {
-            if (!VERSIONS.includes(versionDetail.version.name)) continue;
-            for (const detail of versionDetail.encounter_details) {
-                if (detail.method.name !== METHOD) continue;
-                chances.push(detail.chance);
-                minLevel = Math.min(minLevel, detail.min_level);
-                maxLevel = Math.max(maxLevel, detail.max_level);
-            }
-        }
-
-        if (chances.length === 0) continue;
-
-        const avgChance = chances.reduce((sum, c) => sum + c, 0) / chances.length;
-        results.push({
-            speciesName: encounter.pokemon.name,
-            weight: avgChance,
-            minLevel,
-            maxLevel
-        });
-    }
-
-    return results;
-}
-
-async function buildEncounterTable(zoneId: string, slugs: string[]): Promise<EncounterTableJSON> {
-    const perArea = await Promise.all(slugs.map(fetchAreaEncounters));
-    const merged = new Map<string, AggregatedEncounter>();
-
-    for (const areaResults of perArea) {
-        for (const entry of areaResults) {
-            const existing = merged.get(entry.speciesName);
-            if (existing == null) {
-                merged.set(entry.speciesName, { ...entry });
-            } else {
-                existing.weight += entry.weight;
-                existing.minLevel = Math.min(existing.minLevel, entry.minLevel);
-                existing.maxLevel = Math.max(existing.maxLevel, entry.maxLevel);
-            }
-        }
-    }
-
-    return {
-        zoneId,
-        locationAreaSlugs: slugs,
-        versionGroup: "red-blue",
-        entries: [...merged.values()].map(
-            (e): EncounterTableEntry => ({
-                speciesId: e.speciesName,
-                weight: e.weight,
-                minLevel: e.minLevel,
-                maxLevel: e.maxLevel
-            })
-        )
-    };
-}
-
-function statLookup(stats: PokemonResponse["stats"], name: string): number {
-    return stats.find(s => s.stat.name === name)?.base_stat ?? 0;
-}
-
-async function fetchSpecies(name: string): Promise<SpeciesData> {
-    const [species, pokemon] = await Promise.all([
-        fetchJson<SpeciesResponse>(`${API_BASE}/pokemon-species/${name}`),
-        fetchJson<PokemonResponse>(`${API_BASE}/pokemon/${name}`)
-    ]);
-
-    return {
-        id: String(species.id),
-        name,
-        types: pokemon.types.map(t => t.type.name),
-        captureRate: species.capture_rate,
-        baseStats: {
-            hp: statLookup(pokemon.stats, "hp"),
-            attack: statLookup(pokemon.stats, "attack"),
-            defense: statLookup(pokemon.stats, "defense"),
-            specialAttack: statLookup(pokemon.stats, "special-attack"),
-            specialDefense: statLookup(pokemon.stats, "special-defense"),
-            speed: statLookup(pokemon.stats, "speed")
-        },
-        sprites: {
-            front: pokemon.sprites.front_default ?? "",
-            frontShiny: pokemon.sprites.front_shiny ?? ""
-        }
-    };
+interface Evolution {
+    into: number;
+    method: "level" | "stone" | "trade";
+    level?: number;
+    stone?: string;
 }
 
 async function main() {
-    console.log("Fetching encounter tables...");
-    const tables = await Promise.all(AREAS.map(a => buildEncounterTable(a.zoneId, a.slugs)));
+    console.log("Downloading PokeAPI CSV tables...");
+    const [
+        speciesRows,
+        pokemonRows,
+        statRows,
+        typeRows,
+        typeNameRows,
+        speciesNameRows,
+        evolutionRows,
+        efficacyRows,
+        encounterRows,
+        slotRows,
+        methodRows,
+        areaRows,
+        locationRows
+    ] = await Promise.all(
+        [
+            "pokemon_species",
+            "pokemon",
+            "pokemon_stats",
+            "pokemon_types",
+            "types",
+            "pokemon_species_names",
+            "pokemon_evolution",
+            "type_efficacy",
+            "encounters",
+            "encounter_slots",
+            "encounter_methods",
+            "location_areas",
+            "locations"
+        ].map(fetchCsv)
+    );
 
-    const speciesNames = new Set<string>();
-    for (const table of tables) {
-        for (const entry of table.entries) {
-            speciesNames.add(entry.speciesId);
+    const typeName = new Map(typeNameRows.map(r => [r.id, r.identifier]));
+    const displayName = new Map(
+        speciesNameRows
+            .filter(r => r.local_language_id === ENGLISH)
+            .map(r => [r.pokemon_species_id, r.name])
+    );
+    const baseExp = new Map(pokemonRows.map(r => [r.id, Number(r.base_experience)]));
+
+    const statsById = new Map<string, number[]>();
+    for (const r of statRows) {
+        const stats = statsById.get(r.pokemon_id) ?? [0, 0, 0, 0, 0, 0];
+        stats[Number(r.stat_id) - 1] = Number(r.base_stat);
+        statsById.set(r.pokemon_id, stats);
+    }
+
+    const typesById = new Map<string, string[]>();
+    for (const r of [...typeRows].sort((a, b) => Number(a.slot) - Number(b.slot))) {
+        const types = typesById.get(r.pokemon_id) ?? [];
+        types.push(typeName.get(r.type_id) ?? "normal");
+        typesById.set(r.pokemon_id, types);
+    }
+
+    const preEvolutionOf = new Map(speciesRows.map(r => [r.id, r.evolves_from_species_id]));
+    const evolutions = new Map<number, Evolution[]>();
+    const seenEvolutions = new Set<string>();
+    for (const r of evolutionRows) {
+        const into = Number(r.evolved_species_id);
+        const from = Number(preEvolutionOf.get(r.evolved_species_id));
+        if (into > MAX_DEX || !from || from > MAX_DEX) continue;
+        // Later generations add alternate rows (regional forms, new items); the first is the original.
+        const key = `${from}->${into}`;
+        if (seenEvolutions.has(key)) continue;
+        seenEvolutions.add(key);
+
+        let evolution: Evolution;
+        if (r.evolution_trigger_id === "1") {
+            evolution = { into, method: "level", level: Number(r.minimum_level) };
+        } else if (r.evolution_trigger_id === "2") {
+            evolution = { into, method: "trade" };
+        } else if (r.evolution_trigger_id === "3" && STONE_BY_ITEM_ID[r.trigger_item_id]) {
+            evolution = { into, method: "stone", stone: STONE_BY_ITEM_ID[r.trigger_item_id] };
+        } else {
+            continue;
+        }
+        evolutions.set(from, [...(evolutions.get(from) ?? []), evolution]);
+    }
+
+    const species = speciesRows
+        .filter(r => Number(r.id) <= MAX_DEX)
+        .map(r => ({
+            id: Number(r.id),
+            name: displayName.get(r.id) ?? r.identifier,
+            types: typesById.get(r.id) ?? ["normal"],
+            // [hp, attack, defense, special-attack, special-defense, speed]
+            baseStats: statsById.get(r.id) ?? [0, 0, 0, 0, 0, 0],
+            baseExp: baseExp.get(r.id) ?? 50,
+            captureRate: Number(r.capture_rate),
+            growthRate: GROWTH_RATES[r.growth_rate_id] ?? "medium",
+            legendary: r.is_legendary === "1" || r.is_mythical === "1",
+            evolutions: evolutions.get(Number(r.id)) ?? []
+        }))
+        .sort((a, b) => a.id - b.id);
+
+    const typeChart: Record<string, Record<string, number>> = {};
+    for (const r of efficacyRows) {
+        const factor = Number(r.damage_factor) / 100;
+        if (factor === 1) continue;
+        const attack = typeName.get(r.damage_type_id);
+        const defend = typeName.get(r.target_type_id);
+        if (attack == null || defend == null) continue;
+        typeChart[attack] = { ...typeChart[attack], [defend]: factor };
+    }
+
+    // Encounters: sum slot rarities per species within each pool, across both versions and all
+    // floors of a zone. Version exclusives stay in (the game merges Red and Blue).
+    const locationId = new Map(locationRows.map(r => [r.identifier, r.id]));
+    const areaKey = new Map(areaRows.map(r => [`${r.location_id}/${r.identifier}`, r.id]));
+    const methodName = new Map(methodRows.map(r => [r.id, r.identifier]));
+    const slots = new Map(slotRows.map(r => [r.id, r]));
+
+    const zoneByArea = new Map<string, string>();
+    for (const [zoneId, areas] of Object.entries(ZONE_AREAS)) {
+        for (const [location, area] of areas) {
+            const id = areaKey.get(`${locationId.get(location)}/${area}`);
+            if (id == null) throw new Error(`Unknown location area ${location}/${area}`);
+            zoneByArea.set(id, zoneId);
         }
     }
-    for (const name of EXTRA_SPECIES) {
-        speciesNames.add(name);
+
+    type Acc = { weight: number; minLevel: number; maxLevel: number };
+    const pools: Record<string, Record<string, Map<number, Acc>>> = {};
+    for (const r of encounterRows) {
+        if (!RED_BLUE_VERSION_IDS.has(r.version_id)) continue;
+        const zoneId = zoneByArea.get(r.location_area_id);
+        const slot = slots.get(r.encounter_slot_id);
+        const pool = POOL_BY_METHOD[methodName.get(slot?.encounter_method_id ?? "") ?? ""];
+        const id = Number(r.pokemon_id);
+        if (zoneId == null || slot == null || pool == null || id > MAX_DEX) continue;
+
+        const zonePools = (pools[zoneId] ??= {});
+        const entries = (zonePools[pool] ??= new Map());
+        const acc = entries.get(id) ?? { weight: 0, minLevel: Infinity, maxLevel: -Infinity };
+        acc.weight += Number(slot.rarity);
+        acc.minLevel = Math.min(acc.minLevel, Number(r.min_level));
+        acc.maxLevel = Math.max(acc.maxLevel, Number(r.max_level));
+        entries.set(id, acc);
     }
 
-    console.log(`Fetching species data for ${speciesNames.size} species...`);
-    const speciesEntries = await Promise.all(
-        [...speciesNames].map(async name => {
-            const data = await fetchSpecies(name);
-            return [data.id, data] as const;
-        })
+    const encounters = Object.fromEntries(
+        Object.keys(ZONE_AREAS).map(zoneId => [
+            zoneId,
+            Object.fromEntries(
+                Object.entries(pools[zoneId] ?? {}).map(([pool, entries]) => [
+                    pool,
+                    [...entries.entries()]
+                        .sort((a, b) => b[1].weight - a[1].weight)
+                        .map(([id, acc]) => ({
+                            id,
+                            weight: acc.weight,
+                            minLevel: acc.minLevel,
+                            maxLevel: acc.maxLevel
+                        }))
+                ])
+            )
+        ])
     );
-    const species: Record<string, SpeciesData> = Object.fromEntries(speciesEntries);
-
-    // Re-key each table's entries by dex id (species.json's key), not species name.
-    const nameToId = new Map(speciesEntries.map(([id, data]) => [data.name, id]));
-    for (const table of tables) {
-        table.entries = table.entries.map(entry => ({
-            ...entry,
-            speciesId: nameToId.get(entry.speciesId) ?? entry.speciesId
-        }));
-    }
 
     const dataDir = path.resolve(import.meta.dirname, "../src/data/pokemon");
-    const encountersDir = path.join(dataDir, "encounters");
-    await mkdir(encountersDir, { recursive: true });
-
-    await writeFile(path.join(dataDir, "species.json"), JSON.stringify(species, null, 2));
-    for (const table of tables) {
-        await writeFile(
-            path.join(encountersDir, `${table.zoneId}.json`),
-            JSON.stringify(table, null, 2)
-        );
-    }
-
-    console.log(`Wrote species.json (${Object.keys(species).length} species) and ${tables.length} encounter tables.`);
+    await mkdir(dataDir, { recursive: true });
+    await writeFile(path.join(dataDir, "species.json"), JSON.stringify(species, null, 1) + "\n");
+    await writeFile(
+        path.join(dataDir, "encounters.json"),
+        JSON.stringify(encounters, null, 1) + "\n"
+    );
+    await writeFile(
+        path.join(dataDir, "typeChart.json"),
+        JSON.stringify(typeChart, null, 1) + "\n"
+    );
+    console.log(
+        `Wrote ${species.length} species, ${Object.keys(encounters).length} zones, ${
+            Object.keys(typeChart).length
+        } attacking types.`
+    );
 }
 
 main().catch(err => {

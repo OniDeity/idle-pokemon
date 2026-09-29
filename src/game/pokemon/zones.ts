@@ -1,39 +1,343 @@
-import route1Encounters from "data/pokemon/encounters/route1.json";
-import route2Encounters from "data/pokemon/encounters/route2.json";
-import viridianForestEncounters from "data/pokemon/encounters/viridianForest.json";
-import type { EncounterTableEntry } from "./types";
+import type { EncounterEntry, EncounterPoolId } from "./data";
+import { ENCOUNTERS } from "./data";
+import type { KeyItemId } from "./items";
 
 export interface ZoneDefinition {
     id: string;
     name: string;
-    encounterTable: EncounterTableEntry[];
-    unlockedByDefault: boolean;
+    /** Badges needed to travel here. */
+    badgesRequired: number;
+    /** Requires beating the Champion. */
+    postGame?: boolean;
+    blurb: string;
 }
 
-export const ROUTE_1: ZoneDefinition = {
-    id: "route1",
-    name: "Route 1",
-    encounterTable: route1Encounters.entries,
-    unlockedByDefault: true
+/** Every explorable zone, in the order the player reaches them. */
+export const ZONES: ZoneDefinition[] = [
+    {
+        id: "route1",
+        name: "Route 1",
+        badgesRequired: 0,
+        blurb: "Tall grass between Pallet Town and Viridian City."
+    },
+    {
+        id: "route22",
+        name: "Route 22",
+        badgesRequired: 0,
+        blurb: "The westward path toward the Pokémon League gate."
+    },
+    {
+        id: "route2",
+        name: "Route 2",
+        badgesRequired: 0,
+        blurb: "A quiet road north of Viridian City."
+    },
+    {
+        id: "viridianForest",
+        name: "Viridian Forest",
+        badgesRequired: 0,
+        blurb: "A dim maze of trees crawling with Bug Pokémon."
+    },
+    {
+        id: "route3",
+        name: "Route 3",
+        badgesRequired: 1,
+        blurb: "Rocky trails east of Pewter City."
+    },
+    {
+        id: "mtMoon",
+        name: "Mt. Moon",
+        badgesRequired: 1,
+        blurb: "A cavern said to be visited by meteorites... and Clefairy."
+    },
+    {
+        id: "route4",
+        name: "Route 4",
+        badgesRequired: 1,
+        blurb: "A one-way ledge down into Cerulean City."
+    },
+    {
+        id: "route24",
+        name: "Route 24",
+        badgesRequired: 1,
+        blurb: "Nugget Bridge, guarded by a gauntlet of trainers."
+    },
+    {
+        id: "route25",
+        name: "Route 25",
+        badgesRequired: 1,
+        blurb: "The seaside path to Bill's cottage."
+    },
+    {
+        id: "route5",
+        name: "Route 5",
+        badgesRequired: 2,
+        blurb: "Grassland south of Cerulean City."
+    },
+    {
+        id: "route6",
+        name: "Route 6",
+        badgesRequired: 2,
+        blurb: "The road into Vermilion, the port city."
+    },
+    {
+        id: "route11",
+        name: "Route 11",
+        badgesRequired: 2,
+        blurb: "Home of the Diglett's Cave entrance."
+    },
+    {
+        id: "diglettsCave",
+        name: "Diglett's Cave",
+        badgesRequired: 2,
+        blurb: "A long tunnel dug entirely by Diglett."
+    },
+    {
+        id: "route9",
+        name: "Route 9",
+        badgesRequired: 3,
+        blurb: "A rugged path cut east of Cerulean."
+    },
+    {
+        id: "route10",
+        name: "Route 10",
+        badgesRequired: 3,
+        blurb: "The Power Plant hums somewhere nearby."
+    },
+    {
+        id: "rockTunnel",
+        name: "Rock Tunnel",
+        badgesRequired: 3,
+        blurb: "A pitch-black cave. Bring Flash."
+    },
+    {
+        id: "route8",
+        name: "Route 8",
+        badgesRequired: 3,
+        blurb: "The road west from Lavender Town."
+    },
+    {
+        id: "route7",
+        name: "Route 7",
+        badgesRequired: 3,
+        blurb: "A short route leading into Celadon City."
+    },
+    {
+        id: "pokemonTower",
+        name: "Pokémon Tower",
+        badgesRequired: 4,
+        blurb: "A resting place for Pokémon. Something stirs here."
+    },
+    {
+        id: "route12",
+        name: "Route 12",
+        badgesRequired: 4,
+        blurb: "Silence Bridge, a famous fishing spot."
+    },
+    {
+        id: "route13",
+        name: "Route 13",
+        badgesRequired: 4,
+        blurb: "A maze of fences and tall grass."
+    },
+    {
+        id: "route14",
+        name: "Route 14",
+        badgesRequired: 4,
+        blurb: "Winding grassland toward Fuchsia."
+    },
+    {
+        id: "route15",
+        name: "Route 15",
+        badgesRequired: 4,
+        blurb: "The last stretch before Fuchsia City."
+    },
+    { id: "route16", name: "Route 16", badgesRequired: 4, blurb: "The top of Cycling Road." },
+    {
+        id: "route17",
+        name: "Route 17",
+        badgesRequired: 4,
+        blurb: "Cycling Road — a long downhill sprint."
+    },
+    { id: "route18", name: "Route 18", badgesRequired: 4, blurb: "The bottom of Cycling Road." },
+    {
+        id: "safariZone",
+        name: "Safari Zone",
+        badgesRequired: 5,
+        blurb: "Rare Pokémon from far-off lands roam free."
+    },
+    {
+        id: "powerPlant",
+        name: "Power Plant",
+        badgesRequired: 5,
+        blurb: "An abandoned plant, crackling with electricity."
+    },
+    {
+        id: "route19",
+        name: "Route 19",
+        badgesRequired: 6,
+        blurb: "Open sea south of Fuchsia City."
+    },
+    {
+        id: "route20",
+        name: "Route 20",
+        badgesRequired: 6,
+        blurb: "Currents swirl around the Seafoam Islands."
+    },
+    {
+        id: "seafoamIslands",
+        name: "Seafoam Islands",
+        badgesRequired: 6,
+        blurb: "Frozen caverns beneath the sea."
+    },
+    {
+        id: "pokemonMansion",
+        name: "Pokémon Mansion",
+        badgesRequired: 6,
+        blurb: "A burned-out lab. Its journals mention a new Pokémon..."
+    },
+    {
+        id: "route21",
+        name: "Route 21",
+        badgesRequired: 7,
+        blurb: "The sea route home to Pallet Town."
+    },
+    {
+        id: "route23",
+        name: "Route 23",
+        badgesRequired: 8,
+        blurb: "Badge checkpoints on the way to the League."
+    },
+    {
+        id: "victoryRoad",
+        name: "Victory Road",
+        badgesRequired: 8,
+        blurb: "The final test before the Elite Four."
+    },
+    {
+        id: "ceruleanCave",
+        name: "Cerulean Cave",
+        badgesRequired: 8,
+        postGame: true,
+        blurb: "Only the Champion may enter. Incredibly strong Pokémon lurk inside."
+    }
+];
+
+export const ZONES_BY_ID: Record<string, ZoneDefinition> = Object.fromEntries(
+    ZONES.map(zone => [zone.id, zone])
+);
+
+const POOL_KEY_ITEM: Record<Exclude<EncounterPoolId, "walk">, KeyItemId> = {
+    surf: "surf",
+    oldRod: "oldRod",
+    goodRod: "goodRod",
+    superRod: "superRod"
 };
 
-export const ROUTE_2: ZoneDefinition = {
-    id: "route2",
-    name: "Route 2",
-    encounterTable: route2Encounters.entries,
-    unlockedByDefault: false
-};
+/** How often each kind of encounter comes up, relative to each other, when available. */
+const POOL_SHARE = { walk: 0.7, surf: 0.15, fishing: 0.15 };
 
-export const VIRIDIAN_FOREST: ZoneDefinition = {
-    id: "viridianForest",
-    name: "Viridian Forest",
-    encounterTable: viridianForestEncounters.entries,
-    unlockedByDefault: false
-};
+export interface ActivePool {
+    kind: "walk" | "surf" | "fishing";
+    share: number;
+    entries: EncounterEntry[];
+}
 
 /**
- * Every zone in the current Pewter-area cluster. Adding a new zone to a later
- * milestone should only require pushing a new ZoneDefinition here (plus a tab
- * entry in field.tsx) - no other code should need to change.
+ * The encounter pools the player can currently access in a zone.
+ * Fishing combines every rod the player owns into one pool; each rod contributes equally.
  */
-export const ZONES: ZoneDefinition[] = [ROUTE_1, ROUTE_2, VIRIDIAN_FOREST];
+export function activePools(zoneId: string, keyItems: Partial<Record<KeyItemId, boolean>>) {
+    const pools = ENCOUNTERS[zoneId] ?? {};
+    const result: ActivePool[] = [];
+    if (pools.walk != null && pools.walk.length > 0) {
+        result.push({ kind: "walk", share: POOL_SHARE.walk, entries: pools.walk });
+    }
+    if (pools.surf != null && pools.surf.length > 0 && keyItems[POOL_KEY_ITEM.surf] === true) {
+        result.push({ kind: "surf", share: POOL_SHARE.surf, entries: pools.surf });
+    }
+    const fishing: EncounterEntry[] = [];
+    for (const rod of ["oldRod", "goodRod", "superRod"] as const) {
+        const entries = pools[rod];
+        if (entries == null || entries.length === 0 || keyItems[POOL_KEY_ITEM[rod]] !== true) {
+            continue;
+        }
+        const total = entries.reduce((sum, e) => sum + e.weight, 0);
+        fishing.push(...entries.map(e => ({ ...e, weight: e.weight / total })));
+    }
+    if (fishing.length > 0) {
+        result.push({ kind: "fishing", share: POOL_SHARE.fishing, entries: fishing });
+    }
+    return result;
+}
+
+/** Every species that can appear in a zone with any equipment, for completion tracking. */
+export function allZoneSpecies(zoneId: string): number[] {
+    const ids = new Set<number>();
+    for (const entries of Object.values(ENCOUNTERS[zoneId] ?? {})) {
+        entries?.forEach(e => ids.add(e.id));
+    }
+    return [...ids].sort((a, b) => a - b);
+}
+
+/** Species currently findable in a zone with the player's equipment. */
+export function availableZoneSpecies(
+    zoneId: string,
+    keyItems: Partial<Record<KeyItemId, boolean>>
+): number[] {
+    const ids = new Set<number>();
+    for (const pool of activePools(zoneId, keyItems)) {
+        pool.entries.forEach(e => ids.add(e.id));
+    }
+    return [...ids].sort((a, b) => a - b);
+}
+
+export interface RolledEncounter {
+    speciesId: number;
+    level: number;
+    kind: ActivePool["kind"];
+}
+
+function pickWeighted<T extends { weight: number }>(entries: T[], rng: () => number): T {
+    const total = entries.reduce((sum, e) => sum + e.weight, 0);
+    let roll = rng() * total;
+    for (const entry of entries) {
+        roll -= entry.weight;
+        if (roll <= 0) {
+            return entry;
+        }
+    }
+    return entries[entries.length - 1];
+}
+
+export function rollEncounter(
+    zoneId: string,
+    keyItems: Partial<Record<KeyItemId, boolean>>,
+    rng: () => number = Math.random
+): RolledEncounter | null {
+    const pools = activePools(zoneId, keyItems);
+    if (pools.length === 0) {
+        return null;
+    }
+    const pool = pickWeighted(
+        pools.map(p => ({ ...p, weight: p.share })),
+        rng
+    );
+    const entry = pickWeighted(pool.entries, rng);
+    return {
+        speciesId: entry.id,
+        level: entry.minLevel + Math.floor(rng() * (entry.maxLevel - entry.minLevel + 1)),
+        kind: pool.kind
+    };
+}
+
+/** The average wild level in a zone's walking (or surfing) pool, used for recommendations. */
+export function typicalLevel(zoneId: string): number {
+    const pools = ENCOUNTERS[zoneId] ?? {};
+    const entries = pools.walk ?? pools.surf ?? [];
+    const total = entries.reduce((sum, e) => sum + e.weight, 0);
+    if (total === 0) {
+        return 1;
+    }
+    return entries.reduce((sum, e) => sum + ((e.minLevel + e.maxLevel) / 2) * e.weight, 0) / total;
+}

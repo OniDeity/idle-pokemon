@@ -1,0 +1,522 @@
+/**
+ * The left-hand "Journey" pane: status bar, the layer tree, the live battle scene, your party,
+ * and the event log.
+ */
+import dex from "data/layers/dex";
+import hof from "data/layers/hof";
+import { badgeSprite } from "data/layers/league";
+import type { BallMode, BattleState, CatchMode, LogEntry } from "data/projEntry";
+import { main, openLayer } from "data/projEntry";
+import player from "game/player";
+import { catchChance } from "game/pokemon/balance";
+import { DEX_SIZE, getSpecies } from "game/pokemon/data";
+import type { BallId } from "game/pokemon/items";
+import { BALLS } from "game/pokemon/items";
+import { maxHp, xpForLevel } from "game/pokemon/stats";
+import { GYMS } from "game/pokemon/trainers";
+import { formatTime } from "util/bignum";
+import {
+    Bar,
+    Button,
+    formatDuration,
+    formatMoney,
+    ItemIcon,
+    Sprite,
+    TypeBadges
+} from "./components";
+
+const STARTERS = [1, 4, 7];
+
+const CAVES = new Set([
+    "mtMoon",
+    "rockTunnel",
+    "diglettsCave",
+    "seafoamIslands",
+    "victoryRoad",
+    "ceruleanCave"
+]);
+const FORESTS = new Set(["viridianForest", "safariZone"]);
+const BUILDINGS = new Set(["pokemonTower", "powerPlant", "pokemonMansion"]);
+const SEAS = new Set(["route19", "route20", "route21"]);
+
+function terrain(state: BattleState): string {
+    if (state.kind === "trainer") {
+        return state.legendary ? "legend" : "arena";
+    }
+    const zone = main.zoneId.value;
+    if (state.kind === "wild" && state.wild.kind !== "walk") return "water";
+    if (CAVES.has(zone)) return "cave";
+    if (FORESTS.has(zone)) return "forest";
+    if (BUILDINGS.has(zone)) return "building";
+    if (SEAS.has(zone)) return "water";
+    return "grass";
+}
+
+function renderHud() {
+    return (
+        <div class="pk-hud">
+            <div class="pk-hud-money" title="Pokédollars">
+                {formatMoney(main.money.value)}
+            </div>
+            <div class="pk-hud-badges" title={`${main.badges.value} badges`}>
+                {GYMS.map(gym => (
+                    <img
+                        class={[
+                            "pk-badge-img",
+                            main.badges.value >= gym.badgeNumber ? "" : "unearned"
+                        ]}
+                        src={badgeSprite(gym.badgeNumber)}
+                        alt={gym.badge}
+                        width={18}
+                        height={18}
+                    />
+                ))}
+                {main.champion.value ? <span title="Champion">🏆</span> : null}
+            </div>
+            <div class="pk-hud-stat" title="Species caught / total">
+                Dex {dex.caughtCount.value}/{DEX_SIZE}
+            </div>
+            <div class="pk-hud-stat" title="Level cap">
+                Cap Lv. {main.cap.value}
+            </div>
+            {hof.fame.value > 0 || hof.timesEntered.value > 0 ? (
+                <div class="pk-hud-stat" title="Fame">
+                    ★ {hof.fame.value}
+                </div>
+            ) : null}
+        </div>
+    );
+}
+
+function renderNav() {
+    const open = player.tabs[1];
+    return (
+        <nav class="pk-nav">
+            {main.nav.map(node => (
+                <button
+                    class={[
+                        "pk-nav-node",
+                        open === node.id ? "open" : "",
+                        node.glow.value ? "glow" : ""
+                    ]}
+                    style={{ "--node-color": node.color }}
+                    disabled={!node.enabled.value}
+                    title={node.enabled.value ? node.label : "Locked"}
+                    onClick={() => openLayer(node.id)}
+                >
+                    <span class="pk-nav-letter">{node.letter}</span>
+                    <span class="pk-nav-label">{node.label}</span>
+                </button>
+            ))}
+        </nav>
+    );
+}
+
+function renderStarterSelect() {
+    const again = hof.timesEntered.value > 0;
+    return (
+        <div class="pk-starter-select">
+            <h2>{again ? "A new journey begins" : "Welcome to the world of Pokémon!"}</h2>
+            <p>
+                {again
+                    ? "Professor Oak has three Poké Balls ready again. Your Pokédex remembers everything."
+                    : "Professor Oak needs help completing the Pokédex. Choose your first partner — you'll find the other two later on your journey."}
+            </p>
+            <div class="pk-starters">
+                {STARTERS.map(id => (
+                    <button class="pk-starter" onClick={() => main.chooseStarter(id)}>
+                        <Sprite id={id} size={96} />
+                        <b>{getSpecies(id).name}</b>
+                        <TypeBadges id={id} />
+                    </button>
+                ))}
+            </div>
+            <p class="pk-small pk-muted">
+                Tip: Brock's Rock types are tough for Charmander, but Bulbasaur and Squirtle make
+                short work of them.
+            </p>
+        </div>
+    );
+}
+
+function infoBox(
+    name: string,
+    level: number,
+    hp: number,
+    max: number,
+    shiny: boolean,
+    extra?: unknown
+) {
+    return (
+        <div class="pk-infobox">
+            <div class="pk-infobox-name">
+                <span>
+                    {name}
+                    {shiny ? " ✨" : ""}
+                </span>
+                <span>Lv{level}</span>
+            </div>
+            <Bar value={hp} max={max} kind="hp" />
+            {extra}
+        </div>
+    );
+}
+
+function renderScene() {
+    const state = main.battle.value;
+    const flash = main.flash.value;
+    let foe = null;
+    let ally = null;
+    let banner: string;
+    let balls = null;
+
+    if (state.kind === "search") {
+        banner = `Searching ${main.zone.value.name}…`;
+        const leadId = main.partyIds.value[0];
+        if (leadId != null) {
+            const entry = main.box.value[leadId];
+            ally = { id: leadId, level: entry.level, shiny: entry.shiny, hp: 1, max: 1 };
+        }
+    } else if (state.kind === "wild") {
+        const species = getSpecies(state.wild.speciesId);
+        const where =
+            state.wild.kind === "fishing"
+                ? "hooked"
+                : state.wild.kind === "surf"
+                  ? "surfaced"
+                  : "appeared";
+        banner = `A wild ${species.name} ${where}!`;
+        foe = {
+            id: state.wild.speciesId,
+            level: state.wild.level,
+            shiny: state.wild.shiny,
+            hp: state.wild.hp,
+            max: state.wild.maxHp
+        };
+        const activeId = main.partyIds.value[Math.max(0, state.active)];
+        if (activeId != null) {
+            const entry = main.box.value[activeId];
+            ally = { id: activeId, level: entry.level, shiny: entry.shiny, hp: 1, max: 1 };
+        }
+    } else {
+        const trainer = state.trainers[state.index];
+        const enemy = state.enemies[Math.min(state.state.enemyIndex, state.enemies.length - 1)];
+        banner = state.legendary
+            ? `${state.label}! (${formatDuration(Math.max(0, trainer.timeLimit - state.state.elapsed))} left)`
+            : `${trainer.name}: ${formatDuration(Math.max(0, trainer.timeLimit - state.state.elapsed))} left`;
+        foe = {
+            id: enemy.species.id,
+            level: enemy.level,
+            shiny: false,
+            hp: Math.max(0, state.state.enemyHp),
+            max: maxHp(enemy)
+        };
+        const activeIndex =
+            state.state.active === -1
+                ? state.state.partyHp.findIndex(h => h > 0)
+                : state.state.active;
+        const activeId = state.partyIds[Math.max(0, activeIndex)];
+        const entry = main.box.value[activeId];
+        if (entry != null) {
+            const max = Math.round(
+                maxHp(state.party[Math.max(0, activeIndex)]) * main.bonuses.value.hp
+            );
+            ally = {
+                id: activeId,
+                level: state.party[Math.max(0, activeIndex)].level,
+                shiny: entry.shiny,
+                hp: Math.max(0, state.state.partyHp[Math.max(0, activeIndex)] ?? 0),
+                max
+            };
+        }
+        balls = (
+            <div class="pk-scene-trainerballs">
+                {state.enemies.map((_, i) => (
+                    <span class={["pk-pip", i < state.state.enemyIndex ? "fainted" : ""]} />
+                ))}
+            </div>
+        );
+    }
+
+    const showFlash = flash != null && flash.until > Date.now();
+    const allySpecies = ally ? getSpecies(ally.id) : null;
+    const allyEntry = ally ? main.box.value[ally.id] : null;
+    let xpExtra = null;
+    if (ally && allySpecies && allyEntry && state.kind !== "trainer") {
+        const thisXp = xpForLevel(allySpecies.growthRate, allyEntry.level);
+        const nextXp = xpForLevel(allySpecies.growthRate, allyEntry.level + 1);
+        const capped = allyEntry.level >= main.cap.value;
+        xpExtra = (
+            <Bar
+                value={capped ? 1 : allyEntry.xp - thisXp}
+                max={capped ? 1 : nextXp - thisXp}
+                kind="xp"
+            />
+        );
+    }
+
+    return (
+        <div class={["pk-scene", `pk-terrain-${terrain(state)}`]}>
+            <div class="pk-scene-banner">{banner}</div>
+            {balls}
+            {foe ? (
+                <div class="pk-foe" key={`foe-${foe.id}-${foe.level}`}>
+                    {infoBox(getSpecies(foe.id).name, foe.level, foe.hp, foe.max, foe.shiny)}
+                    <div class="pk-platform pk-platform-foe">
+                        <Sprite
+                            id={foe.id}
+                            shiny={foe.shiny}
+                            size={112}
+                            extraClass="pk-foe-sprite"
+                        />
+                    </div>
+                </div>
+            ) : (
+                <div class="pk-foe pk-searching">
+                    <div class="pk-rustle">
+                        <span />
+                        <span />
+                        <span />
+                    </div>
+                    {state.kind === "search" ? (
+                        <Bar value={state.total - state.remaining} max={state.total} kind="time" />
+                    ) : null}
+                </div>
+            )}
+            {ally ? (
+                <div class="pk-ally">
+                    <div class="pk-platform pk-platform-ally">
+                        <Sprite
+                            id={ally.id}
+                            shiny={ally.shiny}
+                            back
+                            size={128}
+                            extraClass="pk-ally-sprite"
+                        />
+                    </div>
+                    {infoBox(allySpecies!.name, ally.level, ally.hp, ally.max, ally.shiny, xpExtra)}
+                </div>
+            ) : null}
+            {showFlash ? (
+                <div class={["pk-flash", `pk-flash-${flash!.kind}`]} key={flash!.until}>
+                    {flash!.text}
+                </div>
+            ) : null}
+        </div>
+    );
+}
+
+function renderPartyStrip() {
+    const state = main.battle.value;
+    const trainerHp = state.kind === "trainer" ? state.state.partyHp : null;
+    const activeIndex =
+        state.kind === "wild" ? state.active : state.kind === "trainer" ? state.state.active : -1;
+    return (
+        <div class="pk-strip">
+            {main.partyIds.value.map((id, i) => {
+                const entry = main.box.value[id];
+                if (entry == null) return null;
+                const species = getSpecies(id);
+                const thisXp = xpForLevel(species.growthRate, entry.level);
+                const nextXp = xpForLevel(species.growthRate, entry.level + 1);
+                const capped = entry.level >= main.cap.value;
+                const fainted = trainerHp != null && (trainerHp[i] ?? 1) <= 0;
+                return (
+                    <button
+                        class={[
+                            "pk-strip-mon",
+                            i === activeIndex ? "active" : "",
+                            fainted ? "fainted" : ""
+                        ]}
+                        title={`${species.name} Lv. ${entry.level}${capped ? " (level cap)" : ""}`}
+                        onClick={() => openLayer("party")}
+                    >
+                        <Sprite id={id} shiny={entry.shiny} size={40} />
+                        <span class="pk-strip-level">{entry.level}</span>
+                        {trainerHp != null && state.kind === "trainer" ? (
+                            <Bar
+                                value={Math.max(0, trainerHp[i] ?? 0)}
+                                max={Math.round(maxHp(state.party[i]) * main.bonuses.value.hp)}
+                                kind="hp"
+                            />
+                        ) : (
+                            <Bar
+                                value={capped ? 1 : entry.xp - thisXp}
+                                max={capped ? 1 : nextXp - thisXp}
+                                kind="xp"
+                            />
+                        )}
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
+
+const CATCH_MODES: [CatchMode, string, string][] = [
+    ["new", "New", "Throw balls at species not in your box yet, and at shinies"],
+    ["all", "All", "Throw balls at everything — extra catches make that species stronger"],
+    ["off", "Off", "Don't throw balls"]
+];
+
+function renderControls() {
+    const state = main.battle.value;
+    const ballOptions: [BallMode, string][] = [
+        ["smart", "Smart"],
+        ...(["pokeBall", "greatBall", "ultraBall"] as BallId[])
+            .filter(id => main.badges.value >= BALLS[id].badgesRequired || main.balls.value[id] > 0)
+            .map((id): [BallMode, string] => [id, BALLS[id].name])
+    ];
+    let chance = null;
+    if (state.kind === "wild") {
+        const species = getSpecies(state.wild.speciesId);
+        const ball = main.ballMode.value === "smart" ? "pokeBall" : main.ballMode.value;
+        chance = catchChance(
+            species.captureRate,
+            BALLS[ball].catchMultiplier,
+            main.bonuses.value.catch
+        );
+    }
+    return (
+        <div class="pk-controls">
+            <div class="pk-control-row">
+                <span class="pk-control-label">Location</span>
+                <Button kind="ghost" onClick={() => openLayer("map")}>
+                    📍 {main.zone.value.name}
+                </Button>
+                {state.kind === "trainer" ? (
+                    <Button kind="danger" onClick={main.forfeit}>
+                        Withdraw
+                    </Button>
+                ) : null}
+            </div>
+            <div class="pk-control-row">
+                <span class="pk-control-label">Catch</span>
+                {CATCH_MODES.map(([mode, label, title]) => (
+                    <Button
+                        kind={main.catchMode.value === mode ? "primary" : "ghost"}
+                        title={title}
+                        onClick={() => (main.catchMode.value = mode)}
+                    >
+                        {label}
+                    </Button>
+                ))}
+            </div>
+            <div class="pk-control-row">
+                <span class="pk-control-label">Ball</span>
+                {ballOptions.map(([mode, label]) => (
+                    <Button
+                        kind={main.ballMode.value === mode ? "primary" : "ghost"}
+                        title={
+                            mode === "smart"
+                                ? "Uses the cheapest ball with a good chance, else your best ball"
+                                : ""
+                        }
+                        onClick={() => (main.ballMode.value = mode)}
+                    >
+                        {label}
+                    </Button>
+                ))}
+            </div>
+            <div class="pk-ball-counts">
+                {(["pokeBall", "greatBall", "ultraBall", "masterBall"] as BallId[])
+                    .filter(id => main.balls.value[id] > 0 || id === "pokeBall")
+                    .map(id => (
+                        <span
+                            class={["pk-ball-count", main.balls.value[id] === 0 ? "empty" : ""]}
+                            title={BALLS[id].name}
+                        >
+                            <ItemIcon src={BALLS[id].sprite} size={24} alt={BALLS[id].name} />
+                            {main.balls.value[id]}
+                        </span>
+                    ))}
+                <Button kind="small" onClick={() => openLayer("mart")}>
+                    Buy
+                </Button>
+                {chance != null && main.ballMode.value !== "smart" ? (
+                    <span class="pk-small pk-muted">{Math.round(chance * 100)}% catch</span>
+                ) : null}
+            </div>
+            {main.balls.value.masterBall > 0 ? (
+                <label class="pk-small pk-check">
+                    <input
+                        type="checkbox"
+                        checked={main.useMasterBallOnLegendaries.value}
+                        onChange={(e: Event) =>
+                            (main.useMasterBallOnLegendaries.value = (
+                                e.target as HTMLInputElement
+                            ).checked)
+                        }
+                    />{" "}
+                    Use the Master Ball on legendary Pokémon
+                </label>
+            ) : null}
+        </div>
+    );
+}
+
+const LOG_ICONS: Record<LogEntry["kind"], string> = {
+    catch: "●",
+    shiny: "✨",
+    evolve: "⬆",
+    badge: "🏅",
+    fail: "✘",
+    info: "›",
+    levelup: "★"
+};
+
+function renderLog() {
+    return (
+        <div class="pk-log">
+            {main.log.value.length === 0 ? (
+                <div class="pk-muted pk-small">Your adventure log is empty.</div>
+            ) : (
+                main.log.value.map(entry => (
+                    <div class={["pk-log-entry", `pk-log-${entry.kind}`]} key={entry.id}>
+                        <span class="pk-log-icon">{LOG_ICONS[entry.kind]}</span>
+                        {entry.speciesId != null ? (
+                            <Sprite id={entry.speciesId} shiny={entry.shiny} size={28} />
+                        ) : null}
+                        <span>{entry.text}</span>
+                    </div>
+                ))
+            )}
+        </div>
+    );
+}
+
+function renderStatus() {
+    const notices = [];
+    if (player.devSpeed === 0) notices.push("Game paused");
+    if (player.devSpeed != null && player.devSpeed !== 0 && player.devSpeed !== 1) {
+        notices.push(`Dev speed ${player.devSpeed}×`);
+    }
+    if (player.offlineTime != null && player.offlineTime > 0) {
+        notices.push(`Catching up on offline time: ${formatTime(player.offlineTime)}`);
+    }
+    return notices.length > 0 ? <div class="pk-notice">{notices.join(" · ")}</div> : null;
+}
+
+export function renderJourney() {
+    return (
+        <div class="pk-journey">
+            {renderHud()}
+            {renderStatus()}
+            {renderNav()}
+            {main.starter.value === 0 ? (
+                renderStarterSelect()
+            ) : (
+                <>
+                    {renderScene()}
+                    {renderPartyStrip()}
+                    {renderControls()}
+                    <div class="pk-run-stats pk-small pk-muted">
+                        Journey time {formatDuration(main.runTime.value)} ·{" "}
+                        {main.battlesWon.value.toLocaleString("en-US")} battles won
+                    </div>
+                    {renderLog()}
+                </>
+            )}
+        </div>
+    );
+}
