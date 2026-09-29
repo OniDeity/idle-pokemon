@@ -1,26 +1,54 @@
 name: Build and Deploy
+# main → the public game at https://onideity.github.io/idle-pokemon/
+# dev  → the dev build at https://onideity.github.io/idle-pokemon/dev/ (separate saves)
 on:
   push:
     branches:
       - 'main'
+      - 'dev'
   workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  # Both branches write to gh-pages; take turns.
+  group: gh-pages
+  cancel-in-progress: false
 jobs:
   build-and-deploy:
     if: github.repository != 'profectus-engine/Profectus' # Don't build placeholder mod on main repo
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Mark as dev build 🧪
+        if: github.ref_name == 'dev'
+        run: node scripts/prepareDevBuild.mjs
+
+      - name: Install and Build 🔧
         run: |
           npm ci
           npm run build
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.2.5
+      - name: Deploy public version 🚀
+        if: github.ref_name == 'main'
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: dist # The folder the action should deploy.
+          branch: gh-pages
+          folder: dist
+          clean-exclude: dev
+
+      - name: Deploy dev version 🚀
+        if: github.ref_name == 'dev'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: dist
+          target-folder: dev

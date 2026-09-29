@@ -1,206 +1,3978 @@
-{
-  "1": {
-    "id": "1",
-    "name": "bulbasaur",
-    "types": [
-      "grass",
-      "poison"
-    ],
-    "captureRate": 45,
-    "baseStats": {
-      "hp": 45,
-      "attack": 49,
-      "defense": 49,
-      "specialAttack": 65,
-      "specialDefense": 65,
-      "speed": 45
+[
+    {
+        "id": 1,
+        "name": "Bulbasaur",
+        "types": ["grass", "poison"],
+        "baseStats": [45, 49, 49, 65, 65, 45],
+        "baseExp": 64,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 2,
+                "method": "level",
+                "level": 16
+            }
+        ]
     },
-    "sprites": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
-      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png"
-    }
-  },
-  "4": {
-    "id": "4",
-    "name": "charmander",
-    "types": [
-      "fire"
-    ],
-    "captureRate": 45,
-    "baseStats": {
-      "hp": 39,
-      "attack": 52,
-      "defense": 43,
-      "specialAttack": 60,
-      "specialDefense": 50,
-      "speed": 65
+    {
+        "id": 2,
+        "name": "Ivysaur",
+        "types": ["grass", "poison"],
+        "baseStats": [60, 62, 63, 80, 80, 60],
+        "baseExp": 142,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 3,
+                "method": "level",
+                "level": 32
+            }
+        ]
     },
-    "sprites": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
-      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/4.png"
-    }
-  },
-  "7": {
-    "id": "7",
-    "name": "squirtle",
-    "types": [
-      "water"
-    ],
-    "captureRate": 45,
-    "baseStats": {
-      "hp": 44,
-      "attack": 48,
-      "defense": 65,
-      "specialAttack": 50,
-      "specialDefense": 64,
-      "speed": 43
+    {
+        "id": 3,
+        "name": "Venusaur",
+        "types": ["grass", "poison"],
+        "baseStats": [80, 82, 83, 100, 100, 80],
+        "baseExp": 236,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": true,
+        "evolutions": []
     },
-    "sprites": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
-      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/7.png"
-    }
-  },
-  "10": {
-    "id": "10",
-    "name": "caterpie",
-    "types": [
-      "bug"
-    ],
-    "captureRate": 255,
-    "baseStats": {
-      "hp": 45,
-      "attack": 30,
-      "defense": 35,
-      "specialAttack": 20,
-      "specialDefense": 20,
-      "speed": 45
+    {
+        "id": 4,
+        "name": "Charmander",
+        "types": ["fire"],
+        "baseStats": [39, 52, 43, 60, 50, 65],
+        "baseExp": 62,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 5,
+                "method": "level",
+                "level": 16
+            }
+        ]
     },
-    "sprites": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10.png",
-      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/10.png"
-    }
-  },
-  "11": {
-    "id": "11",
-    "name": "metapod",
-    "types": [
-      "bug"
-    ],
-    "captureRate": 120,
-    "baseStats": {
-      "hp": 50,
-      "attack": 20,
-      "defense": 55,
-      "specialAttack": 25,
-      "specialDefense": 25,
-      "speed": 30
+    {
+        "id": 5,
+        "name": "Charmeleon",
+        "types": ["fire"],
+        "baseStats": [58, 64, 58, 80, 65, 80],
+        "baseExp": 142,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 6,
+                "method": "level",
+                "level": 36
+            }
+        ]
     },
-    "sprites": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/11.png",
-      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/11.png"
-    }
-  },
-  "13": {
-    "id": "13",
-    "name": "weedle",
-    "types": [
-      "bug",
-      "poison"
-    ],
-    "captureRate": 255,
-    "baseStats": {
-      "hp": 40,
-      "attack": 35,
-      "defense": 30,
-      "specialAttack": 20,
-      "specialDefense": 20,
-      "speed": 50
+    {
+        "id": 6,
+        "name": "Charizard",
+        "types": ["fire", "flying"],
+        "baseStats": [78, 84, 78, 109, 85, 100],
+        "baseExp": 240,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
     },
-    "sprites": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/13.png",
-      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/13.png"
-    }
-  },
-  "14": {
-    "id": "14",
-    "name": "kakuna",
-    "types": [
-      "bug",
-      "poison"
-    ],
-    "captureRate": 120,
-    "baseStats": {
-      "hp": 45,
-      "attack": 25,
-      "defense": 50,
-      "specialAttack": 25,
-      "specialDefense": 25,
-      "speed": 35
+    {
+        "id": 7,
+        "name": "Squirtle",
+        "types": ["water"],
+        "baseStats": [44, 48, 65, 50, 64, 43],
+        "baseExp": 63,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 8,
+                "method": "level",
+                "level": 16
+            }
+        ]
     },
-    "sprites": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/14.png",
-      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/14.png"
-    }
-  },
-  "16": {
-    "id": "16",
-    "name": "pidgey",
-    "types": [
-      "normal",
-      "flying"
-    ],
-    "captureRate": 255,
-    "baseStats": {
-      "hp": 40,
-      "attack": 45,
-      "defense": 40,
-      "specialAttack": 35,
-      "specialDefense": 35,
-      "speed": 56
+    {
+        "id": 8,
+        "name": "Wartortle",
+        "types": ["water"],
+        "baseStats": [59, 63, 80, 65, 80, 58],
+        "baseExp": 142,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 9,
+                "method": "level",
+                "level": 36
+            }
+        ]
     },
-    "sprites": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/16.png",
-      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/16.png"
-    }
-  },
-  "19": {
-    "id": "19",
-    "name": "rattata",
-    "types": [
-      "normal"
-    ],
-    "captureRate": 255,
-    "baseStats": {
-      "hp": 30,
-      "attack": 56,
-      "defense": 35,
-      "specialAttack": 25,
-      "specialDefense": 35,
-      "speed": 72
+    {
+        "id": 9,
+        "name": "Blastoise",
+        "types": ["water"],
+        "baseStats": [79, 83, 100, 85, 105, 78],
+        "baseExp": 239,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
     },
-    "sprites": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/19.png",
-      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/19.png"
-    }
-  },
-  "25": {
-    "id": "25",
-    "name": "pikachu",
-    "types": [
-      "electric"
-    ],
-    "captureRate": 190,
-    "baseStats": {
-      "hp": 35,
-      "attack": 55,
-      "defense": 40,
-      "specialAttack": 50,
-      "specialDefense": 50,
-      "speed": 90
+    {
+        "id": 10,
+        "name": "Caterpie",
+        "types": ["bug"],
+        "baseStats": [45, 30, 35, 20, 20, 45],
+        "baseExp": 39,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 11,
+                "method": "level",
+                "level": 7
+            }
+        ]
     },
-    "sprites": {
-      "front": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
-      "frontShiny": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/25.png"
+    {
+        "id": 11,
+        "name": "Metapod",
+        "types": ["bug"],
+        "baseStats": [50, 20, 55, 25, 25, 30],
+        "baseExp": 72,
+        "captureRate": 120,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 12,
+                "method": "level",
+                "level": 10
+            }
+        ]
+    },
+    {
+        "id": 12,
+        "name": "Butterfree",
+        "types": ["bug", "flying"],
+        "baseStats": [60, 45, 50, 90, 80, 70],
+        "baseExp": 178,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 13,
+        "name": "Weedle",
+        "types": ["bug", "poison"],
+        "baseStats": [40, 35, 30, 20, 20, 50],
+        "baseExp": 39,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 14,
+                "method": "level",
+                "level": 7
+            }
+        ]
+    },
+    {
+        "id": 14,
+        "name": "Kakuna",
+        "types": ["bug", "poison"],
+        "baseStats": [45, 25, 50, 25, 25, 35],
+        "baseExp": 72,
+        "captureRate": 120,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 15,
+                "method": "level",
+                "level": 10
+            }
+        ]
+    },
+    {
+        "id": 15,
+        "name": "Beedrill",
+        "types": ["bug", "poison"],
+        "baseStats": [65, 90, 40, 45, 80, 75],
+        "baseExp": 178,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 16,
+        "name": "Pidgey",
+        "types": ["normal", "flying"],
+        "baseStats": [40, 45, 40, 35, 35, 56],
+        "baseExp": 50,
+        "captureRate": 255,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 17,
+                "method": "level",
+                "level": 18
+            }
+        ]
+    },
+    {
+        "id": 17,
+        "name": "Pidgeotto",
+        "types": ["normal", "flying"],
+        "baseStats": [63, 60, 55, 50, 50, 71],
+        "baseExp": 122,
+        "captureRate": 120,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 18,
+                "method": "level",
+                "level": 36
+            }
+        ]
+    },
+    {
+        "id": 18,
+        "name": "Pidgeot",
+        "types": ["normal", "flying"],
+        "baseStats": [83, 80, 75, 70, 70, 101],
+        "baseExp": 216,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 19,
+        "name": "Rattata",
+        "types": ["normal"],
+        "baseStats": [30, 56, 35, 25, 35, 72],
+        "baseExp": 51,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 20,
+                "method": "level",
+                "level": 20
+            }
+        ]
+    },
+    {
+        "id": 20,
+        "name": "Raticate",
+        "types": ["normal"],
+        "baseStats": [55, 81, 60, 50, 70, 97],
+        "baseExp": 145,
+        "captureRate": 127,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 21,
+        "name": "Spearow",
+        "types": ["normal", "flying"],
+        "baseStats": [40, 60, 30, 31, 31, 70],
+        "baseExp": 52,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 22,
+                "method": "level",
+                "level": 20
+            }
+        ]
+    },
+    {
+        "id": 22,
+        "name": "Fearow",
+        "types": ["normal", "flying"],
+        "baseStats": [65, 90, 65, 61, 61, 100],
+        "baseExp": 155,
+        "captureRate": 90,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 23,
+        "name": "Ekans",
+        "types": ["poison"],
+        "baseStats": [35, 60, 44, 40, 54, 55],
+        "baseExp": 58,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 24,
+                "method": "level",
+                "level": 22
+            }
+        ]
+    },
+    {
+        "id": 24,
+        "name": "Arbok",
+        "types": ["poison"],
+        "baseStats": [60, 95, 69, 65, 79, 80],
+        "baseExp": 157,
+        "captureRate": 90,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 25,
+        "name": "Pikachu",
+        "types": ["electric"],
+        "baseStats": [35, 55, 40, 50, 50, 90],
+        "baseExp": 112,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 26,
+                "method": "stone",
+                "stone": "thunderStone"
+            }
+        ]
+    },
+    {
+        "id": 26,
+        "name": "Raichu",
+        "types": ["electric"],
+        "baseStats": [60, 90, 55, 90, 80, 110],
+        "baseExp": 218,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 27,
+        "name": "Sandshrew",
+        "types": ["ground"],
+        "baseStats": [50, 75, 85, 20, 30, 40],
+        "baseExp": 60,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 28,
+                "method": "level",
+                "level": 22
+            }
+        ]
+    },
+    {
+        "id": 28,
+        "name": "Sandslash",
+        "types": ["ground"],
+        "baseStats": [75, 100, 110, 45, 55, 65],
+        "baseExp": 158,
+        "captureRate": 90,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 29,
+        "name": "Nidoran♀",
+        "types": ["poison"],
+        "baseStats": [55, 47, 52, 40, 40, 41],
+        "baseExp": 55,
+        "captureRate": 235,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 8,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 30,
+                "method": "level",
+                "level": 16
+            }
+        ]
+    },
+    {
+        "id": 30,
+        "name": "Nidorina",
+        "types": ["poison"],
+        "baseStats": [70, 62, 67, 55, 55, 56],
+        "baseExp": 128,
+        "captureRate": 120,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 8,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 31,
+                "method": "stone",
+                "stone": "moonStone"
+            }
+        ]
+    },
+    {
+        "id": 31,
+        "name": "Nidoqueen",
+        "types": ["poison", "ground"],
+        "baseStats": [90, 92, 87, 75, 85, 76],
+        "baseExp": 227,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 8,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 32,
+        "name": "Nidoran♂",
+        "types": ["poison"],
+        "baseStats": [46, 57, 40, 40, 40, 50],
+        "baseExp": 55,
+        "captureRate": 235,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 0,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 33,
+                "method": "level",
+                "level": 16
+            }
+        ]
+    },
+    {
+        "id": 33,
+        "name": "Nidorino",
+        "types": ["poison"],
+        "baseStats": [61, 72, 57, 55, 55, 65],
+        "baseExp": 128,
+        "captureRate": 120,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 0,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 34,
+                "method": "stone",
+                "stone": "moonStone"
+            }
+        ]
+    },
+    {
+        "id": 34,
+        "name": "Nidoking",
+        "types": ["poison", "ground"],
+        "baseStats": [81, 102, 77, 85, 75, 85],
+        "baseExp": 227,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 0,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 35,
+        "name": "Clefairy",
+        "types": ["fairy"],
+        "baseStats": [70, 45, 48, 60, 65, 35],
+        "baseExp": 113,
+        "captureRate": 150,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 36,
+                "method": "stone",
+                "stone": "moonStone"
+            }
+        ]
+    },
+    {
+        "id": 36,
+        "name": "Clefable",
+        "types": ["fairy"],
+        "baseStats": [95, 70, 73, 95, 90, 60],
+        "baseExp": 217,
+        "captureRate": 25,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 37,
+        "name": "Vulpix",
+        "types": ["fire"],
+        "baseStats": [38, 41, 40, 50, 65, 65],
+        "baseExp": 60,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 38,
+                "method": "stone",
+                "stone": "fireStone"
+            }
+        ]
+    },
+    {
+        "id": 38,
+        "name": "Ninetales",
+        "types": ["fire"],
+        "baseStats": [73, 76, 75, 81, 100, 100],
+        "baseExp": 177,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 39,
+        "name": "Jigglypuff",
+        "types": ["normal", "fairy"],
+        "baseStats": [115, 45, 20, 45, 25, 20],
+        "baseExp": 95,
+        "captureRate": 170,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 40,
+                "method": "stone",
+                "stone": "moonStone"
+            }
+        ]
+    },
+    {
+        "id": 40,
+        "name": "Wigglytuff",
+        "types": ["normal", "fairy"],
+        "baseStats": [140, 70, 45, 85, 50, 45],
+        "baseExp": 196,
+        "captureRate": 50,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 41,
+        "name": "Zubat",
+        "types": ["poison", "flying"],
+        "baseStats": [40, 45, 35, 30, 40, 55],
+        "baseExp": 49,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 42,
+                "method": "level",
+                "level": 22
+            }
+        ]
+    },
+    {
+        "id": 42,
+        "name": "Golbat",
+        "types": ["poison", "flying"],
+        "baseStats": [75, 80, 70, 65, 75, 90],
+        "baseExp": 159,
+        "captureRate": 90,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 169,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 43,
+        "name": "Oddish",
+        "types": ["grass", "poison"],
+        "baseStats": [45, 50, 55, 75, 65, 30],
+        "baseExp": 64,
+        "captureRate": 255,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 44,
+                "method": "level",
+                "level": 21
+            }
+        ]
+    },
+    {
+        "id": 44,
+        "name": "Gloom",
+        "types": ["grass", "poison"],
+        "baseStats": [60, 65, 70, 85, 75, 40],
+        "baseExp": 138,
+        "captureRate": 120,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 45,
+                "method": "stone",
+                "stone": "leafStone"
+            },
+            {
+                "into": 182,
+                "method": "stone",
+                "stone": "sunStone"
+            }
+        ]
+    },
+    {
+        "id": 45,
+        "name": "Vileplume",
+        "types": ["grass", "poison"],
+        "baseStats": [75, 80, 85, 110, 90, 50],
+        "baseExp": 221,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 46,
+        "name": "Paras",
+        "types": ["bug", "grass"],
+        "baseStats": [35, 70, 55, 45, 55, 25],
+        "baseExp": 57,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 47,
+                "method": "level",
+                "level": 24
+            }
+        ]
+    },
+    {
+        "id": 47,
+        "name": "Parasect",
+        "types": ["bug", "grass"],
+        "baseStats": [60, 95, 80, 60, 80, 30],
+        "baseExp": 142,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 48,
+        "name": "Venonat",
+        "types": ["bug", "poison"],
+        "baseStats": [60, 55, 50, 40, 55, 45],
+        "baseExp": 61,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 49,
+                "method": "level",
+                "level": 31
+            }
+        ]
+    },
+    {
+        "id": 49,
+        "name": "Venomoth",
+        "types": ["bug", "poison"],
+        "baseStats": [70, 65, 60, 90, 75, 90],
+        "baseExp": 158,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 50,
+        "name": "Diglett",
+        "types": ["ground"],
+        "baseStats": [10, 55, 25, 35, 45, 95],
+        "baseExp": 53,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 51,
+                "method": "level",
+                "level": 26
+            }
+        ]
+    },
+    {
+        "id": 51,
+        "name": "Dugtrio",
+        "types": ["ground"],
+        "baseStats": [35, 100, 50, 50, 70, 120],
+        "baseExp": 149,
+        "captureRate": 50,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 52,
+        "name": "Meowth",
+        "types": ["normal"],
+        "baseStats": [40, 45, 35, 40, 40, 90],
+        "baseExp": 58,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 53,
+                "method": "level",
+                "level": 28
+            }
+        ]
+    },
+    {
+        "id": 53,
+        "name": "Persian",
+        "types": ["normal"],
+        "baseStats": [65, 70, 60, 65, 65, 115],
+        "baseExp": 154,
+        "captureRate": 90,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 54,
+        "name": "Psyduck",
+        "types": ["water"],
+        "baseStats": [50, 52, 48, 65, 50, 55],
+        "baseExp": 64,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 55,
+                "method": "level",
+                "level": 33
+            }
+        ]
+    },
+    {
+        "id": 55,
+        "name": "Golduck",
+        "types": ["water"],
+        "baseStats": [80, 82, 78, 95, 80, 85],
+        "baseExp": 175,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 56,
+        "name": "Mankey",
+        "types": ["fighting"],
+        "baseStats": [40, 80, 35, 35, 45, 70],
+        "baseExp": 61,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 57,
+                "method": "level",
+                "level": 28
+            }
+        ]
+    },
+    {
+        "id": 57,
+        "name": "Primeape",
+        "types": ["fighting"],
+        "baseStats": [65, 105, 60, 60, 70, 95],
+        "baseExp": 159,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 58,
+        "name": "Growlithe",
+        "types": ["fire"],
+        "baseStats": [55, 70, 45, 70, 50, 60],
+        "baseExp": 70,
+        "captureRate": 190,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 59,
+                "method": "stone",
+                "stone": "fireStone"
+            }
+        ]
+    },
+    {
+        "id": 59,
+        "name": "Arcanine",
+        "types": ["fire"],
+        "baseStats": [90, 110, 80, 100, 80, 95],
+        "baseExp": 194,
+        "captureRate": 75,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 60,
+        "name": "Poliwag",
+        "types": ["water"],
+        "baseStats": [40, 50, 40, 40, 40, 90],
+        "baseExp": 60,
+        "captureRate": 255,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 61,
+                "method": "level",
+                "level": 25
+            }
+        ]
+    },
+    {
+        "id": 61,
+        "name": "Poliwhirl",
+        "types": ["water"],
+        "baseStats": [65, 65, 65, 50, 50, 90],
+        "baseExp": 135,
+        "captureRate": 120,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 62,
+                "method": "stone",
+                "stone": "waterStone"
+            },
+            {
+                "into": 186,
+                "method": "trade"
+            }
+        ]
+    },
+    {
+        "id": 62,
+        "name": "Poliwrath",
+        "types": ["water", "fighting"],
+        "baseStats": [90, 95, 95, 70, 90, 70],
+        "baseExp": 230,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 63,
+        "name": "Abra",
+        "types": ["psychic"],
+        "baseStats": [25, 20, 15, 105, 55, 90],
+        "baseExp": 62,
+        "captureRate": 200,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 64,
+                "method": "level",
+                "level": 16
+            }
+        ]
+    },
+    {
+        "id": 64,
+        "name": "Kadabra",
+        "types": ["psychic"],
+        "baseStats": [40, 35, 30, 120, 70, 105],
+        "baseExp": 140,
+        "captureRate": 100,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 65,
+                "method": "trade"
+            }
+        ]
+    },
+    {
+        "id": 65,
+        "name": "Alakazam",
+        "types": ["psychic"],
+        "baseStats": [55, 50, 45, 135, 95, 120],
+        "baseExp": 225,
+        "captureRate": 50,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 66,
+        "name": "Machop",
+        "types": ["fighting"],
+        "baseStats": [70, 80, 50, 35, 35, 35],
+        "baseExp": 61,
+        "captureRate": 180,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 67,
+                "method": "level",
+                "level": 28
+            }
+        ]
+    },
+    {
+        "id": 67,
+        "name": "Machoke",
+        "types": ["fighting"],
+        "baseStats": [80, 100, 70, 50, 60, 45],
+        "baseExp": 142,
+        "captureRate": 90,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 68,
+                "method": "trade"
+            }
+        ]
+    },
+    {
+        "id": 68,
+        "name": "Machamp",
+        "types": ["fighting"],
+        "baseStats": [90, 130, 80, 65, 85, 55],
+        "baseExp": 227,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 69,
+        "name": "Bellsprout",
+        "types": ["grass", "poison"],
+        "baseStats": [50, 75, 35, 70, 30, 40],
+        "baseExp": 60,
+        "captureRate": 255,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 70,
+                "method": "level",
+                "level": 21
+            }
+        ]
+    },
+    {
+        "id": 70,
+        "name": "Weepinbell",
+        "types": ["grass", "poison"],
+        "baseStats": [65, 90, 50, 85, 45, 55],
+        "baseExp": 137,
+        "captureRate": 120,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 71,
+                "method": "stone",
+                "stone": "leafStone"
+            }
+        ]
+    },
+    {
+        "id": 71,
+        "name": "Victreebel",
+        "types": ["grass", "poison"],
+        "baseStats": [80, 105, 65, 100, 70, 70],
+        "baseExp": 221,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 72,
+        "name": "Tentacool",
+        "types": ["water", "poison"],
+        "baseStats": [40, 40, 35, 50, 100, 70],
+        "baseExp": 67,
+        "captureRate": 190,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 73,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 73,
+        "name": "Tentacruel",
+        "types": ["water", "poison"],
+        "baseStats": [80, 70, 65, 80, 120, 100],
+        "baseExp": 180,
+        "captureRate": 60,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 74,
+        "name": "Geodude",
+        "types": ["rock", "ground"],
+        "baseStats": [40, 80, 100, 30, 30, 20],
+        "baseExp": 60,
+        "captureRate": 255,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 75,
+                "method": "level",
+                "level": 25
+            }
+        ]
+    },
+    {
+        "id": 75,
+        "name": "Graveler",
+        "types": ["rock", "ground"],
+        "baseStats": [55, 95, 115, 45, 45, 35],
+        "baseExp": 137,
+        "captureRate": 120,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 76,
+                "method": "trade"
+            }
+        ]
+    },
+    {
+        "id": 76,
+        "name": "Golem",
+        "types": ["rock", "ground"],
+        "baseStats": [80, 120, 130, 55, 65, 45],
+        "baseExp": 223,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 77,
+        "name": "Ponyta",
+        "types": ["fire"],
+        "baseStats": [50, 85, 55, 65, 65, 90],
+        "baseExp": 82,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 78,
+                "method": "level",
+                "level": 40
+            }
+        ]
+    },
+    {
+        "id": 78,
+        "name": "Rapidash",
+        "types": ["fire"],
+        "baseStats": [65, 100, 70, 80, 80, 105],
+        "baseExp": 175,
+        "captureRate": 60,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 79,
+        "name": "Slowpoke",
+        "types": ["water", "psychic"],
+        "baseStats": [90, 65, 65, 40, 40, 15],
+        "baseExp": 63,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 80,
+                "method": "level",
+                "level": 37
+            },
+            {
+                "into": 199,
+                "method": "trade"
+            }
+        ]
+    },
+    {
+        "id": 80,
+        "name": "Slowbro",
+        "types": ["water", "psychic"],
+        "baseStats": [95, 75, 110, 100, 80, 30],
+        "baseExp": 172,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 81,
+        "name": "Magnemite",
+        "types": ["electric", "steel"],
+        "baseStats": [25, 35, 70, 95, 55, 45],
+        "baseExp": 65,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 82,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 82,
+        "name": "Magneton",
+        "types": ["electric", "steel"],
+        "baseStats": [50, 60, 95, 120, 70, 70],
+        "baseExp": 163,
+        "captureRate": 60,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 83,
+        "name": "Farfetch’d",
+        "types": ["normal", "flying"],
+        "baseStats": [52, 90, 55, 58, 62, 60],
+        "baseExp": 132,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 84,
+        "name": "Doduo",
+        "types": ["normal", "flying"],
+        "baseStats": [35, 85, 45, 35, 35, 75],
+        "baseExp": 62,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 85,
+                "method": "level",
+                "level": 31
+            }
+        ]
+    },
+    {
+        "id": 85,
+        "name": "Dodrio",
+        "types": ["normal", "flying"],
+        "baseStats": [60, 110, 70, 60, 60, 110],
+        "baseExp": 165,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 86,
+        "name": "Seel",
+        "types": ["water"],
+        "baseStats": [65, 45, 55, 45, 70, 45],
+        "baseExp": 65,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 87,
+                "method": "level",
+                "level": 34
+            }
+        ]
+    },
+    {
+        "id": 87,
+        "name": "Dewgong",
+        "types": ["water", "ice"],
+        "baseStats": [90, 70, 80, 70, 95, 70],
+        "baseExp": 166,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 88,
+        "name": "Grimer",
+        "types": ["poison"],
+        "baseStats": [80, 80, 50, 40, 50, 25],
+        "baseExp": 65,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 89,
+                "method": "level",
+                "level": 38
+            }
+        ]
+    },
+    {
+        "id": 89,
+        "name": "Muk",
+        "types": ["poison"],
+        "baseStats": [105, 105, 75, 65, 100, 50],
+        "baseExp": 175,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 90,
+        "name": "Shellder",
+        "types": ["water"],
+        "baseStats": [30, 65, 100, 45, 25, 40],
+        "baseExp": 61,
+        "captureRate": 190,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 91,
+                "method": "stone",
+                "stone": "waterStone"
+            }
+        ]
+    },
+    {
+        "id": 91,
+        "name": "Cloyster",
+        "types": ["water", "ice"],
+        "baseStats": [50, 95, 180, 85, 45, 70],
+        "baseExp": 184,
+        "captureRate": 60,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 92,
+        "name": "Gastly",
+        "types": ["ghost", "poison"],
+        "baseStats": [30, 35, 30, 100, 35, 80],
+        "baseExp": 62,
+        "captureRate": 190,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 93,
+                "method": "level",
+                "level": 25
+            }
+        ]
+    },
+    {
+        "id": 93,
+        "name": "Haunter",
+        "types": ["ghost", "poison"],
+        "baseStats": [45, 50, 45, 115, 55, 95],
+        "baseExp": 142,
+        "captureRate": 90,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 94,
+                "method": "trade"
+            }
+        ]
+    },
+    {
+        "id": 94,
+        "name": "Gengar",
+        "types": ["ghost", "poison"],
+        "baseStats": [60, 65, 60, 130, 75, 110],
+        "baseExp": 225,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 95,
+        "name": "Onix",
+        "types": ["rock", "ground"],
+        "baseStats": [35, 45, 160, 30, 45, 70],
+        "baseExp": 77,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 208,
+                "method": "trade"
+            }
+        ]
+    },
+    {
+        "id": 96,
+        "name": "Drowzee",
+        "types": ["psychic"],
+        "baseStats": [60, 48, 45, 43, 90, 42],
+        "baseExp": 66,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 97,
+                "method": "level",
+                "level": 26
+            }
+        ]
+    },
+    {
+        "id": 97,
+        "name": "Hypno",
+        "types": ["psychic"],
+        "baseStats": [85, 73, 70, 73, 115, 67],
+        "baseExp": 169,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 98,
+        "name": "Krabby",
+        "types": ["water"],
+        "baseStats": [30, 105, 90, 25, 25, 50],
+        "baseExp": 65,
+        "captureRate": 225,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 99,
+                "method": "level",
+                "level": 28
+            }
+        ]
+    },
+    {
+        "id": 99,
+        "name": "Kingler",
+        "types": ["water"],
+        "baseStats": [55, 130, 115, 50, 50, 75],
+        "baseExp": 166,
+        "captureRate": 60,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 100,
+        "name": "Voltorb",
+        "types": ["electric"],
+        "baseStats": [40, 30, 50, 55, 55, 100],
+        "baseExp": 66,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 101,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 101,
+        "name": "Electrode",
+        "types": ["electric"],
+        "baseStats": [60, 50, 70, 80, 80, 150],
+        "baseExp": 172,
+        "captureRate": 60,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 102,
+        "name": "Exeggcute",
+        "types": ["grass", "psychic"],
+        "baseStats": [60, 40, 80, 60, 45, 40],
+        "baseExp": 65,
+        "captureRate": 90,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 103,
+                "method": "stone",
+                "stone": "leafStone"
+            }
+        ]
+    },
+    {
+        "id": 103,
+        "name": "Exeggutor",
+        "types": ["grass", "psychic"],
+        "baseStats": [95, 95, 85, 125, 75, 55],
+        "baseExp": 186,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 104,
+        "name": "Cubone",
+        "types": ["ground"],
+        "baseStats": [50, 50, 95, 40, 50, 35],
+        "baseExp": 64,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 105,
+                "method": "level",
+                "level": 28
+            }
+        ]
+    },
+    {
+        "id": 105,
+        "name": "Marowak",
+        "types": ["ground"],
+        "baseStats": [60, 80, 110, 50, 80, 45],
+        "baseExp": 149,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 106,
+        "name": "Hitmonlee",
+        "types": ["fighting"],
+        "baseStats": [50, 120, 53, 35, 110, 87],
+        "baseExp": 159,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 0,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 107,
+        "name": "Hitmonchan",
+        "types": ["fighting"],
+        "baseStats": [50, 105, 79, 35, 110, 76],
+        "baseExp": 159,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 0,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 108,
+        "name": "Lickitung",
+        "types": ["normal"],
+        "baseStats": [90, 55, 75, 60, 75, 30],
+        "baseExp": 77,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 109,
+        "name": "Koffing",
+        "types": ["poison"],
+        "baseStats": [40, 65, 95, 60, 45, 35],
+        "baseExp": 68,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 110,
+                "method": "level",
+                "level": 35
+            }
+        ]
+    },
+    {
+        "id": 110,
+        "name": "Weezing",
+        "types": ["poison"],
+        "baseStats": [65, 90, 120, 85, 70, 60],
+        "baseExp": 172,
+        "captureRate": 60,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 111,
+        "name": "Rhyhorn",
+        "types": ["ground", "rock"],
+        "baseStats": [80, 85, 95, 30, 30, 25],
+        "baseExp": 69,
+        "captureRate": 120,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 112,
+                "method": "level",
+                "level": 42
+            }
+        ]
+    },
+    {
+        "id": 112,
+        "name": "Rhydon",
+        "types": ["ground", "rock"],
+        "baseStats": [105, 130, 120, 45, 45, 40],
+        "baseExp": 170,
+        "captureRate": 60,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 113,
+        "name": "Chansey",
+        "types": ["normal"],
+        "baseStats": [250, 5, 5, 35, 105, 50],
+        "baseExp": 395,
+        "captureRate": 30,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 8,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 242,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 114,
+        "name": "Tangela",
+        "types": ["grass"],
+        "baseStats": [65, 55, 115, 100, 40, 60],
+        "baseExp": 87,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 115,
+        "name": "Kangaskhan",
+        "types": ["normal"],
+        "baseStats": [105, 95, 80, 40, 80, 90],
+        "baseExp": 172,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 8,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 116,
+        "name": "Horsea",
+        "types": ["water"],
+        "baseStats": [30, 40, 70, 70, 25, 60],
+        "baseExp": 59,
+        "captureRate": 225,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 117,
+                "method": "level",
+                "level": 32
+            }
+        ]
+    },
+    {
+        "id": 117,
+        "name": "Seadra",
+        "types": ["water"],
+        "baseStats": [55, 65, 95, 95, 45, 85],
+        "baseExp": 154,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 230,
+                "method": "trade"
+            }
+        ]
+    },
+    {
+        "id": 118,
+        "name": "Goldeen",
+        "types": ["water"],
+        "baseStats": [45, 67, 60, 35, 50, 63],
+        "baseExp": 64,
+        "captureRate": 225,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 119,
+                "method": "level",
+                "level": 33
+            }
+        ]
+    },
+    {
+        "id": 119,
+        "name": "Seaking",
+        "types": ["water"],
+        "baseStats": [80, 92, 65, 65, 80, 68],
+        "baseExp": 158,
+        "captureRate": 60,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 120,
+        "name": "Staryu",
+        "types": ["water"],
+        "baseStats": [30, 45, 55, 70, 55, 85],
+        "baseExp": 68,
+        "captureRate": 225,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 121,
+                "method": "stone",
+                "stone": "waterStone"
+            }
+        ]
+    },
+    {
+        "id": 121,
+        "name": "Starmie",
+        "types": ["water", "psychic"],
+        "baseStats": [60, 75, 85, 100, 85, 115],
+        "baseExp": 182,
+        "captureRate": 60,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 122,
+        "name": "Mr. Mime",
+        "types": ["psychic", "fairy"],
+        "baseStats": [40, 45, 65, 100, 120, 90],
+        "baseExp": 161,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 123,
+        "name": "Scyther",
+        "types": ["bug", "flying"],
+        "baseStats": [70, 110, 80, 55, 80, 105],
+        "baseExp": 100,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 212,
+                "method": "trade"
+            }
+        ]
+    },
+    {
+        "id": 124,
+        "name": "Jynx",
+        "types": ["ice", "psychic"],
+        "baseStats": [65, 50, 35, 115, 95, 95],
+        "baseExp": 159,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 8,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 125,
+        "name": "Electabuzz",
+        "types": ["electric"],
+        "baseStats": [65, 83, 57, 95, 85, 105],
+        "baseExp": 172,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 126,
+        "name": "Magmar",
+        "types": ["fire"],
+        "baseStats": [65, 95, 57, 100, 85, 93],
+        "baseExp": 173,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 127,
+        "name": "Pinsir",
+        "types": ["bug"],
+        "baseStats": [65, 125, 100, 55, 70, 85],
+        "baseExp": 175,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 128,
+        "name": "Tauros",
+        "types": ["normal"],
+        "baseStats": [75, 100, 95, 40, 70, 110],
+        "baseExp": 172,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 0,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 129,
+        "name": "Magikarp",
+        "types": ["water"],
+        "baseStats": [20, 10, 55, 15, 20, 80],
+        "baseExp": 40,
+        "captureRate": 255,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 130,
+                "method": "level",
+                "level": 20
+            }
+        ]
+    },
+    {
+        "id": 130,
+        "name": "Gyarados",
+        "types": ["water", "flying"],
+        "baseStats": [95, 125, 79, 60, 100, 81],
+        "baseExp": 189,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 131,
+        "name": "Lapras",
+        "types": ["water", "ice"],
+        "baseStats": [130, 85, 80, 85, 95, 60],
+        "baseExp": 187,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 132,
+        "name": "Ditto",
+        "types": ["normal"],
+        "baseStats": [48, 48, 48, 48, 48, 48],
+        "baseExp": 101,
+        "captureRate": 35,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 133,
+        "name": "Eevee",
+        "types": ["normal"],
+        "baseStats": [55, 55, 50, 45, 65, 55],
+        "baseExp": 65,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 134,
+                "method": "stone",
+                "stone": "waterStone"
+            },
+            {
+                "into": 135,
+                "method": "stone",
+                "stone": "thunderStone"
+            },
+            {
+                "into": 136,
+                "method": "stone",
+                "stone": "fireStone"
+            },
+            {
+                "into": 196,
+                "method": "level",
+                "level": 30
+            },
+            {
+                "into": 197,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 134,
+        "name": "Vaporeon",
+        "types": ["water"],
+        "baseStats": [130, 65, 60, 110, 95, 65],
+        "baseExp": 184,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 135,
+        "name": "Jolteon",
+        "types": ["electric"],
+        "baseStats": [65, 65, 60, 110, 95, 130],
+        "baseExp": 184,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 136,
+        "name": "Flareon",
+        "types": ["fire"],
+        "baseStats": [65, 130, 60, 95, 110, 65],
+        "baseExp": 184,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 137,
+        "name": "Porygon",
+        "types": ["normal"],
+        "baseStats": [65, 60, 70, 85, 75, 40],
+        "baseExp": 79,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 233,
+                "method": "trade"
+            }
+        ]
+    },
+    {
+        "id": 138,
+        "name": "Omanyte",
+        "types": ["rock", "water"],
+        "baseStats": [35, 40, 100, 90, 55, 35],
+        "baseExp": 71,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 139,
+                "method": "level",
+                "level": 40
+            }
+        ]
+    },
+    {
+        "id": 139,
+        "name": "Omastar",
+        "types": ["rock", "water"],
+        "baseStats": [70, 60, 125, 115, 70, 55],
+        "baseExp": 173,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 140,
+        "name": "Kabuto",
+        "types": ["rock", "water"],
+        "baseStats": [30, 80, 90, 55, 45, 55],
+        "baseExp": 71,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 141,
+                "method": "level",
+                "level": 40
+            }
+        ]
+    },
+    {
+        "id": 141,
+        "name": "Kabutops",
+        "types": ["rock", "water"],
+        "baseStats": [60, 115, 105, 65, 70, 80],
+        "baseExp": 173,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 142,
+        "name": "Aerodactyl",
+        "types": ["rock", "flying"],
+        "baseStats": [80, 105, 65, 60, 75, 130],
+        "baseExp": 180,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 143,
+        "name": "Snorlax",
+        "types": ["normal"],
+        "baseStats": [160, 110, 65, 65, 110, 30],
+        "baseExp": 189,
+        "captureRate": 25,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 144,
+        "name": "Articuno",
+        "types": ["ice", "flying"],
+        "baseStats": [90, 85, 100, 95, 125, 85],
+        "baseExp": 261,
+        "captureRate": 3,
+        "growthRate": "slow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 145,
+        "name": "Zapdos",
+        "types": ["electric", "flying"],
+        "baseStats": [90, 90, 85, 125, 90, 100],
+        "baseExp": 261,
+        "captureRate": 3,
+        "growthRate": "slow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 146,
+        "name": "Moltres",
+        "types": ["fire", "flying"],
+        "baseStats": [90, 100, 90, 125, 85, 90],
+        "baseExp": 261,
+        "captureRate": 3,
+        "growthRate": "slow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 147,
+        "name": "Dratini",
+        "types": ["dragon"],
+        "baseStats": [41, 64, 45, 50, 50, 50],
+        "baseExp": 60,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 148,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 148,
+        "name": "Dragonair",
+        "types": ["dragon"],
+        "baseStats": [61, 84, 65, 70, 70, 70],
+        "baseExp": 147,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 149,
+                "method": "level",
+                "level": 55
+            }
+        ]
+    },
+    {
+        "id": 149,
+        "name": "Dragonite",
+        "types": ["dragon", "flying"],
+        "baseStats": [91, 134, 95, 100, 100, 80],
+        "baseExp": 270,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 150,
+        "name": "Mewtwo",
+        "types": ["psychic"],
+        "baseStats": [106, 110, 90, 154, 90, 130],
+        "baseExp": 306,
+        "captureRate": 3,
+        "growthRate": "slow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 151,
+        "name": "Mew",
+        "types": ["psychic"],
+        "baseStats": [100, 100, 100, 100, 100, 100],
+        "baseExp": 270,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 152,
+        "name": "Chikorita",
+        "types": ["grass"],
+        "baseStats": [45, 49, 65, 49, 65, 45],
+        "baseExp": 64,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 153,
+                "method": "level",
+                "level": 16
+            }
+        ]
+    },
+    {
+        "id": 153,
+        "name": "Bayleef",
+        "types": ["grass"],
+        "baseStats": [60, 62, 80, 63, 80, 60],
+        "baseExp": 142,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 154,
+                "method": "level",
+                "level": 32
+            }
+        ]
+    },
+    {
+        "id": 154,
+        "name": "Meganium",
+        "types": ["grass"],
+        "baseStats": [80, 82, 100, 83, 100, 80],
+        "baseExp": 236,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 155,
+        "name": "Cyndaquil",
+        "types": ["fire"],
+        "baseStats": [39, 52, 43, 60, 50, 65],
+        "baseExp": 62,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 156,
+                "method": "level",
+                "level": 14
+            }
+        ]
+    },
+    {
+        "id": 156,
+        "name": "Quilava",
+        "types": ["fire"],
+        "baseStats": [58, 64, 58, 80, 65, 80],
+        "baseExp": 142,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 157,
+                "method": "level",
+                "level": 36
+            }
+        ]
+    },
+    {
+        "id": 157,
+        "name": "Typhlosion",
+        "types": ["fire"],
+        "baseStats": [78, 84, 78, 109, 85, 100],
+        "baseExp": 240,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 158,
+        "name": "Totodile",
+        "types": ["water"],
+        "baseStats": [50, 65, 64, 44, 48, 43],
+        "baseExp": 63,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 159,
+                "method": "level",
+                "level": 18
+            }
+        ]
+    },
+    {
+        "id": 159,
+        "name": "Croconaw",
+        "types": ["water"],
+        "baseStats": [65, 80, 80, 59, 63, 58],
+        "baseExp": 142,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 160,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 160,
+        "name": "Feraligatr",
+        "types": ["water"],
+        "baseStats": [85, 105, 100, 79, 83, 78],
+        "baseExp": 239,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 161,
+        "name": "Sentret",
+        "types": ["normal"],
+        "baseStats": [35, 46, 34, 35, 45, 20],
+        "baseExp": 43,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 162,
+                "method": "level",
+                "level": 15
+            }
+        ]
+    },
+    {
+        "id": 162,
+        "name": "Furret",
+        "types": ["normal"],
+        "baseStats": [85, 76, 64, 45, 55, 90],
+        "baseExp": 145,
+        "captureRate": 90,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 163,
+        "name": "Hoothoot",
+        "types": ["normal", "flying"],
+        "baseStats": [60, 30, 30, 36, 56, 50],
+        "baseExp": 52,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 164,
+                "method": "level",
+                "level": 20
+            }
+        ]
+    },
+    {
+        "id": 164,
+        "name": "Noctowl",
+        "types": ["normal", "flying"],
+        "baseStats": [100, 50, 50, 86, 96, 70],
+        "baseExp": 158,
+        "captureRate": 90,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 165,
+        "name": "Ledyba",
+        "types": ["bug", "flying"],
+        "baseStats": [40, 20, 30, 40, 80, 55],
+        "baseExp": 53,
+        "captureRate": 255,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 166,
+                "method": "level",
+                "level": 18
+            }
+        ]
+    },
+    {
+        "id": 166,
+        "name": "Ledian",
+        "types": ["bug", "flying"],
+        "baseStats": [55, 35, 50, 55, 110, 85],
+        "baseExp": 137,
+        "captureRate": 90,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 167,
+        "name": "Spinarak",
+        "types": ["bug", "poison"],
+        "baseStats": [40, 60, 40, 40, 40, 30],
+        "baseExp": 50,
+        "captureRate": 255,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 168,
+                "method": "level",
+                "level": 22
+            }
+        ]
+    },
+    {
+        "id": 168,
+        "name": "Ariados",
+        "types": ["bug", "poison"],
+        "baseStats": [70, 90, 70, 60, 70, 40],
+        "baseExp": 140,
+        "captureRate": 90,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 169,
+        "name": "Crobat",
+        "types": ["poison", "flying"],
+        "baseStats": [85, 90, 80, 70, 80, 130],
+        "baseExp": 241,
+        "captureRate": 90,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 170,
+        "name": "Chinchou",
+        "types": ["water", "electric"],
+        "baseStats": [75, 38, 38, 56, 56, 67],
+        "baseExp": 66,
+        "captureRate": 190,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 171,
+                "method": "level",
+                "level": 27
+            }
+        ]
+    },
+    {
+        "id": 171,
+        "name": "Lanturn",
+        "types": ["water", "electric"],
+        "baseStats": [125, 58, 58, 76, 76, 67],
+        "baseExp": 161,
+        "captureRate": 75,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 172,
+        "name": "Pichu",
+        "types": ["electric"],
+        "baseStats": [20, 40, 15, 35, 35, 60],
+        "baseExp": 41,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 25,
+                "method": "level",
+                "level": 15
+            }
+        ]
+    },
+    {
+        "id": 173,
+        "name": "Cleffa",
+        "types": ["fairy"],
+        "baseStats": [50, 25, 28, 45, 55, 15],
+        "baseExp": 44,
+        "captureRate": 150,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 35,
+                "method": "level",
+                "level": 15
+            }
+        ]
+    },
+    {
+        "id": 174,
+        "name": "Igglybuff",
+        "types": ["normal", "fairy"],
+        "baseStats": [90, 30, 15, 40, 20, 15],
+        "baseExp": 42,
+        "captureRate": 170,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 39,
+                "method": "level",
+                "level": 15
+            }
+        ]
+    },
+    {
+        "id": 175,
+        "name": "Togepi",
+        "types": ["fairy"],
+        "baseStats": [35, 20, 65, 40, 65, 20],
+        "baseExp": 49,
+        "captureRate": 190,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 176,
+                "method": "level",
+                "level": 15
+            }
+        ]
+    },
+    {
+        "id": 176,
+        "name": "Togetic",
+        "types": ["fairy", "flying"],
+        "baseStats": [55, 40, 85, 80, 105, 40],
+        "baseExp": 142,
+        "captureRate": 75,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 177,
+        "name": "Natu",
+        "types": ["psychic", "flying"],
+        "baseStats": [40, 50, 45, 70, 45, 70],
+        "baseExp": 64,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 178,
+                "method": "level",
+                "level": 25
+            }
+        ]
+    },
+    {
+        "id": 178,
+        "name": "Xatu",
+        "types": ["psychic", "flying"],
+        "baseStats": [65, 75, 70, 95, 70, 95],
+        "baseExp": 165,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 179,
+        "name": "Mareep",
+        "types": ["electric"],
+        "baseStats": [55, 40, 40, 65, 45, 35],
+        "baseExp": 56,
+        "captureRate": 235,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 180,
+                "method": "level",
+                "level": 15
+            }
+        ]
+    },
+    {
+        "id": 180,
+        "name": "Flaaffy",
+        "types": ["electric"],
+        "baseStats": [70, 55, 55, 80, 60, 45],
+        "baseExp": 128,
+        "captureRate": 120,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 181,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 181,
+        "name": "Ampharos",
+        "types": ["electric"],
+        "baseStats": [90, 75, 85, 115, 90, 55],
+        "baseExp": 230,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 182,
+        "name": "Bellossom",
+        "types": ["grass"],
+        "baseStats": [75, 80, 95, 90, 100, 50],
+        "baseExp": 221,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 183,
+        "name": "Marill",
+        "types": ["water", "fairy"],
+        "baseStats": [70, 20, 50, 20, 50, 40],
+        "baseExp": 88,
+        "captureRate": 190,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 184,
+                "method": "level",
+                "level": 18
+            }
+        ]
+    },
+    {
+        "id": 184,
+        "name": "Azumarill",
+        "types": ["water", "fairy"],
+        "baseStats": [100, 50, 80, 60, 80, 50],
+        "baseExp": 189,
+        "captureRate": 75,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 185,
+        "name": "Sudowoodo",
+        "types": ["rock"],
+        "baseStats": [70, 100, 115, 30, 65, 30],
+        "baseExp": 144,
+        "captureRate": 65,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 186,
+        "name": "Politoed",
+        "types": ["water"],
+        "baseStats": [90, 75, 75, 90, 100, 70],
+        "baseExp": 225,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 187,
+        "name": "Hoppip",
+        "types": ["grass", "flying"],
+        "baseStats": [35, 35, 40, 35, 55, 50],
+        "baseExp": 50,
+        "captureRate": 255,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 188,
+                "method": "level",
+                "level": 18
+            }
+        ]
+    },
+    {
+        "id": 188,
+        "name": "Skiploom",
+        "types": ["grass", "flying"],
+        "baseStats": [55, 45, 50, 45, 65, 80],
+        "baseExp": 119,
+        "captureRate": 120,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 189,
+                "method": "level",
+                "level": 27
+            }
+        ]
+    },
+    {
+        "id": 189,
+        "name": "Jumpluff",
+        "types": ["grass", "flying"],
+        "baseStats": [75, 55, 70, 55, 95, 110],
+        "baseExp": 207,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 190,
+        "name": "Aipom",
+        "types": ["normal"],
+        "baseStats": [55, 70, 55, 40, 55, 85],
+        "baseExp": 72,
+        "captureRate": 45,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 191,
+        "name": "Sunkern",
+        "types": ["grass"],
+        "baseStats": [30, 30, 30, 30, 30, 30],
+        "baseExp": 36,
+        "captureRate": 235,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 192,
+                "method": "stone",
+                "stone": "sunStone"
+            }
+        ]
+    },
+    {
+        "id": 192,
+        "name": "Sunflora",
+        "types": ["grass"],
+        "baseStats": [75, 75, 55, 105, 85, 30],
+        "baseExp": 149,
+        "captureRate": 120,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 193,
+        "name": "Yanma",
+        "types": ["bug", "flying"],
+        "baseStats": [65, 65, 45, 75, 45, 95],
+        "baseExp": 78,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 194,
+        "name": "Wooper",
+        "types": ["water", "ground"],
+        "baseStats": [55, 45, 45, 25, 25, 15],
+        "baseExp": 42,
+        "captureRate": 255,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": [
+            {
+                "into": 195,
+                "method": "level",
+                "level": 20
+            }
+        ]
+    },
+    {
+        "id": 195,
+        "name": "Quagsire",
+        "types": ["water", "ground"],
+        "baseStats": [95, 85, 85, 65, 65, 35],
+        "baseExp": 151,
+        "captureRate": 90,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 196,
+        "name": "Espeon",
+        "types": ["psychic"],
+        "baseStats": [65, 65, 60, 130, 95, 110],
+        "baseExp": 184,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 197,
+        "name": "Umbreon",
+        "types": ["dark"],
+        "baseStats": [95, 65, 110, 60, 130, 65],
+        "baseExp": 184,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 198,
+        "name": "Murkrow",
+        "types": ["dark", "flying"],
+        "baseStats": [60, 85, 42, 85, 42, 91],
+        "baseExp": 81,
+        "captureRate": 30,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 199,
+        "name": "Slowking",
+        "types": ["water", "psychic"],
+        "baseStats": [95, 75, 80, 100, 110, 30],
+        "baseExp": 172,
+        "captureRate": 70,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 200,
+        "name": "Misdreavus",
+        "types": ["ghost"],
+        "baseStats": [60, 60, 60, 85, 85, 85],
+        "baseExp": 87,
+        "captureRate": 45,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 201,
+        "name": "Unown",
+        "types": ["psychic"],
+        "baseStats": [48, 72, 48, 72, 48, 48],
+        "baseExp": 118,
+        "captureRate": 225,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 202,
+        "name": "Wobbuffet",
+        "types": ["psychic"],
+        "baseStats": [190, 33, 58, 33, 58, 33],
+        "baseExp": 142,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 203,
+        "name": "Girafarig",
+        "types": ["normal", "psychic"],
+        "baseStats": [70, 80, 65, 90, 65, 85],
+        "baseExp": 159,
+        "captureRate": 60,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 204,
+        "name": "Pineco",
+        "types": ["bug"],
+        "baseStats": [50, 65, 90, 35, 35, 15],
+        "baseExp": 58,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 205,
+                "method": "level",
+                "level": 31
+            }
+        ]
+    },
+    {
+        "id": 205,
+        "name": "Forretress",
+        "types": ["bug", "steel"],
+        "baseStats": [75, 90, 140, 60, 60, 40],
+        "baseExp": 163,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 206,
+        "name": "Dunsparce",
+        "types": ["normal"],
+        "baseStats": [100, 70, 70, 65, 65, 45],
+        "baseExp": 145,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 207,
+        "name": "Gligar",
+        "types": ["ground", "flying"],
+        "baseStats": [65, 75, 105, 35, 65, 85],
+        "baseExp": 86,
+        "captureRate": 60,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 208,
+        "name": "Steelix",
+        "types": ["steel", "ground"],
+        "baseStats": [75, 85, 200, 55, 65, 30],
+        "baseExp": 179,
+        "captureRate": 25,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 209,
+        "name": "Snubbull",
+        "types": ["fairy"],
+        "baseStats": [60, 80, 50, 40, 40, 30],
+        "baseExp": 60,
+        "captureRate": 190,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 210,
+                "method": "level",
+                "level": 23
+            }
+        ]
+    },
+    {
+        "id": 210,
+        "name": "Granbull",
+        "types": ["fairy"],
+        "baseStats": [90, 120, 75, 60, 60, 45],
+        "baseExp": 158,
+        "captureRate": 75,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 211,
+        "name": "Qwilfish",
+        "types": ["water", "poison"],
+        "baseStats": [65, 95, 85, 55, 55, 85],
+        "baseExp": 88,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 212,
+        "name": "Scizor",
+        "types": ["bug", "steel"],
+        "baseStats": [70, 130, 100, 55, 80, 65],
+        "baseExp": 175,
+        "captureRate": 25,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 213,
+        "name": "Shuckle",
+        "types": ["bug", "rock"],
+        "baseStats": [20, 10, 230, 10, 230, 5],
+        "baseExp": 177,
+        "captureRate": 190,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 214,
+        "name": "Heracross",
+        "types": ["bug", "fighting"],
+        "baseStats": [80, 125, 75, 40, 95, 85],
+        "baseExp": 175,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 215,
+        "name": "Sneasel",
+        "types": ["dark", "ice"],
+        "baseStats": [55, 95, 55, 35, 75, 115],
+        "baseExp": 86,
+        "captureRate": 60,
+        "growthRate": "mediumSlow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 216,
+        "name": "Teddiursa",
+        "types": ["normal"],
+        "baseStats": [60, 80, 50, 50, 50, 40],
+        "baseExp": 66,
+        "captureRate": 120,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 217,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 217,
+        "name": "Ursaring",
+        "types": ["normal"],
+        "baseStats": [90, 130, 75, 75, 75, 55],
+        "baseExp": 175,
+        "captureRate": 60,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 218,
+        "name": "Slugma",
+        "types": ["fire"],
+        "baseStats": [40, 40, 40, 70, 40, 20],
+        "baseExp": 50,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 219,
+                "method": "level",
+                "level": 38
+            }
+        ]
+    },
+    {
+        "id": 219,
+        "name": "Magcargo",
+        "types": ["fire", "rock"],
+        "baseStats": [60, 50, 120, 90, 80, 30],
+        "baseExp": 151,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 220,
+        "name": "Swinub",
+        "types": ["ice", "ground"],
+        "baseStats": [50, 50, 40, 30, 30, 50],
+        "baseExp": 50,
+        "captureRate": 225,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 221,
+                "method": "level",
+                "level": 33
+            }
+        ]
+    },
+    {
+        "id": 221,
+        "name": "Piloswine",
+        "types": ["ice", "ground"],
+        "baseStats": [100, 100, 80, 60, 60, 50],
+        "baseExp": 158,
+        "captureRate": 75,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 222,
+        "name": "Corsola",
+        "types": ["water", "rock"],
+        "baseStats": [65, 55, 95, 65, 95, 35],
+        "baseExp": 144,
+        "captureRate": 60,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 6,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 223,
+        "name": "Remoraid",
+        "types": ["water"],
+        "baseStats": [35, 65, 35, 65, 35, 65],
+        "baseExp": 60,
+        "captureRate": 190,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 224,
+                "method": "level",
+                "level": 25
+            }
+        ]
+    },
+    {
+        "id": 224,
+        "name": "Octillery",
+        "types": ["water"],
+        "baseStats": [75, 105, 75, 105, 75, 45],
+        "baseExp": 168,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 225,
+        "name": "Delibird",
+        "types": ["ice", "flying"],
+        "baseStats": [45, 55, 45, 65, 45, 75],
+        "baseExp": 116,
+        "captureRate": 45,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 226,
+        "name": "Mantine",
+        "types": ["water", "flying"],
+        "baseStats": [85, 40, 70, 80, 140, 70],
+        "baseExp": 170,
+        "captureRate": 25,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 227,
+        "name": "Skarmory",
+        "types": ["steel", "flying"],
+        "baseStats": [65, 80, 140, 40, 70, 70],
+        "baseExp": 163,
+        "captureRate": 25,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 228,
+        "name": "Houndour",
+        "types": ["dark", "fire"],
+        "baseStats": [45, 60, 30, 80, 50, 65],
+        "baseExp": 66,
+        "captureRate": 120,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 229,
+                "method": "level",
+                "level": 24
+            }
+        ]
+    },
+    {
+        "id": 229,
+        "name": "Houndoom",
+        "types": ["dark", "fire"],
+        "baseStats": [75, 90, 50, 110, 80, 95],
+        "baseExp": 175,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 230,
+        "name": "Kingdra",
+        "types": ["water", "dragon"],
+        "baseStats": [75, 95, 95, 95, 95, 85],
+        "baseExp": 243,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 231,
+        "name": "Phanpy",
+        "types": ["ground"],
+        "baseStats": [90, 60, 60, 40, 40, 40],
+        "baseExp": 66,
+        "captureRate": 120,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 232,
+                "method": "level",
+                "level": 25
+            }
+        ]
+    },
+    {
+        "id": 232,
+        "name": "Donphan",
+        "types": ["ground"],
+        "baseStats": [90, 120, 120, 60, 60, 50],
+        "baseExp": 175,
+        "captureRate": 60,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": true,
+        "evolutions": []
+    },
+    {
+        "id": 233,
+        "name": "Porygon2",
+        "types": ["normal"],
+        "baseStats": [85, 80, 90, 105, 95, 60],
+        "baseExp": 180,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 234,
+        "name": "Stantler",
+        "types": ["normal"],
+        "baseStats": [73, 95, 62, 85, 65, 85],
+        "baseExp": 163,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 235,
+        "name": "Smeargle",
+        "types": ["normal"],
+        "baseStats": [55, 20, 35, 20, 45, 75],
+        "baseExp": 88,
+        "captureRate": 45,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 236,
+        "name": "Tyrogue",
+        "types": ["fighting"],
+        "baseStats": [35, 35, 35, 35, 35, 35],
+        "baseExp": 42,
+        "captureRate": 75,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 0,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 106,
+                "method": "level",
+                "level": 20
+            },
+            {
+                "into": 107,
+                "method": "level",
+                "level": 20
+            },
+            {
+                "into": 237,
+                "method": "level",
+                "level": 20
+            }
+        ]
+    },
+    {
+        "id": 237,
+        "name": "Hitmontop",
+        "types": ["fighting"],
+        "baseStats": [50, 95, 95, 35, 110, 70],
+        "baseExp": 159,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 0,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 238,
+        "name": "Smoochum",
+        "types": ["ice", "psychic"],
+        "baseStats": [45, 30, 15, 85, 65, 65],
+        "baseExp": 61,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 8,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 124,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 239,
+        "name": "Elekid",
+        "types": ["electric"],
+        "baseStats": [45, 63, 37, 65, 55, 95],
+        "baseExp": 72,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 125,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 240,
+        "name": "Magby",
+        "types": ["fire"],
+        "baseStats": [45, 75, 37, 70, 55, 83],
+        "baseExp": 73,
+        "captureRate": 45,
+        "growthRate": "medium",
+        "legendary": false,
+        "genderRate": 2,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 126,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 241,
+        "name": "Miltank",
+        "types": ["normal"],
+        "baseStats": [95, 80, 105, 40, 70, 100],
+        "baseExp": 172,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 8,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 242,
+        "name": "Blissey",
+        "types": ["normal"],
+        "baseStats": [255, 10, 10, 75, 135, 55],
+        "baseExp": 608,
+        "captureRate": 30,
+        "growthRate": "fast",
+        "legendary": false,
+        "genderRate": 8,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 243,
+        "name": "Raikou",
+        "types": ["electric"],
+        "baseStats": [90, 85, 75, 115, 100, 115],
+        "baseExp": 261,
+        "captureRate": 3,
+        "growthRate": "slow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 244,
+        "name": "Entei",
+        "types": ["fire"],
+        "baseStats": [115, 115, 85, 90, 75, 100],
+        "baseExp": 261,
+        "captureRate": 3,
+        "growthRate": "slow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 245,
+        "name": "Suicune",
+        "types": ["water"],
+        "baseStats": [100, 75, 115, 90, 115, 85],
+        "baseExp": 261,
+        "captureRate": 3,
+        "growthRate": "slow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 246,
+        "name": "Larvitar",
+        "types": ["rock", "ground"],
+        "baseStats": [50, 64, 50, 45, 50, 41],
+        "baseExp": 60,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 247,
+                "method": "level",
+                "level": 30
+            }
+        ]
+    },
+    {
+        "id": 247,
+        "name": "Pupitar",
+        "types": ["rock", "ground"],
+        "baseStats": [70, 84, 70, 65, 70, 51],
+        "baseExp": 144,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": [
+            {
+                "into": 248,
+                "method": "level",
+                "level": 55
+            }
+        ]
+    },
+    {
+        "id": 248,
+        "name": "Tyranitar",
+        "types": ["rock", "dark"],
+        "baseStats": [100, 134, 110, 95, 100, 61],
+        "baseExp": 270,
+        "captureRate": 45,
+        "growthRate": "slow",
+        "legendary": false,
+        "genderRate": 4,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 249,
+        "name": "Lugia",
+        "types": ["psychic", "flying"],
+        "baseStats": [106, 90, 130, 90, 154, 110],
+        "baseExp": 306,
+        "captureRate": 3,
+        "growthRate": "slow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 250,
+        "name": "Ho-Oh",
+        "types": ["fire", "flying"],
+        "baseStats": [106, 130, 90, 110, 154, 90],
+        "baseExp": 306,
+        "captureRate": 3,
+        "growthRate": "slow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
+    },
+    {
+        "id": 251,
+        "name": "Celebi",
+        "types": ["psychic", "grass"],
+        "baseStats": [100, 100, 100, 100, 100, 100],
+        "baseExp": 270,
+        "captureRate": 45,
+        "growthRate": "mediumSlow",
+        "legendary": true,
+        "genderRate": -1,
+        "genderDifferences": false,
+        "evolutions": []
     }
-  }
-}
+]
