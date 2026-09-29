@@ -111,7 +111,13 @@ export const STONES: Record<StoneId, StoneDefinition> = {
 };
 
 export type KeyItemId =
-    "oldRod" | "goodRod" | "superRod" | "surf" | "bicycle" | "pokeFlute" | "linkCable";
+    | "oldRod"
+    | "goodRod"
+    | "superRod"
+    | "surf"
+    | "bicycle"
+    | "pokeFlute"
+    | "linkCable";
 
 export interface KeyItemDefinition {
     id: KeyItemId;

@@ -25,7 +25,12 @@ export type PokemonType =
     | "fairy";
 
 export type StoneId =
-    "moonStone" | "fireStone" | "thunderStone" | "waterStone" | "leafStone" | "sunStone";
+    | "moonStone"
+    | "fireStone"
+    | "thunderStone"
+    | "waterStone"
+    | "leafStone"
+    | "sunStone";
 
 export type GrowthRate = "slow" | "medium" | "fast" | "mediumSlow" | "erratic" | "fluctuating";
 
@@ -74,7 +79,14 @@ export interface Species {
  * differences, official regional forms, and other official forms (Unown letters, Pikachu caps).
  */
 export type VariantKind =
-    "pinkan" | "valencian" | "unique" | "female" | "regional" | "official" | "pattern" | "cosmetic";
+    | "pinkan"
+    | "valencian"
+    | "unique"
+    | "female"
+    | "regional"
+    | "official"
+    | "pattern"
+    | "cosmetic";
 
 interface FormData {
     id: number;

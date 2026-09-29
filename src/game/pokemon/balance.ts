@@ -609,7 +609,12 @@ export function fameGain(input: FameInputs): number {
 export const FAME_PER_NEW_SPECIES = 5;
 
 export type AutomationId =
-    "autoShop" | "autoClaim" | "autoEvolve" | "autoParty" | "autoTravel" | "autoChallenge";
+    | "autoShop"
+    | "autoClaim"
+    | "autoEvolve"
+    | "autoParty"
+    | "autoTravel"
+    | "autoChallenge";
 
 export interface AutomationDefinition {
     id: AutomationId;

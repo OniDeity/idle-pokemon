@@ -7,6 +7,9 @@ Pick a starter, and your team battles and catches wild Pokémon on its own while
 where to hunt, who's in your party, when to challenge the next Gym. Earn all 8 badges, beat
 the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster journey.
 
+**Play:** https://onideity.github.io/idle-pokemon/
+**Dev build** (upcoming changes, separate saves): https://onideity.github.io/idle-pokemon/dev/
+
 ## How it plays
 
 - **Journeys through three regions.** Kanto (plus 52 anime-exclusive locations from
@@ -63,6 +66,13 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 | `src/data/pokemon/*.json`        | Generated data (see below).                                                                                                                                                                                   |
 | `scripts/fetchPokemonData.ts`    | Regenerates the JSON from PokeAPI's CSV dump.                                                                                                                                                                 |
 | `scripts/simulateProgression.ts` | Headless balance simulator.                                                                                                                                                                                   |
+
+## Releases
+
+- `dev` is where changes land first. Every push deploys it to `/dev/`, a build with its own
+  save slot (`scripts/prepareDevBuild.mjs`), so testing never touches players' saves.
+- `main` is the public game. Merge `dev` into `main` to release; every push deploys to the site
+  root. Both deploys are handled by `.github/workflows/deploy.yml`.
 
 ## Development
 

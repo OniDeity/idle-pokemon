@@ -161,16 +161,18 @@ const KANTO_SPECIALS: WithoutRegion<SpecialEncounter>[] = [
             [127, 25, 45000],
             [137, 26, 80000]
         ] as const
-    ).map(([speciesId, level, price]): WithoutRegion<SpecialEncounter> => ({
-        kind: "gift",
-        id: `gameCorner${speciesId}`,
-        speciesId,
-        level,
-        place: "Celadon Game Corner",
-        badgesRequired: 3,
-        price,
-        text: "Trade in coins at the prize counter."
-    })),
+    ).map(
+        ([speciesId, level, price]): WithoutRegion<SpecialEncounter> => ({
+            kind: "gift",
+            id: `gameCorner${speciesId}`,
+            speciesId,
+            level,
+            place: "Celadon Game Corner",
+            badgesRequired: 3,
+            price,
+            text: "Trade in coins at the prize counter."
+        })
+    ),
     {
         kind: "trade",
         id: "route18Trade",

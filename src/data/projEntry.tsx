@@ -175,14 +175,15 @@ export const main = createLayer("main", layer => {
     // ------------------------------------------------------------------
     // Derived values
     // ------------------------------------------------------------------
-    const bonuses = computed((): Bonuses =>
-        computeBonuses({
-            dexCaught: dex.caughtCount.value,
-            shinyCaught: dex.shinyCount.value,
-            mart: mart.levels.value,
-            hof: hof.levels.value,
-            keyItems: keyItems.value
-        })
+    const bonuses = computed(
+        (): Bonuses =>
+            computeBonuses({
+                dexCaught: dex.caughtCount.value,
+                shinyCaught: dex.shinyCount.value,
+                mart: mart.levels.value,
+                hof: hof.levels.value,
+                keyItems: keyItems.value
+            })
     );
     const regionDef = computed(() => REGIONS[region.value] ?? REGIONS.kanto);
     const cap = computed(() => levelCap(regionDef.value, badges.value, champion.value));

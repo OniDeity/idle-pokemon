@@ -33,7 +33,9 @@ export default defineConfig({
         VitePWA({
             registerType: 'autoUpdate',
             workbox: {
-              globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+              globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+              // The dev build lives in /dev/ under the public one; never answer for it.
+              navigateFallbackDenylist: [/\/dev\//]
             },
             manifest: {
                 name: projInfo.title,
