@@ -170,6 +170,14 @@ const STONE_BY_ITEM_ID: Record<string, string> = {
     "80": "sunStone"
 };
 
+/** Items a Pokémon must hold to evolve by trade. */
+const HELD_ITEM_BY_ITEM_ID: Record<string, string> = {
+    "198": "kingsRock",
+    "210": "metalCoat",
+    "212": "dragonScale",
+    "229": "upGrade"
+};
+
 const GROWTH_RATES: Record<string, string> = {
     "1": "slow",
     "2": "medium",
@@ -200,6 +208,10 @@ interface Evolution {
     method: "level" | "stone" | "trade";
     level?: number;
     stone?: string;
+    /** A friendship evolution: also possible early with a Soothe Bell. */
+    friendship?: boolean;
+    /** For trade evolutions: an item it must hold, used up alongside the Link Cable. */
+    heldItem?: string;
 }
 
 async function main() {
@@ -279,11 +291,14 @@ async function main() {
         if (r.evolution_trigger_id === "1" && r.minimum_level !== "") {
             evolution = { into, method: "level", level: Number(r.minimum_level) };
         } else if (r.evolution_trigger_id === "1" && r.minimum_happiness !== "") {
-            // Friendship evolutions become level evolutions: babies grow up fast, others at 30.
+            // Friendship evolutions become level evolutions (babies grow up fast, others at 30),
+            // or happen early with a Soothe Bell.
             const baby = babies.has(String(from));
-            evolution = { into, method: "level", level: baby ? 15 : 30 };
+            evolution = { into, method: "level", level: baby ? 15 : 30, friendship: true };
         } else if (r.evolution_trigger_id === "2") {
-            evolution = { into, method: "trade" };
+            const heldItem = HELD_ITEM_BY_ITEM_ID[r.held_item_id];
+            evolution =
+                heldItem != null ? { into, method: "trade", heldItem } : { into, method: "trade" };
         } else if (r.evolution_trigger_id === "3" && STONE_BY_ITEM_ID[r.trigger_item_id]) {
             evolution = { into, method: "stone", stone: STONE_BY_ITEM_ID[r.trigger_item_id] };
         } else {

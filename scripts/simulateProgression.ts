@@ -26,7 +26,7 @@ import {
 } from "../src/game/pokemon/balance";
 import { getSpecies, hallOfFameId } from "../src/game/pokemon/data";
 import type { BallId, KeyItemId } from "../src/game/pokemon/items";
-import { AUTO_BALL_ORDER, BALLS, LINK_CABLE_PRICE, STONES } from "../src/game/pokemon/items";
+import { AUTO_BALL_ORDER, BALLS, STONES } from "../src/game/pokemon/items";
 import type { RegionDefinition } from "../src/game/pokemon/regions";
 import { levelCap, REGIONS, strengthMultiplier, withStrength } from "../src/game/pokemon/regions";
 import { SPECIAL_ENCOUNTERS } from "../src/game/pokemon/specials";
@@ -167,9 +167,23 @@ function runJourney(region: RegionDefinition, starter: number) {
         for (const evo of getSpecies(o.id).evolutions) {
             if (owned.has(evo.into)) continue;
             let ok = evo.method === "level" && o.level >= (evo.level ?? 101);
-            if (evo.method === "trade" && keyItems.linkCable) ok = true;
-            if (evo.method === "stone" && evo.stone && tier() >= STONES[evo.stone].badgesRequired) {
-                const price = STONES[evo.stone].price;
+            // Stones, Link Cables and Soothe Bells are each used up by one evolution; buy one
+            // when it's cheap relative to savings, like the auto-evolve automation.
+            const item =
+                evo.method === "stone"
+                    ? evo.stone
+                    : evo.method === "trade"
+                      ? "linkCable"
+                      : evo.friendship === true && !ok
+                        ? "sootheBell"
+                        : undefined;
+            const held = evo.method === "trade" ? evo.heldItem : undefined;
+            if (
+                item != null &&
+                tier() >= STONES[item].badgesRequired &&
+                (held == null || tier() >= STONES[held].badgesRequired)
+            ) {
+                const price = STONES[item].price + (held != null ? STONES[held].price : 0);
                 if (money > price * 3) {
                     money -= price;
                     ok = true;
@@ -207,10 +221,6 @@ function runJourney(region: RegionDefinition, starter: number) {
             if (!best || money < best.cost * 2) break;
             money -= best.cost;
             mart[best.u.id] = (mart[best.u.id] ?? 0) + 1;
-        }
-        if (!keyItems.linkCable && tier() >= 3 && money > LINK_CABLE_PRICE * 3) {
-            money -= LINK_CABLE_PRICE;
-            keyItems.linkCable = true;
         }
     }
 
