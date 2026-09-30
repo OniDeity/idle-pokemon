@@ -11,12 +11,13 @@ import {
     trainerTeam,
     upgradeCost
 } from "game/pokemon/balance";
-import { getSpecies } from "game/pokemon/data";
+import { getSpecies, hallOfFameId } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
 import type { StoneId } from "game/pokemon/data";
 import { BALLS, STONES } from "game/pokemon/items";
 import { maxHp } from "game/pokemon/stats";
 import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
+import type { TrainerDefinition } from "game/pokemon/trainers";
 import { availableZoneSpecies, typicalLevel, zonesIn } from "game/pokemon/zones";
 import hof from "./layers/hof";
 import mart from "./layers/mart";
@@ -129,7 +130,37 @@ function autoParty() {
         return { id, score };
     });
     scored.sort((a, b) => b.score - a.score);
-    main.setParty(scored.slice(0, 6).map(s => s.id));
+    const best = scored.slice(0, 6).map(s => s.id);
+    main.setParty(
+        main.nextTrial.value == null && hof.newFacesForFinale.value
+            ? (newFacesParty(
+                  scored.map(s => s.id),
+                  trainers
+              ) ?? best)
+            : best
+    );
+}
+
+/**
+ * For the finale: the team with the most Pokémon new to the Hall of Fame (each worth extra Fame)
+ * that the forecast says still wins, filled out with the strongest of the rest. Undefined when
+ * even one newcomer would cost the win.
+ */
+function newFacesParty(ranked: number[], trainers: TrainerDefinition[]): number[] | undefined {
+    const { damage, hp } = main.bonuses.value;
+    // Strongest first; a Gyarados and a Gyarados ♀ are one Hall of Fame entry.
+    const fresh = ranked.filter(
+        (id, i) =>
+            !hof.isEnshrined(id) &&
+            ranked.findIndex(other => hallOfFameId(other) === hallOfFameId(id)) === i
+    );
+    for (let count = Math.min(6, fresh.length); count > 0; count--) {
+        const team = fresh.slice(0, count);
+        team.push(...ranked.filter(id => !team.includes(id)).slice(0, 6 - count));
+        const party = team.map(id => main.battlerFor(id));
+        if (trainers.every(t => simulateTrainerBattle(party, t, damage, hp).won)) return team;
+    }
+    return undefined;
 }
 
 function autoTravel() {

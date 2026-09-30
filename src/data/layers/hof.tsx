@@ -50,6 +50,8 @@ const layer = createLayer(id, () => {
     /** Automations bought (true) and whether the player has them switched on. */
     const automationsOwned = persistent<Partial<Record<AutomationId, boolean>>>({}, false);
     const automationsOn = persistent<Partial<Record<AutomationId, boolean>>>({}, false);
+    /** Team Strategist setting: bring Pokémon new to the Hall of Fame to the finale. */
+    const newFacesForFinale = persistent<boolean>(false);
 
     function level(upgrade: HofUpgradeId) {
         return levels.value[upgrade] ?? 0;
@@ -250,6 +252,19 @@ const layer = createLayer(id, () => {
                             <div class="pk-shop-info">
                                 <b>{def.name}</b>
                                 <div class="pk-small">{def.description}</div>
+                                {def.id === "autoParty" && owned ? (
+                                    <label class="pk-small pk-setting">
+                                        <input
+                                            type="checkbox"
+                                            checked={newFacesForFinale.value}
+                                            onChange={() =>
+                                                (newFacesForFinale.value = !newFacesForFinale.value)
+                                            }
+                                        />{" "}
+                                        Hall of Fame battles: bring as many Pokémon new to the Hall
+                                        as can still win (+{FAME_PER_NEW_SPECIES} Fame each)
+                                    </label>
+                                ) : null}
                             </div>
                             {owned ? (
                                 <Button
@@ -288,6 +303,8 @@ const layer = createLayer(id, () => {
         enshrined,
         automationsOwned,
         automationsOn,
+        newFacesForFinale,
+        isEnshrined,
         pendingFame,
         recordChampionTeam,
         regionUnlocked,
