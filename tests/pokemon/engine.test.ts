@@ -9,7 +9,8 @@ import {
     memberDps,
     simulateTrainerBattle,
     stepTrainerBattle,
-    trainerTeam
+    trainerTeam,
+    zoneRates
 } from "game/pokemon/balance";
 import {
     DEX_SIZE,
@@ -383,5 +384,21 @@ describe("sprites", () => {
         const missing = requiredSpritePaths().filter(path => !existsSync(`public/sprites/${path}`));
         expect(missing).toEqual([]);
         expect(requiredSpritePaths().length).toBeGreaterThan(1000);
+    });
+});
+
+describe("zone efficiency", () => {
+    test("rates are positive and rise with a stronger party", () => {
+        const bonuses = { damage: 1, xp: 1, money: 1, searchTime: 2 };
+        const weak = zoneRates("route1", {}, party([4, 5]), bonuses);
+        const strong = zoneRates("route1", {}, party([6, 50]), bonuses);
+        expect(weak.xpPerMinute).toBeGreaterThan(0);
+        expect(weak.moneyPerMinute).toBeGreaterThan(0);
+        expect(strong.xpPerMinute).toBeGreaterThan(weak.xpPerMinute);
+        expect(strong.moneyPerMinute).toBeGreaterThan(weak.moneyPerMinute);
+        // Fishing adds encounters (and their rewards) only once you have a rod.
+        expect(zoneRates("route22", {}, party([6, 50]), bonuses)).not.toEqual(
+            zoneRates("route22", { oldRod: true }, party([6, 50]), bonuses)
+        );
     });
 });
