@@ -1,9 +1,9 @@
 /**
- * Every image comes from the PokeAPI sprites repository. A self-contained build can ship the
- * images itself by defining `window.__PK_ASSETS` (path → data URI) before the game loads.
+ * Every image ships with the game in public/sprites (fetched from the PokeAPI sprites repository
+ * by scripts/fetchSprites.ts, or drawn by our own sprite generators), so nothing is hotlinked.
+ * A self-contained build can instead define `window.__PK_ASSETS` (path → data URI) before the
+ * game loads.
  */
-const SPRITES_BASE = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites";
-
 declare global {
     interface Window {
         __PK_ASSETS?: Record<string, string>;
@@ -11,11 +11,11 @@ declare global {
 }
 
 /**
- * @param path A path inside the sprites repo, e.g. "items/poke-ball.png", or "local/…" for a
- *   sprite shipped in the game's own public/sprites folder.
+ * @param path A path under public/sprites, laid out like the PokeAPI sprites repo, e.g.
+ *   "items/poke-ball.png". Sprites we draw ourselves are passed as "local/…".
  */
 export function assetUrl(path: string): string {
-    const bundled = typeof window === "undefined" ? undefined : window.__PK_ASSETS?.[path];
-    if (bundled != null) return bundled;
-    return path.startsWith("local/") ? `./sprites/${path.slice(6)}` : `${SPRITES_BASE}/${path}`;
+    const file = path.startsWith("local/") ? path.slice(6) : path;
+    const bundled = typeof window === "undefined" ? undefined : window.__PK_ASSETS?.[file];
+    return bundled ?? `./sprites/${file}`;
 }

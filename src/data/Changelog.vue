@@ -51,6 +51,10 @@
                     </li>
                     <li class="feature">Settings → Behaviour → "Start over…" wipes all progress</li>
                     <li class="feature">Portrait layout for phones</li>
+                    <li class="fix">
+                        Sprites ship with the game instead of loading from GitHub, so they no
+                        longer go missing
+                    </li>
                     <li class="balancing">
                         Slower, steadier pacing: about a day for a first clear; rematches get
                         tougher
