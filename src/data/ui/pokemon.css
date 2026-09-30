@@ -1514,3 +1514,8 @@
     gap: 8px;
     flex-wrap: wrap;
 }
+
+.pk-layer .pk-zone-rates {
+    color: var(--pk-good);
+    margin-top: 2px;
+}

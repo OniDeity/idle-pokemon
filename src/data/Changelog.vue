@@ -56,7 +56,8 @@
                     </li>
                     <li class="feature">
                         Map search, sorting and filters: new Pokémon, not in box, unlocked, anime
-                        or game locations, and type; "N new" tags on each place
+                        or game locations, and type; "N new" tags on each place; a "Most
+                        efficient" sort with estimated XP and ₽ per minute for your party
                     </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="fix">

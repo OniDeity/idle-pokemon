@@ -11,18 +11,21 @@ import type { SpecialEncounter } from "game/pokemon/specials";
 import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import type { ZoneDefinition } from "game/pokemon/zones";
 import { allZoneSpecies, availableZoneSpecies, typicalLevel, zonesIn } from "game/pokemon/zones";
-import { computed, ref } from "vue";
+import type { ZoneRates } from "game/pokemon/balance";
+import { zoneRates } from "game/pokemon/balance";
+import { computed, ref, shallowRef, watch } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
-import { Button, formatMoney, Panel, Sprite, TypeBadge } from "../ui/components";
+import { Button, formatMoney, formatNumber, Panel, Sprite, TypeBadge } from "../ui/components";
 import dex from "./dex";
 
 type Tab = "zones" | "specials";
-type ZoneSort = "story" | "level" | "new";
+type ZoneSort = "story" | "efficient" | "level" | "new";
 type ZoneFilter = "new" | "notInBox" | "unlocked" | "anime" | "games";
 
 const ZONE_SORTS: [ZoneSort, string][] = [
     ["story", "Story order"],
+    ["efficient", "Most efficient"],
     ["level", "Level"],
     ["new", "Most new Pokémon"]
 ];
@@ -81,6 +84,61 @@ const layer = createLayer(id, () => {
         return (Object.keys(TYPE_COLORS) as PokemonType[]).filter(type => present.has(type));
     });
 
+    /**
+     * Only what changes the estimates: every battle adds XP to the party, but rates only move
+     * when the party, its levels, the bonuses, the gear or the unlocked zones change.
+     */
+    const rateInputs = computed(() =>
+        zoneSort.value !== "efficient"
+            ? ""
+            : JSON.stringify([
+                  main.region.value,
+                  main.badges.value,
+                  main.champion.value,
+                  main.partyIds.value.map(id => [id, main.box.value[id]?.level]),
+                  main.keyItems.value,
+                  main.bonuses.value
+              ])
+    );
+
+    /** XP and ₽ per minute in each unlocked zone for your current party and bonuses. */
+    const rates = shallowRef(new Map<string, ZoneRates>());
+    watch(
+        rateInputs,
+        inputs => {
+            const result = new Map<string, ZoneRates>();
+            if (inputs !== "") {
+                for (const zone of zonesIn(main.region.value)) {
+                    if (!main.zoneUnlocked(zone.id)) continue;
+                    result.set(
+                        zone.id,
+                        zoneRates(
+                            zone.id,
+                            main.keyItems.value,
+                            main.partyBattlers.value,
+                            main.bonuses.value
+                        )
+                    );
+                }
+            }
+            rates.value = result;
+        },
+        { immediate: true }
+    );
+
+    /** Efficiency score: XP and ₽ rates, each relative to the best zone, weighted equally. */
+    const efficiency = computed(() => {
+        const all = [...rates.value.values()];
+        const bestXp = Math.max(1, ...all.map(r => r.xpPerMinute));
+        const bestMoney = Math.max(1, ...all.map(r => r.moneyPerMinute));
+        return new Map(
+            [...rates.value.entries()].map(([zoneId, r]) => [
+                zoneId,
+                r.xpPerMinute / bestXp + r.moneyPerMinute / bestMoney
+            ])
+        );
+    });
+
     const visibleZones = computed(() => {
         const query = zoneSearch.value.trim().toLowerCase();
         const zones = zonesIn(main.region.value).filter(zone => {
@@ -104,6 +162,10 @@ const layer = createLayer(id, () => {
             }
             return true;
         });
+        if (zoneSort.value === "efficient") {
+            const score = (zone: ZoneDefinition) => efficiency.value.get(zone.id) ?? -1;
+            return [...zones].sort((a, b) => score(b) - score(a));
+        }
         if (zoneSort.value === "level") {
             return [...zones].sort((a, b) => typicalLevel(a.id) - typicalLevel(b.id));
         }
@@ -186,6 +248,7 @@ const layer = createLayer(id, () => {
         const hidden = all.filter(s => !available.has(s)).length;
         const level = Math.round(typicalLevel(zone.id));
         const fresh = unlocked ? newSpecies(zone).length : 0;
+        const zoneRate = rates.value.get(zone.id);
         return (
             <div class={["pk-zone", current ? "current" : "", unlocked ? "" : "locked"]}>
                 <div class="pk-zone-head">
@@ -194,6 +257,12 @@ const layer = createLayer(id, () => {
                         {zone.anime ? <span class="pk-anime-tag">Anime</span> : null}{" "}
                         <span class="pk-muted pk-small">~Lv. {level}</span>{" "}
                         {fresh > 0 ? <span class="pk-new-tag">{fresh} new</span> : null}
+                        {zoneRate != null ? (
+                            <div class="pk-small pk-zone-rates">
+                                ≈ {formatNumber(zoneRate.xpPerMinute)} XP/min ·{" "}
+                                {formatMoney(Math.round(zoneRate.moneyPerMinute))}/min
+                            </div>
+                        ) : null}
                         {zoneSort.value !== "story" ? (
                             <div class="pk-small pk-muted">
                                 {tierLabel(zone.badgesRequired, zone.postGame)}
@@ -314,6 +383,12 @@ const layer = createLayer(id, () => {
                             ))}
                         </div>
                     </>
+                ) : null}
+                {zoneSort.value === "efficient" ? (
+                    <p class="pk-small pk-muted">
+                        Estimated for your current party, bonuses and fishing gear. XP is per party
+                        member; past the level cap it becomes Effort.
+                    </p>
                 ) : null}
                 {filteringZones.value ? (
                     <div class="pk-filter-row pk-small pk-muted">
