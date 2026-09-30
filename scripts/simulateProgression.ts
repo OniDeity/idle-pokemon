@@ -177,8 +177,13 @@ function runJourney(region: RegionDefinition, starter: number) {
                       : evo.friendship === true && !ok
                         ? "sootheBell"
                         : undefined;
-            if (item != null && tier() >= STONES[item].badgesRequired) {
-                const price = STONES[item].price;
+            const held = evo.method === "trade" ? evo.heldItem : undefined;
+            if (
+                item != null &&
+                tier() >= STONES[item].badgesRequired &&
+                (held == null || tier() >= STONES[held].badgesRequired)
+            ) {
+                const price = STONES[item].price + (held != null ? STONES[held].price : 0);
                 if (money > price * 3) {
                     money -= price;
                     ok = true;

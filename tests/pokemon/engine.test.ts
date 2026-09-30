@@ -412,6 +412,23 @@ describe("evolution items", () => {
         expect(friendship).toEqual(
             expect.arrayContaining(["42->169", "113->242", "175->176", "172->25", "133->196"])
         );
+        // Held-item trade evolutions need their item as well as a Link Cable.
+        const held = SPECIES.flatMap(s =>
+            s.evolutions
+                .filter(e => e.heldItem != null)
+                .map(e => `${s.id}->${e.into}:${e.heldItem}`)
+        );
+        expect(held.sort()).toEqual(
+            [
+                "117->230:dragonScale",
+                "123->212:metalCoat",
+                "137->233:upGrade",
+                "61->186:kingsRock",
+                "79->199:kingsRock",
+                "95->208:metalCoat"
+            ].sort()
+        );
+        held.forEach(h => expect(STONES[h.split(":")[1] as keyof typeof STONES]).toBeDefined());
         expect(STONES.linkCable.price).toBeGreaterThan(0);
         expect(STONES.sootheBell.price).toBeGreaterThan(0);
     });

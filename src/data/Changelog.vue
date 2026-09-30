@@ -66,6 +66,11 @@
                         Link Cables and Soothe Bells are used up by each evolution, like stones
                         (₽2,500 each); an old reusable Link Cable becomes three new ones
                     </li>
+                    <li class="feature">
+                        Held-item trade evolutions need their item too: Metal Coat (Steelix,
+                        Scizor), King's Rock (Politoed, Slowking), Dragon Scale (Kingdra) and
+                        Up-Grade (Porygon2)
+                    </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="fix">
                         Pokémon already at their evolution level (caught above it, or waiting at

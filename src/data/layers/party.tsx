@@ -77,7 +77,7 @@ const layer = createLayer(id, () => {
                 ? level >= (e.level ?? Infinity) || (e.friendship === true && have("sootheBell"))
                 : e.method === "stone"
                   ? have(e.stone!)
-                  : have("linkCable")
+                  : have("linkCable") && (e.heldItem == null || have(e.heldItem))
         );
     }
 
@@ -238,15 +238,32 @@ const layer = createLayer(id, () => {
                         );
                     } else {
                         const cables = main.stones.value.linkCable ?? 0;
+                        const held = evo.heldItem != null ? STONES[evo.heldItem] : null;
+                        const heldCount = held != null ? (main.stones.value[held.id] ?? 0) : 1;
+                        const missing = [
+                            cables <= 0 ? "a Link Cable" : null,
+                            held != null && heldCount <= 0 ? `a ${held.name}` : null
+                        ].filter(x => x != null);
                         action = (
                             <Button
                                 kind="primary"
-                                disabled={cables <= 0 || main.inTrainerBattle.value}
+                                disabled={missing.length > 0 || main.inTrainerBattle.value}
                                 onClick={() => main.evolveByTrade(speciesId)}
-                                title={cables <= 0 ? "Buy a Link Cable at the Poké Mart" : ""}
+                                title={
+                                    missing.length > 0
+                                        ? `Buy ${missing.join(" and ")} at the Poké Mart`
+                                        : ""
+                                }
                             >
-                                <ItemIcon src={STONES.linkCable.sprite} size={20} /> Use Link Cable
-                                ({cables})
+                                <ItemIcon src={STONES.linkCable.sprite} size={20} /> Link Cable (
+                                {cables})
+                                {held != null ? (
+                                    <>
+                                        {" + "}
+                                        <ItemIcon src={held.sprite} size={20} /> {held.name} (
+                                        {heldCount})
+                                    </>
+                                ) : null}
                             </Button>
                         );
                     }

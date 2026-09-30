@@ -115,7 +115,9 @@ function locationsOf(id: number): string[] {
                 ? `at Lv. ${evo.level}`
                 : evo?.method === "stone"
                   ? `with a ${STONES[evo.stone!].name}`
-                  : "by trade (Link Cable)";
+                  : evo?.heldItem != null
+                    ? `by trade (Link Cable, holding a ${STONES[evo.heldItem].name})`
+                    : "by trade (Link Cable)";
         places.push(`Evolve ${getSpecies(pre).name} ${how}`);
     }
     if (id === MEW_ID) {

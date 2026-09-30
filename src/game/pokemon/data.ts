@@ -34,7 +34,12 @@ export type StoneId =
     /** Used up by one trade evolution. */
     | "linkCable"
     /** Used up by one friendship evolution, at any level. */
-    | "sootheBell";
+    | "sootheBell"
+    /** Held items some trade evolutions also need (used up alongside the Link Cable). */
+    | "metalCoat"
+    | "kingsRock"
+    | "dragonScale"
+    | "upGrade";
 
 export type GrowthRate = "slow" | "medium" | "fast" | "mediumSlow" | "erratic" | "fluctuating";
 
@@ -45,6 +50,8 @@ export interface Evolution {
     stone?: StoneId;
     /** A friendship evolution: happens at `level`, or earlier with a Soothe Bell. */
     friendship?: boolean;
+    /** For trade evolutions: an item it must hold, used up alongside the Link Cable. */
+    heldItem?: StoneId;
 }
 
 export interface Species {

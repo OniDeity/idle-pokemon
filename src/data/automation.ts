@@ -97,6 +97,7 @@ function autoEvolve() {
                 main.evolveWithStone(id, stone.id);
             } else if (evolution.method === "trade") {
                 if (!buyIfAffordable("linkCable")) continue;
+                if (evolution.heldItem != null && !buyIfAffordable(evolution.heldItem)) continue;
                 main.evolveByTrade(id);
             } else if (evolution.method === "level") {
                 // Box Pokémon already at the level (party members evolve on their own)...

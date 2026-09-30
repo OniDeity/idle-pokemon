@@ -113,7 +113,7 @@ export const STONES: Record<StoneId, StoneDefinition> = {
         name: "Link Cable",
         price: 2500,
         badgesRequired: 3,
-        sprite: itemSprite("up-grade")
+        sprite: itemSprite("gb-sounds")
     },
     sootheBell: {
         id: "sootheBell",
@@ -121,6 +121,34 @@ export const STONES: Record<StoneId, StoneDefinition> = {
         price: 2500,
         badgesRequired: 3,
         sprite: itemSprite("soothe-bell")
+    },
+    metalCoat: {
+        id: "metalCoat",
+        name: "Metal Coat",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("metal-coat")
+    },
+    kingsRock: {
+        id: "kingsRock",
+        name: "King's Rock",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("kings-rock")
+    },
+    dragonScale: {
+        id: "dragonScale",
+        name: "Dragon Scale",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("dragon-scale")
+    },
+    upGrade: {
+        id: "upGrade",
+        name: "Up-Grade",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("up-grade")
     }
 };
 
@@ -128,7 +156,11 @@ export const STONES: Record<StoneId, StoneDefinition> = {
 export const STONE_DESCRIPTIONS: Partial<Record<StoneId, string>> = {
     linkCable: "Evolves one Pokémon that normally evolves by trading.",
     sootheBell:
-        "Evolves one friendship Pokémon (Golbat, Chansey, Eevee, babies) right away, whatever its level."
+        "Evolves one friendship Pokémon (Golbat, Chansey, Eevee, babies) right away, whatever its level.",
+    metalCoat: "Held while trading: Onix becomes Steelix, Scyther becomes Scizor.",
+    kingsRock: "Held while trading: Poliwhirl becomes Politoed, Slowpoke becomes Slowking.",
+    dragonScale: "Held while trading: Seadra becomes Kingdra.",
+    upGrade: "Held while trading: Porygon becomes Porygon2."
 };
 
 export type KeyItemId = "oldRod" | "goodRod" | "superRod" | "surf" | "bicycle" | "pokeFlute";
