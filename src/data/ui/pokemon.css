@@ -1071,6 +1071,19 @@
     padding: 6px 10px;
 }
 
+.pk-new-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #0b3b1c;
+    background: var(--pk-good);
+    border-radius: 999px;
+    padding: 1px 6px;
+    vertical-align: middle;
+}
+
 .pk-type-toggle {
     font: inherit;
     background: none;

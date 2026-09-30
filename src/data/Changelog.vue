@@ -54,6 +54,10 @@
                         PC Box search, sorting (level, strength, name) and filters (type, can
                         evolve, ready to evolve, shiny, forms, not in party, at level cap)
                     </li>
+                    <li class="feature">
+                        Map search, sorting and filters: new Pokémon, not in box, unlocked, anime
+                        or game locations, and type; "N new" tags on each place
+                    </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="fix">
                         Sprites ship with the game instead of loading from GitHub, so they no

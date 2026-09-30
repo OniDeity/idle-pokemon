@@ -4,7 +4,8 @@
  */
 import { main } from "data/projEntry";
 import { createLayer } from "game/layers";
-import { getSpecies } from "game/pokemon/data";
+import type { PokemonType } from "game/pokemon/data";
+import { getSpecies, TYPE_COLORS } from "game/pokemon/data";
 import { KEY_ITEMS } from "game/pokemon/items";
 import type { SpecialEncounter } from "game/pokemon/specials";
 import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
@@ -13,16 +14,135 @@ import { allZoneSpecies, availableZoneSpecies, typicalLevel, zonesIn } from "gam
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
-import { Button, formatMoney, Panel, Sprite } from "../ui/components";
+import { Button, formatMoney, Panel, Sprite, TypeBadge } from "../ui/components";
 import dex from "./dex";
 
 type Tab = "zones" | "specials";
+type ZoneSort = "story" | "level" | "new";
+type ZoneFilter = "new" | "notInBox" | "unlocked" | "anime" | "games";
+
+const ZONE_SORTS: [ZoneSort, string][] = [
+    ["story", "Story order"],
+    ["level", "Level"],
+    ["new", "Most new Pokémon"]
+];
+
+const ZONE_FILTERS: [ZoneFilter, string, string][] = [
+    ["new", "New Pokémon", "Places you can go now with Pokémon you've never caught"],
+    ["notInBox", "Not in box", "Has Pokémon you haven't caught this journey"],
+    ["unlocked", "Unlocked", "Places you can travel to now"],
+    ["anime", "Anime", "Locations from the animated series"],
+    ["games", "Games", "Locations from the games"]
+];
 
 const id = "map";
 const layer = createLayer(id, () => {
     const name = "Map";
     const color = "#22C55E";
     const tab = ref<Tab>("zones");
+    const zoneSort = ref<ZoneSort>("story");
+    const zoneSearch = ref("");
+    const zoneFilters = ref<ZoneFilter[]>([]);
+    const zoneTypes = ref<PokemonType[]>([]);
+    const showZoneControls = ref(false);
+
+    /** Species you can meet in a zone right now (with your current fishing gear and Surf). */
+    function reachable(zone: ZoneDefinition): number[] {
+        return availableZoneSpecies(zone.id, main.keyItems.value);
+    }
+
+    /** Species in a zone that you've never caught, and can reach now. */
+    function newSpecies(zone: ZoneDefinition): number[] {
+        return reachable(zone).filter(s => !dex.entry(s).caught);
+    }
+
+    function matchesZoneFilter(zone: ZoneDefinition, filter: ZoneFilter): boolean {
+        switch (filter) {
+            case "new":
+                return main.zoneUnlocked(zone.id) && newSpecies(zone).length > 0;
+            case "notInBox":
+                return reachable(zone).some(s => !main.owns(s));
+            case "unlocked":
+                return main.zoneUnlocked(zone.id);
+            case "anime":
+                return zone.anime === true;
+            case "games":
+                return zone.anime !== true;
+        }
+    }
+
+    /** Types of the Pokémon found in this region, for the type filter. */
+    const regionTypes = computed(() => {
+        const present = new Set(
+            zonesIn(main.region.value).flatMap(zone =>
+                allZoneSpecies(zone.id).flatMap(s => getSpecies(s).types)
+            )
+        );
+        return (Object.keys(TYPE_COLORS) as PokemonType[]).filter(type => present.has(type));
+    });
+
+    const visibleZones = computed(() => {
+        const query = zoneSearch.value.trim().toLowerCase();
+        const zones = zonesIn(main.region.value).filter(zone => {
+            if (query !== "") {
+                // Match the place, or any Pokémon you've seen there ("where's Pikachu?").
+                const named =
+                    zone.name.toLowerCase().includes(query) ||
+                    allZoneSpecies(zone.id).some(
+                        s => dex.entry(s).seen && getSpecies(s).name.toLowerCase().includes(query)
+                    );
+                if (!named) return false;
+            }
+            if (!zoneFilters.value.every(filter => matchesZoneFilter(zone, filter))) return false;
+            if (
+                zoneTypes.value.length > 0 &&
+                !reachable(zone).some(s =>
+                    getSpecies(s).types.some(type => zoneTypes.value.includes(type))
+                )
+            ) {
+                return false;
+            }
+            return true;
+        });
+        if (zoneSort.value === "level") {
+            return [...zones].sort((a, b) => typicalLevel(a.id) - typicalLevel(b.id));
+        }
+        if (zoneSort.value === "new") {
+            const counts = new Map(
+                zones.map(zone => [
+                    zone.id,
+                    main.zoneUnlocked(zone.id) ? newSpecies(zone).length : -1
+                ])
+            );
+            return [...zones].sort((a, b) => counts.get(b.id)! - counts.get(a.id)!);
+        }
+        return zones;
+    });
+
+    /** How many sort/filter options differ from the defaults, shown on the Filters button. */
+    const activeZoneControls = computed(
+        () =>
+            zoneFilters.value.length + zoneTypes.value.length + (zoneSort.value === "story" ? 0 : 1)
+    );
+
+    const filteringZones = computed(
+        () =>
+            zoneSearch.value.trim() !== "" ||
+            zoneFilters.value.length > 0 ||
+            zoneTypes.value.length > 0
+    );
+
+    function toggle<T>(list: { value: T[] }, item: T) {
+        list.value = list.value.includes(item)
+            ? list.value.filter(x => x !== item)
+            : [...list.value, item];
+    }
+
+    function clearZoneFilters() {
+        zoneSearch.value = "";
+        zoneFilters.value = [];
+        zoneTypes.value = [];
+    }
 
     const claimableSpecials = computed(() =>
         regionSpecials().filter(
@@ -65,13 +185,20 @@ const layer = createLayer(id, () => {
         const ownedHere = all.filter(s => main.owns(s)).length;
         const hidden = all.filter(s => !available.has(s)).length;
         const level = Math.round(typicalLevel(zone.id));
+        const fresh = unlocked ? newSpecies(zone).length : 0;
         return (
             <div class={["pk-zone", current ? "current" : "", unlocked ? "" : "locked"]}>
                 <div class="pk-zone-head">
                     <div>
                         <b>{zone.name}</b>{" "}
                         {zone.anime ? <span class="pk-anime-tag">Anime</span> : null}{" "}
-                        <span class="pk-muted pk-small">~Lv. {level}</span>
+                        <span class="pk-muted pk-small">~Lv. {level}</span>{" "}
+                        {fresh > 0 ? <span class="pk-new-tag">{fresh} new</span> : null}
+                        {zoneSort.value !== "story" ? (
+                            <div class="pk-small pk-muted">
+                                {tierLabel(zone.badgesRequired, zone.postGame)}
+                            </div>
+                        ) : null}
                         <div class="pk-small pk-muted">{zone.blurb}</div>
                     </div>
                     {unlocked ? (
@@ -125,14 +252,96 @@ const layer = createLayer(id, () => {
         );
     }
 
+    function renderZoneControls() {
+        return (
+            <Panel>
+                <div class="pk-filter-row">
+                    <input
+                        class="pk-search"
+                        type="search"
+                        placeholder="Search places or Pokémon…"
+                        value={zoneSearch.value}
+                        onInput={(e: Event) =>
+                            (zoneSearch.value = (e.target as HTMLInputElement).value)
+                        }
+                    />
+                    <Button
+                        kind={showZoneControls.value ? "primary" : "ghost"}
+                        onClick={() => (showZoneControls.value = !showZoneControls.value)}
+                    >
+                        Filters
+                        {activeZoneControls.value > 0 ? ` (${activeZoneControls.value})` : ""}{" "}
+                        {showZoneControls.value ? "▴" : "▾"}
+                    </Button>
+                </div>
+                {showZoneControls.value ? (
+                    <>
+                        <div class="pk-filter-row">
+                            <span class="pk-small pk-muted">Sort:</span>
+                            {ZONE_SORTS.map(([value, label]) => (
+                                <Button
+                                    kind={zoneSort.value === value ? "primary" : "ghost"}
+                                    onClick={() => (zoneSort.value = value)}
+                                >
+                                    {label}
+                                </Button>
+                            ))}
+                        </div>
+                        <div class="pk-filter-row">
+                            <span class="pk-small pk-muted">Show:</span>
+                            {ZONE_FILTERS.map(([value, label, title]) => (
+                                <Button
+                                    kind={zoneFilters.value.includes(value) ? "primary" : "ghost"}
+                                    title={title}
+                                    onClick={() => toggle(zoneFilters, value)}
+                                >
+                                    {label}
+                                </Button>
+                            ))}
+                        </div>
+                        <div class="pk-filter-row">
+                            <span class="pk-small pk-muted">Type:</span>
+                            {regionTypes.value.map(type => (
+                                <button
+                                    class={[
+                                        "pk-type-toggle",
+                                        zoneTypes.value.includes(type) ? "active" : ""
+                                    ]}
+                                    onClick={() => toggle(zoneTypes, type)}
+                                >
+                                    <TypeBadge type={type} small />
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                ) : null}
+                {filteringZones.value ? (
+                    <div class="pk-filter-row pk-small pk-muted">
+                        Showing {visibleZones.value.length} of {zonesIn(main.region.value).length}
+                        <Button kind="ghost" onClick={clearZoneFilters}>
+                            Clear filters
+                        </Button>
+                    </div>
+                ) : null}
+            </Panel>
+        );
+    }
+
     function renderZones() {
+        const zones = visibleZones.value;
+        if (zones.length === 0) {
+            return <p class="pk-muted">No places match these filters.</p>;
+        }
+        if (zoneSort.value !== "story") {
+            return <Panel>{zones.map(renderZone)}</Panel>;
+        }
         const tiers = new Map<string, ZoneDefinition[]>();
-        for (const zone of zonesIn(main.region.value)) {
+        for (const zone of zones) {
             const key = tierLabel(zone.badgesRequired, zone.postGame);
             tiers.set(key, [...(tiers.get(key) ?? []), zone]);
         }
-        return [...tiers.entries()].map(([label, zones]) => (
-            <Panel title={label}>{zones.map(renderZone)}</Panel>
+        return [...tiers.entries()].map(([label, tierZones]) => (
+            <Panel title={label}>{tierZones.map(renderZone)}</Panel>
         ));
     }
 
@@ -241,7 +450,10 @@ const layer = createLayer(id, () => {
                     </Button>
                 </div>
                 {tab.value === "zones" ? (
-                    renderZones()
+                    <>
+                        {renderZoneControls()}
+                        {renderZones()}
+                    </>
                 ) : (
                     <Panel>
                         <p class="pk-small pk-muted">
