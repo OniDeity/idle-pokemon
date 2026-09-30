@@ -1,4 +1,5 @@
 import { existsSync } from "fs";
+import { requiredSpritePaths } from "../../scripts/fetchSprites";
 import type { PartyBattler } from "game/pokemon/balance";
 import {
     catchChance,
@@ -374,5 +375,13 @@ describe("Cobblemon variants", () => {
         expect(REGIONS.kanto.requires).toBeUndefined();
         expect(REGIONS.orange.requires).toBe("kanto");
         expect(REGIONS.sevii.requires).toBe("orange");
+    });
+});
+
+describe("sprites", () => {
+    test("every sprite the game can show ships in public/sprites", () => {
+        const missing = requiredSpritePaths().filter(path => !existsSync(`public/sprites/${path}`));
+        expect(missing).toEqual([]);
+        expect(requiredSpritePaths().length).toBeGreaterThan(1000);
     });
 });

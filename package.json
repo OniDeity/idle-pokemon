@@ -13,7 +13,8 @@
     "serve": "vite preview --host",
     "lint": "eslint src --max-warnings 0",
     "lint:fix": "eslint --fix --max-warnings 0 src",
-    "fetch:pokemon": "tsx scripts/fetchPokemonData.ts"
+    "fetch:pokemon": "tsx scripts/fetchPokemonData.ts",
+    "fetch:sprites": "tsx scripts/fetchSprites.ts"
   },
   "dependencies": {
     "@fontsource/material-icons": "^5.1.0",
