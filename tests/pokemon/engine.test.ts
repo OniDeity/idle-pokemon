@@ -141,6 +141,10 @@ describe("data", () => {
             expect(getSpecies(special.speciesId).variant, id).toBe("giant");
             expect(wild.has(special.speciesId), id).toBe(false);
         }
+        // Every legendary encounter is a Pokémon you can't just meet in the wild.
+        for (const special of SPECIAL_ENCOUNTERS.filter(s => s.kind === "legendary")) {
+            expect(wild.has(special.speciesId), special.id).toBe(false);
+        }
         // New Island is nothing but Mewtwo's clones, and clones stay clones.
         const clones = allZoneSpecies("newIsland").map(getSpecies);
         expect(clones.length).toBe(27);

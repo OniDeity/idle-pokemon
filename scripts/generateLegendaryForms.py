@@ -7,6 +7,8 @@ game's own copies of PokeAPI's default sprites (public/sprites/pokemon):
 - The Giant Dragonite of Bill's lighthouse ("Mystery at the Lighthouse"): a storm-dark
   silhouette with glowing eyes.
 - Mewtwo's clones ("Mewtwo Strikes Back"): marbled with darker stripes.
+- The sleeping Snorlax that block the way: recolored like Pokémon Sleep's research-area Snorlax.
+  Their shiny sprites stay the regular shiny, as in Pokémon Sleep.
 
 The artwork is our own, following how the anime draws them.
 Usage: python3 scripts/generateLegendaryForms.py  (needs Pillow)
@@ -147,12 +149,40 @@ def paint_clone(img, species):
     return img
 
 
+# Pokémon Sleep research areas: body (hue, saturation, lightness), sampled from the game's art.
+SLEEP_AREAS = {
+    "cyan": (0.35, 0.42, 0.40),  # Cyan Beach: leafy green
+    "taupe": (0.50, 0.21, 0.34),  # Taupe Hollow: slate gray
+}
+
+
+def paint_sleep(img, area, shiny):
+    """Swaps Snorlax's blue-teal body for a research area's color, keeping the shading."""
+    if shiny:
+        return img
+    th, ts, tl = SLEEP_AREAS[area]
+    # Snorlax's main body shade is (49, 90, 123): lightness 0.34, saturation 0.43.
+    px = img.load()
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            p = px[x, y]
+            if not p[3]:
+                continue
+            hh, l, s = hls(p[:3])
+            if 0.48 < hh < 0.62 and s > 0.2:
+                px[x, y] = (*to_rgb(th, l * tl / 0.34, s * ts / 0.43), p[3])
+    return img
+
+
 def forms():
     for species, (mark, darken, bright) in GIANTS.items():
         yield species, f"{species}-giant", lambda img, m=mark, d=darken, b=bright: paint_giant(img, m, d, b)
     yield "149", "149-giant", paint_dragonite
     for species in CLONES:
         yield str(species), f"{species}-clone", lambda img, s=species: paint_clone(img, s)
+    for area in SLEEP_AREAS:
+        yield "143", f"143-sleep-{area}", lambda img, a=area, shiny=False: paint_sleep(img, a, shiny)
 
 
 def main():
@@ -160,7 +190,8 @@ def main():
     for species, key, paint in forms():
         for folder in ("", "back", "shiny", os.path.join("back", "shiny")):
             base = os.path.join(ROOT, folder, f"{species}.png")
-            img = paint(Image.open(base).convert("RGBA"))
+            img = Image.open(base).convert("RGBA")
+            img = img if "sleep" in key and "shiny" in folder else paint(img)
             img.save(os.path.join(ROOT, folder, f"{key}.png"), optimize=True)
         count += 1
     print(f"Wrote {count} forms to {ROOT}")

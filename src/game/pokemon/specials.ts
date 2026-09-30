@@ -187,7 +187,7 @@ const KANTO_SPECIALS: WithoutRegion<SpecialEncounter>[] = [
         kind: "legendary",
         id: "snorlax",
         strength: 1.4,
-        speciesId: 143,
+        speciesId: 7020,
         level: 30,
         zoneId: "route12",
         place: "Route 12",

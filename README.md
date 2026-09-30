@@ -31,7 +31,8 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   [Cobblemon wiki](https://wiki.cobblemon.com/index.php/Pok%C3%A9mon/Unique_Forms).
 - **Legendary forms**: the anime's one-of-a-kind Pokémon are their own forms, never met in the
   wild: the marked giants of Pokémopolis (Alakazam, Gengar, Jigglypuff), the Giant Dragonite of
-  Bill's Lighthouse, and Mewtwo's striped Clone Pokémon on New Island.
+  Bill's Lighthouse, Mewtwo's striped Clone Pokémon on New Island, and the sleeping Snorlax
+  recolored after Pokémon Sleep's research areas (Taupe Hollow, Cyan Beach).
 - **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands; Johto comes next,
   unlocked by completing the Pokédex.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
