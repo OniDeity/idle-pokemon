@@ -13,7 +13,8 @@ import {
 } from "game/pokemon/balance";
 import { getSpecies } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
-import { BALLS, LINK_CABLE_PRICE, STONES } from "game/pokemon/items";
+import type { StoneId } from "game/pokemon/data";
+import { BALLS, STONES } from "game/pokemon/items";
 import { maxHp } from "game/pokemon/stats";
 import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { availableZoneSpecies, typicalLevel, zonesIn } from "game/pokemon/zones";
@@ -70,6 +71,17 @@ function autoClaim() {
     }
 }
 
+/** Makes sure one of an evolution item is in the bag, buying it when it's cheap enough. */
+function buyIfAffordable(id: StoneId): boolean {
+    if ((main.stones.value[id] ?? 0) > 0) return true;
+    const item = STONES[id];
+    if (main.martTier.value < item.badgesRequired || main.money.value < item.price * 3) {
+        return false;
+    }
+    main.buyStone(id);
+    return (main.stones.value[id] ?? 0) > 0;
+}
+
 function autoEvolve() {
     for (const key of Object.keys(main.box.value)) {
         const id = Number(key);
@@ -84,15 +96,17 @@ function autoEvolve() {
                 }
                 main.evolveWithStone(id, stone.id);
             } else if (evolution.method === "trade") {
-                if (!main.keyItems.value.linkCable) {
-                    if (main.martTier.value < 3 || main.money.value < LINK_CABLE_PRICE * 3)
-                        continue;
-                    mart.buyLinkCable();
-                }
+                if (!buyIfAffordable("linkCable")) continue;
                 main.evolveByTrade(id);
             } else if (evolution.method === "level") {
-                // Box Pokémon already at the level (party members evolve on their own).
-                main.evolveByLevel(id, evolution.into);
+                // Box Pokémon already at the level (party members evolve on their own)...
+                const level = main.box.value[id]?.level ?? 0;
+                if (level >= (evolution.level ?? Infinity)) {
+                    main.evolveByLevel(id, evolution.into);
+                } else if (evolution.friendship === true && buyIfAffordable("sootheBell")) {
+                    // ...and friendship Pokémon early, with a Soothe Bell.
+                    main.evolveWithSootheBell(id, evolution.into);
+                }
             }
         }
     }

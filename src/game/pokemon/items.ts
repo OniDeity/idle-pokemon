@@ -107,17 +107,31 @@ export const STONES: Record<StoneId, StoneDefinition> = {
         price: 3000,
         badgesRequired: 4,
         sprite: itemSprite("sun-stone")
+    },
+    linkCable: {
+        id: "linkCable",
+        name: "Link Cable",
+        price: 2500,
+        badgesRequired: 3,
+        sprite: itemSprite("up-grade")
+    },
+    sootheBell: {
+        id: "sootheBell",
+        name: "Soothe Bell",
+        price: 2500,
+        badgesRequired: 3,
+        sprite: itemSprite("soothe-bell")
     }
 };
 
-export type KeyItemId =
-    | "oldRod"
-    | "goodRod"
-    | "superRod"
-    | "surf"
-    | "bicycle"
-    | "pokeFlute"
-    | "linkCable";
+/** What each evolution item does, for the Mart. */
+export const STONE_DESCRIPTIONS: Partial<Record<StoneId, string>> = {
+    linkCable: "Evolves one Pokémon that normally evolves by trading.",
+    sootheBell:
+        "Evolves one friendship Pokémon (Golbat, Chansey, Eevee, babies) right away, whatever its level."
+};
+
+export type KeyItemId = "oldRod" | "goodRod" | "superRod" | "surf" | "bicycle" | "pokeFlute";
 
 export interface KeyItemDefinition {
     id: KeyItemId;
@@ -162,13 +176,5 @@ export const KEY_ITEMS: Record<KeyItemId, KeyItemDefinition> = {
         name: "Poké Flute",
         description: "Wakes the sleeping Snorlax on Route 12.",
         sprite: itemSprite("poke-flute")
-    },
-    linkCable: {
-        id: "linkCable",
-        name: "Link Cable",
-        description: "Evolve Pokémon that normally only evolve by trading.",
-        sprite: itemSprite("up-grade")
     }
 };
-
-export const LINK_CABLE_PRICE = 10000;

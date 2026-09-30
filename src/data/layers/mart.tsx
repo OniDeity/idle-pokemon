@@ -1,5 +1,5 @@
 /**
- * The Poké Mart: balls, evolution stones, the Link Cable, and Pokédollar upgrades.
+ * The Poké Mart: balls, evolution items (stones, Link Cables, Soothe Bells), and Pokédollar upgrades.
  * Upgrades are part of the journey and reset on entering the Hall of Fame.
  */
 import { main } from "data/projEntry";
@@ -8,7 +8,7 @@ import { persistent } from "game/persistence";
 import type { MartUpgradeId, UpgradeDefinition } from "game/pokemon/balance";
 import { MART_UPGRADE_LIST, upgradeCost } from "game/pokemon/balance";
 import type { BallId } from "game/pokemon/items";
-import { BALLS, KEY_ITEMS, LINK_CABLE_PRICE, STONES } from "game/pokemon/items";
+import { BALLS, STONE_DESCRIPTIONS, STONES } from "game/pokemon/items";
 import { computed } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
@@ -30,12 +30,6 @@ const layer = createLayer(id, () => {
         if (current >= upgrade.maxLevel || main.martTier.value < upgrade.badgesRequired) return;
         if (!main.spend(upgradeCost(upgrade, current))) return;
         levels.value = { ...levels.value, [upgrade.id]: current + 1 };
-    }
-
-    function buyLinkCable() {
-        if (main.keyItems.value.linkCable || main.martTier.value < 3) return;
-        if (!main.spend(LINK_CABLE_PRICE)) return;
-        main.grantKeyItem("linkCable");
     }
 
     const nav: NavNode = {
@@ -128,7 +122,6 @@ const layer = createLayer(id, () => {
         classes: mobileClasses(id),
         levels,
         buyUpgrade,
-        buyLinkCable,
         nav,
         display: () => (
             <div class="pk-layer">
@@ -167,7 +160,8 @@ const layer = createLayer(id, () => {
                                     </span>
                                     <div class="pk-small">
                                         {unlocked
-                                            ? "Use from the Party screen to evolve certain Pokémon."
+                                            ? (STONE_DESCRIPTIONS[stone.id] ??
+                                              "Use from the Party screen to evolve certain Pokémon.")
                                             : `Stocked after ${stone.badgesRequired} badge${
                                                   stone.badgesRequired === 1 ? "" : "s"
                                               }`}
@@ -185,31 +179,6 @@ const layer = createLayer(id, () => {
                             </div>
                         );
                     })}
-                    <div class={["pk-shop-row", main.martTier.value >= 3 ? "" : "locked"]}>
-                        <ItemIcon src={KEY_ITEMS.linkCable.sprite} alt="Link Cable" />
-                        <div class="pk-shop-info">
-                            <b>Link Cable</b>
-                            <div class="pk-small">
-                                {main.martTier.value >= 3
-                                    ? KEY_ITEMS.linkCable.description
-                                    : "Stocked after 3 badges"}
-                            </div>
-                        </div>
-                        {main.martTier.value >= 3 ? (
-                            <Button
-                                kind="primary"
-                                disabled={
-                                    main.keyItems.value.linkCable === true ||
-                                    main.money.value < LINK_CABLE_PRICE
-                                }
-                                onClick={buyLinkCable}
-                            >
-                                {main.keyItems.value.linkCable
-                                    ? "Owned"
-                                    : formatMoney(LINK_CABLE_PRICE)}
-                            </Button>
-                        ) : null}
-                    </div>
                 </Panel>
             </div>
         )

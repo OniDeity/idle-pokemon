@@ -145,7 +145,9 @@ export const main = createLayer("main", layer => {
             waterStone: 0,
             thunderStone: 0,
             leafStone: 0,
-            sunStone: 0
+            sunStone: 0,
+            linkCable: 0,
+            sootheBell: 0
         },
         false
     );
@@ -342,7 +344,7 @@ export const main = createLayer("main", layer => {
         if (evolution == null || (stones.value[stone] ?? 0) <= 0) return;
         const into = evolutionTarget(fromId, evolution.into);
         if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
-        stones.value = { ...stones.value, [stone]: (stones.value[stone] ?? 0) - 1 };
+        useStone(stone);
         evolve(fromId, into, ` with a ${STONES[stone].name}`);
     }
 
@@ -361,12 +363,30 @@ export const main = createLayer("main", layer => {
         evolve(fromId, into, "");
     }
 
+    /** Uses up one evolution item (a stone, Link Cable or Soothe Bell). */
+    function useStone(id: StoneId) {
+        stones.value = { ...stones.value, [id]: (stones.value[id] ?? 0) - 1 };
+    }
+
     function evolveByTrade(fromId: number) {
         const evolution = getSpecies(fromId).evolutions.find(e => e.method === "trade");
-        if (evolution == null || !keyItems.value.linkCable) return;
+        if (evolution == null || (stones.value.linkCable ?? 0) <= 0) return;
         const into = evolutionTarget(fromId, evolution.into);
         if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
+        useStone("linkCable");
         evolve(fromId, into, " over the Link Cable");
+    }
+
+    /** A friendship evolution right away, whatever the level, using up a Soothe Bell. */
+    function evolveWithSootheBell(fromId: number, evolvesInto: number) {
+        const evolution = getSpecies(fromId).evolutions.find(
+            e => e.friendship === true && e.into === evolvesInto
+        );
+        if (evolution == null || (stones.value.sootheBell ?? 0) <= 0) return;
+        const into = evolutionTarget(fromId, evolution.into);
+        if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
+        useStone("sootheBell");
+        evolve(fromId, into, " with a Soothe Bell");
     }
 
     function gainXp(amount: number) {
@@ -765,6 +785,14 @@ export const main = createLayer("main", layer => {
 
     let automationTimer = 0;
     layer.on("update", diff => {
+        // The Link Cable used to be a reusable key item; trade it in for three of the new,
+        // used-up-per-evolution Link Cables.
+        if ((keyItems.value as Record<string, boolean>).linkCable === true) {
+            const rest: Record<string, boolean> = { ...keyItems.value };
+            delete rest.linkCable;
+            keyItems.value = rest;
+            stones.value = { ...stones.value, linkCable: (stones.value.linkCable ?? 0) + 3 };
+        }
         if (starter.value === 0 || partyIds.value.length === 0) return;
         runTime.value += diff;
         let remaining = diff;
@@ -914,6 +942,7 @@ export const main = createLayer("main", layer => {
         evolveWithStone,
         evolveByLevel,
         evolveByTrade,
+        evolveWithSootheBell,
         buyBalls,
         buyStone,
         grantKeyItem,

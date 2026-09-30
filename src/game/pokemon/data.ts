@@ -30,7 +30,11 @@ export type StoneId =
     | "thunderStone"
     | "waterStone"
     | "leafStone"
-    | "sunStone";
+    | "sunStone"
+    /** Used up by one trade evolution. */
+    | "linkCable"
+    /** Used up by one friendship evolution, at any level. */
+    | "sootheBell";
 
 export type GrowthRate = "slow" | "medium" | "fast" | "mediumSlow" | "erratic" | "fluctuating";
 
@@ -39,6 +43,8 @@ export interface Evolution {
     method: "level" | "stone" | "trade";
     level?: number;
     stone?: StoneId;
+    /** A friendship evolution: happens at `level`, or earlier with a Soothe Bell. */
+    friendship?: boolean;
 }
 
 export interface Species {

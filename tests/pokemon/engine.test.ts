@@ -23,6 +23,7 @@ import {
     variantFilter,
     WILD_VARIANTS
 } from "game/pokemon/data";
+import { STONES } from "game/pokemon/items";
 import { MEW_ID, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
@@ -400,5 +401,18 @@ describe("zone efficiency", () => {
         expect(zoneRates("route22", {}, party([6, 50]), bonuses)).not.toEqual(
             zoneRates("route22", { oldRod: true }, party([6, 50]), bonuses)
         );
+    });
+});
+
+describe("evolution items", () => {
+    test("friendship evolutions are flagged, and Link Cables and Soothe Bells are sold", () => {
+        const friendship = SPECIES.flatMap(s =>
+            s.evolutions.filter(e => e.friendship === true).map(e => `${s.id}->${e.into}`)
+        );
+        expect(friendship).toEqual(
+            expect.arrayContaining(["42->169", "113->242", "175->176", "172->25", "133->196"])
+        );
+        expect(STONES.linkCable.price).toBeGreaterThan(0);
+        expect(STONES.sootheBell.price).toBeGreaterThan(0);
     });
 });

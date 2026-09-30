@@ -59,6 +59,13 @@
                         or game locations, and type; "N new" tags on each place; a "Most
                         efficient" sort with estimated XP and ₽ per minute for your party
                     </li>
+                    <li class="feature">
+                        Soothe Bell: evolves a friendship Pokémon right away, at any level
+                    </li>
+                    <li class="balancing">
+                        Link Cables and Soothe Bells are used up by each evolution, like stones
+                        (₽2,500 each); an old reusable Link Cable becomes three new ones
+                    </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="fix">
                         Pokémon already at their evolution level (caught above it, or waiting at

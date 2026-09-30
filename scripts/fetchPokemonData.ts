@@ -200,6 +200,8 @@ interface Evolution {
     method: "level" | "stone" | "trade";
     level?: number;
     stone?: string;
+    /** A friendship evolution: also possible early with a Soothe Bell. */
+    friendship?: boolean;
 }
 
 async function main() {
@@ -279,9 +281,10 @@ async function main() {
         if (r.evolution_trigger_id === "1" && r.minimum_level !== "") {
             evolution = { into, method: "level", level: Number(r.minimum_level) };
         } else if (r.evolution_trigger_id === "1" && r.minimum_happiness !== "") {
-            // Friendship evolutions become level evolutions: babies grow up fast, others at 30.
+            // Friendship evolutions become level evolutions (babies grow up fast, others at 30),
+            // or happen early with a Soothe Bell.
             const baby = babies.has(String(from));
-            evolution = { into, method: "level", level: baby ? 15 : 30 };
+            evolution = { into, method: "level", level: baby ? 15 : 30, friendship: true };
         } else if (r.evolution_trigger_id === "2") {
             evolution = { into, method: "trade" };
         } else if (r.evolution_trigger_id === "3" && STONE_BY_ITEM_ID[r.trigger_item_id]) {

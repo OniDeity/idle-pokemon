@@ -4,7 +4,7 @@
 import { main } from "data/projEntry";
 import { createLayer } from "game/layers";
 import { memberMultiplier, effortMultiplier } from "game/pokemon/balance";
-import type { Evolution, PokemonType } from "game/pokemon/data";
+import type { Evolution, PokemonType, StoneId } from "game/pokemon/data";
 import { getSpecies, TYPE_COLORS } from "game/pokemon/data";
 import { STONES } from "game/pokemon/items";
 import { attacksPerSecond, maxHp, statAtLevel, xpForLevel } from "game/pokemon/stats";
@@ -71,12 +71,13 @@ const layer = createLayer(id, () => {
      * stone in the bag, or the Link Cable. */
     function readyToEvolve(speciesId: number): boolean {
         const level = main.box.value[speciesId]?.level ?? 0;
+        const have = (item: StoneId) => (main.stones.value[item] ?? 0) > 0;
         return pendingEvolutions(speciesId).some(e =>
             e.method === "level"
-                ? level >= (e.level ?? Infinity)
+                ? level >= (e.level ?? Infinity) || (e.friendship === true && have("sootheBell"))
                 : e.method === "stone"
-                  ? (main.stones.value[e.stone!] ?? 0) > 0
-                  : main.keyItems.value.linkCable === true
+                  ? have(e.stone!)
+                  : have("linkCable")
         );
     }
 
@@ -194,6 +195,7 @@ const layer = createLayer(id, () => {
                     } else if (evo.method === "level") {
                         const reached =
                             (main.box.value[speciesId]?.level ?? 0) >= (evo.level ?? Infinity);
+                        const bells = main.stones.value.sootheBell ?? 0;
                         action = reached ? (
                             <Button
                                 kind="primary"
@@ -201,6 +203,20 @@ const layer = createLayer(id, () => {
                                 onClick={() => main.evolveByLevel(speciesId, evo.into)}
                             >
                                 Evolve (Lv. {evo.level})
+                            </Button>
+                        ) : evo.friendship === true ? (
+                            <Button
+                                kind="primary"
+                                disabled={bells <= 0 || main.inTrainerBattle.value}
+                                onClick={() => main.evolveWithSootheBell(speciesId, evo.into)}
+                                title={
+                                    bells <= 0
+                                        ? `Buy a Soothe Bell at the Poké Mart, or reach Lv. ${evo.level}`
+                                        : `Evolves by itself at Lv. ${evo.level}`
+                                }
+                            >
+                                <ItemIcon src={STONES.sootheBell.sprite} size={20} /> Use Soothe
+                                Bell ({bells})
                             </Button>
                         ) : (
                             <span class="pk-small pk-muted">
@@ -221,15 +237,16 @@ const layer = createLayer(id, () => {
                             </Button>
                         );
                     } else {
-                        const hasCable = main.keyItems.value.linkCable === true;
+                        const cables = main.stones.value.linkCable ?? 0;
                         action = (
                             <Button
                                 kind="primary"
-                                disabled={!hasCable || main.inTrainerBattle.value}
+                                disabled={cables <= 0 || main.inTrainerBattle.value}
                                 onClick={() => main.evolveByTrade(speciesId)}
-                                title={hasCable ? "" : "Buy a Link Cable at the Poké Mart"}
+                                title={cables <= 0 ? "Buy a Link Cable at the Poké Mart" : ""}
                             >
-                                {hasCable ? "Trade-evolve" : "Needs Link Cable"}
+                                <ItemIcon src={STONES.linkCable.sprite} size={20} /> Use Link Cable
+                                ({cables})
                             </Button>
                         );
                     }

@@ -697,7 +697,8 @@
             {
                 "into": 169,
                 "method": "level",
-                "level": 30
+                "level": 30,
+                "friendship": true
             }
         ]
     },
@@ -1856,7 +1857,8 @@
             {
                 "into": 242,
                 "method": "level",
-                "level": 30
+                "level": 30,
+                "friendship": true
             }
         ]
     },
@@ -2171,12 +2173,14 @@
             {
                 "into": 196,
                 "method": "level",
-                "level": 30
+                "level": 30,
+                "friendship": true
             },
             {
                 "into": 197,
                 "method": "level",
-                "level": 30
+                "level": 30,
+                "friendship": true
             }
         ]
     },
@@ -2784,7 +2788,8 @@
             {
                 "into": 25,
                 "method": "level",
-                "level": 15
+                "level": 15,
+                "friendship": true
             }
         ]
     },
@@ -2803,7 +2808,8 @@
             {
                 "into": 35,
                 "method": "level",
-                "level": 15
+                "level": 15,
+                "friendship": true
             }
         ]
     },
@@ -2822,7 +2828,8 @@
             {
                 "into": 39,
                 "method": "level",
-                "level": 15
+                "level": 15,
+                "friendship": true
             }
         ]
     },
@@ -2841,7 +2848,8 @@
             {
                 "into": 176,
                 "method": "level",
-                "level": 15
+                "level": 15,
+                "friendship": true
             }
         ]
     },
