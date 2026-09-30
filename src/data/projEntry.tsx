@@ -346,6 +346,21 @@ export const main = createLayer("main", layer => {
         evolve(fromId, into, ` with a ${STONES[stone].name}`);
     }
 
+    /**
+     * Level evolutions happen by themselves as party members level up; this also evolves a
+     * Pokémon that's already at the level (caught above it, or stuck at the level cap).
+     */
+    function evolveByLevel(fromId: number, evolvesInto: number) {
+        const evolution = getSpecies(fromId).evolutions.find(
+            e => e.method === "level" && e.into === evolvesInto
+        );
+        const level = box.value[fromId]?.level ?? 0;
+        if (evolution == null || level < (evolution.level ?? Infinity)) return;
+        const into = evolutionTarget(fromId, evolution.into);
+        if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
+        evolve(fromId, into, "");
+    }
+
     function evolveByTrade(fromId: number) {
         const evolution = getSpecies(fromId).evolutions.find(e => e.method === "trade");
         if (evolution == null || !keyItems.value.linkCable) return;
@@ -366,19 +381,20 @@ export const main = createLayer("main", layer => {
             const level = levelForXp(species.growthRate, xp, levelCap);
             const effort = (entry.effort ?? 0) + overflow;
             setBoxEntry(id, { ...entry, xp, level, effort });
-            if (level > entry.level) {
-                if (level === levelCap) {
-                    addLog({
-                        kind: "levelup",
-                        text: `${species.name} reached the level cap (Lv. ${level}). Further experience builds Effort.`,
-                        speciesId: id,
-                        shiny: entry.shiny
-                    });
-                }
-                for (const evolution of species.evolutions) {
-                    if (evolution.method === "level" && level >= (evolution.level ?? Infinity)) {
-                        evolve(id, evolutionTarget(id, evolution.into), "");
-                    }
+            if (level > entry.level && level === levelCap) {
+                addLog({
+                    kind: "levelup",
+                    text: `${species.name} reached the level cap (Lv. ${level}). Further experience builds Effort.`,
+                    speciesId: id,
+                    shiny: entry.shiny
+                });
+            }
+            // Checked every battle, not only on level-ups: a Pokémon caught above its
+            // evolution level, or waiting at the level cap, still evolves.
+            for (const evolution of species.evolutions) {
+                if (evolution.method === "level" && level >= (evolution.level ?? Infinity)) {
+                    const into = evolutionTarget(id, evolution.into);
+                    if (!owns(into)) evolve(id, into, "");
                 }
             }
         }
@@ -896,6 +912,7 @@ export const main = createLayer("main", layer => {
         swapIntoParty,
         setParty,
         evolveWithStone,
+        evolveByLevel,
         evolveByTrade,
         buyBalls,
         buyStone,
