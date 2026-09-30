@@ -72,6 +72,10 @@
                         Up-Grade (Porygon2)
                     </li>
                     <li class="feature">
+                        Team Strategist setting: bring as many Pokémon new to the Hall of Fame to
+                        the finale as the forecast says can still win, for extra Fame
+                    </li>
+                    <li class="feature">
                         Legendary encounters are one-of-a-kind forms: Giant Alakazam, Gengar and
                         the new Giant Jigglypuff at Pokémopolis, with their tattoo-like marks, and
                         the storm-dark Giant Dragonite at Bill's Lighthouse

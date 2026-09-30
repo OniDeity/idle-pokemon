@@ -88,6 +88,14 @@
     line-height: 1.4;
 }
 
+.pk-setting {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    margin-top: 4px;
+    cursor: pointer;
+}
+
 .pk-done {
     color: var(--pk-good);
 }

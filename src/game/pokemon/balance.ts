@@ -647,7 +647,8 @@ export const AUTOMATIONS: AutomationDefinition[] = [
     {
         id: "autoParty",
         name: "Team Strategist",
-        description: "Keeps the six Pokémon that best counter your next opponent in your party.",
+        description:
+            "Keeps the six Pokémon that best counter your next opponent in your party. Can bring Pokémon new to the Hall of Fame to the finale instead.",
         cost: 10,
         sprite: itemSprite("exp-share")
     },
