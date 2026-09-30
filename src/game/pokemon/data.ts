@@ -275,7 +275,10 @@ const COSMETIC_VARIANTS: Species[] = (
         [241, 7012, "241-mooshtank-brown", "Brown Mooshtank"],
         [205, 7013, "205-shulker", "Shulker Forretress"],
         // Puka, the surfing Pikachu of Seafoam Island in "The Pi-Kahuna".
-        [25, 7014, "25-alola-bias", "Alola-Bias Pikachu"]
+        [25, 7014, "25-alola-bias", "Alola-Bias Pikachu"],
+        // Pokémon Sleep's research-area Snorlax, for the sleeping Snorlax that block the way.
+        [143, 7020, "143-sleep-taupe", "Taupe Hollow Snorlax"],
+        [143, 7021, "143-sleep-cyan", "Cyan Beach Snorlax"]
     ] as [number, number, string, string][]
 ).map(([base, id, key, name]) =>
     variant(base, id, "cosmetic", name, {

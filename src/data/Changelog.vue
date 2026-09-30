@@ -79,6 +79,10 @@
                     <li class="feature">
                         New Island is home to 27 of Mewtwo's striped Clone Pokémon
                     </li>
+                    <li class="feature">
+                        The sleeping Snorlax are recolored like Pokémon Sleep's: Taupe Hollow
+                        Snorlax on Route 12 and Cyan Beach Snorlax on Murcott Island
+                    </li>
                     <li class="balancing">
                         Mew is no longer a Pokédex gift; find it at the Tree of Beginning
                     </li>
