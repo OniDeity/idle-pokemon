@@ -372,7 +372,3 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
 
 /** Seconds allowed to defeat a legendary before it flees. */
 export const LEGENDARY_TIME_LIMIT = 90;
-
-/** Pokédex-completion reward: Professor Oak's last gift. */
-export const MEW_ID = 151;
-export const MEW_REQUIREMENT = 150;

@@ -71,6 +71,17 @@
                         Scizor), King's Rock (Politoed, Slowking), Dragon Scale (Kingdra) and
                         Up-Grade (Porygon2)
                     </li>
+                    <li class="feature">
+                        Legendary encounters are one-of-a-kind forms: Giant Alakazam, Gengar and
+                        the new Giant Jigglypuff at Pokémopolis, with their tattoo-like marks, and
+                        the storm-dark Giant Dragonite at Bill's Lighthouse
+                    </li>
+                    <li class="feature">
+                        New Island is home to 27 of Mewtwo's striped Clone Pokémon
+                    </li>
+                    <li class="balancing">
+                        Mew is no longer a Pokédex gift; find it at the Tree of Beginning
+                    </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="fix">
                         Pokémon already at their evolution level (caught above it, or waiting at

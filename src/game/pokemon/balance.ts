@@ -105,12 +105,6 @@ export const DEX_MILESTONES: DexMilestone[] = [
         sprite: itemSprite("silph-scope")
     },
     {
-        caught: 150,
-        name: "Mew",
-        description: "Professor Oak entrusts you with the mythical Mew.",
-        sprite: itemSprite("old-sea-map")
-    },
-    {
         caught: 151,
         name: "Shiny Charm",
         description: "Shiny Pokémon appear three times as often.",

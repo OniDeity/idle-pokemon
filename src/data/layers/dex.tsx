@@ -2,7 +2,6 @@
  * The Pokédex. Permanent: survives Hall of Fame resets, and its milestones (and the damage
  * bonus from every species caught) carry into every future journey.
  */
-import { main } from "data/projEntry";
 import { createLayer } from "game/layers";
 import { persistent } from "game/persistence";
 import {
@@ -23,7 +22,7 @@ import {
 } from "game/pokemon/data";
 import { STONES } from "game/pokemon/items";
 import { REGION_LIST, REGIONS } from "game/pokemon/regions";
-import { MEW_ID, MEW_REQUIREMENT, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
+import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { allZoneSpecies, ZONES } from "game/pokemon/zones";
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
@@ -119,9 +118,6 @@ function locationsOf(id: number): string[] {
                     ? `by trade (Link Cable, holding a ${STONES[evo.heldItem].name})`
                     : "by trade (Link Cable)";
         places.push(`Evolve ${getSpecies(pre).name} ${how}`);
-    }
-    if (id === MEW_ID) {
-        places.push(`Professor Oak's reward for ${MEW_REQUIREMENT} species caught`);
     }
     for (const region of REGION_LIST) {
         if (region.starters.includes(id)) {
@@ -229,26 +225,12 @@ const layer = createLayer(id, () => {
         return entry(speciesId).timesCaught;
     }
 
-    const mewAvailable = computed(
-        (): boolean =>
-            caughtCount.value >= MEW_REQUIREMENT && main.starter.value !== 0 && !main.owns(MEW_ID)
-    );
-    function claimMew() {
-        if (!mewAvailable.value) return;
-        main.receivePokemon(MEW_ID, 30, false);
-        main.addLog({
-            kind: "catch",
-            text: "Professor Oak entrusted you with Mew!",
-            speciesId: MEW_ID
-        });
-    }
-
     const nav: NavNode = {
         id,
         letter: "D",
         label: "Dex",
         color,
-        glow: computed((): boolean => mewAvailable.value),
+        glow: computed((): boolean => false),
         enabled: computed((): boolean => true)
     };
 
@@ -360,7 +342,6 @@ const layer = createLayer(id, () => {
         markCaught,
         timesCaught,
         entry,
-        mewAvailable,
         nav,
         display: () => (
             <div class="pk-layer">
@@ -396,11 +377,6 @@ const layer = createLayer(id, () => {
                             );
                         })}
                     </div>
-                    {mewAvailable.value ? (
-                        <Button kind="primary" onClick={claimMew}>
-                            Receive Mew from Professor Oak
-                        </Button>
-                    ) : null}
                 </Panel>
 
                 <div class="pk-filter-row">
@@ -416,9 +392,9 @@ const layer = createLayer(id, () => {
 
                 {filter.value === "variants" ? (
                     <p class="pk-small pk-muted">
-                        Anime variants, regional and official forms, female forms, Magikarp Jump
-                        patterns and fan favorites from Cobblemon. {FUTURE_VARIANTS} more forms
-                        arrive with regions still to come.
+                        Anime variants, legendary giants and clones, regional and official forms,
+                        female forms, Magikarp Jump patterns and fan favorites from Cobblemon.{" "}
+                        {FUTURE_VARIANTS} more forms arrive with regions still to come.
                     </p>
                 ) : null}
                 <div class="pk-dex-layout">

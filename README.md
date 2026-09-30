@@ -29,6 +29,9 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 - **Cobblemon fan favorites**: Arbok's hood patterns, Heart-Marked Wooper, the Mooshtanks,
   Shulker Forretress, Alola-bias Pikachu and Valencian Gloom and Bellossom, following the
   [Cobblemon wiki](https://wiki.cobblemon.com/index.php/Pok%C3%A9mon/Unique_Forms).
+- **Legendary forms**: the anime's one-of-a-kind Pokémon are their own forms, never met in the
+  wild: the marked giants of Pokémopolis (Alakazam, Gengar, Jigglypuff), the Giant Dragonite of
+  Bill's Lighthouse, and Mewtwo's striped Clone Pokémon on New Island.
 - **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands; Johto comes next,
   unlocked by completing the Pokédex.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
@@ -41,7 +44,7 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   make that species stronger), or none, and pick which ball to throw.
 - **251 species.** Red/Blue and FireRed/LeafGreen encounter tables, fishing and Surf pools
   unlocked by key items, trades, gifts, Game Corner prizes, fossils, legendaries (including the
-  birds, beasts, Lugia and Ho-Oh) and Mew from Professor Oak.
+  birds, beasts, Lugia and Ho-Oh) and Mew at the Tree of Beginning.
 - **Evolution** by level (automatic, in the party), evolution stones, or trade (Link Cable).
 - **Trainer battles** are two-sided and deterministic, so every Gym, quest and finale shows an
   **exact forecast** before you commit. Progress raises your level cap.
