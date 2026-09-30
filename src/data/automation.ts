@@ -90,6 +90,9 @@ function autoEvolve() {
                     mart.buyLinkCable();
                 }
                 main.evolveByTrade(id);
+            } else if (evolution.method === "level") {
+                // Box Pokémon already at the level (party members evolve on their own).
+                main.evolveByLevel(id, evolution.into);
             }
         }
     }

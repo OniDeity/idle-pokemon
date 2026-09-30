@@ -61,6 +61,10 @@
                     </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="fix">
+                        Pokémon already at their evolution level (caught above it, or waiting at
+                        the level cap) now evolve; boxed ones get an Evolve button
+                    </li>
+                    <li class="fix">
                         Sprites ship with the game instead of loading from GitHub, so they no
                         longer go missing
                     </li>

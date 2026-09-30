@@ -60,11 +60,6 @@ const layer = createLayer(id, () => {
     /** Every Pokémon in the box, unfiltered. */
     const allIds = computed(() => Object.keys(main.box.value).map(Number));
 
-    /** Evolutions the player could trigger right now from the box. */
-    function manualEvolutions(speciesId: number): Evolution[] {
-        return getSpecies(speciesId).evolutions.filter(e => e.method !== "level");
-    }
-
     /** Evolutions whose result the player doesn't own yet. */
     function pendingEvolutions(speciesId: number): Evolution[] {
         return getSpecies(speciesId).evolutions.filter(
@@ -171,16 +166,8 @@ const layer = createLayer(id, () => {
         typeFilters.value = [];
     }
 
-    const evolutionReady = computed(() =>
-        allIds.value.some(sid =>
-            manualEvolutions(sid).some(
-                e =>
-                    !main.owns(main.evolutionTarget(sid, e.into)) &&
-                    ((e.method === "stone" && (main.stones.value[e.stone!] ?? 0) > 0) ||
-                        (e.method === "trade" && main.keyItems.value.linkCable === true))
-            )
-        )
-    );
+    /** Something in the box can evolve right now; lights up the Party button. */
+    const evolutionReady = computed(() => allIds.value.some(readyToEvolve));
 
     const nav: NavNode = {
         id,
@@ -205,7 +192,17 @@ const layer = createLayer(id, () => {
                     if (done) {
                         action = <span class="pk-small pk-done">✔ Owned</span>;
                     } else if (evo.method === "level") {
-                        action = (
+                        const reached =
+                            (main.box.value[speciesId]?.level ?? 0) >= (evo.level ?? Infinity);
+                        action = reached ? (
+                            <Button
+                                kind="primary"
+                                disabled={main.inTrainerBattle.value}
+                                onClick={() => main.evolveByLevel(speciesId, evo.into)}
+                            >
+                                Evolve (Lv. {evo.level})
+                            </Button>
+                        ) : (
                             <span class="pk-small pk-muted">
                                 Evolves at Lv. {evo.level} while in your party
                             </span>
