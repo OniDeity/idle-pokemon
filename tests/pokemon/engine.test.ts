@@ -9,7 +9,8 @@ import {
     memberDps,
     simulateTrainerBattle,
     stepTrainerBattle,
-    trainerTeam
+    trainerTeam,
+    zoneRates
 } from "game/pokemon/balance";
 import {
     DEX_SIZE,
@@ -22,6 +23,7 @@ import {
     variantFilter,
     WILD_VARIANTS
 } from "game/pokemon/data";
+import { STONES } from "game/pokemon/items";
 import { MEW_ID, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
@@ -383,5 +385,51 @@ describe("sprites", () => {
         const missing = requiredSpritePaths().filter(path => !existsSync(`public/sprites/${path}`));
         expect(missing).toEqual([]);
         expect(requiredSpritePaths().length).toBeGreaterThan(1000);
+    });
+});
+
+describe("zone efficiency", () => {
+    test("rates are positive and rise with a stronger party", () => {
+        const bonuses = { damage: 1, xp: 1, money: 1, searchTime: 2 };
+        const weak = zoneRates("route1", {}, party([4, 5]), bonuses);
+        const strong = zoneRates("route1", {}, party([6, 50]), bonuses);
+        expect(weak.xpPerMinute).toBeGreaterThan(0);
+        expect(weak.moneyPerMinute).toBeGreaterThan(0);
+        expect(strong.xpPerMinute).toBeGreaterThan(weak.xpPerMinute);
+        expect(strong.moneyPerMinute).toBeGreaterThan(weak.moneyPerMinute);
+        // Fishing adds encounters (and their rewards) only once you have a rod.
+        expect(zoneRates("route22", {}, party([6, 50]), bonuses)).not.toEqual(
+            zoneRates("route22", { oldRod: true }, party([6, 50]), bonuses)
+        );
+    });
+});
+
+describe("evolution items", () => {
+    test("friendship evolutions are flagged, and Link Cables and Soothe Bells are sold", () => {
+        const friendship = SPECIES.flatMap(s =>
+            s.evolutions.filter(e => e.friendship === true).map(e => `${s.id}->${e.into}`)
+        );
+        expect(friendship).toEqual(
+            expect.arrayContaining(["42->169", "113->242", "175->176", "172->25", "133->196"])
+        );
+        // Held-item trade evolutions need their item as well as a Link Cable.
+        const held = SPECIES.flatMap(s =>
+            s.evolutions
+                .filter(e => e.heldItem != null)
+                .map(e => `${s.id}->${e.into}:${e.heldItem}`)
+        );
+        expect(held.sort()).toEqual(
+            [
+                "117->230:dragonScale",
+                "123->212:metalCoat",
+                "137->233:upGrade",
+                "61->186:kingsRock",
+                "79->199:kingsRock",
+                "95->208:metalCoat"
+            ].sort()
+        );
+        held.forEach(h => expect(STONES[h.split(":")[1] as keyof typeof STONES]).toBeDefined());
+        expect(STONES.linkCable.price).toBeGreaterThan(0);
+        expect(STONES.sootheBell.price).toBeGreaterThan(0);
     });
 });

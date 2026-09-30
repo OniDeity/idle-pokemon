@@ -9,6 +9,7 @@ import type { BattlerStats } from "./stats";
 import { attacksPerSecond, damagePerHit, maxHp, TRAINER_IV, xpForLevel, xpYield } from "./stats";
 import type { TrainerDefinition } from "./trainers";
 import { getSpecies } from "./data";
+import { activePools } from "./zones";
 
 /** Seconds spent looking for the next wild Pokémon. */
 export const BASE_SEARCH_TIME = 2;
@@ -677,4 +678,49 @@ export const AUTOMATIONS: AutomationDefinition[] = [
 export function speciesPower(species: Species): number {
     const [hp, atk, def, spa, spd, spe] = species.baseStats;
     return Math.max(atk, spa) * (0.6 + spe / 150) + (hp + def + spd) * 0.1;
+}
+
+export interface ZoneRates {
+    /** Experience per minute for each party member (past the level cap it becomes Effort). */
+    xpPerMinute: number;
+    moneyPerMinute: number;
+}
+
+/**
+ * Expected experience and Pokédollars per minute from wild battles in a zone, averaged over
+ * every Pokémon you can meet there (weighted like rollEncounter) with this party and these
+ * bonuses. Each battle takes the search time plus however long your best matchup needs.
+ */
+export function zoneRates(
+    zoneId: string,
+    keyItems: Partial<Record<KeyItemId, boolean>>,
+    party: PartyBattler[],
+    bonuses: Pick<Bonuses, "damage" | "xp" | "money" | "searchTime">
+): ZoneRates {
+    let seconds = 0;
+    let xp = 0;
+    let money = 0;
+    const pools = activePools(zoneId, keyItems);
+    const totalShare = pools.reduce((sum, pool) => sum + pool.share, 0);
+    for (const pool of pools) {
+        const totalWeight = pool.entries.reduce((sum, entry) => sum + entry.weight, 0);
+        for (const entry of pool.entries) {
+            const chance = (pool.share / totalShare) * (entry.weight / totalWeight);
+            const species = getSpecies(entry.id);
+            // Average over the entry's level range; its ends and middle are close enough.
+            const levels = [entry.minLevel, (entry.minLevel + entry.maxLevel) / 2, entry.maxLevel];
+            for (const level of levels) {
+                const target = { species, level: Math.round(level) };
+                const dps = wildDps(party, target, bonuses.damage);
+                // A Pokémon nobody can hurt holds the party up; count it as a long battle.
+                const fight = dps > 0 ? maxHp(target) / dps : 600;
+                const weight = chance / levels.length;
+                seconds += weight * (bonuses.searchTime + fight);
+                xp += weight * battleXp(target) * bonuses.xp;
+                money += weight * moneyYield(target.level) * bonuses.money;
+            }
+        }
+    }
+    if (seconds === 0) return { xpPerMinute: 0, moneyPerMinute: 0 };
+    return { xpPerMinute: (xp / seconds) * 60, moneyPerMinute: (money / seconds) * 60 };
 }

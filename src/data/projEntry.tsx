@@ -145,7 +145,13 @@ export const main = createLayer("main", layer => {
             waterStone: 0,
             thunderStone: 0,
             leafStone: 0,
-            sunStone: 0
+            sunStone: 0,
+            linkCable: 0,
+            sootheBell: 0,
+            metalCoat: 0,
+            kingsRock: 0,
+            dragonScale: 0,
+            upGrade: 0
         },
         false
     );
@@ -342,16 +348,59 @@ export const main = createLayer("main", layer => {
         if (evolution == null || (stones.value[stone] ?? 0) <= 0) return;
         const into = evolutionTarget(fromId, evolution.into);
         if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
-        stones.value = { ...stones.value, [stone]: (stones.value[stone] ?? 0) - 1 };
+        useStone(stone);
         evolve(fromId, into, ` with a ${STONES[stone].name}`);
     }
 
-    function evolveByTrade(fromId: number) {
-        const evolution = getSpecies(fromId).evolutions.find(e => e.method === "trade");
-        if (evolution == null || !keyItems.value.linkCable) return;
+    /**
+     * Level evolutions happen by themselves as party members level up; this also evolves a
+     * Pokémon that's already at the level (caught above it, or stuck at the level cap).
+     */
+    function evolveByLevel(fromId: number, evolvesInto: number) {
+        const evolution = getSpecies(fromId).evolutions.find(
+            e => e.method === "level" && e.into === evolvesInto
+        );
+        const level = box.value[fromId]?.level ?? 0;
+        if (evolution == null || level < (evolution.level ?? Infinity)) return;
         const into = evolutionTarget(fromId, evolution.into);
         if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
-        evolve(fromId, into, " over the Link Cable");
+        evolve(fromId, into, "");
+    }
+
+    /** Uses up one evolution item (a stone, Link Cable or Soothe Bell). */
+    function useStone(id: StoneId) {
+        stones.value = { ...stones.value, [id]: (stones.value[id] ?? 0) - 1 };
+    }
+
+    /** Trade evolutions use up a Link Cable, plus the held item some of them need. */
+    function evolveByTrade(fromId: number) {
+        const evolution = getSpecies(fromId).evolutions.find(e => e.method === "trade");
+        if (evolution == null || (stones.value.linkCable ?? 0) <= 0) return;
+        const held = evolution.heldItem;
+        if (held != null && (stones.value[held] ?? 0) <= 0) return;
+        const into = evolutionTarget(fromId, evolution.into);
+        if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
+        useStone("linkCable");
+        if (held != null) useStone(held);
+        evolve(
+            fromId,
+            into,
+            held != null
+                ? ` over the Link Cable, holding a ${STONES[held].name}`
+                : " over the Link Cable"
+        );
+    }
+
+    /** A friendship evolution right away, whatever the level, using up a Soothe Bell. */
+    function evolveWithSootheBell(fromId: number, evolvesInto: number) {
+        const evolution = getSpecies(fromId).evolutions.find(
+            e => e.friendship === true && e.into === evolvesInto
+        );
+        if (evolution == null || (stones.value.sootheBell ?? 0) <= 0) return;
+        const into = evolutionTarget(fromId, evolution.into);
+        if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
+        useStone("sootheBell");
+        evolve(fromId, into, " with a Soothe Bell");
     }
 
     function gainXp(amount: number) {
@@ -366,19 +415,20 @@ export const main = createLayer("main", layer => {
             const level = levelForXp(species.growthRate, xp, levelCap);
             const effort = (entry.effort ?? 0) + overflow;
             setBoxEntry(id, { ...entry, xp, level, effort });
-            if (level > entry.level) {
-                if (level === levelCap) {
-                    addLog({
-                        kind: "levelup",
-                        text: `${species.name} reached the level cap (Lv. ${level}). Further experience builds Effort.`,
-                        speciesId: id,
-                        shiny: entry.shiny
-                    });
-                }
-                for (const evolution of species.evolutions) {
-                    if (evolution.method === "level" && level >= (evolution.level ?? Infinity)) {
-                        evolve(id, evolutionTarget(id, evolution.into), "");
-                    }
+            if (level > entry.level && level === levelCap) {
+                addLog({
+                    kind: "levelup",
+                    text: `${species.name} reached the level cap (Lv. ${level}). Further experience builds Effort.`,
+                    speciesId: id,
+                    shiny: entry.shiny
+                });
+            }
+            // Checked every battle, not only on level-ups: a Pokémon caught above its
+            // evolution level, or waiting at the level cap, still evolves.
+            for (const evolution of species.evolutions) {
+                if (evolution.method === "level" && level >= (evolution.level ?? Infinity)) {
+                    const into = evolutionTarget(id, evolution.into);
+                    if (!owns(into)) evolve(id, into, "");
                 }
             }
         }
@@ -749,6 +799,14 @@ export const main = createLayer("main", layer => {
 
     let automationTimer = 0;
     layer.on("update", diff => {
+        // The Link Cable used to be a reusable key item; trade it in for three of the new,
+        // used-up-per-evolution Link Cables.
+        if ((keyItems.value as Record<string, boolean>).linkCable === true) {
+            const rest: Record<string, boolean> = { ...keyItems.value };
+            delete rest.linkCable;
+            keyItems.value = rest;
+            stones.value = { ...stones.value, linkCable: (stones.value.linkCable ?? 0) + 3 };
+        }
         if (starter.value === 0 || partyIds.value.length === 0) return;
         runTime.value += diff;
         let remaining = diff;
@@ -896,7 +954,9 @@ export const main = createLayer("main", layer => {
         swapIntoParty,
         setParty,
         evolveWithStone,
+        evolveByLevel,
         evolveByTrade,
+        evolveWithSootheBell,
         buyBalls,
         buyStone,
         grantKeyItem,

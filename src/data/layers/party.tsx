@@ -4,7 +4,7 @@
 import { main } from "data/projEntry";
 import { createLayer } from "game/layers";
 import { memberMultiplier, effortMultiplier } from "game/pokemon/balance";
-import type { Evolution, PokemonType } from "game/pokemon/data";
+import type { Evolution, PokemonType, StoneId } from "game/pokemon/data";
 import { getSpecies, TYPE_COLORS } from "game/pokemon/data";
 import { STONES } from "game/pokemon/items";
 import { attacksPerSecond, maxHp, statAtLevel, xpForLevel } from "game/pokemon/stats";
@@ -60,11 +60,6 @@ const layer = createLayer(id, () => {
     /** Every Pokémon in the box, unfiltered. */
     const allIds = computed(() => Object.keys(main.box.value).map(Number));
 
-    /** Evolutions the player could trigger right now from the box. */
-    function manualEvolutions(speciesId: number): Evolution[] {
-        return getSpecies(speciesId).evolutions.filter(e => e.method !== "level");
-    }
-
     /** Evolutions whose result the player doesn't own yet. */
     function pendingEvolutions(speciesId: number): Evolution[] {
         return getSpecies(speciesId).evolutions.filter(
@@ -76,12 +71,13 @@ const layer = createLayer(id, () => {
      * stone in the bag, or the Link Cable. */
     function readyToEvolve(speciesId: number): boolean {
         const level = main.box.value[speciesId]?.level ?? 0;
+        const have = (item: StoneId) => (main.stones.value[item] ?? 0) > 0;
         return pendingEvolutions(speciesId).some(e =>
             e.method === "level"
-                ? level >= (e.level ?? Infinity)
+                ? level >= (e.level ?? Infinity) || (e.friendship === true && have("sootheBell"))
                 : e.method === "stone"
-                  ? (main.stones.value[e.stone!] ?? 0) > 0
-                  : main.keyItems.value.linkCable === true
+                  ? have(e.stone!)
+                  : have("linkCable") && (e.heldItem == null || have(e.heldItem))
         );
     }
 
@@ -171,16 +167,8 @@ const layer = createLayer(id, () => {
         typeFilters.value = [];
     }
 
-    const evolutionReady = computed(() =>
-        allIds.value.some(sid =>
-            manualEvolutions(sid).some(
-                e =>
-                    !main.owns(main.evolutionTarget(sid, e.into)) &&
-                    ((e.method === "stone" && (main.stones.value[e.stone!] ?? 0) > 0) ||
-                        (e.method === "trade" && main.keyItems.value.linkCable === true))
-            )
-        )
-    );
+    /** Something in the box can evolve right now; lights up the Party button. */
+    const evolutionReady = computed(() => allIds.value.some(readyToEvolve));
 
     const nav: NavNode = {
         id,
@@ -205,7 +193,32 @@ const layer = createLayer(id, () => {
                     if (done) {
                         action = <span class="pk-small pk-done">✔ Owned</span>;
                     } else if (evo.method === "level") {
-                        action = (
+                        const reached =
+                            (main.box.value[speciesId]?.level ?? 0) >= (evo.level ?? Infinity);
+                        const bells = main.stones.value.sootheBell ?? 0;
+                        action = reached ? (
+                            <Button
+                                kind="primary"
+                                disabled={main.inTrainerBattle.value}
+                                onClick={() => main.evolveByLevel(speciesId, evo.into)}
+                            >
+                                Evolve (Lv. {evo.level})
+                            </Button>
+                        ) : evo.friendship === true ? (
+                            <Button
+                                kind="primary"
+                                disabled={bells <= 0 || main.inTrainerBattle.value}
+                                onClick={() => main.evolveWithSootheBell(speciesId, evo.into)}
+                                title={
+                                    bells <= 0
+                                        ? `Buy a Soothe Bell at the Poké Mart, or reach Lv. ${evo.level}`
+                                        : `Evolves by itself at Lv. ${evo.level}`
+                                }
+                            >
+                                <ItemIcon src={STONES.sootheBell.sprite} size={20} /> Use Soothe
+                                Bell ({bells})
+                            </Button>
+                        ) : (
                             <span class="pk-small pk-muted">
                                 Evolves at Lv. {evo.level} while in your party
                             </span>
@@ -224,15 +237,33 @@ const layer = createLayer(id, () => {
                             </Button>
                         );
                     } else {
-                        const hasCable = main.keyItems.value.linkCable === true;
+                        const cables = main.stones.value.linkCable ?? 0;
+                        const held = evo.heldItem != null ? STONES[evo.heldItem] : null;
+                        const heldCount = held != null ? (main.stones.value[held.id] ?? 0) : 1;
+                        const missing = [
+                            cables <= 0 ? "a Link Cable" : null,
+                            held != null && heldCount <= 0 ? `a ${held.name}` : null
+                        ].filter(x => x != null);
                         action = (
                             <Button
                                 kind="primary"
-                                disabled={!hasCable || main.inTrainerBattle.value}
+                                disabled={missing.length > 0 || main.inTrainerBattle.value}
                                 onClick={() => main.evolveByTrade(speciesId)}
-                                title={hasCable ? "" : "Buy a Link Cable at the Poké Mart"}
+                                title={
+                                    missing.length > 0
+                                        ? `Buy ${missing.join(" and ")} at the Poké Mart`
+                                        : ""
+                                }
                             >
-                                {hasCable ? "Trade-evolve" : "Needs Link Cable"}
+                                <ItemIcon src={STONES.linkCable.sprite} size={20} /> Link Cable (
+                                {cables})
+                                {held != null ? (
+                                    <>
+                                        {" + "}
+                                        <ItemIcon src={held.sprite} size={20} /> {held.name} (
+                                        {heldCount})
+                                    </>
+                                ) : null}
                             </Button>
                         );
                     }
