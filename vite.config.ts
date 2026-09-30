@@ -34,6 +34,18 @@ export default defineConfig({
             registerType: 'autoUpdate',
             workbox: {
               globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+              // ~1,900 sprites: cache each one the first time it's shown rather than all upfront.
+              globIgnores: ['**/sprites/**'],
+              runtimeCaching: [
+                {
+                  urlPattern: /\/sprites\/.*\.png$/,
+                  handler: 'CacheFirst',
+                  options: {
+                    cacheName: 'sprites',
+                    expiration: { maxEntries: 4000 }
+                  }
+                }
+              ],
               // The dev build lives in /dev/ under the public one; never answer for it.
               navigateFallbackDenylist: [/\/dev\//]
             },
