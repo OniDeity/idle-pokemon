@@ -2,7 +2,7 @@
  * Kanto locations that only exist in the animated series. Encounter tables are hand-authored
  * from the Pokémon seen in each location's episodes, at levels that fit the badge tier.
  */
-import { enc } from "./data";
+import { CLONE_OFFSET, enc } from "./data";
 import type { SpecialEncounter } from "./specials";
 import type { ZoneDefinition } from "./zones";
 
@@ -182,7 +182,7 @@ export const KANTO_ANIME_ZONES: ZoneDefinition[] = [
         region: "kanto",
         anime: true,
         badgesRequired: 7,
-        blurb: "Ancient ruins near Pallet Town, home to a giant Gengar and Alakazam of legend.",
+        blurb: "Ancient ruins near Pallet Town, home to a giant Gengar, Alakazam and Jigglypuff of legend.",
         encounters: {
             walk: [
                 enc(93, 40, 44, 25),
@@ -723,14 +723,33 @@ export const MORE_KANTO_ANIME_ZONES: ZoneDefinition[] = [
         8,
         "Mewtwo's fortress. The clones of great Trainers' Pokémon still linger.",
         [
-            [3, 55, 60, 5],
-            [6, 55, 60, 5],
-            [9, 55, 60, 5],
-            [18, 52, 58, 15],
-            [34, 52, 58, 15],
-            [112, 52, 58, 15],
-            [130, 52, 58, 15],
-            [26, 52, 58, 10]
+            [CLONE_OFFSET + 3, 55, 60, 4],
+            [CLONE_OFFSET + 6, 55, 60, 4],
+            [CLONE_OFFSET + 9, 55, 60, 4],
+            [CLONE_OFFSET + 1, 50, 55, 6],
+            [CLONE_OFFSET + 4, 50, 55, 6],
+            [CLONE_OFFSET + 7, 50, 55, 6],
+            [CLONE_OFFSET + 25, 50, 55, 8],
+            [CLONE_OFFSET + 52, 50, 55, 8],
+            [CLONE_OFFSET + 31, 52, 58, 6],
+            [CLONE_OFFSET + 18, 52, 58, 6],
+            [CLONE_OFFSET + 111, 50, 55, 6],
+            [CLONE_OFFSET + 27, 50, 55, 6],
+            [CLONE_OFFSET + 28, 52, 58, 5],
+            [CLONE_OFFSET + 123, 52, 58, 5],
+            [CLONE_OFFSET + 106, 52, 58, 5],
+            [CLONE_OFFSET + 87, 52, 58, 5],
+            [CLONE_OFFSET + 45, 52, 58, 5],
+            [CLONE_OFFSET + 55, 52, 58, 5],
+            [CLONE_OFFSET + 54, 50, 55, 6],
+            [CLONE_OFFSET + 117, 52, 58, 5],
+            [CLONE_OFFSET + 73, 52, 58, 5],
+            [CLONE_OFFSET + 130, 52, 58, 4],
+            [CLONE_OFFSET + 38, 52, 58, 5],
+            [CLONE_OFFSET + 37, 50, 55, 6],
+            [CLONE_OFFSET + 78, 52, 58, 5],
+            [CLONE_OFFSET + 134, 52, 58, 5],
+            [CLONE_OFFSET + 40, 52, 58, 5]
         ],
         { postGame: true }
     ),
@@ -798,7 +817,7 @@ export const KANTO_ANIME_SPECIALS: SpecialEncounter[] = [
         kind: "legendary",
         id: "lighthouseDragonite",
         region: "kanto",
-        speciesId: 149,
+        speciesId: 7153,
         level: 60,
         zoneId: "billsLighthouse",
         place: "Bill's Lighthouse",
@@ -811,7 +830,7 @@ export const KANTO_ANIME_SPECIALS: SpecialEncounter[] = [
         kind: "legendary",
         id: "giantGengar",
         region: "kanto",
-        speciesId: 94,
+        speciesId: 7151,
         level: 60,
         zoneId: "pokemopolis",
         place: "Pokémopolis",
@@ -824,7 +843,7 @@ export const KANTO_ANIME_SPECIALS: SpecialEncounter[] = [
         kind: "legendary",
         id: "giantAlakazam",
         region: "kanto",
-        speciesId: 65,
+        speciesId: 7150,
         level: 60,
         zoneId: "pokemopolis",
         place: "Pokémopolis",
@@ -832,6 +851,19 @@ export const KANTO_ANIME_SPECIALS: SpecialEncounter[] = [
         postGame: true,
         strength: 2.6,
         text: "A colossal Alakazam, guardian of Pokémopolis, stands in your way."
+    },
+    {
+        kind: "legendary",
+        id: "giantJigglypuff",
+        region: "kanto",
+        speciesId: 7152,
+        level: 60,
+        zoneId: "pokemopolis",
+        place: "Pokémopolis",
+        badgesRequired: 8,
+        postGame: true,
+        strength: 2.6,
+        text: "A giant Jigglypuff wakes among the ruins, and its lullaby shakes the ground."
     },
     {
         kind: "gift",

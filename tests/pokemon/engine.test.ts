@@ -24,7 +24,7 @@ import {
     WILD_VARIANTS
 } from "game/pokemon/data";
 import { STONES } from "game/pokemon/items";
-import { MEW_ID, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
+import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
 import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
@@ -51,7 +51,7 @@ describe("data", () => {
     });
 
     test("every species can be obtained", () => {
-        const obtainable = new Set<number>([1, 4, 7, MEW_ID]);
+        const obtainable = new Set<number>([1, 4, 7]);
         ZONES.forEach(zone => allZoneSpecies(zone.id).forEach(id => obtainable.add(id)));
         SPECIAL_ENCOUNTERS.forEach(special => obtainable.add(special.speciesId));
         // Evolutions of anything obtainable are obtainable too.
@@ -129,6 +129,25 @@ describe("data", () => {
         expect(VARIANT_SPECIES.filter(v => v.variant === "regional").length).toBeGreaterThan(40);
     });
 
+    test("legendary encounters are one-of-a-kind forms", () => {
+        const wild = new Set(ZONES.flatMap(z => allZoneSpecies(z.id)));
+        for (const id of [
+            "giantAlakazam",
+            "giantGengar",
+            "giantJigglypuff",
+            "lighthouseDragonite"
+        ]) {
+            const special = SPECIAL_ENCOUNTERS.find(s => s.id === id)!;
+            expect(getSpecies(special.speciesId).variant, id).toBe("giant");
+            expect(wild.has(special.speciesId), id).toBe(false);
+        }
+        // New Island is nothing but Mewtwo's clones, and clones stay clones.
+        const clones = allZoneSpecies("newIsland").map(getSpecies);
+        expect(clones.length).toBe(27);
+        clones.forEach(c => expect(c.variant, c.name).toBe("clone"));
+        clones.forEach(c => expect(c.evolutions, c.name).toEqual([]));
+    });
+
     test("forms are only placed in the regions they belong to", () => {
         const found = new Set([
             ...ZONES.flatMap(z => allZoneSpecies(z.id)),
@@ -140,7 +159,7 @@ describe("data", () => {
         // Every anime variant and every Kanto form can be found; Unown letters are in Tanoby.
         const shouldBeFound = VARIANT_SPECIES.filter(
             v =>
-                ["pinkan", "valencian", "unique"].includes(v.variant!) ||
+                ["pinkan", "valencian", "unique", "giant", "clone"].includes(v.variant!) ||
                 v.nativeRegion === "kanto" ||
                 v.baseSpecies === 201
         );
