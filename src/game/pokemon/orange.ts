@@ -664,7 +664,7 @@ export const ORANGE_SPECIALS: SpecialEncounter[] = [
         kind: "legendary",
         id: "murcottSnorlax",
         region: "orange",
-        speciesId: 143,
+        speciesId: 7021,
         level: 35,
         zoneId: "murcottIsland",
         place: "Murcott Island",

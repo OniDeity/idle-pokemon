@@ -187,7 +187,7 @@ const KANTO_SPECIALS: WithoutRegion<SpecialEncounter>[] = [
         kind: "legendary",
         id: "snorlax",
         strength: 1.4,
-        speciesId: 143,
+        speciesId: 7020,
         level: 30,
         zoneId: "route12",
         place: "Route 12",
@@ -372,7 +372,3 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
 
 /** Seconds allowed to defeat a legendary before it flees. */
 export const LEGENDARY_TIME_LIMIT = 90;
-
-/** Pokédex-completion reward: Professor Oak's last gift. */
-export const MEW_ID = 151;
-export const MEW_REQUIREMENT = 150;
