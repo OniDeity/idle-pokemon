@@ -50,6 +50,10 @@
                         Effort: experience past the level cap becomes a growing damage bonus
                     </li>
                     <li class="feature">Settings → Behaviour → "Start over…" wipes all progress</li>
+                    <li class="feature">
+                        PC Box search, sorting (level, strength, name) and filters (type, can
+                        evolve, ready to evolve, shiny, forms, not in party, at level cap)
+                    </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="fix">
                         Sprites ship with the game instead of loading from GitHub, so they no

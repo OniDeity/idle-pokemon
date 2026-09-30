@@ -4,8 +4,8 @@
 import { main } from "data/projEntry";
 import { createLayer } from "game/layers";
 import { memberMultiplier, effortMultiplier } from "game/pokemon/balance";
-import type { Evolution } from "game/pokemon/data";
-import { getSpecies } from "game/pokemon/data";
+import type { Evolution, PokemonType } from "game/pokemon/data";
+import { getSpecies, TYPE_COLORS } from "game/pokemon/data";
 import { STONES } from "game/pokemon/items";
 import { attacksPerSecond, maxHp, statAtLevel, xpForLevel } from "game/pokemon/stats";
 import { computed, ref } from "vue";
@@ -19,11 +19,33 @@ import {
     Panel,
     Sprite,
     Stat,
+    TypeBadge,
     TypeBadges
 } from "../ui/components";
 import dex from "./dex";
 
-type Sort = "dex" | "level";
+type Sort = "dex" | "level" | "strongest" | "name";
+type QuickFilter = "canEvolve" | "ready" | "shiny" | "forms" | "boxed" | "capped";
+
+const SORTS: [Sort, string][] = [
+    ["dex", "Dex no."],
+    ["level", "Level"],
+    ["strongest", "Strongest"],
+    ["name", "Name"]
+];
+
+const QUICK_FILTERS: [QuickFilter, string, string][] = [
+    ["canEvolve", "Can evolve", "Has an evolution you don't own yet"],
+    [
+        "ready",
+        "Ready to evolve",
+        "Can evolve right now: level reached, stone in the bag, or Link Cable"
+    ],
+    ["shiny", "Shiny", "Shiny Pokémon"],
+    ["forms", "Forms", "Variants, regional forms, female forms and patterns"],
+    ["boxed", "Not in party", "Pokémon waiting in the box"],
+    ["capped", "At level cap", "Can't gain levels until the next badge"]
+];
 
 const id = "party";
 const layer = createLayer(id, () => {
@@ -31,22 +53,126 @@ const layer = createLayer(id, () => {
     const color = "#F97316";
     const selected = ref<number | null>(null);
     const sort = ref<Sort>("dex");
+    const search = ref("");
+    const quickFilters = ref<QuickFilter[]>([]);
+    const typeFilters = ref<PokemonType[]>([]);
 
-    const boxIds = computed(() => {
-        const ids = Object.keys(main.box.value).map(Number);
-        if (sort.value === "level") {
-            return ids.sort((a, b) => main.box.value[b].level - main.box.value[a].level || a - b);
-        }
-        return ids.sort((a, b) => a - b);
-    });
+    /** Every Pokémon in the box, unfiltered. */
+    const allIds = computed(() => Object.keys(main.box.value).map(Number));
 
     /** Evolutions the player could trigger right now from the box. */
     function manualEvolutions(speciesId: number): Evolution[] {
         return getSpecies(speciesId).evolutions.filter(e => e.method !== "level");
     }
 
+    /** Evolutions whose result the player doesn't own yet. */
+    function pendingEvolutions(speciesId: number): Evolution[] {
+        return getSpecies(speciesId).evolutions.filter(
+            e => !main.owns(main.evolutionTarget(speciesId, e.into))
+        );
+    }
+
+    /** Can evolve right now: level reached (it evolves on its next level-up in the party), a
+     * stone in the bag, or the Link Cable. */
+    function readyToEvolve(speciesId: number): boolean {
+        const level = main.box.value[speciesId]?.level ?? 0;
+        return pendingEvolutions(speciesId).some(e =>
+            e.method === "level"
+                ? level >= (e.level ?? Infinity)
+                : e.method === "stone"
+                  ? (main.stones.value[e.stone!] ?? 0) > 0
+                  : main.keyItems.value.linkCable === true
+        );
+    }
+
+    /** Rough battle strength: best attacking stat, attack speed and damage bonuses. */
+    function strength(speciesId: number): number {
+        const species = getSpecies(speciesId);
+        const level = main.box.value[speciesId]?.level ?? 1;
+        const [, atk, , spa] = species.baseStats;
+        return (
+            statAtLevel(Math.max(atk, spa), level) *
+            attacksPerSecond(species) *
+            main.battlerFor(speciesId).multiplier
+        );
+    }
+
+    function matchesQuickFilter(speciesId: number, filter: QuickFilter): boolean {
+        switch (filter) {
+            case "canEvolve":
+                return pendingEvolutions(speciesId).length > 0;
+            case "ready":
+                return readyToEvolve(speciesId);
+            case "shiny":
+                return main.box.value[speciesId]?.shiny === true;
+            case "forms":
+                return getSpecies(speciesId).variant != null;
+            case "boxed":
+                return !main.partyIds.value.includes(speciesId);
+            case "capped":
+                return (main.box.value[speciesId]?.level ?? 0) >= main.cap.value;
+        }
+    }
+
+    /** Types present in the box, in type-chart order, for the type filter. */
+    const boxTypes = computed(() => {
+        const present = new Set(allIds.value.flatMap(sid => getSpecies(sid).types));
+        return (Object.keys(TYPE_COLORS) as PokemonType[]).filter(type => present.has(type));
+    });
+
+    const boxIds = computed(() => {
+        const query = search.value.trim().toLowerCase();
+        const ids = allIds.value.filter(sid => {
+            const species = getSpecies(sid);
+            if (query !== "" && !species.name.toLowerCase().includes(query)) return false;
+            if (!quickFilters.value.every(filter => matchesQuickFilter(sid, filter))) {
+                return false;
+            }
+            if (
+                typeFilters.value.length > 0 &&
+                !species.types.some(type => typeFilters.value.includes(type))
+            ) {
+                return false;
+            }
+            return true;
+        });
+        const dexOrder = (sid: number) => (getSpecies(sid).baseSpecies ?? sid) * 100000 + sid;
+        const level = (sid: number) => main.box.value[sid].level;
+        switch (sort.value) {
+            case "level":
+                return ids.sort((a, b) => level(b) - level(a) || dexOrder(a) - dexOrder(b));
+            case "strongest": {
+                const scores = new Map(ids.map(sid => [sid, strength(sid)]));
+                return ids.sort((a, b) => scores.get(b)! - scores.get(a)!);
+            }
+            case "name":
+                return ids.sort((a, b) => getSpecies(a).name.localeCompare(getSpecies(b).name));
+            default:
+                return ids.sort((a, b) => dexOrder(a) - dexOrder(b));
+        }
+    });
+
+    const filtering = computed(
+        () =>
+            search.value.trim() !== "" ||
+            quickFilters.value.length > 0 ||
+            typeFilters.value.length > 0
+    );
+
+    function toggle<T>(list: { value: T[] }, item: T) {
+        list.value = list.value.includes(item)
+            ? list.value.filter(x => x !== item)
+            : [...list.value, item];
+    }
+
+    function clearFilters() {
+        search.value = "";
+        quickFilters.value = [];
+        typeFilters.value = [];
+    }
+
     const evolutionReady = computed(() =>
-        boxIds.value.some(sid =>
+        allIds.value.some(sid =>
             manualEvolutions(sid).some(
                 e =>
                     !main.owns(main.evolutionTarget(sid, e.into)) &&
@@ -280,22 +406,66 @@ const layer = createLayer(id, () => {
                     ) : null}
                     <div class="pk-party-grid">{main.partyIds.value.map(renderPartySlot)}</div>
                     {renderDetail(detailId)}
-                    <Panel title={`PC Box (${boxIds.value.length})`}>
+                    <Panel title={`PC Box (${allIds.value.length})`}>
+                        <div class="pk-filter-row">
+                            <input
+                                class="pk-search"
+                                type="search"
+                                placeholder="Search by name…"
+                                value={search.value}
+                                onInput={(e: Event) =>
+                                    (search.value = (e.target as HTMLInputElement).value)
+                                }
+                            />
+                        </div>
                         <div class="pk-filter-row">
                             <span class="pk-small pk-muted">Sort:</span>
-                            <Button
-                                kind={sort.value === "dex" ? "primary" : "ghost"}
-                                onClick={() => (sort.value = "dex")}
-                            >
-                                Dex no.
-                            </Button>
-                            <Button
-                                kind={sort.value === "level" ? "primary" : "ghost"}
-                                onClick={() => (sort.value = "level")}
-                            >
-                                Level
-                            </Button>
+                            {SORTS.map(([value, label]) => (
+                                <Button
+                                    kind={sort.value === value ? "primary" : "ghost"}
+                                    onClick={() => (sort.value = value)}
+                                >
+                                    {label}
+                                </Button>
+                            ))}
                         </div>
+                        <div class="pk-filter-row">
+                            <span class="pk-small pk-muted">Show:</span>
+                            {QUICK_FILTERS.map(([value, label, title]) => (
+                                <Button
+                                    kind={quickFilters.value.includes(value) ? "primary" : "ghost"}
+                                    title={title}
+                                    onClick={() => toggle(quickFilters, value)}
+                                >
+                                    {label}
+                                </Button>
+                            ))}
+                        </div>
+                        <div class="pk-filter-row">
+                            <span class="pk-small pk-muted">Type:</span>
+                            {boxTypes.value.map(type => (
+                                <button
+                                    class={[
+                                        "pk-type-toggle",
+                                        typeFilters.value.includes(type) ? "active" : ""
+                                    ]}
+                                    onClick={() => toggle(typeFilters, type)}
+                                >
+                                    <TypeBadge type={type} small />
+                                </button>
+                            ))}
+                        </div>
+                        {filtering.value ? (
+                            <div class="pk-filter-row pk-small pk-muted">
+                                Showing {boxIds.value.length} of {allIds.value.length}
+                                <Button kind="ghost" onClick={clearFilters}>
+                                    Clear filters
+                                </Button>
+                            </div>
+                        ) : null}
+                        {boxIds.value.length === 0 ? (
+                            <p class="pk-muted">No Pokémon match these filters.</p>
+                        ) : null}
                         <div class="pk-box-grid">
                             {boxIds.value.map(sid => {
                                 const entry = main.box.value[sid];
@@ -312,6 +482,11 @@ const layer = createLayer(id, () => {
                                     >
                                         <Sprite id={sid} size={48} shiny={entry.shiny} />
                                         <span class="pk-box-level">{entry.level}</span>
+                                        {readyToEvolve(sid) ? (
+                                            <span class="pk-box-ready" title="Ready to evolve">
+                                                ▲
+                                            </span>
+                                        ) : null}
                                     </button>
                                 );
                             })}

@@ -1058,6 +1058,42 @@
     line-height: 0;
 }
 
+.pk-layer .pk-search {
+    flex: 1;
+    min-width: 0;
+    max-width: 320px;
+    font: inherit;
+    font-size: 14px;
+    color: inherit;
+    background: var(--pk-soft);
+    border: 1px solid var(--pk-line);
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+.pk-type-toggle {
+    font: inherit;
+    background: none;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    padding: 1px;
+    cursor: pointer;
+    opacity: 0.55;
+}
+
+.pk-type-toggle.active {
+    opacity: 1;
+    border-color: var(--foreground);
+}
+
+.pk-box-ready {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 11px;
+    color: var(--pk-good);
+}
+
 .pk-box-cell.in-party {
     background: rgba(249, 115, 22, 0.15);
 }
