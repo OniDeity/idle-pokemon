@@ -18,7 +18,9 @@ import { BALLS, STONES } from "game/pokemon/items";
 import { maxHp } from "game/pokemon/stats";
 import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import type { TrainerDefinition } from "game/pokemon/trainers";
-import { availableZoneSpecies, typicalLevel, zonesIn } from "game/pokemon/zones";
+import type { ZoneDefinition } from "game/pokemon/zones";
+import { availableZoneSpecies, encounterOdds, typicalLevel, zonesIn } from "game/pokemon/zones";
+import dex from "./layers/dex";
 import hof from "./layers/hof";
 import mart from "./layers/mart";
 import { main } from "./projEntry";
@@ -163,9 +165,40 @@ function newFacesParty(ranked: number[], trainers: TrainerDefinition[]): number[
     return undefined;
 }
 
+/**
+ * For "catch 'em all": the place where an encounter is most likely to be a Pokémon (or form:
+ * variants, female forms, patterns) you've caught before but don't have this journey, at any
+ * level. Brand-new Pokédex entries are left for the player to find.
+ */
+function bestZoneToRecatch(zones: ZoneDefinition[]): ZoneDefinition | undefined {
+    const rodLevel = hof.levels.value.roddysRod ?? 0;
+    let best: ZoneDefinition | undefined;
+    let bestChance = 0;
+    for (const zone of zones) {
+        let chance = 0;
+        for (const [id, p] of encounterOdds(zone.id, main.keyItems.value, rodLevel)) {
+            if (dex.entry(id).caught && !main.owns(id)) chance += p;
+        }
+        // Stay put unless somewhere else is clearly better, so it doesn't hop on ties.
+        const here = zone.id === main.zoneId.value ? 1.05 : 1;
+        if (chance * here > bestChance) {
+            best = zone;
+            bestChance = chance * here;
+        }
+    }
+    return best;
+}
+
 function autoTravel() {
     const zones = zonesIn(main.region.value).filter(z => main.zoneUnlocked(z.id));
     if (zones.length === 0) return;
+    if (hof.catchEmAll.value) {
+        const best = bestZoneToRecatch(zones);
+        if (best != null) {
+            main.travel(best.id);
+            return;
+        }
+    }
     const levels = main.partyIds.value.map(id => main.box.value[id]?.level ?? 1);
     const average = levels.reduce((a, b) => a + b, 0) / Math.max(1, levels.length);
     // Newest zone that still has Pokémon we haven't caught this journey, unless it's so weak

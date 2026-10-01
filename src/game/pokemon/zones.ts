@@ -409,6 +409,60 @@ export function rollEncounter(
     };
 }
 
+/**
+ * The chance each species (or form) is what an encounter here turns out to be: the same rolls
+ * as rollEncounter (pool, entry, female form, cosmetic variant, Magikarp pattern), worked out
+ * exactly instead of at random.
+ */
+export function encounterOdds(
+    zoneId: string,
+    keyItems: Partial<Record<KeyItemId, boolean>>,
+    rodLevel = 0
+): Map<number, number> {
+    const odds = new Map<number, number>();
+    const add = (id: number, p: number) => odds.set(id, (odds.get(id) ?? 0) + p);
+    const pools = activePools(zoneId, keyItems);
+    const totalShare = pools.reduce((sum, pool) => sum + pool.share, 0);
+    for (const pool of pools) {
+        const totalWeight = pool.entries.reduce((sum, e) => sum + e.weight, 0);
+        for (const entry of pool.entries) {
+            const p = (pool.share / totalShare) * (entry.weight / totalWeight);
+            const female = femaleForm(entry.id);
+            const forms: [number, number][] =
+                female != null
+                    ? [
+                          [female.id, p * (female.genderRate / 8)],
+                          [entry.id, p * (1 - female.genderRate / 8)]
+                      ]
+                    : [[entry.id, p]];
+            for (const [id, formP] of forms) {
+                const cosmetic = WILD_VARIANTS[id];
+                let plain = formP;
+                if (cosmetic != null) {
+                    const total = cosmetic.variants.reduce((sum, [, w]) => sum + w, 0);
+                    for (const [variant, w] of cosmetic.variants) {
+                        add(variant, formP * cosmetic.chance * (w / total));
+                    }
+                    plain *= 1 - cosmetic.chance;
+                }
+                if (id === 129 && rodLevel > 0) {
+                    const patterns = magikarpPatterns(rodLevel).map(s => ({
+                        id: s.id,
+                        weight: s.spriteKey === "129-gold" ? 0.1 : 1
+                    }));
+                    const total = patterns.reduce((sum, s) => sum + s.weight, 0);
+                    for (const pattern of patterns) {
+                        add(pattern.id, plain * PATTERN_CHANCE * (pattern.weight / total));
+                    }
+                    if (patterns.length > 0) plain *= 1 - PATTERN_CHANCE;
+                }
+                add(id, plain);
+            }
+        }
+    }
+    return odds;
+}
+
 /** The average wild level in a zone's walking (or surfing) pool, used for recommendations. */
 export function typicalLevel(zoneId: string): number {
     const pools = zonePools(zoneId);

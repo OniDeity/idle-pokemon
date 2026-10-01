@@ -186,6 +186,7 @@ export const main = createLayer("main", layer => {
             computeBonuses({
                 dexCaught: dex.caughtCount.value,
                 shinyCaught: dex.shinyCount.value,
+                variantsCaught: dex.variantCaught.value,
                 mart: mart.levels.value,
                 hof: hof.levels.value,
                 keyItems: keyItems.value
