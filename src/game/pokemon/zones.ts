@@ -387,14 +387,16 @@ export function rollEncounter(
     // Species with visible gender differences show up as their female form genderRate/8 of the time.
     const female = femaleForm(entry.id);
     let speciesId = female != null && rng() < female.genderRate / 8 ? female.id : entry.id;
-    const cosmetic = WILD_VARIANTS[speciesId];
+    // Variants and patterns go by the species in the table, so females get them too (a female
+    // Wooper can have the heart, a female Magikarp a pattern).
+    const cosmetic = WILD_VARIANTS[entry.id];
     if (cosmetic != null && rng() < cosmetic.chance) {
         speciesId = pickWeighted(
             cosmetic.variants.map(([id, weight]) => ({ id, weight })),
             rng
         ).id;
     }
-    if (speciesId === 129 && rodLevel > 0 && rng() < PATTERN_CHANCE) {
+    if (entry.id === 129 && rodLevel > 0 && rng() < PATTERN_CHANCE) {
         // The Gold pattern is ten times rarer than the rest.
         const patterns = magikarpPatterns(rodLevel);
         speciesId = pickWeighted(
@@ -426,38 +428,33 @@ export function encounterOdds(
     for (const pool of pools) {
         const totalWeight = pool.entries.reduce((sum, e) => sum + e.weight, 0);
         for (const entry of pool.entries) {
-            const p = (pool.share / totalShare) * (entry.weight / totalWeight);
-            const female = femaleForm(entry.id);
-            const forms: [number, number][] =
-                female != null
-                    ? [
-                          [female.id, p * (female.genderRate / 8)],
-                          [entry.id, p * (1 - female.genderRate / 8)]
-                      ]
-                    : [[entry.id, p]];
-            for (const [id, formP] of forms) {
-                const cosmetic = WILD_VARIANTS[id];
-                let plain = formP;
-                if (cosmetic != null) {
-                    const total = cosmetic.variants.reduce((sum, [, w]) => sum + w, 0);
-                    for (const [variant, w] of cosmetic.variants) {
-                        add(variant, formP * cosmetic.chance * (w / total));
-                    }
-                    plain *= 1 - cosmetic.chance;
+            let plain = (pool.share / totalShare) * (entry.weight / totalWeight);
+            const cosmetic = WILD_VARIANTS[entry.id];
+            if (cosmetic != null) {
+                const total = cosmetic.variants.reduce((sum, [, w]) => sum + w, 0);
+                for (const [variant, w] of cosmetic.variants) {
+                    add(variant, plain * cosmetic.chance * (w / total));
                 }
-                if (id === 129 && rodLevel > 0) {
-                    const patterns = magikarpPatterns(rodLevel).map(s => ({
-                        id: s.id,
-                        weight: s.spriteKey === "129-gold" ? 0.1 : 1
-                    }));
-                    const total = patterns.reduce((sum, s) => sum + s.weight, 0);
-                    for (const pattern of patterns) {
-                        add(pattern.id, plain * PATTERN_CHANCE * (pattern.weight / total));
-                    }
-                    if (patterns.length > 0) plain *= 1 - PATTERN_CHANCE;
-                }
-                add(id, plain);
+                plain *= 1 - cosmetic.chance;
             }
+            if (entry.id === 129 && rodLevel > 0) {
+                const patterns = magikarpPatterns(rodLevel).map(s => ({
+                    id: s.id,
+                    weight: s.spriteKey === "129-gold" ? 0.1 : 1
+                }));
+                const total = patterns.reduce((sum, s) => sum + s.weight, 0);
+                for (const pattern of patterns) {
+                    add(pattern.id, plain * PATTERN_CHANCE * (pattern.weight / total));
+                }
+                if (patterns.length > 0) plain *= 1 - PATTERN_CHANCE;
+            }
+            // What's left is the plain species, split between its female and male forms.
+            const female = femaleForm(entry.id);
+            if (female != null) {
+                add(female.id, plain * (female.genderRate / 8));
+                plain *= 1 - female.genderRate / 8;
+            }
+            add(entry.id, plain);
         }
     }
     return odds;
