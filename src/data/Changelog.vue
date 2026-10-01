@@ -100,6 +100,10 @@
                     </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="fix">
+                        Female Magikarp can have Magikarp Jump patterns and female Wooper the heart
+                        mark, so patterns are twice as common as before (30% of Magikarp)
+                    </li>
+                    <li class="fix">
                         Valencian Butterfree finally appears on Valencia Island (it was turning into
                         a Brown Mooshtank every time), and Pinkan Island's Pokémon and Valencian
                         Raticate no longer turn into Magikarp, Gyarados or Snorlax
