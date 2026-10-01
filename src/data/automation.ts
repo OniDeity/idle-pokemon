@@ -166,17 +166,18 @@ function newFacesParty(ranked: number[], trainers: TrainerDefinition[]): number[
 }
 
 /**
- * For "catch 'em all": the place where an encounter is most likely to be something missing from
- * the Pokédex (species and every form: variants, female forms, patterns), at any level.
+ * For "catch 'em all": the place where an encounter is most likely to be a Pokémon (or form:
+ * variants, female forms, patterns) you've caught before but don't have this journey, at any
+ * level. Brand-new Pokédex entries are left for the player to find.
  */
-function bestZoneForPokedex(zones: ZoneDefinition[]): ZoneDefinition | undefined {
+function bestZoneToRecatch(zones: ZoneDefinition[]): ZoneDefinition | undefined {
     const rodLevel = hof.levels.value.roddysRod ?? 0;
     let best: ZoneDefinition | undefined;
     let bestChance = 0;
     for (const zone of zones) {
         let chance = 0;
         for (const [id, p] of encounterOdds(zone.id, main.keyItems.value, rodLevel)) {
-            if (!dex.entry(id).caught) chance += p;
+            if (dex.entry(id).caught && !main.owns(id)) chance += p;
         }
         // Stay put unless somewhere else is clearly better, so it doesn't hop on ties.
         const here = zone.id === main.zoneId.value ? 1.05 : 1;
@@ -192,7 +193,7 @@ function autoTravel() {
     const zones = zonesIn(main.region.value).filter(z => main.zoneUnlocked(z.id));
     if (zones.length === 0) return;
     if (hof.catchEmAll.value) {
-        const best = bestZoneForPokedex(zones);
+        const best = bestZoneToRecatch(zones);
         if (best != null) {
             main.travel(best.id);
             return;

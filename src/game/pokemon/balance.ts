@@ -663,7 +663,7 @@ export const AUTOMATIONS: AutomationDefinition[] = [
         id: "autoTravel",
         name: "Travel Planner",
         description:
-            "Moves to the best zone: the newest area with Pokémon you haven't caught this journey, or the toughest one your team handles. Can hunt for Pokédex entries instead.",
+            "Moves to the best zone: the newest area with Pokémon you haven't caught this journey, or the toughest one your team handles. Can re-catch your whole Pokédex instead.",
         cost: 12,
         sprite: itemSprite("bicycle")
     },

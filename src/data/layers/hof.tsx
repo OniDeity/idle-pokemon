@@ -52,7 +52,7 @@ const layer = createLayer(id, () => {
     const automationsOn = persistent<Partial<Record<AutomationId, boolean>>>({}, false);
     /** Team Strategist setting: bring Pokémon new to the Hall of Fame to the finale. */
     const newFacesForFinale = persistent<boolean>(false);
-    /** Travel Planner setting: go wherever new Pokédex entries are likeliest, at any level. */
+    /** Travel Planner setting: re-catch Pokédex Pokémon missing from the box, at any level. */
     const catchEmAll = persistent<boolean>(false);
 
     function level(upgrade: HofUpgradeId) {
@@ -274,7 +274,8 @@ const layer = createLayer(id, () => {
                                             checked={catchEmAll.value}
                                             onChange={() => (catchEmAll.value = !catchEmAll.value)}
                                         />{" "}
-                                        Catch 'em all: go wherever a new Pokédex entry is likeliest
+                                        Catch 'em all: go wherever you're likeliest to find Pokémon
+                                        from your Pokédex that aren't in your box this journey
                                         (variants and forms too), at any level
                                     </label>
                                 ) : null}

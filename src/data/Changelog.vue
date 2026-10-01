@@ -72,8 +72,9 @@
                         Up-Grade (Porygon2)
                     </li>
                     <li class="feature">
-                        Travel Planner setting "Catch 'em all": goes wherever an encounter is most
-                        likely to be a new Pokédex entry, variants and forms included, at any level
+                        Travel Planner setting "Catch 'em all": goes wherever you're likeliest to
+                        find Pokémon from your Pokédex that aren't in your box this journey,
+                        variants and forms included, at any level
                     </li>
                     <li class="feature">
                         Every variant in your Pokédex gives +1% shiny chance
