@@ -14,6 +14,7 @@ import {
 } from "game/pokemon/balance";
 import {
     DEX_SIZE,
+    femaleForm,
     getSpecies,
     magikarpPatterns,
     PRE_EVOLUTION,
@@ -408,6 +409,30 @@ describe("sprites", () => {
         const missing = requiredSpritePaths().filter(path => !existsSync(`public/sprites/${path}`));
         expect(missing).toEqual([]);
         expect(requiredSpritePaths().length).toBeGreaterThan(1000);
+    });
+});
+
+describe("wild encounters", () => {
+    test("only regular species roll female forms, so variants spawn as themselves", () => {
+        for (const zone of ZONES) {
+            for (const id of allZoneSpecies(zone.id)) {
+                const female = femaleForm(id);
+                if (female != null) expect(female.variant, `${zone.id} #${id}`).toBe("female");
+            }
+        }
+        // Valencian Butterfree (2012) used to become a Brown Mooshtank (7012) every time.
+        expect(femaleForm(2012)).toBeUndefined();
+        expect(femaleForm(1010)).toBeUndefined();
+        expect(femaleForm(25)?.id).toBe(5025);
+        let seed = 1;
+        const rng = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+        const seen = new Set<number>();
+        for (let i = 0; i < 5000; i++) {
+            const encounter = rollEncounter("valenciaIsland", {}, rng);
+            if (encounter != null) seen.add(encounter.speciesId);
+        }
+        expect(seen.has(2012)).toBe(true);
+        expect(seen.has(7012)).toBe(false);
     });
 });
 
