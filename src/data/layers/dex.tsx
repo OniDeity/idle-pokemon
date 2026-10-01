@@ -7,7 +7,8 @@ import { persistent } from "game/persistence";
 import {
     DEX_MILESTONES,
     DEX_DAMAGE_BONUS_PER_SPECIES,
-    memberMultiplier
+    memberMultiplier,
+    SHINY_BONUS_PER_VARIANT
 } from "game/pokemon/balance";
 import type { Species } from "game/pokemon/data";
 import {
@@ -357,7 +358,9 @@ const layer = createLayer(id, () => {
                     <div class="pk-muted">
                         Every species caught gives +{DEX_DAMAGE_BONUS_PER_SPECIES * 100}% damage
                         (now +{Math.round(caughtCount.value * DEX_DAMAGE_BONUS_PER_SPECIES * 100)}
-                        %). The Pokédex is never reset.
+                        %); every variant gives +{SHINY_BONUS_PER_VARIANT * 100}% shiny chance (now
+                        +{Math.round(variantCaught.value * SHINY_BONUS_PER_VARIANT * 100)}%). The
+                        Pokédex is never reset.
                     </div>
                 </div>
 

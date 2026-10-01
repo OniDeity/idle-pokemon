@@ -29,7 +29,14 @@ import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
 import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
-import { activePools, allZoneSpecies, rollEncounter, ZONES, zonesIn } from "game/pokemon/zones";
+import {
+    activePools,
+    allZoneSpecies,
+    encounterOdds,
+    rollEncounter,
+    ZONES,
+    zonesIn
+} from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
 
 function mulberry(seed: number): () => number {
@@ -433,6 +440,32 @@ describe("wild encounters", () => {
         }
         expect(seen.has(2012)).toBe(true);
         expect(seen.has(7012)).toBe(false);
+    });
+});
+
+describe("encounter odds", () => {
+    test("add up to one and match what rollEncounter actually rolls", () => {
+        const gear = { oldRod: true, goodRod: true, superRod: true, surf: true };
+        for (const zone of ZONES) {
+            const total = [...encounterOdds(zone.id, gear, 3).values()].reduce((a, b) => a + b, 0);
+            expect(total, zone.id).toBeCloseTo(1, 6);
+        }
+        // Route 23 has Arbok (hood patterns) and Magikarp (patterns); Route 1 has Rattata
+        // (female forms); Valencia Island has variants.
+        for (const zoneId of ["route23", "route1", "valenciaIsland"]) {
+            const odds = encounterOdds(zoneId, gear, 3);
+            let seed = 7;
+            const rng = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+            const counts = new Map<number, number>();
+            const rolls = 200000;
+            for (let i = 0; i < rolls; i++) {
+                const id = rollEncounter(zoneId, gear, rng, 3)!.speciesId;
+                counts.set(id, (counts.get(id) ?? 0) + 1);
+            }
+            for (const [id, p] of odds) {
+                expect((counts.get(id) ?? 0) / rolls, `${zoneId} #${id}`).toBeCloseTo(p, 2);
+            }
+        }
     });
 });
 

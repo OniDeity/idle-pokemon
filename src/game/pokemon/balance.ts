@@ -23,6 +23,8 @@ export const DUPLICATE_BONUS_MAX_CATCHES = 25;
 export const SHINY_DAMAGE_BONUS = 1.2;
 /** Every species registered as caught boosts the whole party's damage. */
 export const DEX_DAMAGE_BONUS_PER_SPECIES = 0.003;
+/** Each variant form in the Pokédex (Pinkan, regional, female, patterns...) adds +1% shiny odds. */
+export const SHINY_BONUS_PER_VARIANT = 0.01;
 /** Max stock of each ball type; also where auto-restock tops up to. */
 export const BALL_RESTOCK_TARGET = 20;
 
@@ -293,6 +295,8 @@ export const HOF_UPGRADE_LIST = Object.values(HOF_UPGRADES) as (UpgradeDefinitio
 export interface BonusInputs {
     dexCaught: number;
     shinyCaught: number;
+    /** Variant forms in the Pokédex: each makes shinies a little more common. */
+    variantsCaught?: number;
     mart: Partial<Record<MartUpgradeId, number>>;
     hof: Partial<Record<HofUpgradeId, number>>;
     keyItems: Partial<Record<KeyItemId, boolean>>;
@@ -337,7 +341,10 @@ export function computeBonuses(input: BonusInputs): Bonuses {
         (milestone("Silph Scope") ? 1.2 : 1) *
         (1 + 0.1 * lvl(hof.fortune));
     const catchBonus = (milestone("Oak's Letter") ? 1.1 : 1) * (1 + 0.1 * lvl(hof.catcher));
-    const shiny = (milestone("Shiny Charm") ? 3 : 1) * (1 + 0.5 * lvl(hof.shinyHunter));
+    const shiny =
+        (milestone("Shiny Charm") ? 3 : 1) *
+        (1 + 0.5 * lvl(hof.shinyHunter)) *
+        (1 + SHINY_BONUS_PER_VARIANT * (input.variantsCaught ?? 0));
     const searchTime =
         (BASE_SEARCH_TIME / (keyItems.bicycle ? 2 : 1)) *
         (1 - 0.08 * lvl(mart.repel)) *
@@ -656,7 +663,7 @@ export const AUTOMATIONS: AutomationDefinition[] = [
         id: "autoTravel",
         name: "Travel Planner",
         description:
-            "Moves to the best zone: the newest area with Pokémon you haven't caught this journey, or the toughest one your team handles.",
+            "Moves to the best zone: the newest area with Pokémon you haven't caught this journey, or the toughest one your team handles. Can re-catch your whole Pokédex instead.",
         cost: 12,
         sprite: itemSprite("bicycle")
     },
