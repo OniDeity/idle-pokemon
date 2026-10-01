@@ -1,7 +1,9 @@
-import type { KeyItemId } from "./items";
+import type { BallId, KeyItemId } from "./items";
+import { JOHTO_SPECIALS } from "./johto";
 import { KANTO_ANIME_SPECIALS } from "./kantoAnime";
 import { ORANGE_SPECIALS } from "./orange";
 import { SEVII_SPECIALS } from "./sevii";
+import type { TrainerDefinition } from "./trainers";
 import type { RegionId } from "./zones";
 
 /**
@@ -20,6 +22,12 @@ export type SpecialEncounter =
           /** Pokédollar price; omitted for free gifts. */
           price?: number;
           postGame?: boolean;
+          /** A gift that's one of several Pokémon at random (the Odd Egg); speciesId is shown. */
+          pool?: number[];
+          /** Chance the gift is shiny (the Odd Egg's 14%). */
+          shinyChance?: number;
+          /** Only on these days of the week (0 = Sunday), like Union Cave's Friday Lapras. */
+          weekdays?: number[];
           text: string;
       }
     | {
@@ -49,8 +57,32 @@ export type SpecialEncounter =
           keyItem?: KeyItemId;
           /** Stat multiplier, like a trainer's; legendaries are tough. */
           strength: number;
+          /** Only on these days of the week (0 = Sunday), like Union Cave's Friday Lapras. */
+          weekdays?: number[];
+          text: string;
+      }
+    | {
+          /** A one-off battle against a famous Trainer, with a prize for winning. */
+          kind: "boss";
+          id: string;
+          region: RegionId;
+          /** The Trainer's ace, shown on the map. */
+          speciesId: number;
+          level: number;
+          place: string;
+          badgesRequired: number;
+          postGame?: boolean;
+          trainer: TrainerDefinition;
+          prizeBalls?: Partial<Record<BallId, number>>;
           text: string;
       };
+
+/** The Pokémon a special encounter can give (none for a boss battle). */
+export function specialSpecies(special: SpecialEncounter): number[] {
+    if (special.kind === "boss") return [];
+    if (special.kind === "gift" && special.pool != null) return special.pool;
+    return [special.speciesId];
+}
 
 type WithoutRegion<T> = T extends unknown ? Omit<T, "region"> : never;
 
@@ -367,7 +399,8 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
     ...KANTO_SPECIALS.map(special => ({ ...special, region: "kanto" }) as SpecialEncounter),
     ...KANTO_ANIME_SPECIALS,
     ...ORANGE_SPECIALS,
-    ...SEVII_SPECIALS
+    ...SEVII_SPECIALS,
+    ...JOHTO_SPECIALS
 ];
 
 /** Seconds allowed to defeat a legendary before it flees. */

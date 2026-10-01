@@ -16,7 +16,7 @@ import type { BallId } from "game/pokemon/items";
 import type { StoneId } from "game/pokemon/data";
 import { BALLS, STONES } from "game/pokemon/items";
 import { maxHp } from "game/pokemon/stats";
-import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
+import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import type { TrainerDefinition } from "game/pokemon/trainers";
 import type { ZoneDefinition } from "game/pokemon/zones";
 import { availableZoneSpecies, encounterOdds, typicalLevel, zonesIn } from "game/pokemon/zones";
@@ -60,8 +60,10 @@ function autoShop() {
 
 function autoClaim() {
     for (const special of SPECIAL_ENCOUNTERS) {
-        if (special.kind === "legendary" || main.claimedSpecials.value[special.id]) continue;
-        if (!main.specialAvailable(special) || main.owns(special.speciesId)) continue;
+        if (special.kind === "legendary" || special.kind === "boss") continue;
+        if (main.claimedSpecials.value[special.id]) continue;
+        if (!main.specialAvailable(special) || specialSpecies(special).every(id => main.owns(id)))
+            continue;
         if (special.kind === "trade" && !main.owns(special.wants)) continue;
         if (
             special.kind === "gift" &&

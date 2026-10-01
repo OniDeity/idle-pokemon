@@ -8,7 +8,7 @@ import type { PokemonType } from "game/pokemon/data";
 import { getSpecies, TYPE_COLORS } from "game/pokemon/data";
 import { KEY_ITEMS } from "game/pokemon/items";
 import type { SpecialEncounter } from "game/pokemon/specials";
-import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
+import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import type { ZoneDefinition } from "game/pokemon/zones";
 import {
     allZoneSpecies,
@@ -561,12 +561,32 @@ const layer = createLayer(id, () => {
         ));
     }
 
+    const WEEKDAYS = [
+        "Sundays",
+        "Mondays",
+        "Tuesdays",
+        "Wednesdays",
+        "Thursdays",
+        "Fridays",
+        "Saturdays"
+    ];
+
     function renderSpecial(special: SpecialEncounter) {
         const species = getSpecies(special.speciesId);
         const available = main.specialAvailable(special);
-        const owned = main.owns(special.speciesId);
+        const isBoss = special.kind === "boss";
+        // An Egg counts as "owned" once you have every Pokémon it can hatch into; a boss never is.
+        const owned =
+            !isBoss &&
+            specialSpecies(special).every(id => main.owns(id)) &&
+            special.kind !== "legendary";
         const claimed = main.claimedSpecials.value[special.id] === true;
-        const seen = dex.entry(special.speciesId).seen || available;
+        const seen = isBoss || dex.entry(special.speciesId).seen || available;
+        const weekdayLocked =
+            (special.kind === "legendary" || special.kind === "gift") &&
+            special.weekdays != null &&
+            main.badges.value >= special.badgesRequired &&
+            !special.weekdays.includes(main.moment.value.weekday);
 
         let action;
         if (!available) {
@@ -580,16 +600,35 @@ const layer = createLayer(id, () => {
                     🔒{" "}
                     {missingItem && special.kind === "legendary"
                         ? `Needs the ${KEY_ITEMS[special.keyItem!].name}`
-                        : special.postGame === true
-                          ? `After the ${main.regionDef.value.finaleName}`
-                          : `${special.badgesRequired} ${main.regionDef.value.trialNoun}`}
+                        : weekdayLocked && (special.kind === "legendary" || special.kind === "gift")
+                          ? `Only on ${special.weekdays!.map(d => WEEKDAYS[d]).join(" and ")}`
+                          : special.postGame === true
+                            ? `After the ${main.regionDef.value.finaleName}`
+                            : `${special.badgesRequired} ${main.regionDef.value.trialNoun}`}
                 </span>
             );
-        } else if (claimed || (owned && special.kind !== "legendary")) {
+        } else if (claimed || owned) {
             action = (
                 <span class="pk-small pk-done">
-                    ✔ {special.kind === "legendary" ? "Caught" : owned ? "In your box" : "Done"}
+                    ✔{" "}
+                    {special.kind === "legendary"
+                        ? "Caught"
+                        : isBoss
+                          ? "Defeated"
+                          : owned
+                            ? "In your box"
+                            : "Done"}
                 </span>
+            );
+        } else if (special.kind === "boss") {
+            action = (
+                <Button
+                    kind="danger"
+                    disabled={main.inTrainerBattle.value}
+                    onClick={() => main.claimSpecial(special)}
+                >
+                    Challenge (Lv. {special.level})
+                </Button>
             );
         } else if (special.kind === "trade") {
             const has = main.owns(special.wants);
@@ -624,7 +663,15 @@ const layer = createLayer(id, () => {
             <div class={["pk-special", available ? "" : "locked"]}>
                 <Sprite id={special.speciesId} size={56} silhouette={!seen} />
                 <div class="pk-special-body">
-                    <b>{seen ? species.name : "???"}</b>{" "}
+                    <b>
+                        {isBoss
+                            ? special.trainer.name
+                            : special.kind === "gift" && special.pool != null
+                              ? "Odd Egg"
+                              : seen
+                                ? species.name
+                                : "???"}
+                    </b>{" "}
                     <span class="pk-muted pk-small">
                         {special.place} · Lv. {special.level}
                     </span>

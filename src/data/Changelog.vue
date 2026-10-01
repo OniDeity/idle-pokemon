@@ -42,6 +42,25 @@
                         The Route 34 Day Care: leave a Pokémon and its Eggs hatch into its family's
                         first stage, baby Pokémon included
                     </li>
+                    <li class="feature">
+                        Johto's legends: Lugia in the Whirl Islands, Ho-Oh on the Bell Tower,
+                        Raikou, Entei and Suicune, Celebi and the Spiky-eared Pichu at the Ilex
+                        Forest shrine, and the Lake of Rage's Red Gyarados (its own form)
+                    </li>
+                    <li class="feature">
+                        Johto's gifts and trades: the Odd Egg (any baby Pokémon, often shiny),
+                        Bill's Eevee, Kirk's Shuckle, Kiyo's Tyrogue, Kenya, the Dragon's Den
+                        Dratini, Union Cave's Friday Lapras, the Goldenrod Game Corner, four NPC
+                        trades, and Sudowoodo on Route 36 (bring the SquirtBottle)
+                    </li>
+                    <li class="feature">
+                        Red waits at the summit of Mt. Silver after the League: beat him for a
+                        Master Ball
+                    </li>
+                    <li class="feature">
+                        Every species can now be caught: Sudowoodo, Elekid and Celebi arrive with
+                        Johto
+                    </li>
                 </ul>
             </details>
             <details>

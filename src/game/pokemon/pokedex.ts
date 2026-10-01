@@ -6,7 +6,7 @@
 import { DEX_SIZE, getSpecies, PRE_EVOLUTION, SPECIES } from "./data";
 import type { RegionDefinition } from "./regions";
 import { REGION_LIST } from "./regions";
-import { SPECIAL_ENCOUNTERS } from "./specials";
+import { SPECIAL_ENCOUNTERS, specialSpecies } from "./specials";
 import type { RegionId } from "./zones";
 import { allZoneSpecies, zonesIn } from "./zones";
 
@@ -19,7 +19,9 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
     };
     for (const region of regions) {
         zonesIn(region).forEach(zone => allZoneSpecies(zone.id).forEach(add));
-        SPECIAL_ENCOUNTERS.filter(s => s.region === region).forEach(s => add(s.speciesId));
+        SPECIAL_ENCOUNTERS.filter(s => s.region === region).forEach(s =>
+            specialSpecies(s).forEach(add)
+        );
         const def = REGION_LIST.find(r => r.id === region);
         [...(def?.starters ?? []), ...(def?.partnerStarters ?? [])].forEach(add);
     }

@@ -23,7 +23,7 @@ import {
 } from "game/pokemon/data";
 import { STONES } from "game/pokemon/items";
 import { REGION_LIST, REGIONS } from "game/pokemon/regions";
-import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
+import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import { allZoneSpecies, ZONES } from "game/pokemon/zones";
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
@@ -64,15 +64,19 @@ function locationsOf(id: number): string[] {
         }
     }
     for (const special of SPECIAL_ENCOUNTERS) {
-        if (special.speciesId === id) {
+        if (special.kind !== "boss" && specialSpecies(special).includes(id)) {
             const how =
                 special.kind === "trade"
                     ? `trade (show a ${getSpecies(special.wants).name})`
                     : special.kind === "legendary"
-                      ? "legendary encounter"
-                      : special.price != null
-                        ? `₽${special.price.toLocaleString("en-US")}`
-                        : "gift";
+                      ? `legendary encounter${special.weekdays != null ? ", some days only" : ""}`
+                      : special.weekdays != null
+                        ? "gift, some days only"
+                        : special.pool != null
+                          ? "Egg"
+                          : special.price != null
+                            ? `₽${special.price.toLocaleString("en-US")}`
+                            : "gift";
             places.push(`${REGIONS[special.region].name}: ${special.place} (${how})`);
         }
     }
@@ -152,7 +156,7 @@ function obtainable(id: number, depth = 0): boolean {
     }
     if (
         ZONES.some(zone => allZoneSpecies(zone.id).includes(wildId)) ||
-        SPECIAL_ENCOUNTERS.some(s => s.speciesId === id) ||
+        SPECIAL_ENCOUNTERS.some(s => specialSpecies(s).includes(id)) ||
         REGION_LIST.some(r => r.starters.includes(id) || r.partnerStarters?.includes(id))
     ) {
         return true;

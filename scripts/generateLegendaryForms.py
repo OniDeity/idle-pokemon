@@ -7,6 +7,7 @@ game's own copies of PokeAPI's default sprites (public/sprites/pokemon):
 - The Giant Dragonite of Bill's lighthouse ("Mystery at the Lighthouse"): a storm-dark
   silhouette with glowing eyes.
 - Mewtwo's clones ("Mewtwo Strikes Back"): marbled with darker stripes.
+- The Lake of Rage's Red Gyarados: the shiny Gyarados art, in every view.
 - The sleeping Snorlax that block the way: recolored like Pokémon Sleep's research-area Snorlax.
   Their shiny sprites stay the regular shiny, as in Pokémon Sleep.
 
@@ -185,7 +186,15 @@ def forms():
         yield "143", f"143-sleep-{area}", lambda img, a=area, shiny=False: paint_sleep(img, a, shiny)
 
 
+def red_gyarados():
+    """The Lake of Rage's red Gyarados is the shiny Gyarados, in every view (its shiny too)."""
+    for folder in ("", "back", "shiny", os.path.join("back", "shiny")):
+        source = os.path.join(ROOT, "back" if folder.startswith("back") else "", "shiny", "130.png")
+        Image.open(source).save(os.path.join(ROOT, folder, "130-red.png"), optimize=True)
+
+
 def main():
+    red_gyarados()
     count = 0
     for species, key, paint in forms():
         for folder in ("", "back", "shiny", os.path.join("back", "shiny")):

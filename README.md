@@ -22,6 +22,9 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 - **Johto's Gen 2 extras**: day and night encounters on your real clock, the Pokégear radio's
   daily swarms and Lucky Number Show, the Bug-Catching Contest (Tuesdays, Thursdays and
   Saturdays), Kurt's seven Apricorn Balls, and the Day Care's Eggs.
+- **Johto's legends and events**: Lugia, Ho-Oh, the legendary beasts, Celebi, the Spiky-eared
+  Pichu and the Lake of Rage's Red Gyarados; the Odd Egg, Bill's Eevee and the other gifts and
+  trades; and Red at the summit of Mt. Silver.
 - **Anime variants**: 20 Pinkan Pokémon on Pinkan Island, 7 Valencian Pokémon on Valencia
   Island, the Crystal Onix, the Pink Butterfree, and Surfing and Flying Pikachu, each with
   its own Pokédex entry.
