@@ -52,6 +52,8 @@ const layer = createLayer(id, () => {
     const automationsOn = persistent<Partial<Record<AutomationId, boolean>>>({}, false);
     /** Team Strategist setting: bring Pokémon new to the Hall of Fame to the finale. */
     const newFacesForFinale = persistent<boolean>(false);
+    /** Travel Planner setting: go wherever new Pokédex entries are likeliest, at any level. */
+    const catchEmAll = persistent<boolean>(false);
 
     function level(upgrade: HofUpgradeId) {
         return levels.value[upgrade] ?? 0;
@@ -265,6 +267,17 @@ const layer = createLayer(id, () => {
                                         as can still win (+{FAME_PER_NEW_SPECIES} Fame each)
                                     </label>
                                 ) : null}
+                                {def.id === "autoTravel" && owned ? (
+                                    <label class="pk-small pk-setting">
+                                        <input
+                                            type="checkbox"
+                                            checked={catchEmAll.value}
+                                            onChange={() => (catchEmAll.value = !catchEmAll.value)}
+                                        />{" "}
+                                        Catch 'em all: go wherever a new Pokédex entry is likeliest
+                                        (variants and forms too), at any level
+                                    </label>
+                                ) : null}
                             </div>
                             {owned ? (
                                 <Button
@@ -304,6 +317,7 @@ const layer = createLayer(id, () => {
         automationsOwned,
         automationsOn,
         newFacesForFinale,
+        catchEmAll,
         isEnshrined,
         pendingFame,
         recordChampionTeam,

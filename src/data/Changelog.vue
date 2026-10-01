@@ -72,6 +72,13 @@
                         Up-Grade (Porygon2)
                     </li>
                     <li class="feature">
+                        Travel Planner setting "Catch 'em all": goes wherever an encounter is most
+                        likely to be a new Pokédex entry, variants and forms included, at any level
+                    </li>
+                    <li class="feature">
+                        Every variant in your Pokédex gives +1% shiny chance
+                    </li>
+                    <li class="feature">
                         Team Strategist setting: bring as many Pokémon new to the Hall of Fame to
                         the finale as the forecast says can still win, for extra Fame
                     </li>
