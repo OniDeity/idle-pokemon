@@ -2,6 +2,7 @@
  * Party & PC Box: choose your six, reorder them, and evolve Pokémon with stones or trades.
  */
 import { EGG_BATTLES, main } from "data/projEntry";
+import { DAY_CARE_PLACE } from "game/pokemon/mechanics";
 import { createLayer } from "game/layers";
 import { memberMultiplier, effortMultiplier } from "game/pokemon/balance";
 import type { Evolution, PokemonType, StoneId } from "game/pokemon/data";
@@ -417,7 +418,7 @@ const layer = createLayer(id, () => {
         );
     }
 
-    /** Route 34's Day Care: leave a Pokémon, and its Eggs hatch into its family's first stage. */
+    /** The Day Care: leave a Pokémon, and its Eggs hatch into its family's first stage. */
     function renderDayCare() {
         const id = main.dayCareId.value;
         const options = allIds.value.filter(
@@ -425,7 +426,13 @@ const layer = createLayer(id, () => {
         );
         const inParty = id !== 0 && main.partyIds.value.includes(id);
         return (
-            <Panel title="Day Care (Route 34)">
+            <Panel
+                title={
+                    DAY_CARE_PLACE[main.region.value] != null
+                        ? `Day Care (${DAY_CARE_PLACE[main.region.value]})`
+                        : "Day Care"
+                }
+            >
                 <p class="pk-small pk-muted">
                     Leave a Pokémon from your box and the Day Care couple finds an Egg every{" "}
                     {EGG_BATTLES} wild battles you win. Eggs hatch into the first stage of its

@@ -31,6 +31,7 @@ import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { JOHTO_SWARMS } from "game/pokemon/johto";
+import { MECHANIC_LIST } from "game/pokemon/mechanics";
 import { pokedexRequirement, speciesObtainableIn } from "game/pokemon/pokedex";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
 import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
@@ -521,6 +522,17 @@ describe("Apricorn Balls", () => {
         // Plain balls are unchanged.
         expect(ballEffect("greatBall", ctx(19))).toEqual([1.5, 0]);
         expect(APRICORN_BALLS.every(id => BALLS[id].region === "johto")).toBe(true);
+    });
+});
+
+describe("generation mechanics", () => {
+    test("each is reached partway through its own region", () => {
+        expect(MECHANIC_LIST.map(m => m.id)).toContain("breeding");
+        for (const mechanic of MECHANIC_LIST) {
+            const region = REGIONS[mechanic.region];
+            expect(region, mechanic.id).toBeDefined();
+            expect(mechanic.trialsRequired).toBeLessThanOrEqual(region.trials.length);
+        }
     });
 });
 
