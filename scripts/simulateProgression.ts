@@ -71,6 +71,13 @@ if (process.env.KANTO_E4 != null || process.env.KANTO_CHAMP != null) {
         }));
 }
 
+//   GYMS_johto=1,1.6,… override a region's trial strengths one by one
+for (const region of Object.values(REGIONS)) {
+    process.env[`GYMS_${region.id}`]?.split(",").forEach((v, i) => {
+        if (region.trials[i] != null) region.trials[i].statMultiplier = Number(v);
+    });
+}
+
 //   SCALE_orange=1.5   multiply every trial and finale strength in a region
 //   FINALE_orange=1.2  override the finale's multiplier separately
 for (const region of Object.values(REGIONS)) {
@@ -199,7 +206,7 @@ function runJourney(region: RegionDefinition, starter: number) {
     function claimSpecials() {
         for (const s of SPECIAL_ENCOUNTERS) {
             if (s.region !== region.id || claimed.has(s.id) || badges < s.badgesRequired) continue;
-            if (s.kind === "legendary" || owned.has(s.speciesId)) continue;
+            if (s.kind === "legendary" || s.kind === "boss" || owned.has(s.speciesId)) continue;
             if (s.kind === "trade" && !owned.has(s.wants)) continue;
             if (s.kind === "gift" && s.price != null) {
                 if (money < s.price * 2) continue;

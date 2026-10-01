@@ -1,7 +1,17 @@
 import { assetUrl } from "./assets";
 import type { StoneId } from "./data";
 
-export type BallId = "pokeBall" | "greatBall" | "ultraBall" | "masterBall";
+export type BallId = "pokeBall" | "greatBall" | "ultraBall" | "masterBall" | ApricornBallId;
+
+/** Kurt's Apricorn Balls, made in Azalea Town: each shines in its own situation. */
+export type ApricornBallId =
+    | "levelBall"
+    | "lureBall"
+    | "moonBall"
+    | "friendBall"
+    | "loveBall"
+    | "fastBall"
+    | "heavyBall";
 
 export interface BallDefinition {
     id: BallId;
@@ -13,6 +23,10 @@ export interface BallDefinition {
     /** Badges needed before the Mart stocks it. */
     badgesRequired: number;
     sprite: string;
+    /** Only sold in this region (Kurt's Apricorn Balls are Johto's). */
+    region?: "johto";
+    /** What a ball with a special effect does, shown in the Mart. */
+    description?: string;
 }
 
 export function itemSprite(slug: string): string {
@@ -51,8 +65,81 @@ export const BALLS: Record<BallId, BallDefinition> = {
         price: null,
         badgesRequired: Infinity,
         sprite: itemSprite("master-ball")
-    }
+    },
+    ...apricornBalls()
 };
+
+function apricornBalls(): Record<ApricornBallId, BallDefinition> {
+    const ball = (
+        id: ApricornBallId,
+        name: string,
+        sprite: string,
+        description: string
+    ): BallDefinition => ({
+        id,
+        name,
+        catchMultiplier: 1,
+        price: 250,
+        badgesRequired: 2,
+        sprite,
+        region: "johto",
+        description
+    });
+    return {
+        levelBall: ball(
+            "levelBall",
+            "Level Ball",
+            itemSprite("level-ball"),
+            "×2 if your strongest party member out-levels the wild Pokémon, ×4 at double its level, ×8 at four times."
+        ),
+        lureBall: ball(
+            "lureBall",
+            "Lure Ball",
+            itemSprite("lure-ball"),
+            "×3 on Pokémon hooked with a rod."
+        ),
+        moonBall: ball(
+            "moonBall",
+            "Moon Ball",
+            itemSprite("moon-ball"),
+            "×4 on Pokémon that evolve with a Moon Stone (Nidorina, Nidorino, Clefairy, Jigglypuff)."
+        ),
+        friendBall: ball(
+            "friendBall",
+            "Friend Ball",
+            itemSprite("friend-ball"),
+            "A normal catch rate, but its Pokémon is so friendly it evolves by friendship without a Soothe Bell."
+        ),
+        loveBall: ball(
+            "loveBall",
+            "Love Ball",
+            itemSprite("love-ball"),
+            "×8 on a Pokémon whose evolution family you already have this journey."
+        ),
+        fastBall: ball(
+            "fastBall",
+            "Fast Ball",
+            itemSprite("fast-ball"),
+            "×4 on Pokémon with a base Speed of 100 or more."
+        ),
+        heavyBall: ball(
+            "heavyBall",
+            "Heavy Ball",
+            itemSprite("heavy-ball"),
+            "Better the heavier the Pokémon: −20 catch rate under 100 kg, +20 from 100 kg, +30 from 200 kg, +40 from 300 kg."
+        )
+    };
+}
+
+export const APRICORN_BALLS: ApricornBallId[] = [
+    "levelBall",
+    "lureBall",
+    "moonBall",
+    "friendBall",
+    "loveBall",
+    "fastBall",
+    "heavyBall"
+];
 
 /** Balls in the order they're tried when "best available" is selected (Master Balls are never auto-used). */
 export const AUTO_BALL_ORDER: BallId[] = ["ultraBall", "greatBall", "pokeBall"];
@@ -163,7 +250,17 @@ export const STONE_DESCRIPTIONS: Partial<Record<StoneId, string>> = {
     upGrade: "Held while trading: Porygon becomes Porygon2."
 };
 
-export type KeyItemId = "oldRod" | "goodRod" | "superRod" | "surf" | "bicycle" | "pokeFlute";
+export type KeyItemId =
+    | "oldRod"
+    | "goodRod"
+    | "superRod"
+    | "surf"
+    | "bicycle"
+    | "pokeFlute"
+    | "headbutt"
+    | "rockSmash"
+    | "squirtBottle"
+    | "radioCard";
 
 export interface KeyItemDefinition {
     id: KeyItemId;
@@ -208,5 +305,30 @@ export const KEY_ITEMS: Record<KeyItemId, KeyItemDefinition> = {
         name: "Poké Flute",
         description: "Wakes the sleeping Snorlax on Route 12.",
         sprite: itemSprite("poke-flute")
+    },
+    headbutt: {
+        id: "headbutt",
+        name: "TM02 Headbutt",
+        description: "Shake Johto's trees to knock down the Pokémon living in them.",
+        sprite: itemSprite("tm-normal")
+    },
+    rockSmash: {
+        id: "rockSmash",
+        name: "HM06 Rock Smash",
+        description: "Smash cracked rocks to find the Pokémon hiding underneath.",
+        sprite: itemSprite("hm-fighting")
+    },
+    squirtBottle: {
+        id: "squirtBottle",
+        name: "SquirtBottle",
+        description: "Water the odd tree blocking Route 36.",
+        sprite: itemSprite("squirt-bottle")
+    },
+    radioCard: {
+        id: "radioCard",
+        name: "Radio Card",
+        description:
+            "Tunes the Pokégear to Johto's radio: a daily swarm report and the Lucky Number Show.",
+        sprite: itemSprite("card-key")
     }
 };

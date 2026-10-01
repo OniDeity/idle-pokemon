@@ -5,6 +5,75 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.2 Johto</summary>
+                <ul>
+                    <li class="feature">
+                        Johto, from HeartGold and SoulSilver: 50 places from New Bark Town to Mt.
+                        Silver, Falkner to Clair, and Will, Koga, Bruno, Karen and Champion Lance
+                    </li>
+                    <li class="feature">
+                        Unlocks after the Sevii Islands, once your Pokédex has every species the
+                        first three regions offer
+                    </li>
+                    <li class="feature">
+                        58 anime-only Johto places, from Palm Hills and the Whirl Islands to the
+                        Dragon Holy Land, Alto Mare and Mount Quena (where Mewtwo's clones now
+                        live), each with the wild Pokémon seen in its episodes
+                    </li>
+                    <li class="feature">
+                        The Johto anime's one-of-a-kind Pokémon: wild Pudgy Pidgey on Pudgy Pidgey
+                        Isle, and Silver the young Lugia, the Unown's Entei, Dark Celebi and Dark
+                        Tyranitar as legendary encounters
+                    </li>
+                    <li class="feature">
+                        Headbutt trees and Rock Smash rocks: new kinds of encounter in Johto
+                    </li>
+                    <li class="feature">
+                        All 28 Unown in the Ruins of Alph's chambers
+                    </li>
+                    <li class="feature">
+                        Day and night: Johto's wild Pokémon follow your clock (morning, day,
+                        night), like HeartGold and SoulSilver
+                    </li>
+                    <li class="feature">
+                        Pokégear: win the Radio Card in Goldenrod for a daily swarm report and the
+                        Lucky Number Show (match today's number with your Trainer ID for prizes, up
+                        to a Master Ball)
+                    </li>
+                    <li class="feature">
+                        Bug-Catching Contest in the National Park on Tuesdays, Thursdays and
+                        Saturdays: free Sport Balls, and a Scyther or Pinsir wins the Sun Stone
+                    </li>
+                    <li class="feature">
+                        Kurt's Apricorn Balls in Johto's Poké Mart: Level, Lure, Moon, Friend, Love,
+                        Fast and Heavy Balls, picked automatically when they work best
+                    </li>
+                    <li class="feature">
+                        The Route 34 Day Care: leave a Pokémon and its Eggs hatch into its family's
+                        first stage, baby Pokémon included
+                    </li>
+                    <li class="feature">
+                        Johto's legends: Lugia in the Whirl Islands, Ho-Oh on the Bell Tower,
+                        Raikou, Entei and Suicune, Celebi and the Spiky-eared Pichu at the Ilex
+                        Forest shrine, and the Lake of Rage's Red Gyarados (its own form)
+                    </li>
+                    <li class="feature">
+                        Johto's gifts and trades: the Odd Egg (any baby Pokémon, often shiny),
+                        Bill's Eevee, Kirk's Shuckle, Kiyo's Tyrogue, Kenya, the Dragon's Den
+                        Dratini, Union Cave's Friday Lapras, the Goldenrod Game Corner, four NPC
+                        trades, and Sudowoodo on Route 36 (bring the SquirtBottle)
+                    </li>
+                    <li class="feature">
+                        Red waits at the summit of Mt. Silver after the League: beat him for a
+                        Master Ball
+                    </li>
+                    <li class="feature">
+                        Every species can now be caught: Sudowoodo, Elekid and Celebi arrive with
+                        Johto
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.1 Islands &amp; Legends</summary>
                 <ul>
                     <li class="feature">

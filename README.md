@@ -12,11 +12,20 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 
 ## How it plays
 
-- **Journeys through three regions.** Kanto (plus 52 anime-exclusive locations from
+- **Journeys through four regions.** Kanto (plus 52 anime-exclusive locations from
   [Bulbapedia's list](https://bulbapedia.bulbagarden.net/wiki/List_of_animated_series-exclusive_locations),
   from Porta Vista to the Tree of Beginning), the Orange Islands (29 islands, the Orange Crew
   and Drake's Winner's Cup), and the Sevii Islands from FireRed/LeafGreen (Team Rocket, the
-  Ruby & Sapphire quest and the Trainer Tower). Each first clear is tuned for about a day of play.
+  Ruby & Sapphire quest and the Trainer Tower), and Johto from HeartGold/SoulSilver (eight Gyms,
+  the Elite Four and Lance, with Headbutt trees and Rock Smash rocks, plus 58 anime-exclusive
+  locations from Palm Hills to Mount Quena). Each first clear is tuned
+  for about a day of play.
+- **Johto's Gen 2 extras**: day and night encounters on your real clock, the Pokégear radio's
+  daily swarms and Lucky Number Show, the Bug-Catching Contest (Tuesdays, Thursdays and
+  Saturdays), Kurt's seven Apricorn Balls, and the Day Care's Eggs.
+- **Johto's legends and events**: Lugia, Ho-Oh, the legendary beasts, Celebi, the Spiky-eared
+  Pichu and the Lake of Rage's Red Gyarados; the Odd Egg, Bill's Eevee and the other gifts and
+  trades; and Red at the summit of Mt. Silver.
 - **Anime variants**: 20 Pinkan Pokémon on Pinkan Island, 7 Valencian Pokémon on Valencia
   Island, the Crystal Onix, the Pink Butterfree, and Surfing and Flying Pikachu, each with
   its own Pokédex entry.
@@ -32,9 +41,11 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 - **Legendary forms**: the anime's one-of-a-kind Pokémon are their own forms, never met in the
   wild: the marked giants of Pokémopolis (Alakazam, Gengar, Jigglypuff), the Giant Dragonite of
   Bill's Lighthouse, Mewtwo's striped Clone Pokémon on New Island, and the sleeping Snorlax
-  recolored after Pokémon Sleep's research areas (Taupe Hollow, Cyan Beach).
-- **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands; Johto comes next,
-  unlocked by completing the Pokédex.
+  recolored after Pokémon Sleep's research areas (Taupe Hollow, Cyan Beach). Johto adds the
+  wild Pudgy Pidgey, Silver the young Lugia, the Unown's Entei, Dark Celebi and
+  Dark Tyranitar.
+- **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands, then Johto,
+  which also needs every species the first three regions offer in your Pokédex.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
   trainers in regions you haven't cleared grow tougher (Renown) as you conquer others,
   and rematches in cleared regions go faster. Experience past the level cap becomes Effort, a
@@ -62,7 +73,7 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 
 | Path                             | What's in it                                                                                                                                                                                                  |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/game/pokemon/`              | The game engine: species data, stat/XP/damage formulas, battles, regions (`regions.ts`, `kantoAnime.ts`, `orange.ts`, `sevii.ts`), zones, trainers, gifts/trades, balance constants. Pure TypeScript, no Vue. |
+| `src/game/pokemon/`              | The game engine: species data, stat/XP/damage formulas, battles, regions (`regions.ts`, `kantoAnime.ts`, `orange.ts`, `sevii.ts`, `johto.ts`, `johtoAnime.ts`), zones, trainers, gifts/trades, balance constants. Pure TypeScript, no Vue. |
 | `src/data/projEntry.tsx`         | The main "Journey" layer: run state, the real-time battle loop, catching, XP and evolution.                                                                                                                   |
 | `src/data/layers/`               | Map, Party & Box, Poké Mart, League, Pokédex, Hall of Fame.                                                                                                                                                   |
 | `src/data/automation.ts`         | The Fame-bought automations.                                                                                                                                                                                  |

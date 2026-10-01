@@ -16,7 +16,7 @@ import type { BallId } from "game/pokemon/items";
 import type { StoneId } from "game/pokemon/data";
 import { BALLS, STONES } from "game/pokemon/items";
 import { maxHp } from "game/pokemon/stats";
-import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
+import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import type { TrainerDefinition } from "game/pokemon/trainers";
 import type { ZoneDefinition } from "game/pokemon/zones";
 import { availableZoneSpecies, encounterOdds, typicalLevel, zonesIn } from "game/pokemon/zones";
@@ -60,8 +60,10 @@ function autoShop() {
 
 function autoClaim() {
     for (const special of SPECIAL_ENCOUNTERS) {
-        if (special.kind === "legendary" || main.claimedSpecials.value[special.id]) continue;
-        if (!main.specialAvailable(special) || main.owns(special.speciesId)) continue;
+        if (special.kind === "legendary" || special.kind === "boss") continue;
+        if (main.claimedSpecials.value[special.id]) continue;
+        if (!main.specialAvailable(special) || specialSpecies(special).every(id => main.owns(id)))
+            continue;
         if (special.kind === "trade" && !main.owns(special.wants)) continue;
         if (
             special.kind === "gift" &&
@@ -107,7 +109,10 @@ function autoEvolve() {
                 const level = main.box.value[id]?.level ?? 0;
                 if (level >= (evolution.level ?? Infinity)) {
                     main.evolveByLevel(id, evolution.into);
-                } else if (evolution.friendship === true && buyIfAffordable("sootheBell")) {
+                } else if (
+                    evolution.friendship === true &&
+                    (main.box.value[id]?.friend === true || buyIfAffordable("sootheBell"))
+                ) {
                     // ...and friendship Pokémon early, with a Soothe Bell.
                     main.evolveWithSootheBell(id, evolution.into);
                 }
@@ -176,7 +181,12 @@ function bestZoneToRecatch(zones: ZoneDefinition[]): ZoneDefinition | undefined 
     let bestChance = 0;
     for (const zone of zones) {
         let chance = 0;
-        for (const [id, p] of encounterOdds(zone.id, main.keyItems.value, rodLevel)) {
+        for (const [id, p] of encounterOdds(
+            zone.id,
+            main.keyItems.value,
+            rodLevel,
+            main.moment.value
+        )) {
             if (dex.entry(id).caught && !main.owns(id)) chance += p;
         }
         // Stay put unless somewhere else is clearly better, so it doesn't hop on ties.
@@ -206,7 +216,9 @@ function autoTravel() {
     const withNew = zones.filter(
         z =>
             typicalLevel(z.id) >= average - 12 &&
-            availableZoneSpecies(z.id, main.keyItems.value).some(id => !main.owns(id))
+            availableZoneSpecies(z.id, main.keyItems.value, main.moment.value).some(
+                id => !main.owns(id)
+            )
     );
     let target = withNew[withNew.length - 1];
     if (target == null) {

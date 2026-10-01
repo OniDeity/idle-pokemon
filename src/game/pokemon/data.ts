@@ -61,6 +61,8 @@ export interface Species {
     /** [hp, attack, defense, special attack, special defense, speed] */
     baseStats: [number, number, number, number, number, number];
     baseExp: number;
+    /** In kilograms, for the Heavy Ball. */
+    weight: number;
     /** 3-255; higher is easier to catch. */
     captureRate: number;
     growthRate: GrowthRate;
@@ -120,9 +122,20 @@ export interface EncounterEntry {
     weight: number;
     minLevel: number;
     maxLevel: number;
+    /** HeartGold/SoulSilver tables that change with the time of day: the weight at each time. */
+    byTime?: Record<TimeOfDay, number>;
 }
 
-export type EncounterPoolId = "walk" | "surf" | "oldRod" | "goodRod" | "superRod";
+export type EncounterPoolId =
+    | "walk"
+    | "surf"
+    | "oldRod"
+    | "goodRod"
+    | "superRod"
+    | "headbutt"
+    | "rockSmash";
+
+export type TimeOfDay = "morning" | "day" | "night";
 
 /** The regular National Pokédex species, #1-251, in order. */
 export const SPECIES = speciesJson as Species[];
@@ -278,7 +291,9 @@ const COSMETIC_VARIANTS: Species[] = (
         [25, 7014, "25-alola-bias", "Alola-Bias Pikachu"],
         // Pokémon Sleep's research-area Snorlax, for the sleeping Snorlax that block the way.
         [143, 7020, "143-sleep-taupe", "Taupe Hollow Snorlax"],
-        [143, 7021, "143-sleep-cyan", "Cyan Beach Snorlax"]
+        [143, 7021, "143-sleep-cyan", "Cyan Beach Snorlax"],
+        // The Lake of Rage's red Gyarados, forced to evolve by Team Rocket's signal.
+        [130, 7022, "130-red", "Red Gyarados"]
     ] as [number, number, string, string][]
 ).map(([base, id, key, name]) =>
     variant(base, id, "cosmetic", name, {
@@ -320,6 +335,34 @@ const LEGENDARY_FORMS: Species[] = [
         localSprite: true,
         baseStats: boosted(149),
         captureRate: 3
+    }),
+    // Johto's: the round, flightless Pidgey of Pudgy Pidgey Isle ("Fly Me to the Moon")...
+    variant(16, 3016, "unique", "Pudgy Pidgey", {
+        spriteKey: "16-pudgy",
+        localSprite: true,
+        captureRate: 120
+    }),
+    // ...Silver, Lugia's child ("Hi Ho Silver... Away!")...
+    variant(249, 3249, "unique", "Silver (young Lugia)", {
+        spriteKey: "249-young",
+        localSprite: true
+    }),
+    // ...the Unown's Entei ("Spell of the Unown"), drawn in the Unown's dark glyphs...
+    variant(244, 3244, "unique", "Unown Entei", {
+        spriteKey: "244-unown",
+        localSprite: true,
+        types: ["fire", "psychic"]
+    }),
+    // ...and the Celebi and Tyranitar corrupted by the Iron-Masked Marauder's Dark Balls
+    // ("Celebi: The Voice of the Forest").
+    variant(251, 3251, "unique", "Dark Celebi", {
+        spriteKey: "251-dark",
+        localSprite: true,
+        types: ["dark", "grass"]
+    }),
+    variant(248, 3248, "unique", "Dark Tyranitar", {
+        spriteKey: "248-dark",
+        localSprite: true
     }),
     // Mewtwo's clones of great Trainers' Pokémon in "Mewtwo Strikes Back", marked with stripes.
     ...[1, 4, 7, 3, 6, 9, 25, 52, 31, 18, 111, 27, 28, 123, 106, 87, 45, 55, 54, 117, 73, 130]

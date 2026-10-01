@@ -1,7 +1,9 @@
 import { existsSync } from "fs";
 import { requiredSpritePaths } from "../../scripts/fetchSprites";
-import type { PartyBattler } from "game/pokemon/balance";
+import type { BallContext, PartyBattler } from "game/pokemon/balance";
 import {
+    ballCatchChance,
+    ballEffect,
     catchChance,
     computeBonuses,
     effortMultiplier,
@@ -15,6 +17,7 @@ import {
 import {
     DEX_SIZE,
     femaleForm,
+    type TimeOfDay,
     getSpecies,
     magikarpPatterns,
     PRE_EVOLUTION,
@@ -24,15 +27,21 @@ import {
     variantFilter,
     WILD_VARIANTS
 } from "game/pokemon/data";
-import { STONES } from "game/pokemon/items";
-import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
+import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
+import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
+import { JOHTO_SWARMS } from "game/pokemon/johto";
+import { pokedexRequirement, speciesObtainableIn } from "game/pokemon/pokedex";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
 import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
 import {
     activePools,
     allZoneSpecies,
+    availableZoneSpecies,
+    bugContestOn,
     encounterOdds,
+    momentOf,
+    swarmOn,
     PATTERN_CHANCE,
     rollEncounter,
     ZONES,
@@ -123,9 +132,9 @@ describe("data", () => {
         const anime = VARIANT_SPECIES.filter(v =>
             ["pinkan", "valencian", "unique"].includes(v.variant!)
         );
-        expect(anime.length).toBe(33);
+        expect(anime.length).toBe(38);
         anime
-            .filter(v => v.accessory == null)
+            .filter(v => v.accessory == null && !v.localSprite)
             .forEach(v => expect(variantFilter(v.id), v.name).toBeDefined());
         // Pinkan Rhyhorn stays pink when it evolves; Pinkan Caterpie becomes a regular Metapod.
         expect(getSpecies(1111).evolutions[0].into).toBe(1112);
@@ -405,10 +414,191 @@ describe("Cobblemon variants", () => {
         );
     });
 
-    test("regions unlock in order: Kanto, then the Orange Islands, then Sevii", () => {
+    test("regions unlock in order: Kanto, then the Orange Islands, then Sevii, then Johto", () => {
         expect(REGIONS.kanto.requires).toBeUndefined();
         expect(REGIONS.orange.requires).toBe("kanto");
         expect(REGIONS.sevii.requires).toBe("orange");
+        expect(REGIONS.johto.requires).toBe("sevii");
+        // Johto also needs a Pokédex with everything the first three regions offer.
+        expect(REGIONS.johto.requiresCompletePokedex).toBe(true);
+        const needed = pokedexRequirement(REGIONS.johto);
+        expect(needed).toEqual(speciesObtainableIn(["kanto", "orange", "sevii"]));
+        expect(needed.size).toBeGreaterThan(240);
+        // Johto brings the rest (Sudowoodo, Elekid, Celebi…): the Pokédex can be completed.
+        const all = speciesObtainableIn(REGION_LIST.map(r => r.id));
+        expect(SPECIES.filter(sp => !all.has(sp.id)).map(sp => sp.name)).toEqual([]);
+    });
+});
+
+describe("Johto clock, swarms and contest", () => {
+    test("the clock follows HeartGold/SoulSilver's hours", () => {
+        const at = (h: number) => momentOf(new Date(2026, 9, 6, h, 30)).time;
+        expect([at(3), at(4), at(9), at(10), at(19), at(20)]).toEqual([
+            "night",
+            "morning",
+            "morning",
+            "day",
+            "day",
+            "night"
+        ]);
+        // 6 October 2026 is a Tuesday.
+        expect(momentOf(new Date(2026, 9, 6, 12)).weekday).toBe(2);
+        expect(momentOf(new Date(2026, 9, 7, 0, 5)).day).toBe(
+            momentOf(new Date(2026, 9, 6)).day + 1
+        );
+    });
+
+    test("time-of-day tables change who appears", () => {
+        const base = momentOf(new Date(2026, 9, 7, 12));
+        const ids = (time: TimeOfDay) => availableZoneSpecies("route29", {}, { ...base, time });
+        // Hoothoot only comes out at night on Route 29.
+        expect(ids("night")).toContain(163);
+        expect(ids("day")).not.toContain(163);
+        // Without a moment (simulator, tests) every time of day is in, at its average weight.
+        expect(availableZoneSpecies("route29", {})).toContain(163);
+    });
+
+    test("the Bug-Catching Contest takes over the National Park on its days", () => {
+        const tuesday = momentOf(new Date(2026, 9, 6, 12));
+        const wednesday = momentOf(new Date(2026, 9, 7, 12));
+        expect(bugContestOn(tuesday)).toBe(true);
+        expect(bugContestOn(wednesday)).toBe(false);
+        expect(availableZoneSpecies("nationalPark", {}, tuesday)).toContain(123);
+        expect(availableZoneSpecies("nationalPark", {}, wednesday)).not.toContain(123);
+        expect(allZoneSpecies("nationalPark")).toContain(127);
+    });
+
+    test("the radio's swarm makes up about 40% of its place, with the Radio Card", () => {
+        const days = Array.from({ length: 60 }, (_, i) => 20000 + i);
+        const zones = new Set(days.map(d => swarmOn(d).zoneId));
+        // Every swarm comes up over two months, and the report is the same for everyone.
+        expect(zones.size).toBe(JOHTO_SWARMS.length);
+        expect(swarmOn(20005)).toBe(swarmOn(20005));
+        const day = days.find(d => swarmOn(d).zoneId === "route35")!;
+        const moment = { ...momentOf(new Date(2026, 9, 7, 12)), day };
+        const walk = (radioCard: boolean) =>
+            activePools("route35", { radioCard }, moment).find(p => p.kind === "walk")!.entries;
+        const share = (entries: { id: number; weight: number }[]) =>
+            entries.filter(e => e.id === 193).reduce((a, e) => a + e.weight, 0) /
+            entries.reduce((a, e) => a + e.weight, 0);
+        // Yanma is already a rare sight on Route 35; the swarm adds 40% on top of that.
+        const usual = share(walk(false));
+        expect(usual).toBeLessThan(0.05);
+        expect(share(walk(true))).toBeCloseTo(0.4 + 0.6 * usual, 6);
+    });
+});
+
+describe("Apricorn Balls", () => {
+    test("each ball shines in its own situation", () => {
+        const ctx = (id: number, extra: Partial<BallContext> = {}): BallContext => ({
+            species: getSpecies(id),
+            level: 20,
+            kind: "walk",
+            partyLevel: 20,
+            familyOwned: false,
+            ...extra
+        });
+        expect(ballEffect("levelBall", ctx(19, { partyLevel: 21 }))[0]).toBe(2);
+        expect(ballEffect("levelBall", ctx(19, { partyLevel: 40 }))[0]).toBe(4);
+        expect(ballEffect("levelBall", ctx(19, { partyLevel: 80 }))[0]).toBe(8);
+        expect(ballEffect("levelBall", ctx(19, { partyLevel: 20 }))[0]).toBe(1);
+        expect(ballEffect("lureBall", ctx(129, { kind: "fishing" }))[0]).toBe(3);
+        expect(ballEffect("lureBall", ctx(129))[0]).toBe(1);
+        // Clefairy and Nidorina evolve with a Moon Stone; Clefable doesn't.
+        expect(ballEffect("moonBall", ctx(35))[0]).toBe(4);
+        expect(ballEffect("moonBall", ctx(30))[0]).toBe(4);
+        expect(ballEffect("moonBall", ctx(36))[0]).toBe(1);
+        expect(ballEffect("loveBall", ctx(19, { familyOwned: true }))[0]).toBe(8);
+        // Jolteon (base Speed 130) is fast; Snorlax isn't, but at 460 kg it's very heavy.
+        expect(ballEffect("fastBall", ctx(135))[0]).toBe(4);
+        expect(ballEffect("fastBall", ctx(143))[0]).toBe(1);
+        expect(ballEffect("heavyBall", ctx(143))).toEqual([1, 40]);
+        expect(ballEffect("heavyBall", ctx(25))).toEqual([1, -20]);
+        expect(ballCatchChance("heavyBall", ctx(143))).toBeGreaterThan(
+            ballCatchChance("pokeBall", ctx(143))
+        );
+        // Plain balls are unchanged.
+        expect(ballEffect("greatBall", ctx(19))).toEqual([1.5, 0]);
+        expect(APRICORN_BALLS.every(id => BALLS[id].region === "johto")).toBe(true);
+    });
+});
+
+describe("Johto anime", () => {
+    test("every anime-only Johto place is explorable, with its one-of-a-kind Pokémon", () => {
+        const anime = zonesIn("johto").filter(z => z.anime);
+        expect(anime.length).toBe(58);
+        // Anime places come after the game's own within each badge tier.
+        const johto = zonesIn("johto");
+        johto.forEach((zone, i) => {
+            if (i > 0)
+                expect(zone.badgesRequired).toBeGreaterThanOrEqual(johto[i - 1].badgesRequired);
+        });
+        // Pudgy Pidgey are wild; Silver, Dark Celebi and the Unown's Entei are legendary encounters.
+        expect(allZoneSpecies("pudgyPidgeyIsle")).toContain(3016);
+        const legends = SPECIAL_ENCOUNTERS.filter(sp => sp.kind === "legendary").map(
+            sp => sp.speciesId
+        );
+        expect(legends).toEqual(expect.arrayContaining([3249, 3251, 3248, 3244]));
+        expect(getSpecies(3251).types).toEqual(["dark", "grass"]);
+        // Mewtwo's clones settled on Mount Quena.
+        expect(allZoneSpecies("mountQuena").length).toBe(27);
+    });
+});
+
+describe("Johto specials", () => {
+    test("gifts, trades, legends and Red are all set up", () => {
+        const johto = SPECIAL_ENCOUNTERS.filter(sp => sp.region === "johto");
+        expect(johto.length).toBeGreaterThan(20);
+        const zoneIds = new Set(zonesIn("johto").map(z => z.id));
+        for (const special of johto) {
+            specialSpecies(special).forEach(id => expect(getSpecies(id).id).toBe(id));
+            if (special.kind === "legendary")
+                expect(zoneIds.has(special.zoneId), special.id).toBe(true);
+        }
+        // The Odd Egg can hatch every baby Pokémon, often shiny.
+        const oddEgg = johto.find(sp => sp.id === "oddEgg")!;
+        expect(specialSpecies(oddEgg).sort()).toEqual([172, 173, 174, 236, 238, 239, 240]);
+        // Red waits on Mt. Silver after the League, with his HeartGold/SoulSilver team.
+        const red = johto.find(sp => sp.kind === "boss")!;
+        expect(red.kind === "boss" && red.trainer.team.map(p => p.id)).toEqual([
+            25, 196, 143, 3, 6, 9
+        ]);
+        expect(red.postGame).toBe(true);
+        expect(specialSpecies(red)).toEqual([]);
+        // The Red Gyarados is its own form; Union Cave's Lapras only comes on Fridays.
+        expect(getSpecies(7022).baseSpecies).toBe(130);
+        const lapras = johto.find(sp => sp.id === "unionCaveLapras")!;
+        expect(lapras.kind === "gift" && lapras.weekdays).toEqual([5]);
+    });
+});
+
+describe("Johto", () => {
+    test("every place has wild Pokémon by the time its badges open it", () => {
+        for (const zone of zonesIn("johto")) {
+            const keyItems = Object.fromEntries(
+                REGIONS.johto.trials
+                    .filter(gym => gym.badgeNumber <= zone.badgesRequired)
+                    .flatMap(gym => gym.keyItems)
+                    .map(item => [item, true])
+            );
+            const pools = activePools(zone.id, keyItems);
+            expect(pools.length, zone.id).toBeGreaterThan(0);
+        }
+        expect(zonesIn("johto").length).toBeGreaterThanOrEqual(50);
+    });
+
+    test("Gyms, Elite Four and Champion use real species and their own ids", () => {
+        expect(REGIONS.johto.trials.map(g => g.badgeIcon)).toEqual(
+            Array.from({ length: 8 }, (_, i) => `badges/${i + 9}.png`)
+        );
+        const finale = REGIONS.johto.finale(152);
+        expect(finale.map(t => t.name)).toEqual(["Will", "Koga", "Bruno", "Karen", "Lance"]);
+        for (const trainer of [...REGIONS.johto.trials, ...finale]) {
+            trainer.team.forEach(p => expect(getSpecies(p.id).id).toBe(p.id));
+        }
+        // Trainer ids never clash with another region's.
+        const ids = REGION_LIST.flatMap(r => [...r.trials, ...r.finale(1)].map(t => t.id));
+        expect(new Set(ids).size).toBe(ids.length);
     });
 });
 
@@ -446,7 +636,14 @@ describe("wild encounters", () => {
 
 describe("encounter odds", () => {
     test("add up to one and match what rollEncounter actually rolls", () => {
-        const gear = { oldRod: true, goodRod: true, superRod: true, surf: true };
+        const gear = {
+            oldRod: true,
+            goodRod: true,
+            superRod: true,
+            surf: true,
+            headbutt: true,
+            rockSmash: true
+        };
         for (const zone of ZONES) {
             const total = [...encounterOdds(zone.id, gear, 3).values()].reduce((a, b) => a + b, 0);
             expect(total, zone.id).toBeCloseTo(1, 6);
