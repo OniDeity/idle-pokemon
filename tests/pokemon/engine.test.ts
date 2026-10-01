@@ -33,6 +33,7 @@ import {
     activePools,
     allZoneSpecies,
     encounterOdds,
+    PATTERN_CHANCE,
     rollEncounter,
     ZONES,
     zonesIn
@@ -450,6 +451,20 @@ describe("encounter odds", () => {
             const total = [...encounterOdds(zone.id, gear, 3).values()].reduce((a, b) => a + b, 0);
             expect(total, zone.id).toBeCloseTo(1, 6);
         }
+        // Patterns and cosmetic variants apply to the whole species, females included: 30% of
+        // Magikarp have a pattern (it was 15%, since female Magikarp never did).
+        const fishing = encounterOdds(
+            "route12",
+            { oldRod: true, goodRod: true, superRod: true },
+            3
+        );
+        let patterned = 0;
+        let magikarp = 0;
+        for (const [id, p] of fishing) {
+            if (id >= 6000 && id < 6100) patterned += p;
+            if (id === 129 || id === 5129 || (id >= 6000 && id < 6100)) magikarp += p;
+        }
+        expect(patterned / magikarp).toBeCloseTo(PATTERN_CHANCE, 6);
         // Route 23 has Arbok (hood patterns) and Magikarp (patterns); Route 1 has Rattata
         // (female forms); Valencia Island has variants.
         for (const zoneId of ["route23", "route1", "valenciaIsland"]) {
