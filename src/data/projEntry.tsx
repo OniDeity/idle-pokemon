@@ -23,6 +23,8 @@ import type { StoneId } from "game/pokemon/data";
 import { ALTERNATE_EVOLUTIONS, femaleForm, getSpecies, PRE_EVOLUTION } from "game/pokemon/data";
 import type { BallId, KeyItemId } from "game/pokemon/items";
 import { APRICORN_BALLS, BALLS, KEY_ITEMS, STONES } from "game/pokemon/items";
+import type { MechanicDefinition } from "game/pokemon/mechanics";
+import { MECHANIC_LIST, MECHANICS } from "game/pokemon/mechanics";
 import type { SpecialEncounter } from "game/pokemon/specials";
 import { LEGENDARY_TIME_LIMIT } from "game/pokemon/specials";
 import type { BattlerStats } from "game/pokemon/stats";
@@ -187,7 +189,7 @@ export const main = createLayer("main", layer => {
     /** Bug-Catching Contest days (see Moment.day) you took part in, and won. */
     const contestEnteredDay = persistent<number>(-1);
     const contestWonDay = persistent<number>(-1);
-    /** The Pokémon left at the Route 34 Day Care (0 for none), and battles toward its Egg. */
+    /** The Pokémon left at the Day Care (0 for none), and battles toward its Egg. */
     const dayCareId = persistent<number>(0);
     const dayCareProgress = persistent<number>(0);
 
@@ -430,9 +432,38 @@ export const main = createLayer("main", layer => {
         );
     }
 
-    /** A friendship evolution right away, whatever the level, using up a Soothe Bell. */
-    /** The Day Care opens on Route 34, past the Hive Badge, in Johto. */
-    const dayCareOpen = computed(() => region.value === "johto" && badges.value >= 2);
+    /**
+     * Whether this journey has reached where a generation mechanic is introduced. Clearing that
+     * region on an earlier journey counts too (for saves from before mechanics were tracked).
+     */
+    function mechanicReached(def: MechanicDefinition): boolean {
+        return (
+            (starter.value !== 0 &&
+                region.value === def.region &&
+                badges.value >= def.trialsRequired) ||
+            hof.clearCount(def.region) > 0
+        );
+    }
+
+    /** Unlocks every mechanic this journey has reached, for good and in every region. */
+    function checkMechanics() {
+        for (const def of MECHANIC_LIST) {
+            if (mechanicReached(def) && hof.unlockMechanic(def.id)) {
+                addLog({
+                    kind: "info",
+                    text: `${def.name} unlocked! From now on it works in every region.`
+                });
+            }
+        }
+    }
+
+    /**
+     * The Day Care: first met on Route 34, past the Hive Badge, in Johto; once breeding is
+     * unlocked there, every region's journeys have one from the start.
+     */
+    const dayCareOpen = computed(
+        () => hof.mechanicUnlocked("breeding") || mechanicReached(MECHANICS.breeding)
+    );
 
     function canBreed(id: number): boolean {
         const species = getSpecies(id);
@@ -1051,6 +1082,7 @@ export const main = createLayer("main", layer => {
                 .filter(item => !keyItems.value[item])
                 .forEach(grantKeyItem);
         }
+        checkMechanics();
         if (starter.value === 0 || partyIds.value.length === 0) return;
         runTime.value += diff;
         let remaining = diff;

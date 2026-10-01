@@ -18,6 +18,8 @@ import {
 } from "game/pokemon/balance";
 import type { UpgradeDefinition } from "game/pokemon/balance";
 import { getSpecies, hallOfFameId } from "game/pokemon/data";
+import type { MechanicId } from "game/pokemon/mechanics";
+import { MECHANIC_LIST } from "game/pokemon/mechanics";
 import { pokedexRequirement } from "game/pokemon/pokedex";
 import { REGIONS } from "game/pokemon/regions";
 import type { RegionId } from "game/pokemon/zones";
@@ -59,6 +61,45 @@ const layer = createLayer(id, () => {
     const newFacesForFinale = persistent<boolean>(false);
     /** Travel Planner setting: re-catch Pokédex Pokémon missing from the box, at any level. */
     const catchEmAll = persistent<boolean>(false);
+    /** Generation mechanics reached in their own region, now on everywhere. */
+    const mechanics = persistent<Partial<Record<MechanicId, boolean>>>({}, false);
+
+    function mechanicUnlocked(id: MechanicId): boolean {
+        return mechanics.value[id] === true;
+    }
+
+    /** Unlocks a mechanic for good; true if it was new. */
+    function unlockMechanic(id: MechanicId): boolean {
+        if (mechanicUnlocked(id)) return false;
+        mechanics.value = { ...mechanics.value, [id]: true };
+        return true;
+    }
+
+    function renderMechanics() {
+        return (
+            <Panel title="Mechanics">
+                <p class="pk-small pk-muted">
+                    Each generation's new mechanics are met first in its region. Once you reach one,
+                    it works in every region from then on.
+                </p>
+                {MECHANIC_LIST.map(def => (
+                    <div class="pk-shop-row">
+                        <div class="pk-shop-info">
+                            <b>{def.name}</b>{" "}
+                            <span class="pk-muted">
+                                {mechanicUnlocked(def.id) ? "Unlocked" : "Locked"}
+                            </span>
+                            <div class="pk-small">
+                                {mechanicUnlocked(def.id)
+                                    ? def.description
+                                    : `Reach ${def.unlockAt} in ${REGIONS[def.region].name} to unlock.`}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </Panel>
+        );
+    }
 
     function level(upgrade: HofUpgradeId) {
         return levels.value[upgrade] ?? 0;
@@ -337,6 +378,9 @@ const layer = createLayer(id, () => {
         trainerId,
         luckyNumberDay,
         catchEmAll,
+        mechanics,
+        mechanicUnlocked,
+        unlockMechanic,
         isEnshrined,
         pendingFame,
         recordChampionTeam,
@@ -355,6 +399,7 @@ const layer = createLayer(id, () => {
 
                 {renderEnter()}
                 {renderAutomation()}
+                {renderMechanics()}
 
                 <Panel title="Fame upgrades">
                     {HOF_UPGRADE_LIST.map(upgrade => {

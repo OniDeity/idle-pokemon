@@ -53,6 +53,12 @@
                         first stage, baby Pokémon included
                     </li>
                     <li class="feature">
+                        Generation mechanics carry back: once you reach a generation's new mechanic
+                        in its region, it works in every region after. Breeding is the first (reach
+                        the Route 34 Day Care, and every journey has a Day Care from the start); see
+                        the Hall of Fame's Mechanics panel
+                    </li>
+                    <li class="feature">
                         Johto's legends: Lugia in the Whirl Islands, Ho-Oh on the Bell Tower,
                         Raikou, Entei and Suicune, Celebi and the Spiky-eared Pichu at the Ilex
                         Forest shrine, and the Lake of Rage's Red Gyarados (its own form)
@@ -70,6 +76,10 @@
                     <li class="feature">
                         Every species can now be caught: Sudowoodo, Elekid and Celebi arrive with
                         Johto
+                    </li>
+                    <li class="fix">
+                        The Sevii Islands now give Rock Smash, so the rocks on Kindle Road, Mt.
+                        Ember and Sevault Canyon can be smashed
                     </li>
                 </ul>
             </details>
