@@ -27,6 +27,7 @@ import {
 import { STONES } from "game/pokemon/items";
 import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
+import { pokedexRequirement, speciesObtainableIn } from "game/pokemon/pokedex";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
 import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
 import {
@@ -405,10 +406,49 @@ describe("Cobblemon variants", () => {
         );
     });
 
-    test("regions unlock in order: Kanto, then the Orange Islands, then Sevii", () => {
+    test("regions unlock in order: Kanto, then the Orange Islands, then Sevii, then Johto", () => {
         expect(REGIONS.kanto.requires).toBeUndefined();
         expect(REGIONS.orange.requires).toBe("kanto");
         expect(REGIONS.sevii.requires).toBe("orange");
+        expect(REGIONS.johto.requires).toBe("sevii");
+        // Johto also needs a Pokédex with everything the first three regions offer.
+        expect(REGIONS.johto.requiresCompletePokedex).toBe(true);
+        const needed = pokedexRequirement(REGIONS.johto);
+        expect(needed).toEqual(speciesObtainableIn(["kanto", "orange", "sevii"]));
+        expect(needed.size).toBeGreaterThan(240);
+        // Johto brings the rest.
+        const all = speciesObtainableIn(REGION_LIST.map(r => r.id));
+        expect(all.size).toBeGreaterThanOrEqual(needed.size);
+    });
+});
+
+describe("Johto", () => {
+    test("every place has wild Pokémon by the time its badges open it", () => {
+        for (const zone of zonesIn("johto")) {
+            const keyItems = Object.fromEntries(
+                REGIONS.johto.trials
+                    .filter(gym => gym.badgeNumber <= zone.badgesRequired)
+                    .flatMap(gym => gym.keyItems)
+                    .map(item => [item, true])
+            );
+            const pools = activePools(zone.id, keyItems);
+            expect(pools.length, zone.id).toBeGreaterThan(0);
+        }
+        expect(zonesIn("johto").length).toBeGreaterThanOrEqual(50);
+    });
+
+    test("Gyms, Elite Four and Champion use real species and their own ids", () => {
+        expect(REGIONS.johto.trials.map(g => g.badgeIcon)).toEqual(
+            Array.from({ length: 8 }, (_, i) => `badges/${i + 9}.png`)
+        );
+        const finale = REGIONS.johto.finale(152);
+        expect(finale.map(t => t.name)).toEqual(["Will", "Koga", "Bruno", "Karen", "Lance"]);
+        for (const trainer of [...REGIONS.johto.trials, ...finale]) {
+            trainer.team.forEach(p => expect(getSpecies(p.id).id).toBe(p.id));
+        }
+        // Trainer ids never clash with another region's.
+        const ids = REGION_LIST.flatMap(r => [...r.trials, ...r.finale(1)].map(t => t.id));
+        expect(new Set(ids).size).toBe(ids.length);
     });
 });
 
@@ -446,7 +486,14 @@ describe("wild encounters", () => {
 
 describe("encounter odds", () => {
     test("add up to one and match what rollEncounter actually rolls", () => {
-        const gear = { oldRod: true, goodRod: true, superRod: true, surf: true };
+        const gear = {
+            oldRod: true,
+            goodRod: true,
+            superRod: true,
+            surf: true,
+            headbutt: true,
+            rockSmash: true
+        };
         for (const zone of ZONES) {
             const total = [...encounterOdds(zone.id, gear, 3).values()].reduce((a, b) => a + b, 0);
             expect(total, zone.id).toBeCloseTo(1, 6);

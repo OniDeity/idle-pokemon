@@ -254,6 +254,13 @@ const layer = createLayer(id, () => {
         return `After ${badges} ${badges === 1 ? noun : region.trialNoun}`;
     }
 
+    /** What hidden encounters need: Johto adds Headbutt trees and Rock Smash rocks. */
+    function gearNeeded() {
+        return main.region.value === "johto"
+            ? "rods, Surf, Headbutt or Rock Smash"
+            : "better fishing gear or Surf";
+    }
+
     function renderZone(zone: ZoneDefinition) {
         const unlocked = main.zoneUnlocked(zone.id);
         const current = main.zoneId.value === zone.id;
@@ -314,9 +321,7 @@ const layer = createLayer(id, () => {
                                         title={
                                             entry.seen
                                                 ? `${getSpecies(s).name}${
-                                                      reachable
-                                                          ? ""
-                                                          : " (needs better fishing gear or Surf)"
+                                                      reachable ? "" : ` (needs ${gearNeeded()})`
                                                   }`
                                                 : "???"
                                         }
@@ -329,7 +334,7 @@ const layer = createLayer(id, () => {
                         <div class="pk-small pk-muted">
                             {ownedHere}/{all.length} in your box this journey · {caughtHere}/
                             {all.length} in Pokédex
-                            {hidden > 0 ? ` · ${hidden} more with fishing gear/Surf` : ""}
+                            {hidden > 0 ? ` · ${hidden} more with ${gearNeeded()}` : ""}
                         </div>
                     </>
                 ) : null}

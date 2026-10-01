@@ -71,6 +71,13 @@ if (process.env.KANTO_E4 != null || process.env.KANTO_CHAMP != null) {
         }));
 }
 
+//   GYMS_johto=1,1.6,… override a region's trial strengths one by one
+for (const region of Object.values(REGIONS)) {
+    process.env[`GYMS_${region.id}`]?.split(",").forEach((v, i) => {
+        if (region.trials[i] != null) region.trials[i].statMultiplier = Number(v);
+    });
+}
+
 //   SCALE_orange=1.5   multiply every trial and finale strength in a region
 //   FINALE_orange=1.2  override the finale's multiplier separately
 for (const region of Object.values(REGIONS)) {

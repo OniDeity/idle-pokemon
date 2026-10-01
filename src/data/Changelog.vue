@@ -5,6 +5,25 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.2 Johto</summary>
+                <ul>
+                    <li class="feature">
+                        Johto, from HeartGold and SoulSilver: 50 places from New Bark Town to Mt.
+                        Silver, Falkner to Clair, and Will, Koga, Bruno, Karen and Champion Lance
+                    </li>
+                    <li class="feature">
+                        Unlocks after the Sevii Islands, once your Pokédex has every species the
+                        first three regions offer
+                    </li>
+                    <li class="feature">
+                        Headbutt trees and Rock Smash rocks: new kinds of encounter in Johto
+                    </li>
+                    <li class="feature">
+                        All 28 Unown in the Ruins of Alph's chambers
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.1 Islands &amp; Legends</summary>
                 <ul>
                     <li class="feature">

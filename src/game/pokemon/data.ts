@@ -120,9 +120,20 @@ export interface EncounterEntry {
     weight: number;
     minLevel: number;
     maxLevel: number;
+    /** HeartGold/SoulSilver tables that change with the time of day: the weight at each time. */
+    byTime?: Record<TimeOfDay, number>;
 }
 
-export type EncounterPoolId = "walk" | "surf" | "oldRod" | "goodRod" | "superRod";
+export type EncounterPoolId =
+    | "walk"
+    | "surf"
+    | "oldRod"
+    | "goodRod"
+    | "superRod"
+    | "headbutt"
+    | "rockSmash";
+
+export type TimeOfDay = "morning" | "day" | "night";
 
 /** The regular National Pokédex species, #1-251, in order. */
 export const SPECIES = speciesJson as Species[];

@@ -34,7 +34,7 @@ import {
     withStrength
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
-import type { RegionId } from "game/pokemon/zones";
+import type { EncounterKind, RegionId } from "game/pokemon/zones";
 import { rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
 import { computed, ref } from "vue";
 import { useToast } from "vue-toastification";
@@ -73,7 +73,7 @@ export interface WildPokemon {
     speciesId: number;
     level: number;
     shiny: boolean;
-    kind: "walk" | "surf" | "fishing";
+    kind: EncounterKind;
     hp: number;
     maxHp: number;
 }

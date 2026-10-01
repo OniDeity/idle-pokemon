@@ -12,11 +12,13 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 
 ## How it plays
 
-- **Journeys through three regions.** Kanto (plus 52 anime-exclusive locations from
+- **Journeys through four regions.** Kanto (plus 52 anime-exclusive locations from
   [Bulbapedia's list](https://bulbapedia.bulbagarden.net/wiki/List_of_animated_series-exclusive_locations),
   from Porta Vista to the Tree of Beginning), the Orange Islands (29 islands, the Orange Crew
   and Drake's Winner's Cup), and the Sevii Islands from FireRed/LeafGreen (Team Rocket, the
-  Ruby & Sapphire quest and the Trainer Tower). Each first clear is tuned for about a day of play.
+  Ruby & Sapphire quest and the Trainer Tower), and Johto from HeartGold/SoulSilver (eight Gyms,
+  the Elite Four and Lance, with Headbutt trees and Rock Smash rocks). Each first clear is tuned
+  for about a day of play.
 - **Anime variants**: 20 Pinkan Pokémon on Pinkan Island, 7 Valencian Pokémon on Valencia
   Island, the Crystal Onix, the Pink Butterfree, and Surfing and Flying Pikachu, each with
   its own Pokédex entry.
@@ -33,8 +35,8 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   wild: the marked giants of Pokémopolis (Alakazam, Gengar, Jigglypuff), the Giant Dragonite of
   Bill's Lighthouse, Mewtwo's striped Clone Pokémon on New Island, and the sleeping Snorlax
   recolored after Pokémon Sleep's research areas (Taupe Hollow, Cyan Beach).
-- **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands; Johto comes next,
-  unlocked by completing the Pokédex.
+- **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands, then Johto,
+  which also needs every species the first three regions offer in your Pokédex.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
   trainers in regions you haven't cleared grow tougher (Renown) as you conquer others,
   and rematches in cleared regions go faster. Experience past the level cap becomes Effort, a
