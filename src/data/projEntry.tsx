@@ -1044,6 +1044,13 @@ export const main = createLayer("main", layer => {
             keyItems.value = rest;
             stones.value = { ...stones.value, linkCable: (stones.value.linkCable ?? 0) + 3 };
         }
+        // Journeys started before a region gained a starting key item (Rock Smash in the Sevii
+        // Islands) get it now.
+        if (starter.value !== 0) {
+            regionDef.value.startingKeyItems
+                .filter(item => !keyItems.value[item])
+                .forEach(grantKeyItem);
+        }
         if (starter.value === 0 || partyIds.value.length === 0) return;
         runTime.value += diff;
         let remaining = diff;
