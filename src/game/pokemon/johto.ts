@@ -321,12 +321,14 @@ export const JOHTO_ZONES: ZoneDefinition[] = [
 ];
 
 /**
- * Stat multipliers for Johto's leaders, tuned with scripts/simulateProgression.ts. Johto's
- * leaders keep lower levels than Kanto's through the mid-game, so their multipliers climb faster.
+ * Stat multipliers for Johto's leaders, tuned with scripts/simulateProgression.ts (a first clear
+ * after Kanto, Orange and Sevii takes about 11.6 hours). Johto's leaders keep lower levels than
+ * Kanto's through the mid-game, so their multipliers climb faster; Pryce and Clair sit near the
+ * level cap, so theirs come back down.
  */
-const JOHTO_GYM_STRENGTHS = [0.85, 1.6, 2.3, 2.9, 3.2, 3.5, 3.8, 4.0];
-const JOHTO_ELITE_FOUR_STRENGTH = 2.9;
-const JOHTO_CHAMPION_STRENGTH = 3.1;
+const JOHTO_GYM_STRENGTHS = [1.3, 2.4, 3.3, 4.1, 4.6, 5.0, 4.2, 3.7];
+const JOHTO_ELITE_FOUR_STRENGTH = 3.25;
+const JOHTO_CHAMPION_STRENGTH = 3.45;
 
 function johtoGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">
