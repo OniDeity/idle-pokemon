@@ -32,25 +32,34 @@
                         All 28 Unown in the Ruins of Alph's chambers
                     </li>
                     <li class="feature">
-                        Day and night: Johto's wild Pokémon follow your clock (morning, day,
-                        night), like HeartGold and SoulSilver
+                        Morning, day and night: every time of day's wild Pokémon are always in
+                        Johto's grass, at their average HeartGold/SoulSilver rates
                     </li>
                     <li class="feature">
-                        Pokégear: win the Radio Card in Goldenrod for a daily swarm report and the
+                        Pokégear: win the Radio Card in Goldenrod to tune in to Johto's seven swarms
+                        (a one-time fee each adds the swarm to that place for the journey) and the
                         Lucky Number Show (match today's number with your Trainer ID for prizes, up
                         to a Master Ball)
                     </li>
                     <li class="feature">
-                        Bug-Catching Contest in the National Park on Tuesdays, Thursdays and
-                        Saturdays: free Sport Balls, and a Scyther or Pinsir wins the Sun Stone
+                        Bug-Catching Contest: a one-time entry fee adds its bugs to the National
+                        Park for the journey, and your first Scyther or Pinsir there wins the Sun
+                        Stone
                     </li>
                     <li class="feature">
-                        Kurt's Apricorn Balls in Johto's Poké Mart: Level, Lure, Moon, Friend, Love,
-                        Fast and Heavy Balls, picked automatically when they work best
+                        Kurt's Apricorn Balls: Level, Lure, Moon, Friend, Love, Fast and Heavy
+                        Balls, picked automatically when they work best. Reach Kurt in Azalea Town
+                        and every region's Poké Mart stocks them from then on
                     </li>
                     <li class="feature">
                         The Route 34 Day Care: leave a Pokémon and its Eggs hatch into its family's
                         first stage, baby Pokémon included
+                    </li>
+                    <li class="feature">
+                        Generation mechanics carry back: once you reach a generation's new mechanic
+                        in its region, it works in every region after: breeding (reach the Route 34
+                        Day Care, and every journey has a Day Care from the start) and Kurt's
+                        Apricorn Balls; see the Hall of Fame's Mechanics panel
                     </li>
                     <li class="feature">
                         Johto's legends: Lugia in the Whirl Islands, Ho-Oh on the Bell Tower,
@@ -60,7 +69,7 @@
                     <li class="feature">
                         Johto's gifts and trades: the Odd Egg (any baby Pokémon, often shiny),
                         Bill's Eevee, Kirk's Shuckle, Kiyo's Tyrogue, Kenya, the Dragon's Den
-                        Dratini, Union Cave's Friday Lapras, the Goldenrod Game Corner, four NPC
+                        Dratini, Union Cave's Lapras, the Goldenrod Game Corner, four NPC
                         trades, and Sudowoodo on Route 36 (bring the SquirtBottle)
                     </li>
                     <li class="feature">
@@ -70,6 +79,10 @@
                     <li class="feature">
                         Every species can now be caught: Sudowoodo, Elekid and Celebi arrive with
                         Johto
+                    </li>
+                    <li class="fix">
+                        The Sevii Islands now give Rock Smash, so the rocks on Kindle Road, Mt.
+                        Ember and Sevault Canyon can be smashed
                     </li>
                 </ul>
             </details>

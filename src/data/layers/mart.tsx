@@ -131,14 +131,19 @@ const layer = createLayer(id, () => {
 
                 <Panel title="Poké Balls">
                     {(["pokeBall", "greatBall", "ultraBall"] as BallId[]).map(renderBall)}
-                    {main.region.value === "johto" ? (
+                    {main.mechanicOn("apricornBalls") ? (
                         <>
                             <div class="pk-small pk-muted">
-                                Kurt's Apricorn Balls from Azalea Town (after the Hive Badge). Smart
-                                throwing picks whichever ball works best.
+                                Kurt's Apricorn Balls, stocked in every region once you've met him
+                                in Azalea Town. Smart throwing picks whichever ball works best.
                             </div>
                             {APRICORN_BALLS.map(renderBall)}
                         </>
+                    ) : main.region.value === "johto" ? (
+                        <div class="pk-small pk-muted">
+                            🔒 Kurt's Apricorn Balls: reach Azalea Town after the Hive Badge, and
+                            every region's Poké Mart stocks them from then on.
+                        </div>
                     ) : null}
                     {main.balls.value.masterBall > 0 ? (
                         <div class="pk-shop-row">

@@ -20,9 +20,13 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   the Elite Four and Lance, with Headbutt trees and Rock Smash rocks, plus 58 anime-exclusive
   locations from Palm Hills to Mount Quena). Each first clear is tuned
   for about a day of play.
-- **Johto's Gen 2 extras**: day and night encounters on your real clock, the Pokégear radio's
-  daily swarms and Lucky Number Show, the Bug-Catching Contest (Tuesdays, Thursdays and
-  Saturdays), Kurt's seven Apricorn Balls, and the Day Care's Eggs.
+- **Johto's Gen 2 extras**: morning, day and night Pokémon all in the grass together, the
+  Pokégear radio's swarms (a one-time fee adds each to its place) and Lucky Number Show, the
+  Bug-Catching Contest (a one-time entry fee adds its bugs to the National Park), Kurt's seven
+  Apricorn Balls, and the Day Care's Eggs.
+- **Generation mechanics carry back**: a generation's new mechanic is met first in its region,
+  then works in every region from then on: breeding (Johto's Day Care) and Kurt's Apricorn
+  Balls so far; later generations' mechanics will follow the same rule.
 - **Johto's legends and events**: Lugia, Ho-Oh, the legendary beasts, Celebi, the Spiky-eared
   Pichu and the Lake of Rage's Red Gyarados; the Odd Egg, Bill's Eevee and the other gifts and
   trades; and Red at the summit of Mt. Silver.

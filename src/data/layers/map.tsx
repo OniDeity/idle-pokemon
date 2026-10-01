@@ -13,15 +13,12 @@ import type { ZoneDefinition } from "game/pokemon/zones";
 import {
     allZoneSpecies,
     availableZoneSpecies,
-    bugContestOn,
     occasionalSpecies,
-    swarmOn,
     typicalLevel,
-    zonePools,
     zonesIn,
     ZONES_BY_ID
 } from "game/pokemon/zones";
-import type { TimeOfDay } from "game/pokemon/data";
+import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
 import type { ZoneRates } from "game/pokemon/balance";
 import { zoneRates } from "game/pokemon/balance";
 import { computed, ref, shallowRef, watch } from "vue";
@@ -65,69 +62,83 @@ const layer = createLayer(id, () => {
 
     /** Species you can meet in a zone right now (with your current fishing gear and Surf). */
     function reachable(zone: ZoneDefinition): number[] {
-        return availableZoneSpecies(zone.id, main.keyItems.value, main.moment.value);
+        return availableZoneSpecies(zone.id, main.keyItems.value, main.zoneExtras.value);
     }
 
-    const TIME_LABELS: Record<TimeOfDay, string> = {
-        morning: "🌅 Morning",
-        day: "☀️ Day",
-        night: "🌙 Night"
-    };
-
-    /** When a species can be met in a zone, if only at some times of day. */
-    function timesFor(zoneId: string, speciesId: number): TimeOfDay[] | undefined {
-        const times = new Set<TimeOfDay>();
-        for (const entries of Object.values(zonePools(zoneId))) {
-            for (const e of entries ?? []) {
-                if (e.id !== speciesId) continue;
-                if (e.byTime == null) return undefined;
-                (Object.keys(e.byTime) as TimeOfDay[])
-                    .filter(t => e.byTime![t] > 0)
-                    .forEach(t => times.add(t));
-            }
-        }
-        return times.size === 3 || times.size === 0 ? undefined : [...times];
-    }
-
-    /** The Pokégear: Johto's clock, the radio's swarm report and Lucky Number, the contest. */
+    /**
+     * The Pokégear: the Bug-Catching Contest's entry, and with the Radio Card, the swarm report
+     * (tune in to a place's swarm to add it to that place's pool) and the Lucky Number Show.
+     */
     function renderPokegear() {
-        const moment = main.moment.value;
         const radio = main.keyItems.value.radioCard === true;
-        const swarm = swarmOn(moment.day);
-        const swarmZone = ZONES_BY_ID[swarm.zoneId];
-        const contest = bugContestOn(moment);
-        const drawn = hof.luckyNumberDay.value === moment.day;
+        const day = main.today();
+        const drawn = hof.luckyNumberDay.value === day;
+        const parkOpen = main.zoneUnlocked("nationalPark");
         return (
             <Panel title="Pokégear">
-                <div class="pk-small">
-                    <b>{TIME_LABELS[moment.time]}</b> · Johto's wild Pokémon change with your clock
-                    (morning 4-10, day 10-20, night 20-4).
-                </div>
-                <div class="pk-small">
-                    🐛 Bug-Catching Contest:{" "}
-                    {contest
-                        ? "today in the National Park! Free Sport Balls; a Scyther or Pinsir wins the Sun Stone."
-                        : "Tuesdays, Thursdays and Saturdays in the National Park."}
+                <div class="pk-small pk-filter-row">
+                    <span>
+                        🐛 Bug-Catching Contest:{" "}
+                        {main.contestEntered.value
+                            ? main.contestWon.value
+                                ? "you won the Sun Stone! Its bugs roam the National Park."
+                                : "entered! Its bugs roam the National Park; catch a Scyther or Pinsir there to win a Sun Stone."
+                            : parkOpen
+                              ? "pay the entry fee once and its bugs join the National Park's grass for this journey."
+                              : "held in the National Park."}
+                    </span>
+                    {!main.contestEntered.value && parkOpen ? (
+                        <Button
+                            kind="small"
+                            disabled={main.money.value < BUG_CONTEST_FEE}
+                            onClick={main.enterBugContest}
+                        >
+                            Enter ({formatMoney(BUG_CONTEST_FEE)})
+                        </Button>
+                    ) : null}
                 </div>
                 {radio ? (
                     <>
-                        <div class="pk-small pk-filter-row">
-                            <span>
-                                📻 Swarm report: lots of <b>{getSpecies(swarm.speciesId).name}</b>{" "}
-                                at {swarmZone?.name} today.
-                            </span>
-                            {main.zoneUnlocked(swarm.zoneId) &&
-                            main.zoneId.value !== swarm.zoneId ? (
-                                <Button kind="small" onClick={() => main.travel(swarm.zoneId)}>
-                                    Go
-                                </Button>
-                            ) : null}
+                        <div class="pk-small">
+                            📻 Swarm report: tune in to a swarm and its Pokémon join that place's
+                            pool for the rest of this journey.
                         </div>
+                        {JOHTO_SWARMS.map(swarm => {
+                            const place = ZONES_BY_ID[swarm.zoneId];
+                            const joined = main.swarmsJoined.value[swarm.zoneId] === true;
+                            const open = main.zoneUnlocked(swarm.zoneId);
+                            return (
+                                <div class="pk-small pk-filter-row">
+                                    <span>
+                                        <b>{getSpecies(swarm.speciesId).name}</b> at {place?.name}
+                                        {joined ? " · swarming" : open ? "" : " · 🔒"}
+                                    </span>
+                                    {joined ? (
+                                        main.zoneId.value !== swarm.zoneId ? (
+                                            <Button
+                                                kind="small"
+                                                onClick={() => main.travel(swarm.zoneId)}
+                                            >
+                                                Go
+                                            </Button>
+                                        ) : null
+                                    ) : open ? (
+                                        <Button
+                                            kind="small"
+                                            disabled={main.money.value < SWARM_PRICE}
+                                            onClick={() => main.joinSwarm(swarm.zoneId)}
+                                        >
+                                            Tune in ({formatMoney(SWARM_PRICE)})
+                                        </Button>
+                                    ) : null}
+                                </div>
+                            );
+                        })}
                         <div class="pk-small pk-filter-row">
                             <span>
                                 🎟️ Lucky Number Show:{" "}
                                 {drawn
-                                    ? `today's number was ${String(main.luckyNumberOn(moment.day)).padStart(5, "0")}. Come back tomorrow!`
+                                    ? `today's number was ${String(main.luckyNumberOn(day)).padStart(5, "0")}. Come back tomorrow!`
                                     : "match today's number with your Trainer ID for a prize."}
                             </span>
                             <Button kind="small" disabled={drawn} onClick={main.drawLuckyNumber}>
@@ -137,8 +148,8 @@ const layer = createLayer(id, () => {
                     </>
                 ) : (
                     <div class="pk-small pk-muted">
-                        📻 Win the Radio Card in Goldenrod (after the Plain Badge) for daily swarm
-                        reports and the Lucky Number Show.
+                        📻 Win the Radio Card in Goldenrod (after the Plain Badge) for the swarm
+                        report and the Lucky Number Show.
                     </div>
                 )}
             </Panel>
@@ -355,23 +366,23 @@ const layer = createLayer(id, () => {
         const current = main.zoneId.value === zone.id;
         const all = allZoneSpecies(zone.id);
         const available = new Set(
-            availableZoneSpecies(zone.id, main.keyItems.value, main.moment.value)
+            availableZoneSpecies(zone.id, main.keyItems.value, main.zoneExtras.value)
         );
-        const anyTime = new Set(availableZoneSpecies(zone.id, main.keyItems.value));
+        const withoutExtras = new Set(availableZoneSpecies(zone.id, main.keyItems.value));
         const caughtHere = all.filter(s => dex.entry(s).caught).length;
         const ownedHere = all.filter(s => main.owns(s)).length;
         const hidden = all.filter(
             s =>
-                !anyTime.has(s) &&
+                !withoutExtras.has(s) &&
                 !occasionalSpecies(zone.id).swarm.includes(s) &&
                 !occasionalSpecies(zone.id).contest.includes(s)
         ).length;
+        const swarm = JOHTO_SWARMS.find(sw => sw.zoneId === zone.id);
         const swarming =
-            main.keyItems.value.radioCard === true &&
-            swarmOn(main.moment.value.day).zoneId === zone.id
-                ? getSpecies(swarmOn(main.moment.value.day).speciesId).name
+            swarm != null && main.swarmsJoined.value[zone.id] === true
+                ? getSpecies(swarm.speciesId).name
                 : null;
-        const contest = zone.id === "nationalPark" && bugContestOn(main.moment.value);
+        const contest = zone.id === "nationalPark" && main.contestEntered.value;
         const occasional = occasionalSpecies(zone.id);
         const level = Math.round(typicalLevel(zone.id));
         const fresh = unlocked ? newSpecies(zone).length : 0;
@@ -387,7 +398,7 @@ const layer = createLayer(id, () => {
                         {swarming != null ? (
                             <span class="pk-new-tag">📻 {swarming} swarm</span>
                         ) : null}
-                        {contest ? <span class="pk-new-tag">🐛 Contest today</span> : null}
+                        {contest ? <span class="pk-new-tag">🐛 Contest</span> : null}
                         {zoneRate != null ? (
                             <div class="pk-small pk-zone-rates">
                                 ≈ {formatNumber(zoneRate.xpPerMinute)} XP/min ·{" "}
@@ -419,19 +430,14 @@ const layer = createLayer(id, () => {
                             {all.map(s => {
                                 const entry = dex.entry(s);
                                 const reachable = available.has(s);
-                                const times = timesFor(zone.id, s);
                                 const why =
                                     occasional.swarm.includes(s) && !reachable
-                                        ? " (swarms here some days; check the Pokégear radio)"
+                                        ? " (swarm: tune in on the Pokégear radio)"
                                         : occasional.contest.includes(s) && !reachable
-                                          ? " (Bug-Catching Contest days)"
-                                          : !anyTime.has(s)
+                                          ? " (enter the Bug-Catching Contest on the Pokégear)"
+                                          : !reachable
                                             ? ` (needs ${gearNeeded()})`
-                                            : !reachable && times != null
-                                              ? ` (only at ${times.map(t => (t === "day" ? "daytime" : t)).join(" and ")})`
-                                              : times != null
-                                                ? ` (${times.map(t => (t === "day" ? "daytime" : t)).join(" and ")} only)`
-                                                : "";
+                                            : "";
                                 return (
                                     <span
                                         class={[
@@ -561,16 +567,6 @@ const layer = createLayer(id, () => {
         ));
     }
 
-    const WEEKDAYS = [
-        "Sundays",
-        "Mondays",
-        "Tuesdays",
-        "Wednesdays",
-        "Thursdays",
-        "Fridays",
-        "Saturdays"
-    ];
-
     function renderSpecial(special: SpecialEncounter) {
         const species = getSpecies(special.speciesId);
         const available = main.specialAvailable(special);
@@ -582,11 +578,6 @@ const layer = createLayer(id, () => {
             special.kind !== "legendary";
         const claimed = main.claimedSpecials.value[special.id] === true;
         const seen = isBoss || dex.entry(special.speciesId).seen || available;
-        const weekdayLocked =
-            (special.kind === "legendary" || special.kind === "gift") &&
-            special.weekdays != null &&
-            main.badges.value >= special.badgesRequired &&
-            !special.weekdays.includes(main.moment.value.weekday);
 
         let action;
         if (!available) {
@@ -600,11 +591,9 @@ const layer = createLayer(id, () => {
                     🔒{" "}
                     {missingItem && special.kind === "legendary"
                         ? `Needs the ${KEY_ITEMS[special.keyItem!].name}`
-                        : weekdayLocked && (special.kind === "legendary" || special.kind === "gift")
-                          ? `Only on ${special.weekdays!.map(d => WEEKDAYS[d]).join(" and ")}`
-                          : special.postGame === true
-                            ? `After the ${main.regionDef.value.finaleName}`
-                            : `${special.badgesRequired} ${main.regionDef.value.trialNoun}`}
+                        : special.postGame === true
+                          ? `After the ${main.regionDef.value.finaleName}`
+                          : `${special.badgesRequired} ${main.regionDef.value.trialNoun}`}
                 </span>
             );
         } else if (claimed || owned) {

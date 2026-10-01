@@ -17,7 +17,6 @@ import {
 import {
     DEX_SIZE,
     femaleForm,
-    type TimeOfDay,
     getSpecies,
     magikarpPatterns,
     PRE_EVOLUTION,
@@ -31,6 +30,7 @@ import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { JOHTO_SWARMS } from "game/pokemon/johto";
+import { MECHANIC_LIST } from "game/pokemon/mechanics";
 import { pokedexRequirement, speciesObtainableIn } from "game/pokemon/pokedex";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
 import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
@@ -38,13 +38,12 @@ import {
     activePools,
     allZoneSpecies,
     availableZoneSpecies,
-    bugContestOn,
     encounterOdds,
-    momentOf,
-    swarmOn,
+    EXTRA_SHARE,
     PATTERN_CHANCE,
     rollEncounter,
     ZONES,
+    zonePools,
     zonesIn
 } from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
@@ -430,61 +429,44 @@ describe("Cobblemon variants", () => {
     });
 });
 
-describe("Johto clock, swarms and contest", () => {
-    test("the clock follows HeartGold/SoulSilver's hours", () => {
-        const at = (h: number) => momentOf(new Date(2026, 9, 6, h, 30)).time;
-        expect([at(3), at(4), at(9), at(10), at(19), at(20)]).toEqual([
-            "night",
-            "morning",
-            "morning",
-            "day",
-            "day",
-            "night"
-        ]);
-        // 6 October 2026 is a Tuesday.
-        expect(momentOf(new Date(2026, 9, 6, 12)).weekday).toBe(2);
-        expect(momentOf(new Date(2026, 9, 7, 0, 5)).day).toBe(
-            momentOf(new Date(2026, 9, 6)).day + 1
-        );
-    });
-
-    test("time-of-day tables change who appears", () => {
-        const base = momentOf(new Date(2026, 9, 7, 12));
-        const ids = (time: TimeOfDay) => availableZoneSpecies("route29", {}, { ...base, time });
-        // Hoothoot only comes out at night on Route 29.
-        expect(ids("night")).toContain(163);
-        expect(ids("day")).not.toContain(163);
-        // Without a moment (simulator, tests) every time of day is in, at its average weight.
+describe("Johto's swarms and contest", () => {
+    test("every time of day's Pokémon are always in, at their average weights", () => {
+        // Hoothoot only comes out at night on Route 29 in HeartGold/SoulSilver.
         expect(availableZoneSpecies("route29", {})).toContain(163);
     });
 
-    test("the Bug-Catching Contest takes over the National Park on its days", () => {
-        const tuesday = momentOf(new Date(2026, 9, 6, 12));
-        const wednesday = momentOf(new Date(2026, 9, 7, 12));
-        expect(bugContestOn(tuesday)).toBe(true);
-        expect(bugContestOn(wednesday)).toBe(false);
-        expect(availableZoneSpecies("nationalPark", {}, tuesday)).toContain(123);
-        expect(availableZoneSpecies("nationalPark", {}, wednesday)).not.toContain(123);
+    test("entering the Bug-Catching Contest adds its bugs to the National Park", () => {
+        expect(availableZoneSpecies("nationalPark", {})).not.toContain(123);
+        const walk = activePools("nationalPark", {}, { bugContest: true }).find(
+            p => p.kind === "walk"
+        )!.entries;
+        expect(walk.map(e => e.id)).toEqual(expect.arrayContaining([123, 127, 13, 48]));
+        // The park's own Pokémon stay: the contest's bugs make up a third of the grass.
+        const usual = availableZoneSpecies("nationalPark", {});
+        expect(walk.map(e => e.id)).toEqual(expect.arrayContaining(usual));
         expect(allZoneSpecies("nationalPark")).toContain(127);
     });
 
-    test("the radio's swarm makes up about 40% of its place, with the Radio Card", () => {
-        const days = Array.from({ length: 60 }, (_, i) => 20000 + i);
-        const zones = new Set(days.map(d => swarmOn(d).zoneId));
-        // Every swarm comes up over two months, and the report is the same for everyone.
-        expect(zones.size).toBe(JOHTO_SWARMS.length);
-        expect(swarmOn(20005)).toBe(swarmOn(20005));
-        const day = days.find(d => swarmOn(d).zoneId === "route35")!;
-        const moment = { ...momentOf(new Date(2026, 9, 7, 12)), day };
-        const walk = (radioCard: boolean) =>
-            activePools("route35", { radioCard }, moment).find(p => p.kind === "walk")!.entries;
+    test("a swarm tuned in to makes up a third of its place, as long as it's paid for", () => {
+        const walk = (joined: boolean) =>
+            activePools("route35", {}, { swarms: { route35: joined } }).find(
+                p => p.kind === "walk"
+            )!.entries;
         const share = (entries: { id: number; weight: number }[]) =>
             entries.filter(e => e.id === 193).reduce((a, e) => a + e.weight, 0) /
             entries.reduce((a, e) => a + e.weight, 0);
-        // Yanma is already a rare sight on Route 35; the swarm adds 40% on top of that.
+        // Yanma is already a rare sight on Route 35; the swarm adds a third on top of that.
         const usual = share(walk(false));
         expect(usual).toBeLessThan(0.05);
-        expect(share(walk(true))).toBeCloseTo(0.4 + 0.6 * usual, 6);
+        expect(share(walk(true))).toBeCloseTo(EXTRA_SHARE + (1 - EXTRA_SHARE) * usual, 6);
+        // Every swarm is somewhere in Johto, and only adds to its own place.
+        for (const swarm of JOHTO_SWARMS) {
+            expect(zonesIn("johto").some(z => z.id === swarm.zoneId)).toBe(true);
+            expect(allZoneSpecies(swarm.zoneId)).toContain(swarm.speciesId);
+        }
+        expect(availableZoneSpecies("route29", {}, { swarms: { route35: true } })).not.toContain(
+            193
+        );
     });
 });
 
@@ -519,7 +501,37 @@ describe("Apricorn Balls", () => {
         );
         // Plain balls are unchanged.
         expect(ballEffect("greatBall", ctx(19))).toEqual([1.5, 0]);
-        expect(APRICORN_BALLS.every(id => BALLS[id].region === "johto")).toBe(true);
+        // Kurt's balls are stocked once the Apricorn Balls mechanic is unlocked, in any region.
+        expect(APRICORN_BALLS.every(id => BALLS[id].mechanic === "apricornBalls")).toBe(true);
+    });
+});
+
+describe("generation mechanics", () => {
+    test("each is reached partway through its own region", () => {
+        expect(MECHANIC_LIST.map(m => m.id)).toEqual(["breeding", "apricornBalls"]);
+        for (const mechanic of MECHANIC_LIST) {
+            const region = REGIONS[mechanic.region];
+            expect(region, mechanic.id).toBeDefined();
+            expect(mechanic.trialsRequired).toBeLessThanOrEqual(region.trials.length);
+        }
+    });
+});
+
+describe("key items", () => {
+    test("every encounter pool's key item can be had in that zone's region", () => {
+        // Kindle Road's Rock Smash rocks were once out of reach: the Sevii Islands never gave it.
+        for (const region of REGION_LIST) {
+            const items = new Set<string>([
+                ...region.startingKeyItems,
+                ...region.trials.flatMap(t => t.keyItems)
+            ]);
+            for (const zone of zonesIn(region.id)) {
+                for (const [pool, entries] of Object.entries(zonePools(zone.id))) {
+                    if (pool === "walk" || entries == null || entries.length === 0) continue;
+                    expect(items.has(pool), `${zone.id} ${pool}`).toBe(true);
+                }
+            }
+        }
     });
 });
 
@@ -565,10 +577,9 @@ describe("Johto specials", () => {
         ]);
         expect(red.postGame).toBe(true);
         expect(specialSpecies(red)).toEqual([]);
-        // The Red Gyarados is its own form; Union Cave's Lapras only comes on Fridays.
+        // The Red Gyarados is its own form; Union Cave's Lapras is a gift any day.
         expect(getSpecies(7022).baseSpecies).toBe(130);
-        const lapras = johto.find(sp => sp.id === "unionCaveLapras")!;
-        expect(lapras.kind === "gift" && lapras.weekdays).toEqual([5]);
+        expect(johto.find(sp => sp.id === "unionCaveLapras")?.kind).toBe("gift");
     });
 });
 

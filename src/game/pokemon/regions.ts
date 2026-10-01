@@ -86,7 +86,8 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         color: "#0EA5E9",
         starters: [152, 155, 158],
         startLevel: 25,
-        startingKeyItems: ["oldRod", "goodRod", "superRod", "surf", "bicycle"],
+        // A FireRed/LeafGreen Trainer reaches the islands with every Kanto HM, Rock Smash included.
+        startingKeyItems: ["oldRod", "goodRod", "superRod", "surf", "bicycle", "rockSmash"],
         shopTier: 8,
         trials: SEVII_TRIALS,
         trialNoun: "quests",
