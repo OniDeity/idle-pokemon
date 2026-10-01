@@ -163,7 +163,16 @@ export const STONE_DESCRIPTIONS: Partial<Record<StoneId, string>> = {
     upGrade: "Held while trading: Porygon becomes Porygon2."
 };
 
-export type KeyItemId = "oldRod" | "goodRod" | "superRod" | "surf" | "bicycle" | "pokeFlute";
+export type KeyItemId =
+    | "oldRod"
+    | "goodRod"
+    | "superRod"
+    | "surf"
+    | "bicycle"
+    | "pokeFlute"
+    | "headbutt"
+    | "rockSmash"
+    | "squirtBottle";
 
 export interface KeyItemDefinition {
     id: KeyItemId;
@@ -208,5 +217,23 @@ export const KEY_ITEMS: Record<KeyItemId, KeyItemDefinition> = {
         name: "Poké Flute",
         description: "Wakes the sleeping Snorlax on Route 12.",
         sprite: itemSprite("poke-flute")
+    },
+    headbutt: {
+        id: "headbutt",
+        name: "TM02 Headbutt",
+        description: "Shake Johto's trees to knock down the Pokémon living in them.",
+        sprite: itemSprite("tm-normal")
+    },
+    rockSmash: {
+        id: "rockSmash",
+        name: "HM06 Rock Smash",
+        description: "Smash cracked rocks to find the Pokémon hiding underneath.",
+        sprite: itemSprite("hm-fighting")
+    },
+    squirtBottle: {
+        id: "squirtBottle",
+        name: "SquirtBottle",
+        description: "Water the odd tree blocking Route 36.",
+        sprite: itemSprite("squirt-bottle")
     }
 };

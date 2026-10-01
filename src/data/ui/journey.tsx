@@ -12,6 +12,7 @@ import { DEX_SIZE, getSpecies } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
 import { BALLS } from "game/pokemon/items";
 import { maxHp, xpForLevel } from "game/pokemon/stats";
+import type { RegionDefinition } from "game/pokemon/regions";
 import { REGION_LIST, startersFor } from "game/pokemon/regions";
 import { formatTime } from "util/bignum";
 import {
@@ -39,6 +40,18 @@ const CAVES = new Set([
     "lostCave",
     "alteringCave",
     "sevaultCanyon",
+    "darkCave",
+    "darkCaveBlackthorn",
+    "unionCave",
+    "slowpokeWell",
+    "mtMortar",
+    "icePath",
+    "whirlIslands",
+    "dragonsDen",
+    "tohjoFalls",
+    "johtoVictoryRoad",
+    "mtSilver",
+    "ruinsOfAlphChambers",
     "canyonEntrance",
     "navelIsland"
 ]);
@@ -50,7 +63,10 @@ const FORESTS = new Set([
     "patternBush",
     "pinkanIsland",
     "murcottIsland",
-    "valenciaIsland"
+    "valenciaIsland",
+    "ilexForest",
+    "nationalPark",
+    "johtoSafariZone"
 ]);
 const BUILDINGS = new Set([
     "pokemonTower",
@@ -62,7 +78,9 @@ const BUILDINGS = new Set([
     "maidensPeak",
     "pokemopolis",
     "moroIsland",
-    "tanobyRuins"
+    "tanobyRuins",
+    "sproutTower",
+    "burnedTower"
 ]);
 const SEAS = new Set([
     "route19",
@@ -74,7 +92,13 @@ const SEAS = new Set([
     "fourIsland",
     "waterLabyrinth",
     "resortGorgeous",
-    "treasureBeach"
+    "treasureBeach",
+    "route40",
+    "route41",
+    "lakeOfRage",
+    "cherrygroveCity",
+    "olivineCity",
+    "cianwoodCity"
 ]);
 
 function terrain(state: BattleState): string {
@@ -82,7 +106,9 @@ function terrain(state: BattleState): string {
         return state.legendary ? "legend" : "arena";
     }
     const zone = main.zoneId.value;
-    if (state.kind === "wild" && state.wild.kind !== "walk") return "water";
+    if (state.kind === "wild" && (state.wild.kind === "surf" || state.wild.kind === "fishing")) {
+        return "water";
+    }
     if (CAVES.has(zone)) return "cave";
     if (FORESTS.has(zone)) return "forest";
     if (BUILDINGS.has(zone)) return "building";
@@ -117,6 +143,18 @@ function renderHud() {
     );
 }
 
+/** Why a region can't be chosen yet. */
+function lockedReason(region: RegionDefinition): string {
+    const requires = REGION_LIST.find(x => x.id === region.requires);
+    if (requires != null && hof.clearCount(requires.id) === 0) {
+        return `Clear ${requires.name} first.`;
+    }
+    const progress = hof.pokedexProgress(region.id);
+    return progress != null
+        ? `Complete your Pokédex first: ${progress.caught}/${progress.needed} species from the earlier regions caught.`
+        : "";
+}
+
 function renderStarterSelect() {
     const again = hof.timesEntered.value > 0;
     const region = main.regionDef.value;
@@ -138,11 +176,7 @@ function renderStarterSelect() {
                                 onClick={() => main.chooseRegion(r.id)}
                             >
                                 <b>{r.name}</b>
-                                <span class="pk-small">
-                                    {unlocked
-                                        ? r.blurb
-                                        : `Clear ${REGION_LIST.find(x => x.id === r.requires)?.name} first.`}
-                                </span>
+                                <span class="pk-small">{unlocked ? r.blurb : lockedReason(r)}</span>
                                 <span class="pk-small pk-muted">
                                     {clears > 0
                                         ? `Cleared ${clears}×`
@@ -223,7 +257,11 @@ function renderScene() {
                 ? "hooked"
                 : state.wild.kind === "surf"
                   ? "surfaced"
-                  : "appeared";
+                  : state.wild.kind === "headbutt"
+                    ? "fell out of the tree"
+                    : state.wild.kind === "rockSmash"
+                      ? "was under the rock"
+                      : "appeared";
         banner = `A wild ${species.name} ${where}!`;
         foe = {
             id: state.wild.speciesId,

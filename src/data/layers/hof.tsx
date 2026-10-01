@@ -18,6 +18,7 @@ import {
 } from "game/pokemon/balance";
 import type { UpgradeDefinition } from "game/pokemon/balance";
 import { getSpecies, hallOfFameId } from "game/pokemon/data";
+import { pokedexRequirement } from "game/pokemon/pokedex";
 import { REGIONS } from "game/pokemon/regions";
 import type { RegionId } from "game/pokemon/zones";
 import { computed } from "vue";
@@ -71,9 +72,20 @@ const layer = createLayer(id, () => {
         return recorded;
     }
 
+    /** For regions that need a complete Pokédex: species caught out of those required. */
+    function pokedexProgress(region: RegionId): { caught: number; needed: number } | undefined {
+        const def = REGIONS[region];
+        if (def.requiresCompletePokedex !== true) return undefined;
+        const needed = pokedexRequirement(def);
+        const caught = [...needed].filter(id => dex.entry(id).caught).length;
+        return { caught, needed: needed.size };
+    }
+
     function regionUnlocked(region: RegionId) {
         const requires = REGIONS[region].requires;
-        return requires == null || clearCount(requires) > 0;
+        if (requires != null && clearCount(requires) === 0) return false;
+        const progress = pokedexProgress(region);
+        return progress == null || progress.caught >= progress.needed;
     }
 
     function isEnshrined(speciesId: number) {
@@ -323,6 +335,7 @@ const layer = createLayer(id, () => {
         pendingFame,
         recordChampionTeam,
         regionUnlocked,
+        pokedexProgress,
         clearCount,
         automationActive,
         toggleAutomation,

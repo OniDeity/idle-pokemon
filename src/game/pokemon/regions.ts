@@ -4,6 +4,7 @@
  * they've unlocked.
  */
 import type { KeyItemId } from "./items";
+import { JOHTO_GYMS, johtoFinale } from "./johto";
 import { ORANGE_TRIALS, orangeFinale } from "./orange";
 import { SEVII_TRIALS, seviiFinale } from "./sevii";
 import type { GymDefinition, TrainerDefinition } from "./trainers";
@@ -35,6 +36,8 @@ export interface RegionDefinition {
     fame: number;
     /** A region that must be cleared once before this one can be chosen. */
     requires?: RegionId;
+    /** Also needs every species the earlier regions offer in the Pokédex. */
+    requiresCompletePokedex?: boolean;
 }
 
 export const REGIONS: Record<RegionId, RegionDefinition> = {
@@ -93,6 +96,26 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         levelCaps: [38, 44, 48, 52, 56, 64, 100],
         fame: 15,
         requires: "orange"
+    },
+    johto: {
+        id: "johto",
+        name: "Johto",
+        blurb: "Eight new Gyms from Violet City to Blackthorn, and the Indigo Plateau's Elite Four.",
+        color: "#B8860B",
+        starters: [152, 155, 158],
+        startLevel: 5,
+        startingKeyItems: [],
+        shopTier: 0,
+        trials: JOHTO_GYMS,
+        trialNoun: "badges",
+        finaleName: "Indigo Plateau",
+        finaleBlurb:
+            "Face Will, Koga, Bruno, Karen and Champion Lance back-to-back (your party is healed between battles).",
+        finale: () => johtoFinale(),
+        levelCaps: [18, 22, 26, 31, 36, 40, 42, 47, 55, 100],
+        fame: 18,
+        requires: "sevii",
+        requiresCompletePokedex: true
     }
 };
 

@@ -3,9 +3,10 @@ import { enc, ENCOUNTERS, femaleForm, magikarpPatterns, WILD_VARIANTS } from "./
 import type { KeyItemId } from "./items";
 import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
+import { JOHTO_ZONES } from "./johto";
 import { SEVII_ZONES } from "./sevii";
 
-export type RegionId = "kanto" | "orange" | "sevii";
+export type RegionId = "kanto" | "orange" | "sevii" | "johto";
 
 export type ZonePools = Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 
@@ -249,7 +250,12 @@ const ORANGE_ALL: ZoneDefinition[] = [...ORANGE_ZONES, ...MORE_ORANGE_ZONES].sor
 );
 
 /** Every explorable zone in every region. */
-export const ZONES: ZoneDefinition[] = [...KANTO_ZONES, ...ORANGE_ALL, ...SEVII_ZONES];
+export const ZONES: ZoneDefinition[] = [
+    ...KANTO_ZONES,
+    ...ORANGE_ALL,
+    ...SEVII_ZONES,
+    ...JOHTO_ZONES
+];
 
 export function zonesIn(region: RegionId): ZoneDefinition[] {
     return ZONES.filter(zone => zone.region === region);
@@ -263,14 +269,18 @@ const POOL_KEY_ITEM: Record<Exclude<EncounterPoolId, "walk">, KeyItemId> = {
     surf: "surf",
     oldRod: "oldRod",
     goodRod: "goodRod",
-    superRod: "superRod"
+    superRod: "superRod",
+    headbutt: "headbutt",
+    rockSmash: "rockSmash"
 };
 
 /** How often each kind of encounter comes up, relative to each other, when available. */
-const POOL_SHARE = { walk: 0.7, surf: 0.15, fishing: 0.15 };
+const POOL_SHARE = { walk: 0.7, surf: 0.15, fishing: 0.15, headbutt: 0.12, rockSmash: 0.06 };
+
+export type EncounterKind = "walk" | "surf" | "fishing" | "headbutt" | "rockSmash";
 
 export interface ActivePool {
-    kind: "walk" | "surf" | "fishing";
+    kind: EncounterKind;
     share: number;
     entries: EncounterEntry[];
 }
@@ -320,6 +330,12 @@ export function activePools(zoneId: string, keyItems: Partial<Record<KeyItemId, 
     }
     if (fishing.length > 0) {
         result.push({ kind: "fishing", share: POOL_SHARE.fishing, entries: fishing });
+    }
+    for (const kind of ["headbutt", "rockSmash"] as const) {
+        const entries = pools[kind];
+        if (entries != null && entries.length > 0 && keyItems[POOL_KEY_ITEM[kind]] === true) {
+            result.push({ kind, share: POOL_SHARE[kind], entries });
+        }
     }
     return result;
 }

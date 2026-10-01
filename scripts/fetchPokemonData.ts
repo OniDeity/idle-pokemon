@@ -1,7 +1,8 @@
 /**
  * Regenerates the static Pokémon data the game ships with:
  *   - src/data/pokemon/species.json     Species #1-251 (stats, types, catch rate, evolutions)
- *   - src/data/pokemon/encounters.json  Wild encounter pools: Red/Blue for Kanto, FireRed/LeafGreen for Sevii
+ *   - src/data/pokemon/encounters.json  Wild encounter pools: Red/Blue for Kanto, FireRed/LeafGreen for Sevii,
+ *                                      HeartGold/SoulSilver for Johto
  *   - src/data/pokemon/typeChart.json   Non-neutral type matchups
  *   - src/data/pokemon/forms.json       Official alternate forms of #1-251 (regional forms, Pikachu
  *                                       caps, partner Pokémon, Unown letters, Spiky-eared Pichu)
@@ -18,6 +19,7 @@ const CSV_BASE = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/
 const MAX_DEX = 251;
 const RED_BLUE_VERSION_IDS = new Set(["1", "2"]);
 const FRLG_VERSION_IDS = new Set(["10", "11"]);
+const HGSS_VERSION_IDS = new Set(["15", "16"]);
 const ENGLISH = "9";
 
 /**
@@ -153,12 +155,121 @@ const SEVII_ZONE_AREAS: Record<string, [string, string][]> = {
     tanobyRuins: [["tanoby-ruins", ""]]
 };
 
+/**
+ * Johto zones use HeartGold/SoulSilver data. Routes 26-28, Tohjo Falls and Victory Road sit on
+ * the Kanto side of PokeAPI's map but are part of the Johto journey.
+ */
+const JOHTO_ZONE_AREAS: Record<string, [string, string][]> = {
+    newBarkTown: [["new-bark-town", ""]],
+    route29: [["johto-route-29", ""]],
+    route46: [["johto-route-46", ""]],
+    cherrygroveCity: [["cherrygrove-city", ""]],
+    route30: [["johto-route-30", ""]],
+    route31: [["johto-route-31", ""]],
+    darkCave: [["dark-cave", "violet-city-entrance"]],
+    violetCity: [["violet-city", ""]],
+    sproutTower: [
+        ["sprout-tower", "2f"],
+        ["sprout-tower", "3f"]
+    ],
+    route32: [["johto-route-32", ""]],
+    ruinsOfAlph: [["ruins-of-alph", "outside"]],
+    unionCave: [
+        ["union-cave", "1f"],
+        ["union-cave", "b1f"],
+        ["union-cave", "b2f"]
+    ],
+    route33: [["johto-route-33", ""]],
+    azaleaTown: [["azalea-town", "area"]],
+    slowpokeWell: [
+        ["slowpoke-well", "1f"],
+        ["slowpoke-well", "b1f"]
+    ],
+    ilexForest: [["ilex-forest", ""]],
+    route34: [["johto-route-34", ""]],
+    route35: [["johto-route-35", ""]],
+    nationalPark: [["national-park", ""]],
+    route36: [["johto-route-36", ""]],
+    route37: [["johto-route-37", ""]],
+    ecruteakCity: [["ecruteak-city", ""]],
+    burnedTower: [
+        ["burned-tower", "1f"],
+        ["burned-tower", "b1f"]
+    ],
+    route38: [["johto-route-38", ""]],
+    route39: [["johto-route-39", ""]],
+    olivineCity: [["olivine-city", ""]],
+    route40: [["johto-sea-route-40", ""]],
+    route41: [["johto-sea-route-41", ""]],
+    whirlIslands: ["1f", "b1f", "b2f", "b3f"].map(a => ["whirl-islands", a] as [string, string]),
+    cianwoodCity: [["cianwood-city", ""]],
+    route47: [
+        ["johto-route-47", ""],
+        ["johto-route-47", "cave-gate"],
+        ["johto-route-47", "inside-cave"]
+    ],
+    route48: [["johto-route-48", ""]],
+    johtoSafariZone: [
+        "desert",
+        "forest",
+        "marshland",
+        "meadow",
+        "mountain",
+        "peak",
+        "plains",
+        "rocky-beach",
+        "savannah",
+        "swamp",
+        "wasteland",
+        "wetland"
+    ].map(a => ["johto-safari-zone", a] as [string, string]),
+    route42: [["johto-route-42", ""]],
+    mtMortar: ["1f", "b1f", "lower-cave", "upper-cave"].map(
+        a => ["mt-mortar", a] as [string, string]
+    ),
+    route43: [["johto-route-43", ""]],
+    lakeOfRage: [["lake-of-rage", ""]],
+    route44: [["johto-route-44", ""]],
+    icePath: ["1f", "b1f", "b2f", "b3f"].map(a => ["ice-path", a] as [string, string]),
+    blackthornCity: [["blackthorn-city", ""]],
+    darkCaveBlackthorn: [["dark-cave", "blackthorn-city-entrance"]],
+    dragonsDen: [["dragons-den", ""]],
+    route45: [["johto-route-45", ""]],
+    route27: [["kanto-route-27", ""]],
+    tohjoFalls: [["tohjo-falls", ""]],
+    route26: [["kanto-route-26", ""]],
+    johtoVictoryRoad: ["1f", "2f", "3f"].map(a => ["kanto-victory-road-1", a] as [string, string]),
+    route28: [["kanto-route-28", ""]],
+    mtSilver: ["outside", "mountainside", "1f", "1f-top", "2f", "3f", "4f", "top"].map(
+        a => ["mt-silver", a] as [string, string]
+    )
+};
+
+/**
+ * HeartGold/SoulSilver encounters that only happen under conditions the game doesn't have
+ * (radio shows playing Hoenn or Sinnoh sounds, swarms, the Bug-Catching Contest, Safari Zone
+ * objects placed for a while). Swarms and the contest come back as their own features.
+ */
+function excludedCondition(value: string): boolean {
+    return (
+        value === "radio-hoenn" ||
+        value === "radio-sinnoh" ||
+        value === "swarm-yes" ||
+        value === "bug-catching-contest-yes" ||
+        (value.startsWith("johto-safari-blocks-") && value !== "johto-safari-blocks-inactive")
+    );
+}
+
+const TIMES = ["morning", "day", "night"] as const;
+
 const POOL_BY_METHOD: Record<string, string> = {
     walk: "walk",
     surf: "surf",
     "old-rod": "oldRod",
     "good-rod": "goodRod",
-    "super-rod": "superRod"
+    "super-rod": "superRod",
+    headbutt: "headbutt",
+    "rock-smash": "rockSmash"
 };
 
 const STONE_BY_ITEM_ID: Record<string, string> = {
@@ -231,7 +342,9 @@ async function main() {
         areaRows,
         locationRows,
         formRows,
-        formNameRows
+        formNameRows,
+        conditionValueRows,
+        conditionMapRows
     ] = await Promise.all(
         [
             "pokemon_species",
@@ -248,7 +361,9 @@ async function main() {
             "location_areas",
             "locations",
             "pokemon_forms",
-            "pokemon_form_names"
+            "pokemon_form_names",
+            "encounter_condition_values",
+            "encounter_condition_value_map"
         ].map(fetchCsv)
     );
 
@@ -337,7 +452,8 @@ async function main() {
     }
 
     // Encounters: sum slot rarities per species within each pool, across both versions and all
-    // floors of a zone. Version exclusives stay in (the game merges Red and Blue).
+    // floors of a zone. Version exclusives stay in (the game merges Red and Blue). HeartGold and
+    // SoulSilver split many tables by time of day; those weights are kept per time too.
     const locationId = new Map(locationRows.map(r => [r.identifier, r.id]));
     const areaKey = new Map(areaRows.map(r => [`${r.location_id}/${r.identifier}`, r.id]));
     const methodName = new Map(methodRows.map(r => [r.id, r.identifier]));
@@ -345,11 +461,15 @@ async function main() {
 
     const zoneByArea = new Map<string, string>();
     const zoneVersions = new Map<string, Set<string>>();
-    const allZones = { ...ZONE_AREAS, ...SEVII_ZONE_AREAS };
+    const allZones = { ...ZONE_AREAS, ...SEVII_ZONE_AREAS, ...JOHTO_ZONE_AREAS };
     for (const [zoneId, areas] of Object.entries(allZones)) {
         zoneVersions.set(
             zoneId,
-            zoneId in SEVII_ZONE_AREAS ? FRLG_VERSION_IDS : RED_BLUE_VERSION_IDS
+            zoneId in JOHTO_ZONE_AREAS
+                ? HGSS_VERSION_IDS
+                : zoneId in SEVII_ZONE_AREAS
+                  ? FRLG_VERSION_IDS
+                  : RED_BLUE_VERSION_IDS
         );
         for (const [location, area] of areas) {
             const id = areaKey.get(`${locationId.get(location)}/${area}`);
@@ -358,8 +478,21 @@ async function main() {
         }
     }
 
-    type Acc = { weight: number; minLevel: number; maxLevel: number };
+    const conditionName = new Map(conditionValueRows.map(r => [r.id, r.identifier]));
+    const conditionsOf = new Map<string, string[]>();
+    for (const r of conditionMapRows) {
+        const name = conditionName.get(r.encounter_condition_value_id) ?? "";
+        conditionsOf.set(r.encounter_id, [...(conditionsOf.get(r.encounter_id) ?? []), name]);
+    }
+
+    type Acc = {
+        weight: number;
+        minLevel: number;
+        maxLevel: number;
+        byTime: Record<(typeof TIMES)[number], number>;
+    };
     const pools: Record<string, Record<string, Map<number, Acc>>> = {};
+    const timedPools = new Set<string>();
     for (const r of encounterRows) {
         const zoneId = zoneByArea.get(r.location_area_id);
         if (zoneId == null || !zoneVersions.get(zoneId)?.has(r.version_id)) continue;
@@ -367,11 +500,22 @@ async function main() {
         const pool = POOL_BY_METHOD[methodName.get(slot?.encounter_method_id ?? "") ?? ""];
         const id = Number(r.pokemon_id);
         if (zoneId == null || slot == null || pool == null || id > MAX_DEX) continue;
+        const conditions = conditionsOf.get(r.id) ?? [];
+        if (conditions.some(excludedCondition)) continue;
+        const times = TIMES.filter(t => conditions.includes(`time-${t}`));
+        if (times.length > 0) timedPools.add(`${zoneId}/${pool}`);
 
         const zonePools = (pools[zoneId] ??= {});
         const entries = (zonePools[pool] ??= new Map());
-        const acc = entries.get(id) ?? { weight: 0, minLevel: Infinity, maxLevel: -Infinity };
-        acc.weight += Number(slot.rarity);
+        const acc = entries.get(id) ?? {
+            weight: 0,
+            minLevel: Infinity,
+            maxLevel: -Infinity,
+            byTime: { morning: 0, day: 0, night: 0 }
+        };
+        const rarity = Number(slot.rarity);
+        acc.weight += rarity;
+        for (const t of times.length > 0 ? times : TIMES) acc.byTime[t] += rarity;
         acc.minLevel = Math.min(acc.minLevel, Number(r.min_level));
         acc.maxLevel = Math.max(acc.maxLevel, Number(r.max_level));
         entries.set(id, acc);
@@ -385,12 +529,19 @@ async function main() {
                     pool,
                     [...entries.entries()]
                         .sort((a, b) => b[1].weight - a[1].weight)
-                        .map(([id, acc]) => ({
-                            id,
-                            weight: acc.weight,
-                            minLevel: acc.minLevel,
-                            maxLevel: acc.maxLevel
-                        }))
+                        .map(([id, acc]) => {
+                            const timed = timedPools.has(`${zoneId}/${pool}`);
+                            const { morning, day, night } = acc.byTime;
+                            const varies = morning !== day || day !== night;
+                            return {
+                                id,
+                                // A timed table counts each slot once per time of day.
+                                weight: timed ? (morning + day + night) / 3 : acc.weight,
+                                minLevel: acc.minLevel,
+                                maxLevel: acc.maxLevel,
+                                ...(timed && varies ? { byTime: { morning, day, night } } : {})
+                            };
+                        })
                 ])
             )
         ])
