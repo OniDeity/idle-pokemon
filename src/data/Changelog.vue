@@ -92,6 +92,11 @@
                     </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="fix">
+                        Map sorting: "Highest level" puts the toughest places first (it used to
+                        list them lowest first, which looked just like story order); tap a sort
+                        again to reverse it, and places you can't reach yet go last
+                    </li>
+                    <li class="fix">
                         Pokémon already at their evolution level (caught above it, or waiting at
                         the level cap) now evolve; boxed ones get an Evolve button
                     </li>
