@@ -26,7 +26,7 @@ type ZoneFilter = "new" | "notInBox" | "unlocked" | "anime" | "games";
 const ZONE_SORTS: [ZoneSort, string][] = [
     ["story", "Story order"],
     ["efficient", "Most efficient"],
-    ["level", "Level"],
+    ["level", "Highest level"],
     ["new", "Most new Pokémon"]
 ];
 
@@ -44,6 +44,8 @@ const layer = createLayer(id, () => {
     const color = "#22C55E";
     const tab = ref<Tab>("zones");
     const zoneSort = ref<ZoneSort>("story");
+    /** Tapping the active sort again flips it (lowest level first, least efficient first...). */
+    const zoneSortReversed = ref(false);
     const zoneSearch = ref("");
     const zoneFilters = ref<ZoneFilter[]>([]);
     const zoneTypes = ref<PokemonType[]>([]);
@@ -162,29 +164,43 @@ const layer = createLayer(id, () => {
             }
             return true;
         });
+        // Each sort puts the best first: most efficient, highest level, most new Pokémon.
+        let sorted = zones;
         if (zoneSort.value === "efficient") {
             const score = (zone: ZoneDefinition) => efficiency.value.get(zone.id) ?? -1;
-            return [...zones].sort((a, b) => score(b) - score(a));
-        }
-        if (zoneSort.value === "level") {
-            return [...zones].sort((a, b) => typicalLevel(a.id) - typicalLevel(b.id));
-        }
-        if (zoneSort.value === "new") {
+            sorted = [...zones].sort((a, b) => score(b) - score(a));
+        } else if (zoneSort.value === "level") {
+            sorted = [...zones].sort((a, b) => typicalLevel(b.id) - typicalLevel(a.id));
+        } else if (zoneSort.value === "new") {
             const counts = new Map(
                 zones.map(zone => [
                     zone.id,
                     main.zoneUnlocked(zone.id) ? newSpecies(zone).length : -1
                 ])
             );
-            return [...zones].sort((a, b) => counts.get(b.id)! - counts.get(a.id)!);
+            sorted = [...zones].sort((a, b) => counts.get(b.id)! - counts.get(a.id)!);
         }
-        return zones;
+        if (zoneSortReversed.value) sorted = [...sorted].reverse();
+        // Places you can't reach yet go last, except in story order.
+        return zoneSort.value === "story"
+            ? sorted
+            : [
+                  ...sorted.filter(zone => main.zoneUnlocked(zone.id)),
+                  ...sorted.filter(zone => !main.zoneUnlocked(zone.id))
+              ];
     });
+
+    function chooseZoneSort(sort: ZoneSort) {
+        zoneSortReversed.value = zoneSort.value === sort && !zoneSortReversed.value;
+        zoneSort.value = sort;
+    }
 
     /** How many sort/filter options differ from the defaults, shown on the Filters button. */
     const activeZoneControls = computed(
         () =>
-            zoneFilters.value.length + zoneTypes.value.length + (zoneSort.value === "story" ? 0 : 1)
+            zoneFilters.value.length +
+            zoneTypes.value.length +
+            (zoneSort.value === "story" && !zoneSortReversed.value ? 0 : 1)
     );
 
     const filteringZones = computed(
@@ -347,14 +363,19 @@ const layer = createLayer(id, () => {
                     <>
                         <div class="pk-filter-row">
                             <span class="pk-small pk-muted">Sort:</span>
-                            {ZONE_SORTS.map(([value, label]) => (
-                                <Button
-                                    kind={zoneSort.value === value ? "primary" : "ghost"}
-                                    onClick={() => (zoneSort.value = value)}
-                                >
-                                    {label}
-                                </Button>
-                            ))}
+                            {ZONE_SORTS.map(([value, label]) => {
+                                const active = zoneSort.value === value;
+                                return (
+                                    <Button
+                                        kind={active ? "primary" : "ghost"}
+                                        title={active ? "Tap again to reverse" : undefined}
+                                        onClick={() => chooseZoneSort(value)}
+                                    >
+                                        {label}
+                                        {active ? (zoneSortReversed.value ? " ↑" : " ↓") : ""}
+                                    </Button>
+                                );
+                            })}
                         </div>
                         <div class="pk-filter-row">
                             <span class="pk-small pk-muted">Show:</span>
