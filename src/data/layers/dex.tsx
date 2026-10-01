@@ -69,14 +69,12 @@ function locationsOf(id: number): string[] {
                 special.kind === "trade"
                     ? `trade (show a ${getSpecies(special.wants).name})`
                     : special.kind === "legendary"
-                      ? `legendary encounter${special.weekdays != null ? ", some days only" : ""}`
-                      : special.weekdays != null
-                        ? "gift, some days only"
-                        : special.pool != null
-                          ? "Egg"
-                          : special.price != null
-                            ? `₽${special.price.toLocaleString("en-US")}`
-                            : "gift";
+                      ? "legendary encounter"
+                      : special.pool != null
+                        ? "Egg"
+                        : special.price != null
+                          ? `₽${special.price.toLocaleString("en-US")}`
+                          : "gift";
             places.push(`${REGIONS[special.region].name}: ${special.place} (${how})`);
         }
     }

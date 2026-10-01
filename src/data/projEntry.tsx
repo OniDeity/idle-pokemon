@@ -9,7 +9,6 @@ import {
     ballCatchChance,
     battleXp,
     bestMatchup,
-    catchChance,
     computeBonuses,
     initialTrainerBattle,
     memberDps,
@@ -23,7 +22,7 @@ import type { StoneId } from "game/pokemon/data";
 import { ALTERNATE_EVOLUTIONS, femaleForm, getSpecies, PRE_EVOLUTION } from "game/pokemon/data";
 import type { BallId, KeyItemId } from "game/pokemon/items";
 import { APRICORN_BALLS, BALLS, KEY_ITEMS, STONES } from "game/pokemon/items";
-import type { MechanicDefinition } from "game/pokemon/mechanics";
+import type { MechanicDefinition, MechanicId } from "game/pokemon/mechanics";
 import { MECHANIC_LIST, MECHANICS } from "game/pokemon/mechanics";
 import type { SpecialEncounter } from "game/pokemon/specials";
 import { LEGENDARY_TIME_LIMIT } from "game/pokemon/specials";
@@ -37,8 +36,9 @@ import {
     withStrength
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
-import type { EncounterKind, Moment, RegionId } from "game/pokemon/zones";
-import { bugContestOn, momentOf, rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
+import type { EncounterKind, RegionId, ZoneExtras } from "game/pokemon/zones";
+import { rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
+import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
 import { computed, ref } from "vue";
 import { useToast } from "vue-toastification";
 import dex from "./layers/dex";
@@ -116,9 +116,7 @@ const MAX_ENCOUNTERS_PER_TICK = 5000;
 const LOG_LENGTH = 40;
 /** Seconds of game time between automation decisions. */
 const AUTOMATION_INTERVAL = 2;
-/** The Bug-Catching Contest's free Sport Balls catch like Great Balls. */
-const SPORT_BALL_MULTIPLIER = 1.5;
-/** Catching one of these in the contest takes first place (Scyther, Pinsir). */
+/** Catching one of these after entering the contest takes first place (Scyther, Pinsir). */
 const CONTEST_WINNERS = [123, 127];
 /** Wild battles won while a Pokémon is at the Day Care, per Egg. */
 export const EGG_BATTLES = 40;
@@ -186,23 +184,20 @@ export const main = createLayer("main", layer => {
     const battlesWon = persistent<number>(0);
     /** The party that cleared the region's finale this journey, for the Hall of Fame. */
     const clearTeam = persistent<number[]>([], false);
-    /** Bug-Catching Contest days (see Moment.day) you took part in, and won. */
-    const contestEnteredDay = persistent<number>(-1);
-    const contestWonDay = persistent<number>(-1);
+    /** Whether this journey paid the Bug-Catching Contest's entry fee, and won it. */
+    const contestEntered = persistent<boolean>(false);
+    const contestWon = persistent<boolean>(false);
+    /** The places whose Pokégear swarm this journey tuned in to. */
+    const swarmsJoined = persistent<Record<string, boolean>>({}, false);
     /** The Pokémon left at the Day Care (0 for none), and battles toward its Egg. */
     const dayCareId = persistent<number>(0);
     const dayCareProgress = persistent<number>(0);
 
-    /** The real-world clock, for Johto's day and night, swarms and the contest. */
-    const moment = ref<Moment>(momentOf(new Date()));
-    function refreshMoment() {
-        const next = momentOf(new Date());
-        const current = moment.value;
-        if (next.time !== current.time || next.day !== current.day) moment.value = next;
-    }
-    const bugContestActive = computed(
-        () => zoneId.value === "nationalPark" && bugContestOn(moment.value)
-    );
+    /** What this journey has added to its places' pools: swarms and the contest. */
+    const zoneExtras = computed<ZoneExtras>(() => ({
+        swarms: swarmsJoined.value,
+        bugContest: contestEntered.value
+    }));
 
     // Transient state: rebuilt on load.
     const battle = ref<BattleState>({ kind: "search", remaining: 1, total: 1 });
@@ -445,6 +440,11 @@ export const main = createLayer("main", layer => {
         );
     }
 
+    /** Whether a generation mechanic works on this journey: unlocked, or reached right now. */
+    function mechanicOn(id: MechanicId): boolean {
+        return hof.mechanicUnlocked(id) || mechanicReached(MECHANICS[id]);
+    }
+
     /** Unlocks every mechanic this journey has reached, for good and in every region. */
     function checkMechanics() {
         for (const def of MECHANIC_LIST) {
@@ -461,9 +461,7 @@ export const main = createLayer("main", layer => {
      * The Day Care: first met on Route 34, past the Hive Badge, in Johto; once breeding is
      * unlocked there, every region's journeys have one from the start.
      */
-    const dayCareOpen = computed(
-        () => hof.mechanicUnlocked("breeding") || mechanicReached(MECHANICS.breeding)
-    );
+    const dayCareOpen = computed(() => mechanicOn("breeding"));
 
     function canBreed(id: number): boolean {
         const species = getSpecies(id);
@@ -574,8 +572,8 @@ export const main = createLayer("main", layer => {
     function buyBalls(id: BallId, count: number) {
         const price = BALLS[id].price;
         if (price == null || martTier.value < BALLS[id].badgesRequired) return;
-        const only = BALLS[id].region;
-        if (only != null && only !== region.value) return;
+        const mechanic = BALLS[id].mechanic;
+        if (mechanic != null && !mechanicOn(mechanic)) return;
         if (!spend(price * count)) return;
         balls.value = { ...balls.value, [id]: (balls.value[id] ?? 0) + count };
         warnedNoBalls = false;
@@ -667,7 +665,7 @@ export const main = createLayer("main", layer => {
             keyItems.value,
             Math.random,
             hof.levels.value.roddysRod ?? 0,
-            moment.value
+            zoneExtras.value
         );
         if (rolled == null) {
             startSearch();
@@ -704,9 +702,7 @@ export const main = createLayer("main", layer => {
         gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp);
         tendDayCare();
 
-        if (shouldTryCatch(wild) && bugContestActive.value && wild.kind === "walk") {
-            contestCatch(wild);
-        } else if (shouldTryCatch(wild)) {
+        if (shouldTryCatch(wild)) {
             const ball = chooseBall(wild, wild.shiny);
             if (ball == null) {
                 if (!warnedNoBalls) {
@@ -727,6 +723,7 @@ export const main = createLayer("main", layer => {
                         shiny: wild.shiny
                     });
                     showFlash(text, "catch");
+                    checkContestWin(wild);
                 } else {
                     const text = `${species.name} broke free from the ${BALLS[ball].name}!`;
                     addLog({ kind: "fail", text, speciesId: wild.speciesId, shiny: wild.shiny });
@@ -737,47 +734,46 @@ export const main = createLayer("main", layer => {
         startSearch();
     }
 
-    /**
-     * The Bug-Catching Contest hands out free Sport Balls. Taking part wins five Great Balls;
-     * catching a Scyther or Pinsir takes first place and the Sun Stone, once per contest day.
-     */
-    function contestCatch(wild: WildPokemon) {
-        const species = getSpecies(wild.speciesId);
-        const day = moment.value.day;
-        const chance = catchChance(species.captureRate, SPORT_BALL_MULTIPLIER, bonuses.value.catch);
-        if (Math.random() >= chance) {
-            addLog({
-                kind: "fail",
-                text: `${species.name} broke free from the Sport Ball!`,
-                speciesId: wild.speciesId,
-                shiny: wild.shiny
-            });
-            return;
-        }
-        const isNew = receivePokemon(wild.speciesId, wild.level, wild.shiny);
-        const text = `Caught ${wild.shiny ? "a shiny " : ""}${species.name} in the Bug-Catching Contest!`;
+    /** Pays the Bug-Catching Contest's entry fee: its bugs join the National Park's grass. */
+    function enterBugContest() {
+        if (contestEntered.value || !zoneUnlocked("nationalPark")) return;
+        if (!spend(BUG_CONTEST_FEE)) return;
+        contestEntered.value = true;
         addLog({
-            kind: wild.shiny ? "shiny" : "catch",
-            text: isNew ? text : `${text} (x${dex.timesCaught(wild.speciesId)})`,
-            speciesId: wild.speciesId,
-            shiny: wild.shiny
+            kind: "info",
+            text: "You entered the Bug-Catching Contest! Its bugs now roam the National Park. Catch a Scyther or Pinsir there to win."
         });
-        showFlash(text, "catch");
-        if (contestEnteredDay.value !== day) {
-            contestEnteredDay.value = day;
-            balls.value = { ...balls.value, greatBall: balls.value.greatBall + 5 };
-            addLog({
-                kind: "info",
-                text: "Thanks for entering the contest! You receive 5 Great Balls."
-            });
-        }
-        if (contestWonDay.value !== day && CONTEST_WINNERS.includes(wild.speciesId)) {
-            contestWonDay.value = day;
-            stones.value = { ...stones.value, sunStone: (stones.value.sunStone ?? 0) + 1 };
-            const prize = `Your ${species.name} wins the Bug-Catching Contest! You receive a Sun Stone.`;
-            addLog({ kind: "badge", text: prize, speciesId: wild.speciesId });
-            notify(`🏆 ${prize}`, "success");
-        }
+    }
+
+    /** The first Scyther or Pinsir caught in the National Park after entering wins a Sun Stone. */
+    function checkContestWin(wild: WildPokemon) {
+        if (!contestEntered.value || contestWon.value || zoneId.value !== "nationalPark") return;
+        if (!CONTEST_WINNERS.includes(wild.speciesId)) return;
+        contestWon.value = true;
+        stones.value = { ...stones.value, sunStone: (stones.value.sunStone ?? 0) + 1 };
+        const prize = `Your ${getSpecies(wild.speciesId).name} wins the Bug-Catching Contest! You receive a Sun Stone.`;
+        addLog({ kind: "badge", text: prize, speciesId: wild.speciesId });
+        notify(`🏆 ${prize}`, "success");
+    }
+
+    /** Tunes the Pokégear radio to a place's swarm: its Pokémon join that place's pool. */
+    function joinSwarm(placeId: string) {
+        const swarm = JOHTO_SWARMS.find(sw => sw.zoneId === placeId);
+        if (swarm == null || swarmsJoined.value[placeId] === true) return;
+        if (keyItems.value.radioCard !== true || !zoneUnlocked(placeId)) return;
+        if (!spend(SWARM_PRICE)) return;
+        swarmsJoined.value = { ...swarmsJoined.value, [placeId]: true };
+        addLog({
+            kind: "info",
+            text: `📻 ${getSpecies(swarm.speciesId).name} are swarming at ${ZONES_BY_ID[placeId]?.name}!`,
+            speciesId: swarm.speciesId
+        });
+    }
+
+    /** Today, as days since 1 January 1970 in the player's time zone. */
+    function today() {
+        const now = new Date();
+        return Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86_400_000);
     }
 
     /** The Radio Tower's Lucky Number for a day: the same for everyone. */
@@ -796,7 +792,7 @@ export const main = createLayer("main", layer => {
      * Link Cable and Soothe Bell, all five a Master Ball.
      */
     function drawLuckyNumber() {
-        const day = moment.value.day;
+        const day = today();
         if (keyItems.value.radioCard !== true || hof.luckyNumberDay.value === day) return;
         hof.luckyNumberDay.value = day;
         const id = String(ensureTrainerId()).padStart(5, "0");
@@ -1066,7 +1062,6 @@ export const main = createLayer("main", layer => {
 
     let automationTimer = 0;
     layer.on("update", diff => {
-        refreshMoment();
         // The Link Cable used to be a reusable key item; trade it in for three of the new,
         // used-up-per-evolution Link Cables.
         if ((keyItems.value as Record<string, boolean>).linkCable === true) {
@@ -1123,13 +1118,6 @@ export const main = createLayer("main", layer => {
         if (special.postGame === true && !champion.value) return false;
         if (special.kind === "legendary") {
             if (special.keyItem != null && !keyItems.value[special.keyItem]) return false;
-        }
-        if (
-            (special.kind === "legendary" || special.kind === "gift") &&
-            special.weekdays != null &&
-            !special.weekdays.includes(moment.value.weekday)
-        ) {
-            return false;
         }
         return true;
     }
@@ -1255,10 +1243,13 @@ export const main = createLayer("main", layer => {
         useMasterBallOnLegendaries,
         runTime,
         battlesWon,
-        moment,
-        bugContestActive,
-        contestEnteredDay,
-        contestWonDay,
+        zoneExtras,
+        contestEntered,
+        contestWon,
+        swarmsJoined,
+        enterBugContest,
+        joinSwarm,
+        today,
         luckyNumberOn,
         ensureTrainerId,
         drawLuckyNumber,
@@ -1266,6 +1257,7 @@ export const main = createLayer("main", layer => {
         dayCareId,
         dayCareProgress,
         dayCareOpen,
+        mechanicOn,
         canBreed,
         eggSpeciesOf,
         leaveAtDayCare,

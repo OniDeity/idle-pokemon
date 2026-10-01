@@ -27,8 +27,6 @@ export type SpecialEncounter =
           pool?: number[];
           /** Chance the gift is shiny (the Odd Egg's 14%). */
           shinyChance?: number;
-          /** Only on these days of the week (0 = Sunday), like Union Cave's Friday Lapras. */
-          weekdays?: number[];
           text: string;
       }
     | {
@@ -58,8 +56,6 @@ export type SpecialEncounter =
           keyItem?: KeyItemId;
           /** Stat multiplier, like a trainer's; legendaries are tough. */
           strength: number;
-          /** Only on these days of the week (0 = Sunday), like Union Cave's Friday Lapras. */
-          weekdays?: number[];
           text: string;
       }
     | {

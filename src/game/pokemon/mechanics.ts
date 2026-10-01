@@ -6,7 +6,7 @@
  */
 import type { RegionId } from "./zones";
 
-export type MechanicId = "breeding";
+export type MechanicId = "breeding" | "apricornBalls";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -29,6 +29,15 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 2,
         description:
             "The Day Care finds Eggs that hatch into the first stage of a family, babies included."
+    },
+    apricornBalls: {
+        id: "apricornBalls",
+        name: "Apricorn Balls",
+        region: "johto",
+        unlockAt: "Kurt's house in Azalea Town, past the Hive Badge",
+        trialsRequired: 2,
+        description:
+            "Every Poké Mart stocks Kurt's Level, Lure, Moon, Friend, Love, Fast and Heavy Balls."
     }
 };
 

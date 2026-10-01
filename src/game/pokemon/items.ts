@@ -1,5 +1,6 @@
 import { assetUrl } from "./assets";
 import type { StoneId } from "./data";
+import type { MechanicId } from "./mechanics";
 
 export type BallId = "pokeBall" | "greatBall" | "ultraBall" | "masterBall" | ApricornBallId;
 
@@ -23,8 +24,8 @@ export interface BallDefinition {
     /** Badges needed before the Mart stocks it. */
     badgesRequired: number;
     sprite: string;
-    /** Only sold in this region (Kurt's Apricorn Balls are Johto's). */
-    region?: "johto";
+    /** Only stocked once this generation mechanic is unlocked (Kurt's Apricorn Balls). */
+    mechanic?: MechanicId;
     /** What a ball with a special effect does, shown in the Mart. */
     description?: string;
 }
@@ -80,9 +81,9 @@ function apricornBalls(): Record<ApricornBallId, BallDefinition> {
         name,
         catchMultiplier: 1,
         price: 250,
-        badgesRequired: 2,
+        badgesRequired: 0,
         sprite,
-        region: "johto",
+        mechanic: "apricornBalls",
         description
     });
     return {
