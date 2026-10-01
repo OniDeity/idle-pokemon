@@ -17,7 +17,8 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   from Porta Vista to the Tree of Beginning), the Orange Islands (29 islands, the Orange Crew
   and Drake's Winner's Cup), and the Sevii Islands from FireRed/LeafGreen (Team Rocket, the
   Ruby & Sapphire quest and the Trainer Tower), and Johto from HeartGold/SoulSilver (eight Gyms,
-  the Elite Four and Lance, with Headbutt trees and Rock Smash rocks). Each first clear is tuned
+  the Elite Four and Lance, with Headbutt trees and Rock Smash rocks, plus 58 anime-exclusive
+  locations from Palm Hills to Mount Quena). Each first clear is tuned
   for about a day of play.
 - **Johto's Gen 2 extras**: day and night encounters on your real clock, the Pokégear radio's
   daily swarms and Lucky Number Show, the Bug-Catching Contest (Tuesdays, Thursdays and
@@ -40,7 +41,9 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 - **Legendary forms**: the anime's one-of-a-kind Pokémon are their own forms, never met in the
   wild: the marked giants of Pokémopolis (Alakazam, Gengar, Jigglypuff), the Giant Dragonite of
   Bill's Lighthouse, Mewtwo's striped Clone Pokémon on New Island, and the sleeping Snorlax
-  recolored after Pokémon Sleep's research areas (Taupe Hollow, Cyan Beach).
+  recolored after Pokémon Sleep's research areas (Taupe Hollow, Cyan Beach). Johto adds the
+  wild Pudgy Pidgey, Silver the young Lugia, the Unown's Entei, Dark Celebi and
+  Dark Tyranitar.
 - **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands, then Johto,
   which also needs every species the first three regions offer in your Pokédex.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
@@ -70,7 +73,7 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 
 | Path                             | What's in it                                                                                                                                                                                                  |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/game/pokemon/`              | The game engine: species data, stat/XP/damage formulas, battles, regions (`regions.ts`, `kantoAnime.ts`, `orange.ts`, `sevii.ts`), zones, trainers, gifts/trades, balance constants. Pure TypeScript, no Vue. |
+| `src/game/pokemon/`              | The game engine: species data, stat/XP/damage formulas, battles, regions (`regions.ts`, `kantoAnime.ts`, `orange.ts`, `sevii.ts`, `johto.ts`, `johtoAnime.ts`), zones, trainers, gifts/trades, balance constants. Pure TypeScript, no Vue. |
 | `src/data/projEntry.tsx`         | The main "Journey" layer: run state, the real-time battle loop, catching, XP and evolution.                                                                                                                   |
 | `src/data/layers/`               | Map, Party & Box, Poké Mart, League, Pokédex, Hall of Fame.                                                                                                                                                   |
 | `src/data/automation.ts`         | The Fame-bought automations.                                                                                                                                                                                  |

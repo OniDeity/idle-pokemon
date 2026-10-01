@@ -375,13 +375,13 @@ export const BUG_CONTEST_POOL: EncounterEntry[] = [
 
 /**
  * Stat multipliers for Johto's leaders, tuned with scripts/simulateProgression.ts (a first clear
- * after Kanto, Orange and Sevii takes about 11.6 hours). Johto's leaders keep lower levels than
- * Kanto's through the mid-game, so their multipliers climb faster; Pryce and Clair sit near the
- * level cap, so theirs come back down.
+ * after Kanto, Orange and Sevii takes about 10-12 hours, anime places included). Johto's leaders
+ * keep lower levels than Kanto's through the mid-game, so their multipliers climb faster; Pryce
+ * and Clair sit near the level cap, so theirs come back down.
  */
 const JOHTO_GYM_STRENGTHS = [1.3, 2.4, 3.3, 4.1, 4.6, 5.0, 4.2, 3.7];
-const JOHTO_ELITE_FOUR_STRENGTH = 3.25;
-const JOHTO_CHAMPION_STRENGTH = 3.45;
+const JOHTO_ELITE_FOUR_STRENGTH = 3.575;
+const JOHTO_CHAMPION_STRENGTH = 3.795;
 
 function johtoGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">

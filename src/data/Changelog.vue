@@ -16,6 +16,16 @@
                         first three regions offer
                     </li>
                     <li class="feature">
+                        58 anime-only Johto places, from Palm Hills and the Whirl Islands to the
+                        Dragon Holy Land, Alto Mare and Mount Quena (where Mewtwo's clones now
+                        live), each with the wild Pokémon seen in its episodes
+                    </li>
+                    <li class="feature">
+                        The Johto anime's one-of-a-kind Pokémon: wild Pudgy Pidgey on Pudgy Pidgey
+                        Isle, and Silver the young Lugia, the Unown's Entei, Dark Celebi and Dark
+                        Tyranitar as legendary encounters
+                    </li>
+                    <li class="feature">
                         Headbutt trees and Rock Smash rocks: new kinds of encounter in Johto
                     </li>
                     <li class="feature">

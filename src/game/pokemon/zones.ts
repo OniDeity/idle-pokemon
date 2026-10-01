@@ -1,6 +1,7 @@
 import type { EncounterEntry, EncounterPoolId, TimeOfDay } from "./data";
 import { enc, ENCOUNTERS, femaleForm, magikarpPatterns, WILD_VARIANTS } from "./data";
 import type { KeyItemId } from "./items";
+import { JOHTO_ANIME_ZONES } from "./johtoAnime";
 import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
 import { BUG_CONTEST_POOL, BUG_CONTEST_WEEKDAYS, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
@@ -250,12 +251,16 @@ const ORANGE_ALL: ZoneDefinition[] = [...ORANGE_ZONES, ...MORE_ORANGE_ZONES].sor
     (a, b) => a.badgesRequired - b.badgesRequired || Number(!!a.postGame) - Number(!!b.postGame)
 );
 
+const JOHTO_ALL: ZoneDefinition[] = [...JOHTO_ZONES, ...JOHTO_ANIME_ZONES].sort(
+    (a, b) => a.badgesRequired - b.badgesRequired || Number(!!a.postGame) - Number(!!b.postGame)
+);
+
 /** Every explorable zone in every region. */
 export const ZONES: ZoneDefinition[] = [
     ...KANTO_ZONES,
     ...ORANGE_ALL,
     ...SEVII_ZONES,
-    ...JOHTO_ZONES
+    ...JOHTO_ALL
 ];
 
 export function zonesIn(region: RegionId): ZoneDefinition[] {
