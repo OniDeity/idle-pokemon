@@ -107,7 +107,10 @@ function autoEvolve() {
                 const level = main.box.value[id]?.level ?? 0;
                 if (level >= (evolution.level ?? Infinity)) {
                     main.evolveByLevel(id, evolution.into);
-                } else if (evolution.friendship === true && buyIfAffordable("sootheBell")) {
+                } else if (
+                    evolution.friendship === true &&
+                    (main.box.value[id]?.friend === true || buyIfAffordable("sootheBell"))
+                ) {
                     // ...and friendship Pokémon early, with a Soothe Bell.
                     main.evolveWithSootheBell(id, evolution.into);
                 }
@@ -176,7 +179,12 @@ function bestZoneToRecatch(zones: ZoneDefinition[]): ZoneDefinition | undefined 
     let bestChance = 0;
     for (const zone of zones) {
         let chance = 0;
-        for (const [id, p] of encounterOdds(zone.id, main.keyItems.value, rodLevel)) {
+        for (const [id, p] of encounterOdds(
+            zone.id,
+            main.keyItems.value,
+            rodLevel,
+            main.moment.value
+        )) {
             if (dex.entry(id).caught && !main.owns(id)) chance += p;
         }
         // Stay put unless somewhere else is clearly better, so it doesn't hop on ties.
@@ -206,7 +214,9 @@ function autoTravel() {
     const withNew = zones.filter(
         z =>
             typicalLevel(z.id) >= average - 12 &&
-            availableZoneSpecies(z.id, main.keyItems.value).some(id => !main.owns(id))
+            availableZoneSpecies(z.id, main.keyItems.value, main.moment.value).some(
+                id => !main.owns(id)
+            )
     );
     let target = withNew[withNew.length - 1];
     if (target == null) {

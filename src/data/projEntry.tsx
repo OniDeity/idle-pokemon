@@ -2,10 +2,11 @@ import type { Layer } from "game/layers";
 import { createLayer } from "game/layers";
 import { persistent } from "game/persistence";
 import type { Player } from "game/player";
-import type { Bonuses, PartyBattler, TrainerBattleState } from "game/pokemon/balance";
+import type { BallContext, Bonuses, PartyBattler, TrainerBattleState } from "game/pokemon/balance";
 import {
     BALL_RESTOCK_TARGET,
     BASE_SHINY_CHANCE,
+    ballCatchChance,
     battleXp,
     bestMatchup,
     catchChance,
@@ -19,9 +20,9 @@ import {
     trainerTeam
 } from "game/pokemon/balance";
 import type { StoneId } from "game/pokemon/data";
-import { ALTERNATE_EVOLUTIONS, femaleForm, getSpecies } from "game/pokemon/data";
+import { ALTERNATE_EVOLUTIONS, femaleForm, getSpecies, PRE_EVOLUTION } from "game/pokemon/data";
 import type { BallId, KeyItemId } from "game/pokemon/items";
-import { BALLS, KEY_ITEMS, STONES } from "game/pokemon/items";
+import { APRICORN_BALLS, BALLS, KEY_ITEMS, STONES } from "game/pokemon/items";
 import type { SpecialEncounter } from "game/pokemon/specials";
 import { LEGENDARY_TIME_LIMIT } from "game/pokemon/specials";
 import type { BattlerStats } from "game/pokemon/stats";
@@ -34,8 +35,8 @@ import {
     withStrength
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
-import type { EncounterKind, RegionId } from "game/pokemon/zones";
-import { rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
+import type { EncounterKind, Moment, RegionId } from "game/pokemon/zones";
+import { bugContestOn, momentOf, rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
 import { computed, ref } from "vue";
 import { useToast } from "vue-toastification";
 import dex from "./layers/dex";
@@ -55,6 +56,8 @@ export type BoxEntry = {
     shiny: boolean;
     /** Experience earned at the level cap, which becomes a damage bonus (see effortMultiplier). */
     effort?: number;
+    /** Caught in a Friend Ball: evolves by friendship without a Soothe Bell. */
+    friend?: boolean;
 };
 
 export type CatchMode = "new" | "all" | "off";
@@ -111,6 +114,17 @@ const MAX_ENCOUNTERS_PER_TICK = 5000;
 const LOG_LENGTH = 40;
 /** Seconds of game time between automation decisions. */
 const AUTOMATION_INTERVAL = 2;
+/** The Bug-Catching Contest's free Sport Balls catch like Great Balls. */
+const SPORT_BALL_MULTIPLIER = 1.5;
+/** Catching one of these in the contest takes first place (Scyther, Pinsir). */
+const CONTEST_WINNERS = [123, 127];
+/** Wild battles won while a Pokémon is at the Day Care, per Egg. */
+export const EGG_BATTLES = 40;
+/**
+ * Pokémon that can't breed at the Day Care on their own: legendaries (checked separately),
+ * Unown, Ditto (it needs a partner) and the baby Pokémon.
+ */
+const CANNOT_BREED = new Set([201, 132, 172, 173, 174, 175, 236, 238, 239, 240]);
 
 /**
  * @hidden
@@ -134,7 +148,14 @@ export const main = createLayer("main", layer => {
             pokeBall: 10,
             greatBall: 0,
             ultraBall: 0,
-            masterBall: 0
+            masterBall: 0,
+            levelBall: 0,
+            lureBall: 0,
+            moonBall: 0,
+            friendBall: 0,
+            loveBall: 0,
+            fastBall: 0,
+            heavyBall: 0
         },
         false
     );
@@ -163,6 +184,23 @@ export const main = createLayer("main", layer => {
     const battlesWon = persistent<number>(0);
     /** The party that cleared the region's finale this journey, for the Hall of Fame. */
     const clearTeam = persistent<number[]>([], false);
+    /** Bug-Catching Contest days (see Moment.day) you took part in, and won. */
+    const contestEnteredDay = persistent<number>(-1);
+    const contestWonDay = persistent<number>(-1);
+    /** The Pokémon left at the Route 34 Day Care (0 for none), and battles toward its Egg. */
+    const dayCareId = persistent<number>(0);
+    const dayCareProgress = persistent<number>(0);
+
+    /** The real-world clock, for Johto's day and night, swarms and the contest. */
+    const moment = ref<Moment>(momentOf(new Date()));
+    function refreshMoment() {
+        const next = momentOf(new Date());
+        const current = moment.value;
+        if (next.time !== current.time || next.day !== current.day) moment.value = next;
+    }
+    const bugContestActive = computed(
+        () => zoneId.value === "nationalPark" && bugContestOn(moment.value)
+    );
 
     // Transient state: rebuilt on load.
     const battle = ref<BattleState>({ kind: "search", remaining: 1, total: 1 });
@@ -393,15 +431,73 @@ export const main = createLayer("main", layer => {
     }
 
     /** A friendship evolution right away, whatever the level, using up a Soothe Bell. */
+    /** The Day Care opens on Route 34, past the Hive Badge, in Johto. */
+    const dayCareOpen = computed(() => region.value === "johto" && badges.value >= 2);
+
+    function canBreed(id: number): boolean {
+        const species = getSpecies(id);
+        const base = species.baseSpecies ?? id;
+        return (
+            owns(id) && !species.legendary && !CANNOT_BREED.has(base) && !(id >= 4000 && id < 4100)
+        );
+    }
+
+    /** What the Day Care's Eggs hatch into: the first stage of the family, babies included. */
+    function eggSpeciesOf(id: number): number {
+        return familyRoot(id);
+    }
+
+    function leaveAtDayCare(id: number) {
+        if (!dayCareOpen.value || (id !== 0 && !canBreed(id))) return;
+        if (dayCareId.value !== id) dayCareProgress.value = 0;
+        dayCareId.value = id;
+    }
+
+    /** Each wild battle won brings the Day Care's Egg closer, while its Pokémon isn't in the party. */
+    function tendDayCare() {
+        const id = dayCareId.value;
+        if (!dayCareOpen.value || id === 0 || !canBreed(id) || partyIds.value.includes(id)) return;
+        dayCareProgress.value++;
+        if (dayCareProgress.value < EGG_BATTLES) return;
+        dayCareProgress.value = 0;
+        const babyId = eggSpeciesOf(id);
+        // A shiny parent passes its colors on 1 time in 64, as in Gold and Silver.
+        const shiny =
+            box.value[id]?.shiny === true
+                ? Math.random() < 1 / 64
+                : Math.random() < BASE_SHINY_CHANCE * bonuses.value.shiny;
+        const isNew = receivePokemon(babyId, 5, shiny);
+        const name = getSpecies(babyId).name;
+        const text = `The Day Care man found an Egg! It hatched into ${shiny ? "a shiny " : ""}${name}!`;
+        addLog({
+            kind: shiny ? "shiny" : "catch",
+            text: isNew ? text : `${text} (x${dex.timesCaught(babyId)})`,
+            speciesId: babyId,
+            shiny
+        });
+        showFlash(text, "catch");
+    }
+
+    /** A Pokémon caught in a Friend Ball evolves by friendship without a Soothe Bell. */
+    function befriend(id: number) {
+        const entry = box.value[id];
+        if (entry != null && entry.friend !== true) setBoxEntry(id, { ...entry, friend: true });
+    }
+
     function evolveWithSootheBell(fromId: number, evolvesInto: number) {
         const evolution = getSpecies(fromId).evolutions.find(
             e => e.friendship === true && e.into === evolvesInto
         );
-        if (evolution == null || (stones.value.sootheBell ?? 0) <= 0) return;
+        const friend = box.value[fromId]?.friend === true;
+        if (evolution == null || (!friend && (stones.value.sootheBell ?? 0) <= 0)) return;
         const into = evolutionTarget(fromId, evolution.into);
         if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
-        useStone("sootheBell");
-        evolve(fromId, into, " with a Soothe Bell");
+        if (friend) {
+            evolve(fromId, into, " out of friendship (Friend Ball)");
+        } else {
+            useStone("sootheBell");
+            evolve(fromId, into, " with a Soothe Bell");
+        }
     }
 
     function gainXp(amount: number) {
@@ -447,8 +543,10 @@ export const main = createLayer("main", layer => {
     function buyBalls(id: BallId, count: number) {
         const price = BALLS[id].price;
         if (price == null || martTier.value < BALLS[id].badgesRequired) return;
+        const only = BALLS[id].region;
+        if (only != null && only !== region.value) return;
         if (!spend(price * count)) return;
-        balls.value = { ...balls.value, [id]: balls.value[id] + count };
+        balls.value = { ...balls.value, [id]: (balls.value[id] ?? 0) + count };
         warnedNoBalls = false;
     }
 
@@ -467,7 +565,10 @@ export const main = createLayer("main", layer => {
      * Picks which ball to throw, or null if none are available. A chosen ball type that's out
      * of stock falls back to the smart choice; shinies always get the best ball available.
      */
-    function chooseBall(captureRate: number, important = false): BallId | null {
+    function chooseBall(
+        wild: Pick<WildPokemon, "speciesId" | "level" | "kind">,
+        important = false
+    ): BallId | null {
         if (bonuses.value.autoRestock && balls.value.pokeBall < 5) {
             const count = Math.min(
                 BALL_RESTOCK_TARGET - balls.value.pokeBall,
@@ -475,22 +576,50 @@ export const main = createLayer("main", layer => {
             );
             if (count > 0) buyBalls("pokeBall", count);
         }
-        const inStock = (id: BallId) => balls.value[id] > 0;
+        const inStock = (id: BallId) => (balls.value[id] ?? 0) > 0;
         if (!important && ballMode.value !== "smart" && inStock(ballMode.value)) {
             return ballMode.value;
         }
-        // Cheapest ball that's very likely to work; otherwise the strongest one we have.
-        const candidates = (["pokeBall", "greatBall", "ultraBall"] as BallId[]).filter(inStock);
+        const species = getSpecies(wild.speciesId);
+        const ctx = ballContext(wild);
+        // The Friend Ball only earns its place on Pokémon that evolve by friendship.
+        const friendly = species.evolutions.some(e => e.friendship === true);
+        const candidates = (
+            ["pokeBall", "greatBall", "ultraBall", ...APRICORN_BALLS] as BallId[]
+        ).filter(id => inStock(id) && (id !== "friendBall" || friendly));
         if (candidates.length === 0) return null;
-        if (important) return candidates[candidates.length - 1];
-        const good = candidates.find(
-            id => catchChance(captureRate, BALLS[id].catchMultiplier, bonuses.value.catch) >= 0.85
-        );
-        return good ?? candidates[candidates.length - 1];
+        const chance = (id: BallId) => ballCatchChance(id, ctx, bonuses.value.catch);
+        const best = candidates.reduce((a, b) => (chance(b) > chance(a) ? b : a));
+        if (important) return best;
+        // Cheapest ball that's very likely to work (a Friend Ball first, when it will); otherwise
+        // the one most likely to.
+        const price = (id: BallId) => (id === "friendBall" ? -1 : (BALLS[id].price ?? Infinity));
+        const good = [...candidates]
+            .sort((a, b) => price(a) - price(b))
+            .find(id => chance(id) >= 0.85);
+        return good ?? best;
+    }
+
+    /** The first Pokémon of a species' evolution family (forms count as their species). */
+    function familyRoot(id: number): number {
+        let root = getSpecies(id).baseSpecies ?? id;
+        while (PRE_EVOLUTION[root] != null) root = PRE_EVOLUTION[root]!;
+        return root;
+    }
+
+    function ballContext(wild: Pick<WildPokemon, "speciesId" | "level" | "kind">): BallContext {
+        const root = familyRoot(wild.speciesId);
+        return {
+            species: getSpecies(wild.speciesId),
+            level: wild.level,
+            kind: wild.kind,
+            partyLevel: Math.max(0, ...partyIds.value.map(id => box.value[id]?.level ?? 0)),
+            familyOwned: Object.keys(box.value).some(id => familyRoot(Number(id)) === root)
+        };
     }
 
     function useBall(id: BallId) {
-        balls.value = { ...balls.value, [id]: Math.max(0, balls.value[id] - 1) };
+        balls.value = { ...balls.value, [id]: Math.max(0, (balls.value[id] ?? 0) - 1) };
     }
 
     // ------------------------------------------------------------------
@@ -506,7 +635,8 @@ export const main = createLayer("main", layer => {
             zoneId.value,
             keyItems.value,
             Math.random,
-            hof.levels.value.roddysRod ?? 0
+            hof.levels.value.roddysRod ?? 0,
+            moment.value
         );
         if (rolled == null) {
             startSearch();
@@ -541,9 +671,12 @@ export const main = createLayer("main", layer => {
         battlesWon.value++;
         money.value += moneyYield(wild.level) * bonuses.value.money;
         gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp);
+        tendDayCare();
 
-        if (shouldTryCatch(wild)) {
-            const ball = chooseBall(species.captureRate, wild.shiny);
+        if (shouldTryCatch(wild) && bugContestActive.value && wild.kind === "walk") {
+            contestCatch(wild);
+        } else if (shouldTryCatch(wild)) {
+            const ball = chooseBall(wild, wild.shiny);
             if (ball == null) {
                 if (!warnedNoBalls) {
                     warnedNoBalls = true;
@@ -551,13 +684,10 @@ export const main = createLayer("main", layer => {
                 }
             } else {
                 useBall(ball);
-                const chance = catchChance(
-                    species.captureRate,
-                    BALLS[ball].catchMultiplier,
-                    bonuses.value.catch
-                );
+                const chance = ballCatchChance(ball, ballContext(wild), bonuses.value.catch);
                 if (Math.random() < chance) {
                     const isNew = receivePokemon(wild.speciesId, wild.level, wild.shiny);
+                    if (ball === "friendBall") befriend(wild.speciesId);
                     const text = `Caught ${wild.shiny ? "a shiny " : ""}${species.name}!`;
                     addLog({
                         kind: wild.shiny ? "shiny" : "catch",
@@ -574,6 +704,102 @@ export const main = createLayer("main", layer => {
             }
         }
         startSearch();
+    }
+
+    /**
+     * The Bug-Catching Contest hands out free Sport Balls. Taking part wins five Great Balls;
+     * catching a Scyther or Pinsir takes first place and the Sun Stone, once per contest day.
+     */
+    function contestCatch(wild: WildPokemon) {
+        const species = getSpecies(wild.speciesId);
+        const day = moment.value.day;
+        const chance = catchChance(species.captureRate, SPORT_BALL_MULTIPLIER, bonuses.value.catch);
+        if (Math.random() >= chance) {
+            addLog({
+                kind: "fail",
+                text: `${species.name} broke free from the Sport Ball!`,
+                speciesId: wild.speciesId,
+                shiny: wild.shiny
+            });
+            return;
+        }
+        const isNew = receivePokemon(wild.speciesId, wild.level, wild.shiny);
+        const text = `Caught ${wild.shiny ? "a shiny " : ""}${species.name} in the Bug-Catching Contest!`;
+        addLog({
+            kind: wild.shiny ? "shiny" : "catch",
+            text: isNew ? text : `${text} (x${dex.timesCaught(wild.speciesId)})`,
+            speciesId: wild.speciesId,
+            shiny: wild.shiny
+        });
+        showFlash(text, "catch");
+        if (contestEnteredDay.value !== day) {
+            contestEnteredDay.value = day;
+            balls.value = { ...balls.value, greatBall: balls.value.greatBall + 5 };
+            addLog({
+                kind: "info",
+                text: "Thanks for entering the contest! You receive 5 Great Balls."
+            });
+        }
+        if (contestWonDay.value !== day && CONTEST_WINNERS.includes(wild.speciesId)) {
+            contestWonDay.value = day;
+            stones.value = { ...stones.value, sunStone: (stones.value.sunStone ?? 0) + 1 };
+            const prize = `Your ${species.name} wins the Bug-Catching Contest! You receive a Sun Stone.`;
+            addLog({ kind: "badge", text: prize, speciesId: wild.speciesId });
+            notify(`🏆 ${prize}`, "success");
+        }
+    }
+
+    /** The Radio Tower's Lucky Number for a day: the same for everyone. */
+    function luckyNumberOn(day: number) {
+        return (Math.imul(day ^ 0x5bd1e995, 0x27d4eb2d) >>> 0) % 100000;
+    }
+
+    function ensureTrainerId() {
+        if (hof.trainerId.value === 0) hof.trainerId.value = 1 + Math.floor(Math.random() * 99999);
+        return hof.trainerId.value;
+    }
+
+    /**
+     * The Lucky Number Show (Radio Card): once a day, match the trailing digits of today's number
+     * with your Trainer ID. One digit wins Great Balls, two Ultra Balls, three a Sun Stone, four a
+     * Link Cable and Soothe Bell, all five a Master Ball.
+     */
+    function drawLuckyNumber() {
+        const day = moment.value.day;
+        if (keyItems.value.radioCard !== true || hof.luckyNumberDay.value === day) return;
+        hof.luckyNumberDay.value = day;
+        const id = String(ensureTrainerId()).padStart(5, "0");
+        const lucky = String(luckyNumberOn(day)).padStart(5, "0");
+        let digits = 0;
+        while (digits < 5 && id[4 - digits] === lucky[4 - digits]) digits++;
+        const add = (kind: "balls" | "stones", key: string, n: number) => {
+            if (kind === "balls") {
+                const k = key as BallId;
+                balls.value = { ...balls.value, [k]: balls.value[k] + n };
+            } else {
+                const k = key as StoneId;
+                stones.value = { ...stones.value, [k]: (stones.value[k] ?? 0) + n };
+            }
+        };
+        const prizes = [
+            "no prize this time",
+            "5 Great Balls",
+            "5 Ultra Balls",
+            "a Sun Stone",
+            "a Link Cable and a Soothe Bell",
+            "a Master Ball"
+        ];
+        if (digits === 1) add("balls", "greatBall", 5);
+        if (digits === 2) add("balls", "ultraBall", 5);
+        if (digits === 3) add("stones", "sunStone", 1);
+        if (digits === 4) {
+            add("stones", "linkCable", 1);
+            add("stones", "sootheBell", 1);
+        }
+        if (digits === 5) add("balls", "masterBall", 1);
+        const text = `Lucky Number Show: today's number is ${lucky}. Your ID ${id} matches ${digits} digit${digits === 1 ? "" : "s"}: ${prizes[digits]}!`;
+        addLog({ kind: digits > 0 ? "badge" : "info", text });
+        if (digits > 0) notify(`📻 ${text}`, "success");
     }
 
     function startTrainerBattle(options: {
@@ -675,15 +901,24 @@ export const main = createLayer("main", layer => {
             ],
             onWin() {
                 const useMaster = useMasterBallOnLegendaries.value && balls.value.masterBall > 0;
-                const ball = useMaster ? "masterBall" : chooseBall(species.captureRate, true);
+                const ball = useMaster
+                    ? "masterBall"
+                    : chooseBall(
+                          { speciesId: special.speciesId, level: special.level, kind: "walk" },
+                          true
+                      );
                 if (ball == null) {
                     addLog({ kind: "fail", text: `No Poké Balls! ${species.name} flew away.` });
                     return;
                 }
                 useBall(ball);
-                const chance = catchChance(
-                    species.captureRate,
-                    BALLS[ball].catchMultiplier,
+                const chance = ballCatchChance(
+                    ball,
+                    ballContext({
+                        speciesId: special.speciesId,
+                        level: special.level,
+                        kind: "walk"
+                    }),
                     bonuses.value.catch
                 );
                 if (Math.random() < chance) {
@@ -800,6 +1035,7 @@ export const main = createLayer("main", layer => {
 
     let automationTimer = 0;
     layer.on("update", diff => {
+        refreshMoment();
         // The Link Cable used to be a reusable key item; trade it in for three of the new,
         // used-up-per-evolution Link Cables.
         if ((keyItems.value as Record<string, boolean>).linkCable === true) {
@@ -936,6 +1172,20 @@ export const main = createLayer("main", layer => {
         useMasterBallOnLegendaries,
         runTime,
         battlesWon,
+        moment,
+        bugContestActive,
+        contestEnteredDay,
+        contestWonDay,
+        luckyNumberOn,
+        ensureTrainerId,
+        drawLuckyNumber,
+        ballContext,
+        dayCareId,
+        dayCareProgress,
+        dayCareOpen,
+        canBreed,
+        eggSpeciesOf,
+        leaveAtDayCare,
         battle,
         log,
         flash,

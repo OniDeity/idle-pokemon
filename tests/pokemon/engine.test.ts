@@ -1,7 +1,9 @@
 import { existsSync } from "fs";
 import { requiredSpritePaths } from "../../scripts/fetchSprites";
-import type { PartyBattler } from "game/pokemon/balance";
+import type { BallContext, PartyBattler } from "game/pokemon/balance";
 import {
+    ballCatchChance,
+    ballEffect,
     catchChance,
     computeBonuses,
     effortMultiplier,
@@ -15,6 +17,7 @@ import {
 import {
     DEX_SIZE,
     femaleForm,
+    type TimeOfDay,
     getSpecies,
     magikarpPatterns,
     PRE_EVOLUTION,
@@ -24,16 +27,21 @@ import {
     variantFilter,
     WILD_VARIANTS
 } from "game/pokemon/data";
-import { STONES } from "game/pokemon/items";
+import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
 import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
+import { JOHTO_SWARMS } from "game/pokemon/johto";
 import { pokedexRequirement, speciesObtainableIn } from "game/pokemon/pokedex";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
 import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
 import {
     activePools,
     allZoneSpecies,
+    availableZoneSpecies,
+    bugContestOn,
     encounterOdds,
+    momentOf,
+    swarmOn,
     PATTERN_CHANCE,
     rollEncounter,
     ZONES,
@@ -419,6 +427,99 @@ describe("Cobblemon variants", () => {
         // Johto brings the rest.
         const all = speciesObtainableIn(REGION_LIST.map(r => r.id));
         expect(all.size).toBeGreaterThanOrEqual(needed.size);
+    });
+});
+
+describe("Johto clock, swarms and contest", () => {
+    test("the clock follows HeartGold/SoulSilver's hours", () => {
+        const at = (h: number) => momentOf(new Date(2026, 9, 6, h, 30)).time;
+        expect([at(3), at(4), at(9), at(10), at(19), at(20)]).toEqual([
+            "night",
+            "morning",
+            "morning",
+            "day",
+            "day",
+            "night"
+        ]);
+        // 6 October 2026 is a Tuesday.
+        expect(momentOf(new Date(2026, 9, 6, 12)).weekday).toBe(2);
+        expect(momentOf(new Date(2026, 9, 7, 0, 5)).day).toBe(
+            momentOf(new Date(2026, 9, 6)).day + 1
+        );
+    });
+
+    test("time-of-day tables change who appears", () => {
+        const base = momentOf(new Date(2026, 9, 7, 12));
+        const ids = (time: TimeOfDay) => availableZoneSpecies("route29", {}, { ...base, time });
+        // Hoothoot only comes out at night on Route 29.
+        expect(ids("night")).toContain(163);
+        expect(ids("day")).not.toContain(163);
+        // Without a moment (simulator, tests) every time of day is in, at its average weight.
+        expect(availableZoneSpecies("route29", {})).toContain(163);
+    });
+
+    test("the Bug-Catching Contest takes over the National Park on its days", () => {
+        const tuesday = momentOf(new Date(2026, 9, 6, 12));
+        const wednesday = momentOf(new Date(2026, 9, 7, 12));
+        expect(bugContestOn(tuesday)).toBe(true);
+        expect(bugContestOn(wednesday)).toBe(false);
+        expect(availableZoneSpecies("nationalPark", {}, tuesday)).toContain(123);
+        expect(availableZoneSpecies("nationalPark", {}, wednesday)).not.toContain(123);
+        expect(allZoneSpecies("nationalPark")).toContain(127);
+    });
+
+    test("the radio's swarm makes up about 40% of its place, with the Radio Card", () => {
+        const days = Array.from({ length: 60 }, (_, i) => 20000 + i);
+        const zones = new Set(days.map(d => swarmOn(d).zoneId));
+        // Every swarm comes up over two months, and the report is the same for everyone.
+        expect(zones.size).toBe(JOHTO_SWARMS.length);
+        expect(swarmOn(20005)).toBe(swarmOn(20005));
+        const day = days.find(d => swarmOn(d).zoneId === "route35")!;
+        const moment = { ...momentOf(new Date(2026, 9, 7, 12)), day };
+        const walk = (radioCard: boolean) =>
+            activePools("route35", { radioCard }, moment).find(p => p.kind === "walk")!.entries;
+        const share = (entries: { id: number; weight: number }[]) =>
+            entries.filter(e => e.id === 193).reduce((a, e) => a + e.weight, 0) /
+            entries.reduce((a, e) => a + e.weight, 0);
+        // Yanma is already a rare sight on Route 35; the swarm adds 40% on top of that.
+        const usual = share(walk(false));
+        expect(usual).toBeLessThan(0.05);
+        expect(share(walk(true))).toBeCloseTo(0.4 + 0.6 * usual, 6);
+    });
+});
+
+describe("Apricorn Balls", () => {
+    test("each ball shines in its own situation", () => {
+        const ctx = (id: number, extra: Partial<BallContext> = {}): BallContext => ({
+            species: getSpecies(id),
+            level: 20,
+            kind: "walk",
+            partyLevel: 20,
+            familyOwned: false,
+            ...extra
+        });
+        expect(ballEffect("levelBall", ctx(19, { partyLevel: 21 }))[0]).toBe(2);
+        expect(ballEffect("levelBall", ctx(19, { partyLevel: 40 }))[0]).toBe(4);
+        expect(ballEffect("levelBall", ctx(19, { partyLevel: 80 }))[0]).toBe(8);
+        expect(ballEffect("levelBall", ctx(19, { partyLevel: 20 }))[0]).toBe(1);
+        expect(ballEffect("lureBall", ctx(129, { kind: "fishing" }))[0]).toBe(3);
+        expect(ballEffect("lureBall", ctx(129))[0]).toBe(1);
+        // Clefairy and Nidorina evolve with a Moon Stone; Clefable doesn't.
+        expect(ballEffect("moonBall", ctx(35))[0]).toBe(4);
+        expect(ballEffect("moonBall", ctx(30))[0]).toBe(4);
+        expect(ballEffect("moonBall", ctx(36))[0]).toBe(1);
+        expect(ballEffect("loveBall", ctx(19, { familyOwned: true }))[0]).toBe(8);
+        // Jolteon (base Speed 130) is fast; Snorlax isn't, but at 460 kg it's very heavy.
+        expect(ballEffect("fastBall", ctx(135))[0]).toBe(4);
+        expect(ballEffect("fastBall", ctx(143))[0]).toBe(1);
+        expect(ballEffect("heavyBall", ctx(143))).toEqual([1, 40]);
+        expect(ballEffect("heavyBall", ctx(25))).toEqual([1, -20]);
+        expect(ballCatchChance("heavyBall", ctx(143))).toBeGreaterThan(
+            ballCatchChance("pokeBall", ctx(143))
+        );
+        // Plain balls are unchanged.
+        expect(ballEffect("greatBall", ctx(19))).toEqual([1.5, 0]);
+        expect(APRICORN_BALLS.every(id => BALLS[id].region === "johto")).toBe(true);
     });
 });
 

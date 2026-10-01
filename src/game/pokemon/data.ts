@@ -61,6 +61,8 @@ export interface Species {
     /** [hp, attack, defense, special attack, special defense, speed] */
     baseStats: [number, number, number, number, number, number];
     baseExp: number;
+    /** In kilograms, for the Heavy Ball. */
+    weight: number;
     /** 3-255; higher is easier to catch. */
     captureRate: number;
     growthRate: GrowthRate;

@@ -3,8 +3,8 @@
  * simulator (scripts/simulateProgression.ts) always agree.
  */
 import type { GrowthRate, Species } from "./data";
-import type { KeyItemId } from "./items";
-import { itemSprite } from "./items";
+import type { BallId, KeyItemId } from "./items";
+import { BALLS, itemSprite } from "./items";
 import type { BattlerStats } from "./stats";
 import { attacksPerSecond, damagePerHit, maxHp, TRAINER_IV, xpForLevel, xpYield } from "./stats";
 import type { TrainerDefinition } from "./trainers";
@@ -39,6 +39,51 @@ export function moneyYield(level: number): number {
 export function battleXp(defeated: BattlerStats, trainerOwned = false): number {
     const earlyBoost = 1 + 3 * Math.max(0, (20 - defeated.level) / 20);
     return xpYield(defeated, trainerOwned) * earlyBoost;
+}
+
+/** What an Apricorn Ball needs to know about the catch. */
+export interface BallContext {
+    species: Species;
+    level: number;
+    /** How the wild Pokémon was found ("fishing" for the Lure Ball). */
+    kind: string;
+    /** The highest level in the party, for the Level Ball. */
+    partyLevel: number;
+    /** Whether the player already has a Pokémon of this evolution family, for the Love Ball. */
+    familyOwned: boolean;
+}
+
+/**
+ * A ball's effect on one catch, as [capture-rate multiplier, capture-rate bonus]. Plain balls only
+ * multiply; Kurt's Apricorn Balls depend on the Pokémon (HeartGold/SoulSilver's rules).
+ */
+export function ballEffect(ball: BallId, ctx: BallContext): [number, number] {
+    switch (ball) {
+        case "levelBall": {
+            const ratio = ctx.partyLevel / Math.max(1, ctx.level);
+            return [ratio >= 4 ? 8 : ratio >= 2 ? 4 : ratio > 1 ? 2 : 1, 0];
+        }
+        case "lureBall":
+            return [ctx.kind === "fishing" ? 3 : 1, 0];
+        case "moonBall":
+            return [ctx.species.evolutions.some(e => e.stone === "moonStone") ? 4 : 1, 0];
+        case "loveBall":
+            return [ctx.familyOwned ? 8 : 1, 0];
+        case "fastBall":
+            return [ctx.species.baseStats[5] >= 100 ? 4 : 1, 0];
+        case "heavyBall": {
+            const w = ctx.species.weight;
+            return [1, w >= 300 ? 40 : w >= 200 ? 30 : w >= 100 ? 20 : -20];
+        }
+        default:
+            return [BALLS[ball].catchMultiplier, 0];
+    }
+}
+
+/** Catch chance with a particular ball, Apricorn effects included. */
+export function ballCatchChance(ball: BallId, ctx: BallContext, bonus = 1): number {
+    const [multiplier, add] = ballEffect(ball, ctx);
+    return catchChance(Math.max(1, ctx.species.captureRate + add), multiplier, bonus);
 }
 
 /** Chance a thrown ball catches a defeated wild Pokémon. Softened from the mainline formula. */

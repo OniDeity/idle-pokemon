@@ -51,6 +51,10 @@ const layer = createLayer(id, () => {
     /** Automations bought (true) and whether the player has them switched on. */
     const automationsOwned = persistent<Partial<Record<AutomationId, boolean>>>({}, false);
     const automationsOn = persistent<Partial<Record<AutomationId, boolean>>>({}, false);
+    /** The player's five-digit Trainer ID (0 until first needed), for the Lucky Number Show. */
+    const trainerId = persistent<number>(0);
+    /** The last day (see Moment.day) the Lucky Number Show was drawn; once a day, every journey. */
+    const luckyNumberDay = persistent<number>(-1);
     /** Team Strategist setting: bring Pokémon new to the Hall of Fame to the finale. */
     const newFacesForFinale = persistent<boolean>(false);
     /** Travel Planner setting: re-catch Pokédex Pokémon missing from the box, at any level. */
@@ -330,6 +334,8 @@ const layer = createLayer(id, () => {
         automationsOwned,
         automationsOn,
         newFacesForFinale,
+        trainerId,
+        luckyNumberDay,
         catchEmAll,
         isEnshrined,
         pendingFame,

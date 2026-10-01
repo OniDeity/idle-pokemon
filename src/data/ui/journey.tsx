@@ -7,10 +7,10 @@ import hof from "data/layers/hof";
 import type { BallMode, BattleState, CatchMode, LogEntry } from "data/projEntry";
 import { main } from "data/projEntry";
 import player from "game/player";
-import { AUTOMATIONS, catchChance } from "game/pokemon/balance";
+import { AUTOMATIONS, ballCatchChance } from "game/pokemon/balance";
 import { DEX_SIZE, getSpecies } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
-import { BALLS } from "game/pokemon/items";
+import { APRICORN_BALLS, BALLS } from "game/pokemon/items";
 import { maxHp, xpForLevel } from "game/pokemon/stats";
 import type { RegionDefinition } from "game/pokemon/regions";
 import { REGION_LIST, startersFor } from "game/pokemon/regions";
@@ -442,17 +442,16 @@ function renderControls() {
         ["smart", "Smart"],
         ...(["pokeBall", "greatBall", "ultraBall"] as BallId[])
             .filter(id => main.badges.value >= BALLS[id].badgesRequired || main.balls.value[id] > 0)
-            .map((id): [BallMode, string] => [id, BALLS[id].name])
+            .map((id): [BallMode, string] => [id, BALLS[id].name]),
+        // Apricorn Balls you're carrying.
+        ...APRICORN_BALLS.filter(id => (main.balls.value[id] ?? 0) > 0).map(
+            (id): [BallMode, string] => [id, BALLS[id].name]
+        )
     ];
     let chance = null;
     if (state.kind === "wild") {
-        const species = getSpecies(state.wild.speciesId);
         const ball = main.ballMode.value === "smart" ? "pokeBall" : main.ballMode.value;
-        chance = catchChance(
-            species.captureRate,
-            BALLS[ball].catchMultiplier,
-            main.bonuses.value.catch
-        );
+        chance = ballCatchChance(ball, main.ballContext(state.wild), main.bonuses.value.catch);
     }
     return (
         <div class="pk-controls">
@@ -496,15 +495,23 @@ function renderControls() {
                 ))}
             </div>
             <div class="pk-ball-counts">
-                {(["pokeBall", "greatBall", "ultraBall", "masterBall"] as BallId[])
-                    .filter(id => main.balls.value[id] > 0 || id === "pokeBall")
+                {(
+                    [
+                        "pokeBall",
+                        "greatBall",
+                        "ultraBall",
+                        "masterBall",
+                        ...APRICORN_BALLS
+                    ] as BallId[]
+                )
+                    .filter(id => (main.balls.value[id] ?? 0) > 0 || id === "pokeBall")
                     .map(id => (
                         <span
                             class={["pk-ball-count", main.balls.value[id] === 0 ? "empty" : ""]}
                             title={BALLS[id].name}
                         >
                             <ItemIcon src={BALLS[id].sprite} size={24} alt={BALLS[id].name} />
-                            {main.balls.value[id]}
+                            {main.balls.value[id] ?? 0}
                         </span>
                     ))}
                 <Button kind="small" onClick={() => openLayer("mart")}>

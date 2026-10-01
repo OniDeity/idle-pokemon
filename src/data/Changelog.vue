@@ -21,6 +21,27 @@
                     <li class="feature">
                         All 28 Unown in the Ruins of Alph's chambers
                     </li>
+                    <li class="feature">
+                        Day and night: Johto's wild Pokémon follow your clock (morning, day,
+                        night), like HeartGold and SoulSilver
+                    </li>
+                    <li class="feature">
+                        Pokégear: win the Radio Card in Goldenrod for a daily swarm report and the
+                        Lucky Number Show (match today's number with your Trainer ID for prizes, up
+                        to a Master Ball)
+                    </li>
+                    <li class="feature">
+                        Bug-Catching Contest in the National Park on Tuesdays, Thursdays and
+                        Saturdays: free Sport Balls, and a Scyther or Pinsir wins the Sun Stone
+                    </li>
+                    <li class="feature">
+                        Kurt's Apricorn Balls in Johto's Poké Mart: Level, Lure, Moon, Friend, Love,
+                        Fast and Heavy Balls, picked automatically when they work best
+                    </li>
+                    <li class="feature">
+                        The Route 34 Day Care: leave a Pokémon and its Eggs hatch into its family's
+                        first stage, baby Pokémon included
+                    </li>
                 </ul>
             </details>
             <details>

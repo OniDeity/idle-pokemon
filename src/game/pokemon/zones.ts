@@ -1,9 +1,10 @@
-import type { EncounterEntry, EncounterPoolId } from "./data";
+import type { EncounterEntry, EncounterPoolId, TimeOfDay } from "./data";
 import { enc, ENCOUNTERS, femaleForm, magikarpPatterns, WILD_VARIANTS } from "./data";
 import type { KeyItemId } from "./items";
 import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
-import { JOHTO_ZONES } from "./johto";
+import { BUG_CONTEST_POOL, BUG_CONTEST_WEEKDAYS, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
+import type { Swarm } from "./johto";
 import { SEVII_ZONES } from "./sevii";
 
 export type RegionId = "kanto" | "orange" | "sevii" | "johto";
@@ -310,8 +311,89 @@ export function zonePools(zoneId: string): ZonePools {
     return merged;
 }
 
-export function activePools(zoneId: string, keyItems: Partial<Record<KeyItemId, boolean>>) {
-    const pools = zonePools(zoneId);
+/**
+ * When an encounter happens, for what changes with the real clock: Johto's day and night
+ * tables, the Pokégear radio's daily swarm and the Bug-Catching Contest. Without one, tables use
+ * their all-day average and nothing special is on (the simulator and tests).
+ */
+export interface Moment {
+    time: TimeOfDay;
+    /** Days since 1 January 1970 in the player's time zone. */
+    day: number;
+    /** 0 = Sunday … 6 = Saturday. */
+    weekday: number;
+}
+
+/** HeartGold/SoulSilver's clock: morning 4:00-9:59, day 10:00-19:59, night 20:00-3:59. */
+export function momentOf(date: Date): Moment {
+    const hour = date.getHours();
+    const time: TimeOfDay =
+        hour >= 4 && hour < 10 ? "morning" : hour >= 10 && hour < 20 ? "day" : "night";
+    const local = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    return { time, day: Math.floor(local / 86_400_000), weekday: date.getDay() };
+}
+
+/** The swarm the Pokégear radio reports today: one per day, the same for everyone. */
+export function swarmOn(day: number): Swarm {
+    // A cheap integer hash so consecutive days don't walk through the list in order.
+    const h = Math.imul(day ^ (day >>> 16), 0x45d9f3b) >>> 0;
+    return JOHTO_SWARMS[h % JOHTO_SWARMS.length];
+}
+
+export function bugContestOn(moment: Moment | null): boolean {
+    return moment != null && BUG_CONTEST_WEEKDAYS.includes(moment.weekday);
+}
+
+/** A swarming species makes up about 40% of its pool (as in HeartGold/SoulSilver). */
+const SWARM_SHARE = 0.4;
+
+/** A zone's pools at a given moment: timed weights, the contest's bugs, today's swarm. */
+function poolsAt(
+    zoneId: string,
+    keyItems: Partial<Record<KeyItemId, boolean>>,
+    moment: Moment | null
+): ZonePools {
+    const base = zonePools(zoneId);
+    const pools: ZonePools = {};
+    for (const [pool, entries] of Object.entries(base) as [EncounterPoolId, EncounterEntry[]][]) {
+        pools[pool] =
+            moment == null
+                ? entries
+                : entries
+                      .map(e => (e.byTime != null ? { ...e, weight: e.byTime[moment.time] } : e))
+                      .filter(e => e.weight > 0);
+    }
+    if (zoneId === "nationalPark" && bugContestOn(moment)) {
+        pools.walk = BUG_CONTEST_POOL;
+    }
+    if (moment != null && keyItems.radioCard === true) {
+        const swarm = swarmOn(moment.day);
+        if (swarm.zoneId === zoneId) {
+            for (const [pool, entries] of Object.entries(swarm.pools) as [
+                EncounterPoolId,
+                EncounterEntry[]
+            ][]) {
+                const existing = pools[pool] ?? [];
+                const total = existing.reduce((sum, e) => sum + e.weight, 0);
+                const swarmTotal = entries.reduce((sum, e) => sum + e.weight, 0);
+                const scale =
+                    total > 0 ? (total * SWARM_SHARE) / (1 - SWARM_SHARE) / swarmTotal : 1;
+                pools[pool] = [
+                    ...existing,
+                    ...entries.map(e => ({ ...e, weight: e.weight * scale }))
+                ];
+            }
+        }
+    }
+    return pools;
+}
+
+export function activePools(
+    zoneId: string,
+    keyItems: Partial<Record<KeyItemId, boolean>>,
+    moment: Moment | null = null
+) {
+    const pools = poolsAt(zoneId, keyItems, moment);
     const result: ActivePool[] = [];
     if (pools.walk != null && pools.walk.length > 0) {
         result.push({ kind: "walk", share: POOL_SHARE.walk, entries: pools.walk });
@@ -340,22 +422,36 @@ export function activePools(zoneId: string, keyItems: Partial<Record<KeyItemId, 
     return result;
 }
 
-/** Every species that can appear in a zone with any equipment, for completion tracking. */
+/** Species that only come to a zone on some days: radio swarms and the Bug-Catching Contest. */
+export function occasionalSpecies(zoneId: string): { swarm: number[]; contest: number[] } {
+    return {
+        swarm: JOHTO_SWARMS.filter(sw => sw.zoneId === zoneId).map(sw => sw.speciesId),
+        contest: zoneId === "nationalPark" ? BUG_CONTEST_POOL.map(e => e.id) : []
+    };
+}
+
+/**
+ * Every species that can appear in a zone with any equipment, at any time of day, in a swarm or
+ * the Bug-Catching Contest, for completion tracking.
+ */
 export function allZoneSpecies(zoneId: string): number[] {
     const ids = new Set<number>();
     for (const entries of Object.values(zonePools(zoneId))) {
         entries?.forEach(e => ids.add(e.id));
     }
+    const { swarm, contest } = occasionalSpecies(zoneId);
+    [...swarm, ...contest].forEach(id => ids.add(id));
     return [...ids].sort((a, b) => a - b);
 }
 
 /** Species currently findable in a zone with the player's equipment. */
 export function availableZoneSpecies(
     zoneId: string,
-    keyItems: Partial<Record<KeyItemId, boolean>>
+    keyItems: Partial<Record<KeyItemId, boolean>>,
+    moment: Moment | null = null
 ): number[] {
     const ids = new Set<number>();
-    for (const pool of activePools(zoneId, keyItems)) {
+    for (const pool of activePools(zoneId, keyItems, moment)) {
         pool.entries.forEach(e => ids.add(e.id));
     }
     return [...ids].sort((a, b) => a - b);
@@ -389,9 +485,10 @@ export function rollEncounter(
     zoneId: string,
     keyItems: Partial<Record<KeyItemId, boolean>>,
     rng: () => number = Math.random,
-    rodLevel = 0
+    rodLevel = 0,
+    moment: Moment | null = null
 ): RolledEncounter | null {
-    const pools = activePools(zoneId, keyItems);
+    const pools = activePools(zoneId, keyItems, moment);
     if (pools.length === 0) {
         return null;
     }
@@ -435,11 +532,12 @@ export function rollEncounter(
 export function encounterOdds(
     zoneId: string,
     keyItems: Partial<Record<KeyItemId, boolean>>,
-    rodLevel = 0
+    rodLevel = 0,
+    moment: Moment | null = null
 ): Map<number, number> {
     const odds = new Map<number, number>();
     const add = (id: number, p: number) => odds.set(id, (odds.get(id) ?? 0) + p);
-    const pools = activePools(zoneId, keyItems);
+    const pools = activePools(zoneId, keyItems, moment);
     const totalShare = pools.reduce((sum, pool) => sum + pool.share, 0);
     for (const pool of pools) {
         const totalWeight = pool.entries.reduce((sum, e) => sum + e.weight, 0);

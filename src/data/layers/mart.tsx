@@ -8,7 +8,7 @@ import { persistent } from "game/persistence";
 import type { MartUpgradeId, UpgradeDefinition } from "game/pokemon/balance";
 import { MART_UPGRADE_LIST, upgradeCost } from "game/pokemon/balance";
 import type { BallId } from "game/pokemon/items";
-import { BALLS, STONE_DESCRIPTIONS, STONES } from "game/pokemon/items";
+import { APRICORN_BALLS, BALLS, STONE_DESCRIPTIONS, STONES } from "game/pokemon/items";
 import { computed } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
@@ -56,10 +56,10 @@ const layer = createLayer(id, () => {
             <div class={["pk-shop-row", unlocked ? "" : "locked"]}>
                 <ItemIcon src={def.sprite} alt={def.name} />
                 <div class="pk-shop-info">
-                    <b>{def.name}</b> <span class="pk-muted">×{main.balls.value[ball]}</span>
+                    <b>{def.name}</b> <span class="pk-muted">×{main.balls.value[ball] ?? 0}</span>
                     <div class="pk-small">
                         {unlocked
-                            ? `${def.catchMultiplier}× catch rate · ${formatMoney(price ?? 0)} each`
+                            ? `${def.description ?? `${def.catchMultiplier}× catch rate`} · ${formatMoney(price ?? 0)} each`
                             : `Stocked after ${def.badgesRequired} badges`}
                     </div>
                 </div>
@@ -131,6 +131,15 @@ const layer = createLayer(id, () => {
 
                 <Panel title="Poké Balls">
                     {(["pokeBall", "greatBall", "ultraBall"] as BallId[]).map(renderBall)}
+                    {main.region.value === "johto" ? (
+                        <>
+                            <div class="pk-small pk-muted">
+                                Kurt's Apricorn Balls from Azalea Town (after the Hive Badge). Smart
+                                throwing picks whichever ball works best.
+                            </div>
+                            {APRICORN_BALLS.map(renderBall)}
+                        </>
+                    ) : null}
                     {main.balls.value.masterBall > 0 ? (
                         <div class="pk-shop-row">
                             <ItemIcon src={BALLS.masterBall.sprite} alt="Master Ball" />
