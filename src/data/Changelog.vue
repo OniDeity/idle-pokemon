@@ -92,6 +92,11 @@
                     </li>
                     <li class="feature">Portrait layout for phones</li>
                     <li class="fix">
+                        Valencian Butterfree finally appears on Valencia Island (it was turning into
+                        a Brown Mooshtank every time), and Pinkan Island's Pokémon and Valencian
+                        Raticate no longer turn into Magikarp, Gyarados or Snorlax
+                    </li>
+                    <li class="fix">
                         Map sorting: "Highest level" puts the toughest places first (it used to
                         list them lowest first, which looked just like story order); tap a sort
                         again to reverse it, and places you can't reach yet go last

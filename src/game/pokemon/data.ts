@@ -475,9 +475,15 @@ export function hallOfFameId(id: number): number {
     return species?.variant === "female" ? species.baseSpecies! : id;
 }
 
-/** The female form a wild Pokémon of this species appears as, if it has one. */
+/**
+ * The female form a wild Pokémon of this species appears as, if it has one. Only regular species
+ * have them: other ids sit in other forms' ranges (2012 + 5000 is a Mooshtank, 1010 + 5000 a
+ * Magikarp pattern), so they must never be offset.
+ */
 export function femaleForm(speciesId: number): Species | undefined {
-    return SPECIES_BY_ID.get(FEMALE_OFFSET + speciesId);
+    if (speciesId > DEX_SIZE) return undefined;
+    const form = SPECIES_BY_ID.get(FEMALE_OFFSET + speciesId);
+    return form?.variant === "female" ? form : undefined;
 }
 export const TYPE_CHART = typeChartJson as Partial<
     Record<PokemonType, Partial<Record<PokemonType, number>>>
