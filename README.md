@@ -19,6 +19,9 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   Ruby & Sapphire quest and the Trainer Tower), and Johto from HeartGold/SoulSilver (eight Gyms,
   the Elite Four and Lance, with Headbutt trees and Rock Smash rocks). Each first clear is tuned
   for about a day of play.
+- **Johto's Gen 2 extras**: day and night encounters on your real clock, the Pokégear radio's
+  daily swarms and Lucky Number Show, the Bug-Catching Contest (Tuesdays, Thursdays and
+  Saturdays), Kurt's seven Apricorn Balls, and the Day Care's Eggs.
 - **Anime variants**: 20 Pinkan Pokémon on Pinkan Island, 7 Valencian Pokémon on Valencia
   Island, the Crystal Onix, the Pink Butterfree, and Surfing and Flying Pikachu, each with
   its own Pokédex entry.

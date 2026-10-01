@@ -2,6 +2,7 @@
  * Johto, from HeartGold and SoulSilver. Wild encounters come from the games' data (with the time
  * of day kept per entry); the Gyms, Elite Four and Champion use their HeartGold/SoulSilver teams.
  */
+import type { EncounterEntry, EncounterPoolId } from "./data";
 import { enc } from "./data";
 import type { GymDefinition, TrainerDefinition } from "./trainers";
 import { timeLimit, trial } from "./trainers";
@@ -320,6 +321,57 @@ export const JOHTO_ZONES: ZoneDefinition[] = [
     })
 ];
 
+/** A HeartGold/SoulSilver swarm: Pokémon that flood one place on the day the radio reports. */
+export interface Swarm {
+    zoneId: string;
+    speciesId: number;
+    pools: Partial<Record<EncounterPoolId, EncounterEntry[]>>;
+}
+
+/** HeartGold/SoulSilver's Johto swarms (one a day, reported by the Pokégear radio). */
+export const JOHTO_SWARMS: Swarm[] = [
+    { zoneId: "darkCave", speciesId: 206, pools: { walk: [enc(206, 2, 3)] } },
+    {
+        zoneId: "route32",
+        speciesId: 211,
+        pools: {
+            oldRod: [enc(211, 10, 10)],
+            goodRod: [enc(211, 20, 20)],
+            superRod: [enc(211, 40, 40)]
+        }
+    },
+    { zoneId: "route35", speciesId: 193, pools: { walk: [enc(193, 12, 12)] } },
+    { zoneId: "route38", speciesId: 209, pools: { walk: [enc(209, 16, 16)] } },
+    {
+        zoneId: "route44",
+        speciesId: 223,
+        pools: {
+            oldRod: [enc(223, 10, 10)],
+            goodRod: [enc(223, 20, 20)],
+            superRod: [enc(223, 40, 40)]
+        }
+    },
+    { zoneId: "route47", speciesId: 132, pools: { walk: [enc(132, 35, 35)] } },
+    { zoneId: "mtMortar", speciesId: 183, pools: { walk: [enc(183, 13, 15)] } }
+];
+
+/** The Bug-Catching Contest runs in the National Park on Tuesdays, Thursdays and Saturdays. */
+export const BUG_CONTEST_WEEKDAYS = [2, 4, 6];
+
+/** The contest's grass (HeartGold/SoulSilver's Kanto-bug table). */
+export const BUG_CONTEST_POOL: EncounterEntry[] = [
+    enc(10, 7, 18, 20),
+    enc(13, 7, 18, 20),
+    enc(11, 9, 18, 10),
+    enc(14, 9, 18, 10),
+    enc(48, 10, 16, 10),
+    enc(46, 10, 17, 10),
+    enc(12, 12, 15, 5),
+    enc(15, 12, 15, 5),
+    enc(123, 13, 14, 5),
+    enc(127, 13, 14, 5)
+];
+
 /**
  * Stat multipliers for Johto's leaders, tuned with scripts/simulateProgression.ts (a first clear
  * after Kanto, Orange and Sevii takes about 11.6 hours). Johto's leaders keep lower levels than
@@ -388,9 +440,9 @@ export const JOHTO_GYMS: GymDefinition[] = [
             { id: 35, level: 17 },
             { id: 241, level: 19 }
         ],
-        keyItems: ["squirtBottle", "rockSmash"],
+        keyItems: ["squirtBottle", "rockSmash", "radioCard"],
         rewardText:
-            "The flower shop gives you a SquirtBottle, and a man on Route 36 teaches you Rock Smash.",
+            "The flower shop gives you a SquirtBottle, a man on Route 36 teaches you Rock Smash, and you win a Radio Card at the Radio Tower quiz.",
         quote: "Everyone was into Pokémon, so I got into it too! They're super cute!"
     }),
     johtoGym({

@@ -374,6 +374,8 @@ async function main() {
             .map(r => [r.pokemon_species_id, r.name])
     );
     const baseExp = new Map(pokemonRows.map(r => [r.id, Number(r.base_experience)]));
+    // PokeAPI weighs Pokémon in hectograms; the Heavy Ball works in kilograms.
+    const weightKg = new Map(pokemonRows.map(r => [r.id, Number(r.weight) / 10]));
 
     const statsById = new Map<string, number[]>();
     for (const r of statRows) {
@@ -431,6 +433,7 @@ async function main() {
             // [hp, attack, defense, special-attack, special-defense, speed]
             baseStats: statsById.get(r.id) ?? [0, 0, 0, 0, 0, 0],
             baseExp: baseExp.get(r.id) ?? 50,
+            weight: weightKg.get(r.id) ?? 0,
             captureRate: Number(r.capture_rate),
             growthRate: GROWTH_RATES[r.growth_rate_id] ?? "medium",
             legendary: r.is_legendary === "1" || r.is_mythical === "1",

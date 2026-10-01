@@ -1,7 +1,7 @@
 /**
  * Party & PC Box: choose your six, reorder them, and evolve Pokémon with stones or trades.
  */
-import { main } from "data/projEntry";
+import { EGG_BATTLES, main } from "data/projEntry";
 import { createLayer } from "game/layers";
 import { memberMultiplier, effortMultiplier } from "game/pokemon/balance";
 import type { Evolution, PokemonType, StoneId } from "game/pokemon/data";
@@ -74,7 +74,9 @@ const layer = createLayer(id, () => {
         const have = (item: StoneId) => (main.stones.value[item] ?? 0) > 0;
         return pendingEvolutions(speciesId).some(e =>
             e.method === "level"
-                ? level >= (e.level ?? Infinity) || (e.friendship === true && have("sootheBell"))
+                ? level >= (e.level ?? Infinity) ||
+                  (e.friendship === true &&
+                      (have("sootheBell") || main.box.value[speciesId]?.friend === true))
                 : e.method === "stone"
                   ? have(e.stone!)
                   : have("linkCable") && (e.heldItem == null || have(e.heldItem))
@@ -203,6 +205,16 @@ const layer = createLayer(id, () => {
                                 onClick={() => main.evolveByLevel(speciesId, evo.into)}
                             >
                                 Evolve (Lv. {evo.level})
+                            </Button>
+                        ) : evo.friendship === true &&
+                          main.box.value[speciesId]?.friend === true ? (
+                            <Button
+                                kind="primary"
+                                disabled={main.inTrainerBattle.value}
+                                onClick={() => main.evolveWithSootheBell(speciesId, evo.into)}
+                                title="Caught in a Friend Ball: friendly enough to evolve now"
+                            >
+                                💛 Evolve (friendship)
                             </Button>
                         ) : evo.friendship === true ? (
                             <Button
@@ -405,6 +417,51 @@ const layer = createLayer(id, () => {
         );
     }
 
+    /** Route 34's Day Care: leave a Pokémon, and its Eggs hatch into its family's first stage. */
+    function renderDayCare() {
+        const id = main.dayCareId.value;
+        const options = allIds.value.filter(
+            sid => main.canBreed(sid) && !main.partyIds.value.includes(sid)
+        );
+        const inParty = id !== 0 && main.partyIds.value.includes(id);
+        return (
+            <Panel title="Day Care (Route 34)">
+                <p class="pk-small pk-muted">
+                    Leave a Pokémon from your box and the Day Care couple finds an Egg every{" "}
+                    {EGG_BATTLES} wild battles you win. Eggs hatch into the first stage of its
+                    family, babies included (Pikachu → Pichu, Electabuzz → Elekid). A shiny parent
+                    passes its colors on 1 time in 64.
+                </p>
+                <div class="pk-filter-row">
+                    <select
+                        class="pk-search"
+                        value={String(id)}
+                        onChange={(e: Event) =>
+                            main.leaveAtDayCare(Number((e.target as HTMLSelectElement).value))
+                        }
+                    >
+                        <option value="0">Nobody</option>
+                        {(id !== 0 && !options.includes(id) ? [id, ...options] : options).map(
+                            sid => (
+                                <option value={String(sid)}>{getSpecies(sid).name}</option>
+                            )
+                        )}
+                    </select>
+                </div>
+                {id !== 0 ? (
+                    <div class="pk-small">
+                        {inParty
+                            ? `${getSpecies(id).name} is in your party, so it isn't at the Day Care right now.`
+                            : `Next Egg (${getSpecies(main.eggSpeciesOf(id)).name}) in ${
+                                  EGG_BATTLES - main.dayCareProgress.value
+                              } battles.`}
+                        <Bar value={main.dayCareProgress.value} max={EGG_BATTLES} kind="progress" />
+                    </div>
+                ) : null}
+            </Panel>
+        );
+    }
+
     return {
         name,
         color,
@@ -437,6 +494,7 @@ const layer = createLayer(id, () => {
                     ) : null}
                     <div class="pk-party-grid">{main.partyIds.value.map(renderPartySlot)}</div>
                     {renderDetail(detailId)}
+                    {main.dayCareOpen.value ? renderDayCare() : null}
                     <Panel title={`PC Box (${allIds.value.length})`}>
                         <div class="pk-filter-row">
                             <input
