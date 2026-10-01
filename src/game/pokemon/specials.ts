@@ -1,5 +1,6 @@
 import type { BallId, KeyItemId } from "./items";
 import { JOHTO_SPECIALS } from "./johto";
+import { JOHTO_ANIME_SPECIALS } from "./johtoAnime";
 import { KANTO_ANIME_SPECIALS } from "./kantoAnime";
 import { ORANGE_SPECIALS } from "./orange";
 import { SEVII_SPECIALS } from "./sevii";
@@ -400,7 +401,8 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
     ...KANTO_ANIME_SPECIALS,
     ...ORANGE_SPECIALS,
     ...SEVII_SPECIALS,
-    ...JOHTO_SPECIALS
+    ...JOHTO_SPECIALS,
+    ...JOHTO_ANIME_SPECIALS
 ];
 
 /** Seconds allowed to defeat a legendary before it flees. */

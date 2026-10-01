@@ -336,6 +336,34 @@ const LEGENDARY_FORMS: Species[] = [
         baseStats: boosted(149),
         captureRate: 3
     }),
+    // Johto's: the round, flightless Pidgey of Pudgy Pidgey Isle ("Fly Me to the Moon")...
+    variant(16, 3016, "unique", "Pudgy Pidgey", {
+        spriteKey: "16-pudgy",
+        localSprite: true,
+        captureRate: 120
+    }),
+    // ...Silver, Lugia's child ("Hi Ho Silver... Away!")...
+    variant(249, 3249, "unique", "Silver (young Lugia)", {
+        spriteKey: "249-young",
+        localSprite: true
+    }),
+    // ...the Unown's Entei ("Spell of the Unown"), drawn in the Unown's dark glyphs...
+    variant(244, 3244, "unique", "Unown Entei", {
+        spriteKey: "244-unown",
+        localSprite: true,
+        types: ["fire", "psychic"]
+    }),
+    // ...and the Celebi and Tyranitar corrupted by the Iron-Masked Marauder's Dark Balls
+    // ("Celebi: The Voice of the Forest").
+    variant(251, 3251, "unique", "Dark Celebi", {
+        spriteKey: "251-dark",
+        localSprite: true,
+        types: ["dark", "grass"]
+    }),
+    variant(248, 3248, "unique", "Dark Tyranitar", {
+        spriteKey: "248-dark",
+        localSprite: true
+    }),
     // Mewtwo's clones of great Trainers' Pokémon in "Mewtwo Strikes Back", marked with stripes.
     ...[1, 4, 7, 3, 6, 9, 25, 52, 31, 18, 111, 27, 28, 123, 106, 87, 45, 55, 54, 117, 73, 130]
         .concat([38, 37, 78, 134, 40])

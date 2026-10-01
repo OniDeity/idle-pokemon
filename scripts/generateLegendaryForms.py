@@ -8,6 +8,10 @@ game's own copies of PokeAPI's default sprites (public/sprites/pokemon):
   silhouette with glowing eyes.
 - Mewtwo's clones ("Mewtwo Strikes Back"): marbled with darker stripes.
 - The Lake of Rage's Red Gyarados: the shiny Gyarados art, in every view.
+- Johto's: the round, flightless Pudgy Pidgey ("Fly Me to the Moon"), Silver the young Lugia
+  ("Hi Ho Silver... Away!"), the Unown's Entei, drawn in their dark glyphs ("Spell of the
+  Unown"), and Dark Celebi and Dark Tyranitar, corrupted by Dark Balls ("Celebi: The Voice of
+  the Forest").
 - The sleeping Snorlax that block the way: recolored like Pokémon Sleep's research-area Snorlax.
   Their shiny sprites stay the regular shiny, as in Pokémon Sleep.
 
@@ -176,12 +180,104 @@ def paint_sleep(img, area, shiny):
     return img
 
 
+def bounds(img):
+    box = img.getbbox()
+    return img.crop(box), box
+
+
+def rescale(img, sx, sy):
+    """Resizes the Pokémon (pixel art, so nearest-neighbour), keeping its feet where they were."""
+    body, (left, top, right, bottom) = bounds(img)
+    w, h = max(1, round(body.width * sx)), max(1, round(body.height * sy))
+    body = body.resize((w, h), Image.NEAREST)
+    out = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    cx = (left + right) // 2
+    out.paste(body, (max(0, min(img.width - w, cx - w // 2)), min(img.height - h, bottom - h)), body)
+    return out
+
+
+def paint_pudgy(img):
+    """Too well fed to fly: a third wider and a little squatter."""
+    return rescale(img, 1.35, 0.92)
+
+
+def paint_young(img):
+    """Silver is still a child: Lugia at two thirds of its size."""
+    return rescale(img, 0.66, 0.66)
+
+
+def glyph(x, y):
+    """Unown-like glyphs: an eye-ring with a stroke, on a staggered grid."""
+    row = y // 14
+    cx = (x + (row % 2) * 7) % 14 - 7
+    cy = y % 14 - 6
+    d = math.hypot(cx, cy)
+    return abs(d - 3.2) < 0.9 or (abs(cx) < 0.8 and 3 < cy < 7)
+
+
+def paint_unown_entei(img):
+    """The Unown's Entei: a dusky, violet-shaded Entei covered in their glyphs."""
+    px = img.load()
+    body = body_colors(img)
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            p = px[x, y]
+            if not p[3]:
+                continue
+            hh, l, s = hls(p[:3])
+            if p[:3] in body and glyph(x, y):
+                px[x, y] = (34, 22, 48, p[3])
+            elif s > 0.15:
+                px[x, y] = (*to_rgb(hh - 0.04, l * 0.85, s * 0.8), p[3])
+    return img
+
+
+def paint_dark_celebi(img):
+    """Dark Celebi: its green turns a near-black violet, and its blue eyes glow red."""
+    px = img.load()
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            p = px[x, y]
+            if not p[3]:
+                continue
+            hh, l, s = hls(p[:3])
+            if s > 0.2 and 0.15 < hh < 0.45:
+                px[x, y] = (*to_rgb(0.78, 0.08 + l * 0.4, 0.45), p[3])
+            elif s > 0.25 and 0.5 < hh < 0.7:
+                px[x, y] = (*to_rgb(0.99, max(0.35, l), 0.85), p[3])
+    return img
+
+
+def paint_dark_tyranitar(img):
+    """Dark Tyranitar: its green armor turns a near-black violet, its belly a dull slate."""
+    px = img.load()
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            p = px[x, y]
+            if not p[3]:
+                continue
+            hh, l, s = hls(p[:3])
+            if s > 0.15 and 0.15 < hh < 0.45:
+                px[x, y] = (*to_rgb(0.76, 0.06 + l * 0.42, 0.4), p[3])
+            elif s > 0.15 and 0.45 <= hh < 0.7:
+                px[x, y] = (*to_rgb(0.68, l * 0.7, s * 0.5), p[3])
+    return img
+
+
 def forms():
     for species, (mark, darken, bright) in GIANTS.items():
         yield species, f"{species}-giant", lambda img, m=mark, d=darken, b=bright: paint_giant(img, m, d, b)
     yield "149", "149-giant", paint_dragonite
     for species in CLONES:
         yield str(species), f"{species}-clone", lambda img, s=species: paint_clone(img, s)
+    yield "16", "16-pudgy", paint_pudgy
+    yield "249", "249-young", paint_young
+    yield "244", "244-unown", paint_unown_entei
+    yield "251", "251-dark", paint_dark_celebi
+    yield "248", "248-dark", paint_dark_tyranitar
     for area in SLEEP_AREAS:
         yield "143", f"143-sleep-{area}", lambda img, a=area, shiny=False: paint_sleep(img, a, shiny)
 

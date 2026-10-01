@@ -132,9 +132,9 @@ describe("data", () => {
         const anime = VARIANT_SPECIES.filter(v =>
             ["pinkan", "valencian", "unique"].includes(v.variant!)
         );
-        expect(anime.length).toBe(33);
+        expect(anime.length).toBe(38);
         anime
-            .filter(v => v.accessory == null)
+            .filter(v => v.accessory == null && !v.localSprite)
             .forEach(v => expect(variantFilter(v.id), v.name).toBeDefined());
         // Pinkan Rhyhorn stays pink when it evolves; Pinkan Caterpie becomes a regular Metapod.
         expect(getSpecies(1111).evolutions[0].into).toBe(1112);
@@ -520,6 +520,28 @@ describe("Apricorn Balls", () => {
         // Plain balls are unchanged.
         expect(ballEffect("greatBall", ctx(19))).toEqual([1.5, 0]);
         expect(APRICORN_BALLS.every(id => BALLS[id].region === "johto")).toBe(true);
+    });
+});
+
+describe("Johto anime", () => {
+    test("every anime-only Johto place is explorable, with its one-of-a-kind Pokémon", () => {
+        const anime = zonesIn("johto").filter(z => z.anime);
+        expect(anime.length).toBe(58);
+        // Anime places come after the game's own within each badge tier.
+        const johto = zonesIn("johto");
+        johto.forEach((zone, i) => {
+            if (i > 0)
+                expect(zone.badgesRequired).toBeGreaterThanOrEqual(johto[i - 1].badgesRequired);
+        });
+        // Pudgy Pidgey are wild; Silver, Dark Celebi and the Unown's Entei are legendary encounters.
+        expect(allZoneSpecies("pudgyPidgeyIsle")).toContain(3016);
+        const legends = SPECIAL_ENCOUNTERS.filter(sp => sp.kind === "legendary").map(
+            sp => sp.speciesId
+        );
+        expect(legends).toEqual(expect.arrayContaining([3249, 3251, 3248, 3244]));
+        expect(getSpecies(3251).types).toEqual(["dark", "grass"]);
+        // Mewtwo's clones settled on Mount Quena.
+        expect(allZoneSpecies("mountQuena").length).toBe(27);
     });
 });
 
