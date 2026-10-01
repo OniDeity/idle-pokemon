@@ -45,6 +45,7 @@ import {
     PATTERN_CHANCE,
     rollEncounter,
     ZONES,
+    zonePools,
     zonesIn
 } from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
@@ -520,6 +521,24 @@ describe("Apricorn Balls", () => {
         // Plain balls are unchanged.
         expect(ballEffect("greatBall", ctx(19))).toEqual([1.5, 0]);
         expect(APRICORN_BALLS.every(id => BALLS[id].region === "johto")).toBe(true);
+    });
+});
+
+describe("key items", () => {
+    test("every encounter pool's key item can be had in that zone's region", () => {
+        // Kindle Road's Rock Smash rocks were once out of reach: the Sevii Islands never gave it.
+        for (const region of REGION_LIST) {
+            const items = new Set<string>([
+                ...region.startingKeyItems,
+                ...region.trials.flatMap(t => t.keyItems)
+            ]);
+            for (const zone of zonesIn(region.id)) {
+                for (const [pool, entries] of Object.entries(zonePools(zone.id))) {
+                    if (pool === "walk" || entries == null || entries.length === 0) continue;
+                    expect(items.has(pool), `${zone.id} ${pool}`).toBe(true);
+                }
+            }
+        }
     });
 });
 
