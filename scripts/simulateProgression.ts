@@ -206,7 +206,7 @@ function runJourney(region: RegionDefinition, starter: number) {
     function claimSpecials() {
         for (const s of SPECIAL_ENCOUNTERS) {
             if (s.region !== region.id || claimed.has(s.id) || badges < s.badgesRequired) continue;
-            if (s.kind === "legendary" || owned.has(s.speciesId)) continue;
+            if (s.kind === "legendary" || s.kind === "boss" || owned.has(s.speciesId)) continue;
             if (s.kind === "trade" && !owned.has(s.wants)) continue;
             if (s.kind === "gift" && s.price != null) {
                 if (money < s.price * 2) continue;

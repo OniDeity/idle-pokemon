@@ -28,7 +28,7 @@ import {
     WILD_VARIANTS
 } from "game/pokemon/data";
 import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
-import { SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
+import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { JOHTO_SWARMS } from "game/pokemon/johto";
 import { pokedexRequirement, speciesObtainableIn } from "game/pokemon/pokedex";
@@ -424,9 +424,9 @@ describe("Cobblemon variants", () => {
         const needed = pokedexRequirement(REGIONS.johto);
         expect(needed).toEqual(speciesObtainableIn(["kanto", "orange", "sevii"]));
         expect(needed.size).toBeGreaterThan(240);
-        // Johto brings the rest.
+        // Johto brings the rest (Sudowoodo, Elekid, Celebi…): the Pokédex can be completed.
         const all = speciesObtainableIn(REGION_LIST.map(r => r.id));
-        expect(all.size).toBeGreaterThanOrEqual(needed.size);
+        expect(SPECIES.filter(sp => !all.has(sp.id)).map(sp => sp.name)).toEqual([]);
     });
 });
 
@@ -520,6 +520,33 @@ describe("Apricorn Balls", () => {
         // Plain balls are unchanged.
         expect(ballEffect("greatBall", ctx(19))).toEqual([1.5, 0]);
         expect(APRICORN_BALLS.every(id => BALLS[id].region === "johto")).toBe(true);
+    });
+});
+
+describe("Johto specials", () => {
+    test("gifts, trades, legends and Red are all set up", () => {
+        const johto = SPECIAL_ENCOUNTERS.filter(sp => sp.region === "johto");
+        expect(johto.length).toBeGreaterThan(20);
+        const zoneIds = new Set(zonesIn("johto").map(z => z.id));
+        for (const special of johto) {
+            specialSpecies(special).forEach(id => expect(getSpecies(id).id).toBe(id));
+            if (special.kind === "legendary")
+                expect(zoneIds.has(special.zoneId), special.id).toBe(true);
+        }
+        // The Odd Egg can hatch every baby Pokémon, often shiny.
+        const oddEgg = johto.find(sp => sp.id === "oddEgg")!;
+        expect(specialSpecies(oddEgg).sort()).toEqual([172, 173, 174, 236, 238, 239, 240]);
+        // Red waits on Mt. Silver after the League, with his HeartGold/SoulSilver team.
+        const red = johto.find(sp => sp.kind === "boss")!;
+        expect(red.kind === "boss" && red.trainer.team.map(p => p.id)).toEqual([
+            25, 196, 143, 3, 6, 9
+        ]);
+        expect(red.postGame).toBe(true);
+        expect(specialSpecies(red)).toEqual([]);
+        // The Red Gyarados is its own form; Union Cave's Lapras only comes on Fridays.
+        expect(getSpecies(7022).baseSpecies).toBe(130);
+        const lapras = johto.find(sp => sp.id === "unionCaveLapras")!;
+        expect(lapras.kind === "gift" && lapras.weekdays).toEqual([5]);
     });
 });
 

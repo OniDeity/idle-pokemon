@@ -4,6 +4,7 @@
  */
 import type { EncounterEntry, EncounterPoolId } from "./data";
 import { enc } from "./data";
+import type { SpecialEncounter } from "./specials";
 import type { GymDefinition, TrainerDefinition } from "./trainers";
 import { timeLimit, trial } from "./trainers";
 import type { ZoneDefinition } from "./zones";
@@ -640,3 +641,295 @@ export function johtoFinale(): TrainerDefinition[] {
         )
     ];
 }
+
+/** Johto's gifts, trades, Game Corner prizes, one-of-a-kind encounters and Red. */
+export const JOHTO_SPECIALS: SpecialEncounter[] = [
+    {
+        kind: "trade",
+        id: "violetOnix",
+        region: "johto",
+        speciesId: 95,
+        level: 10,
+        place: "Violet City",
+        badgesRequired: 0,
+        wants: 69,
+        text: "Kyle would love to meet a Bellsprout. His Onix, Rocky, is yours for the chance."
+    },
+    {
+        kind: "gift",
+        id: "johtoTogepiEgg",
+        region: "johto",
+        speciesId: 175,
+        level: 5,
+        place: "Violet City Pokémon Center",
+        badgesRequired: 1,
+        text: "Professor Elm's aide hands you the mysterious Egg Mr. Pokémon found."
+    },
+    {
+        kind: "gift",
+        id: "unionCaveLapras",
+        region: "johto",
+        speciesId: 131,
+        level: 20,
+        place: "Union Cave, deepest floor",
+        badgesRequired: 1,
+        weekdays: [5],
+        text: "Every Friday, a gentle Lapras surfaces in the depths of Union Cave and swims up to you."
+    },
+    {
+        kind: "gift",
+        id: "kenyaSpearow",
+        region: "johto",
+        speciesId: 21,
+        level: 20,
+        place: "Route 35 gatehouse",
+        badgesRequired: 2,
+        text: "Deliver Kenya and her Mail to a man on Route 31, and he lets you keep her."
+    },
+    {
+        kind: "gift",
+        id: "billsEevee",
+        region: "johto",
+        speciesId: 133,
+        level: 5,
+        place: "Bill's house, Goldenrod City",
+        badgesRequired: 2,
+        text: "Bill can't keep this Eevee he found. Will you raise it?"
+    },
+    {
+        kind: "gift",
+        id: "oddEgg",
+        region: "johto",
+        speciesId: 172,
+        pool: [172, 173, 174, 236, 238, 239, 240],
+        shinyChance: 0.14,
+        level: 5,
+        place: "Route 34 Day Care",
+        badgesRequired: 2,
+        text: "The Day Care man found an Odd Egg. It could hatch into any baby Pokémon — and it's often shiny!"
+    },
+    {
+        kind: "trade",
+        id: "goldenrodMachop",
+        region: "johto",
+        speciesId: 66,
+        level: 15,
+        place: "Goldenrod Department Store",
+        badgesRequired: 2,
+        wants: 96,
+        text: "Mike wants to see a Drowzee. He'll give you his Machop, Muscle."
+    },
+    ...(
+        [
+            [63, 15, 2000],
+            [23, 15, 7000],
+            [27, 15, 7000],
+            [147, 15, 21000]
+        ] as const
+    ).map(
+        ([speciesId, level, price]): SpecialEncounter => ({
+            kind: "gift",
+            id: `goldenrodGameCorner${speciesId}`,
+            region: "johto",
+            speciesId,
+            level,
+            place: "Goldenrod Game Corner",
+            badgesRequired: 2,
+            price,
+            text: "Trade in coins at the prize counter."
+        })
+    ),
+    {
+        kind: "legendary",
+        id: "route36Sudowoodo",
+        region: "johto",
+        speciesId: 185,
+        level: 20,
+        zoneId: "route36",
+        place: "Route 36",
+        badgesRequired: 3,
+        keyItem: "squirtBottle",
+        strength: 1.6,
+        text: "A strange tree blocks the road. It wiggles when you water it with the SquirtBottle!"
+    },
+    {
+        kind: "gift",
+        id: "kirksShuckle",
+        region: "johto",
+        speciesId: 213,
+        level: 15,
+        place: "Kirk's house, Cianwood City",
+        badgesRequired: 4,
+        text: "Kirk is afraid Team Rocket will steal his Shuckle, Shuckie. He asks you to look after it."
+    },
+    {
+        kind: "trade",
+        id: "olivineVoltorb",
+        region: "johto",
+        speciesId: 100,
+        level: 20,
+        place: "Olivine City",
+        badgesRequired: 4,
+        wants: 98,
+        text: "Tim would love to see a Krabby. He'll give you his Voltorb, Volty."
+    },
+    {
+        kind: "legendary",
+        id: "johtoRaikou",
+        region: "johto",
+        speciesId: 243,
+        level: 40,
+        zoneId: "route38",
+        place: "Roaming Johto",
+        badgesRequired: 4,
+        strength: 2.3,
+        text: "Awakened in the Burned Tower, Raikou races across Johto like lightning."
+    },
+    {
+        kind: "legendary",
+        id: "johtoEntei",
+        region: "johto",
+        speciesId: 244,
+        level: 40,
+        zoneId: "route42",
+        place: "Roaming Johto",
+        badgesRequired: 4,
+        strength: 2.3,
+        text: "Entei roams the land, its roar shaking the mountains like an erupting volcano."
+    },
+    {
+        kind: "gift",
+        id: "karateTyrogue",
+        region: "johto",
+        speciesId: 236,
+        level: 10,
+        place: "Mt. Mortar",
+        badgesRequired: 5,
+        text: "The Karate King, Kiyo, is so impressed by your battle that he gives you a Tyrogue."
+    },
+    {
+        kind: "legendary",
+        id: "redGyarados",
+        region: "johto",
+        speciesId: 7022,
+        level: 30,
+        zoneId: "lakeOfRage",
+        place: "Lake of Rage",
+        badgesRequired: 5,
+        strength: 2.0,
+        text: "A Gyarados as red as fire rampages across the lake, driven mad by a strange signal."
+    },
+    {
+        kind: "trade",
+        id: "blackthornDodrio",
+        region: "johto",
+        speciesId: 85,
+        level: 30,
+        place: "Blackthorn City",
+        badgesRequired: 7,
+        wants: 148,
+        text: "Emy has always wanted to see a Dragonair. She'll trade you her Dodrio, Doris."
+    },
+    {
+        kind: "legendary",
+        id: "whirlLugia",
+        region: "johto",
+        speciesId: 249,
+        level: 45,
+        zoneId: "whirlIslands",
+        place: "Whirl Islands, deep below",
+        badgesRequired: 7,
+        strength: 2.5,
+        text: "With the Silver Wing, you dive to the bottom of the Whirl Islands. Lugia is waiting."
+    },
+    {
+        kind: "gift",
+        id: "dragonsDenDratini",
+        region: "johto",
+        speciesId: 147,
+        level: 15,
+        place: "Dragon's Den",
+        badgesRequired: 8,
+        text: "Passing the Dragon Master's test, you're entrusted with a Dratini that knows Extreme Speed."
+    },
+    {
+        kind: "legendary",
+        id: "johtoSuicune",
+        region: "johto",
+        speciesId: 245,
+        level: 40,
+        zoneId: "tohjoFalls",
+        place: "Tohjo Falls",
+        badgesRequired: 8,
+        strength: 2.4,
+        text: "Suicune, the aurora Pokémon you've chased across Johto, finally stands its ground."
+    },
+    {
+        kind: "legendary",
+        id: "bellTowerHoOh",
+        region: "johto",
+        speciesId: 250,
+        level: 45,
+        zoneId: "ecruteakCity",
+        place: "Bell Tower, roof",
+        badgesRequired: 8,
+        strength: 2.5,
+        text: "With the Rainbow Wing, the Bell Tower opens. A rainbow-colored Pokémon lands on its roof."
+    },
+    {
+        kind: "legendary",
+        id: "ilexCelebi",
+        region: "johto",
+        speciesId: 251,
+        level: 30,
+        zoneId: "ilexForest",
+        place: "Ilex Forest shrine",
+        badgesRequired: 8,
+        postGame: true,
+        strength: 2.6,
+        text: "Kurt asks you to place the GS Ball at the shrine. The guardian of the forest appears!"
+    },
+    {
+        kind: "legendary",
+        id: "ilexSpikyPichu",
+        region: "johto",
+        speciesId: 4028,
+        level: 30,
+        zoneId: "ilexForest",
+        place: "Ilex Forest shrine",
+        badgesRequired: 8,
+        postGame: true,
+        strength: 2.0,
+        text: "A Pichu with a spiky ear plays at the shrine, as if it came here through time."
+    },
+    {
+        kind: "boss",
+        id: "mtSilverRed",
+        region: "johto",
+        speciesId: 25,
+        level: 88,
+        place: "Mt. Silver summit",
+        badgesRequired: 8,
+        postGame: true,
+        trainer: {
+            id: "red",
+            name: "Red",
+            title: "Pokémon Trainer",
+            specialty: null,
+            team: [
+                { id: 25, level: 88 },
+                { id: 196, level: 84 },
+                { id: 143, level: 82 },
+                { id: 3, level: 84 },
+                { id: 6, level: 84 },
+                { id: 9, level: 84 }
+            ],
+            timeLimit: timeLimit(6),
+            statMultiplier: 3.0,
+            prizeMoney: 8800,
+            quote: "…"
+        },
+        prizeBalls: { masterBall: 1 },
+        text: "A silent Trainer waits in the snow at the top of Mt. Silver. Beat him to win a Master Ball."
+    }
+];

@@ -1085,6 +1085,13 @@ export const main = createLayer("main", layer => {
         if (special.kind === "legendary") {
             if (special.keyItem != null && !keyItems.value[special.keyItem]) return false;
         }
+        if (
+            (special.kind === "legendary" || special.kind === "gift") &&
+            special.weekdays != null &&
+            !special.weekdays.includes(moment.value.weekday)
+        ) {
+            return false;
+        }
         return true;
     }
 
@@ -1094,17 +1101,54 @@ export const main = createLayer("main", layer => {
             challengeLegendary(special);
             return;
         }
+        if (special.kind === "boss") {
+            challengeBoss(special);
+            return;
+        }
         if (special.kind === "trade" && !owns(special.wants)) return;
         if (special.kind === "gift" && special.price != null && !spend(special.price)) return;
         claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
-        receivePokemon(special.speciesId, special.level, false);
-        const species = getSpecies(special.speciesId);
+        // The Odd Egg hatches into one of its babies, often shiny.
+        const speciesId =
+            special.kind === "gift" && special.pool != null
+                ? special.pool[Math.floor(Math.random() * special.pool.length)]
+                : special.speciesId;
+        const shiny = special.kind === "gift" && Math.random() < (special.shinyChance ?? 0);
+        receivePokemon(speciesId, special.level, shiny);
+        const species = getSpecies(speciesId);
         const text =
             special.kind === "trade"
                 ? `Traded for ${species.name}! (You kept your ${getSpecies(special.wants).name}.)`
-                : `Received ${species.name}!`;
-        addLog({ kind: "catch", text, speciesId: special.speciesId });
+                : special.kind === "gift" && special.pool != null
+                  ? `The Egg hatched into ${shiny ? "a shiny " : ""}${species.name}!`
+                  : `Received ${species.name}!`;
+        addLog({ kind: shiny ? "shiny" : "catch", text, speciesId, shiny });
         showFlash(text, "catch");
+    }
+
+    /** A one-off battle against a famous Trainer (Red on Mt. Silver), with a prize. */
+    function challengeBoss(special: Extract<SpecialEncounter, { kind: "boss" }>) {
+        startTrainerBattle({
+            label: `${special.trainer.name} on ${special.place}`,
+            trainers: [withStrength(special.trainer, rematch.value)],
+            onWin() {
+                claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
+                const prizes: string[] = [];
+                for (const [ball, n] of Object.entries(special.prizeBalls ?? {}) as [
+                    BallId,
+                    number
+                ][]) {
+                    balls.value = { ...balls.value, [ball]: (balls.value[ball] ?? 0) + n };
+                    prizes.push(`${n} ${BALLS[ball].name}${n === 1 ? "" : "s"}`);
+                }
+                money.value += special.trainer.prizeMoney;
+                const text = `You defeated ${special.trainer.name} at ${special.place}!${
+                    prizes.length > 0 ? ` You receive ${prizes.join(" and ")}.` : ""
+                }`;
+                addLog({ kind: "badge", text });
+                notify(`🏆 ${text}`, "success");
+            }
+        });
     }
 
     /** Picks where the next journey happens. Only possible before choosing a starter. */
