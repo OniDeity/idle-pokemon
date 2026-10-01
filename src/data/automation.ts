@@ -15,6 +15,7 @@ import { getSpecies, hallOfFameId } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
 import type { StoneId } from "game/pokemon/data";
 import { BALLS, STONES } from "game/pokemon/items";
+import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
 import { maxHp } from "game/pokemon/stats";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import type { TrainerDefinition } from "game/pokemon/trainers";
@@ -44,6 +45,14 @@ function autoShop() {
         }
         const count = Math.min(target - have, Math.floor((main.money.value * 0.25) / def.price));
         if (count > 0) main.buyBalls(ball, count);
+    }
+    // Johto's extras: the Bug-Catching Contest and Pokégear swarms, when they're cheap for us.
+    if (!main.contestEntered.value && main.money.value >= BUG_CONTEST_FEE * 4) {
+        main.enterBugContest();
+    }
+    for (const swarm of JOHTO_SWARMS) {
+        if (main.money.value < SWARM_PRICE * 4) break;
+        if (main.swarmsJoined.value[swarm.zoneId] !== true) main.joinSwarm(swarm.zoneId);
     }
     // Then the cheapest upgrade, if it costs under half of what we have.
     const options = MART_UPGRADE_LIST.filter(
@@ -185,7 +194,7 @@ function bestZoneToRecatch(zones: ZoneDefinition[]): ZoneDefinition | undefined 
             zone.id,
             main.keyItems.value,
             rodLevel,
-            main.moment.value
+            main.zoneExtras.value
         )) {
             if (dex.entry(id).caught && !main.owns(id)) chance += p;
         }
@@ -216,7 +225,7 @@ function autoTravel() {
     const withNew = zones.filter(
         z =>
             typicalLevel(z.id) >= average - 12 &&
-            availableZoneSpecies(z.id, main.keyItems.value, main.moment.value).some(
+            availableZoneSpecies(z.id, main.keyItems.value, main.zoneExtras.value).some(
                 id => !main.owns(id)
             )
     );

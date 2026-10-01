@@ -677,7 +677,7 @@ export const AUTOMATIONS: AutomationDefinition[] = [
         id: "autoShop",
         name: "Shopping List",
         description:
-            "Keeps your balls stocked and buys the cheapest Poké Mart upgrade when you can easily afford it.",
+            "Keeps your balls stocked, buys the cheapest Poké Mart upgrade, and pays for Johto's Bug-Catching Contest and swarms, when you can easily afford them.",
         cost: 5,
         sprite: itemSprite("coin-case")
     },

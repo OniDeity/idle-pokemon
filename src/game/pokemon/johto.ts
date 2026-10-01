@@ -322,14 +322,17 @@ export const JOHTO_ZONES: ZoneDefinition[] = [
     })
 ];
 
-/** A HeartGold/SoulSilver swarm: Pokémon that flood one place on the day the radio reports. */
+/** A HeartGold/SoulSilver swarm: Pokémon that flood one place, as the Pokégear radio reports. */
 export interface Swarm {
     zoneId: string;
     speciesId: number;
     pools: Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 }
 
-/** HeartGold/SoulSilver's Johto swarms (one a day, reported by the Pokégear radio). */
+/**
+ * HeartGold/SoulSilver's Johto swarms. With the Radio Card, each can be tuned in to once per
+ * journey, for a fee, and its Pokémon join that place's pool for the rest of the journey.
+ */
 export const JOHTO_SWARMS: Swarm[] = [
     { zoneId: "darkCave", speciesId: 206, pools: { walk: [enc(206, 2, 3)] } },
     {
@@ -356,8 +359,14 @@ export const JOHTO_SWARMS: Swarm[] = [
     { zoneId: "mtMortar", speciesId: 183, pools: { walk: [enc(183, 13, 15)] } }
 ];
 
-/** The Bug-Catching Contest runs in the National Park on Tuesdays, Thursdays and Saturdays. */
-export const BUG_CONTEST_WEEKDAYS = [2, 4, 6];
+/** What tuning in to one swarm costs. */
+export const SWARM_PRICE = 3000;
+
+/**
+ * The Bug-Catching Contest's entry fee: paid once a journey, it adds the contest's bugs to the
+ * National Park's grass for the rest of the journey.
+ */
+export const BUG_CONTEST_FEE = 2000;
 
 /** The contest's grass (HeartGold/SoulSilver's Kanto-bug table). */
 export const BUG_CONTEST_POOL: EncounterEntry[] = [
@@ -673,8 +682,7 @@ export const JOHTO_SPECIALS: SpecialEncounter[] = [
         level: 20,
         place: "Union Cave, deepest floor",
         badgesRequired: 1,
-        weekdays: [5],
-        text: "Every Friday, a gentle Lapras surfaces in the depths of Union Cave and swims up to you."
+        text: "A gentle Lapras surfaces in the depths of Union Cave and swims up to you."
     },
     {
         kind: "gift",
