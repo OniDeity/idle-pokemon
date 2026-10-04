@@ -12,6 +12,8 @@ game's own copies of PokeAPI's default sprites (public/sprites/pokemon):
   ("Hi Ho Silver... Away!"), the Unown's Entei, drawn in their dark glyphs ("Spell of the
   Unown"), and Dark Celebi and Dark Tyranitar, corrupted by Dark Balls ("Celebi: The Voice of
   the Forest").
+- Hoenn's: Meta Groudon, the artificial Groudon Butler built in "Jirachi: Wish Maker": a
+  near-black slate hide with its pale plates glowing red.
 - The sleeping Snorlax that block the way: recolored like Pokémon Sleep's research-area Snorlax.
   Their shiny sprites stay the regular shiny, as in Pokémon Sleep.
 
@@ -267,6 +269,23 @@ def paint_dark_tyranitar(img):
     return img
 
 
+def paint_meta_groudon(img):
+    """Meta Groudon: Groudon's red hide turns a near-black slate, its pale plates glow red."""
+    px = img.load()
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            p = px[x, y]
+            if not p[3]:
+                continue
+            hh, l, s = hls(p[:3])
+            if s > 0.25 and (hh < 0.08 or hh > 0.92):
+                px[x, y] = (*to_rgb(0.7, 0.06 + l * 0.38, 0.22), p[3])
+            elif l > 0.55 and s < 0.45:
+                px[x, y] = (*to_rgb(0.01, 0.35 + (l - 0.55) * 0.6, 0.95), p[3])
+    return img
+
+
 def forms():
     for species, (mark, darken, bright) in GIANTS.items():
         yield species, f"{species}-giant", lambda img, m=mark, d=darken, b=bright: paint_giant(img, m, d, b)
@@ -278,6 +297,7 @@ def forms():
     yield "244", "244-unown", paint_unown_entei
     yield "251", "251-dark", paint_dark_celebi
     yield "248", "248-dark", paint_dark_tyranitar
+    yield "383", "383-meta", paint_meta_groudon
     for area in SLEEP_AREAS:
         yield "143", f"143-sleep-{area}", lambda img, a=area, shiny=False: paint_sleep(img, a, shiny)
 

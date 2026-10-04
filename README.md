@@ -19,7 +19,8 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   Ruby & Sapphire quest and the Trainer Tower), and Johto from HeartGold/SoulSilver (eight Gyms,
   the Elite Four and Lance, with Headbutt trees and Rock Smash rocks, plus 58 anime-exclusive
   locations from Palm Hills to Mount Quena), Hoenn from Ruby/Sapphire/Emerald (Emerald's Gyms,
-  Elite Four and Wallace, Dive, Feebas, the fossils, Regis, Lati@s and the weather trio), and
+  Elite Four and Wallace, Dive, Feebas, the fossils, Regis, Lati@s and the weather trio, plus
+  34 anime-only places from the Oldale Ruins to LaRousse City), and
   Orre's two GameCube journeys. Each first clear is tuned for about a day of play.
 - **Johto's Gen 2 extras**: morning, day and night Pokémon all in the grass together, the
   Pokégear radio's swarms (a one-time fee adds each to its place) and Lucky Number Show, the
@@ -50,7 +51,7 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   Bill's Lighthouse, Mewtwo's striped Clone Pokémon on New Island, and the sleeping Snorlax
   recolored after Pokémon Sleep's research areas (Taupe Hollow, Cyan Beach). Johto adds the
   wild Pudgy Pidgey, Silver the young Lugia, the Unown's Entei, Dark Celebi and
-  Dark Tyranitar.
+  Dark Tyranitar; Hoenn adds Meta Groudon from "Jirachi: Wish Maker".
 - **Orre (Colosseum)**: no wild Pokémon, only trainers and Cipher's 48 Shadow Pokémon to snag
   with the Snag Machine and purify at the Relic Stone, from Phenac City to Realgam Tower. Every
   species has a Shadow form; once unlocked, Cipher Peons roam the other regions with Shadow
