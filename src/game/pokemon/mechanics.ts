@@ -4,9 +4,10 @@
  * journey after. Later generations' (double battles in Hoenn, Mega Evolution in Kalos, ...)
  * join this list with their regions.
  */
+import type { KeyItemId } from "./items";
 import type { RegionId } from "./zones";
 
-export type MechanicId = "breeding" | "apricornBalls";
+export type MechanicId = "breeding" | "apricornBalls" | "headbutt";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -18,6 +19,8 @@ export interface MechanicDefinition {
     /** Trials (Gyms) cleared in that region before it's reached. */
     trialsRequired: number;
     description: string;
+    /** A key item the mechanic hands out on every journey once unlocked. */
+    keyItem?: KeyItemId;
 }
 
 export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
@@ -38,6 +41,16 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 2,
         description:
             "Every Poké Mart stocks Kurt's Level, Lure, Moon, Friend, Love, Fast and Heavy Balls."
+    },
+    headbutt: {
+        id: "headbutt",
+        name: "Headbutt trees",
+        region: "johto",
+        unlockAt: "the Headbutt tutor in Ilex Forest, past the Hive Badge",
+        trialsRequired: 2,
+        description:
+            "Every journey starts with Headbutt, and Kanto's trees have their HeartGold/SoulSilver Pokémon.",
+        keyItem: "headbutt"
     }
 };
 

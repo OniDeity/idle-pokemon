@@ -62,7 +62,10 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
   of the earlier regions), Headbutt/Rock Smash, Unown chambers, Pokégear, contest, Apricorn
   Balls, Day Care, legends/gifts/trades, Red on Mt. Silver, 58 anime-only places and the anime's
   one-of-a-kind Pokémon.
-- Mechanics carry back: breeding (Day Care) and Apricorn Balls.
+- Mechanics carry back: breeding (Day Care), Apricorn Balls, and Headbutt trees (Kanto's
+  trees use HGSS's Kanto Headbutt tables at each zone's grass levels; Orange and Sevii have
+  no Headbutt data in any game). A mechanic's `keyItem` is granted on every journey, and the
+  Pokédex requirement only counts pools whose key item the earlier regions give.
 - Day Care: search, Egg previews (★ new to Pokédex, • not in box), filters, Pick best, Auto-swap.
 - Sevii journeys get Rock Smash; collapsible panels.
 
@@ -72,9 +75,8 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
   main-series region.
 - Future generation mechanics go in `mechanics.ts` with their regions: double battles (Hoenn),
   Mega Evolution (Kalos), etc.
+- Gen 3 (Hoenn) will bring Contests and ways to bring Pokémon back to earlier generations' regions.
 - Gen 3 anime Pokémon wait for Hoenn: Latios/Latias (Alto Mare already exists in Johto).
 - Ideas offered but not picked up yet:
-  - Headbutt trees carried back to earlier regions.
   - Better shiny breeding odds the more a species is bred.
-  - A repeatable contest with prizes on a battle-count cooldown.
   - The Lucky Number Show on a battle count instead of real days.

@@ -94,6 +94,11 @@
                         Every panel (PC Box, Day Care, Map tiers, Mart sections…) collapses with a
                         tap on its title, and remembers it in this browser
                     </li>
+                    <li class="feature">
+                        Headbutt trees carry back: learn Headbutt in Johto and every journey has it,
+                        with HeartGold/SoulSilver's tree Pokémon on 18 Kanto routes and Viridian
+                        Forest (at each route's levels)
+                    </li>
                 </ul>
             </details>
             <details>
