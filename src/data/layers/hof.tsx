@@ -3,6 +3,7 @@
  * their team and starts a new journey in any unlocked region, trading the run for Fame.
  * Teams with Pokémon never enshrined before earn the most. The Pokédex is kept.
  */
+import type { ContestCategory, ContestRank } from "game/pokemon/contests";
 import { main } from "data/projEntry";
 import { openLayer } from "../ui/nav";
 import { createReset } from "features/reset";
@@ -66,6 +67,11 @@ const layer = createLayer(id, () => {
     const dayCareRotate = persistent<boolean>(false);
     /** Generation mechanics reached in their own region, now on everywhere. */
     const mechanics = persistent<Partial<Record<MechanicId, boolean>>>({}, false);
+    /** Contest ribbons by species: the highest rank won in each category. */
+    const ribbons = persistent<Record<string, Partial<Record<ContestCategory, ContestRank>>>>(
+        {},
+        false
+    );
 
     function mechanicUnlocked(id: MechanicId): boolean {
         return mechanics.value[id] === true;
@@ -389,6 +395,7 @@ const layer = createLayer(id, () => {
         dayCareRotate,
         mechanics,
         mechanicUnlocked,
+        ribbons,
         unlockMechanic,
         isEnshrined,
         pendingFame,

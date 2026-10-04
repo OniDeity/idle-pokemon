@@ -26,8 +26,10 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   Bug-Catching Contest (a one-time entry fee adds its bugs to the National Park), Kurt's seven
   Apricorn Balls, and the Day Care's Eggs.
 - **Generation mechanics carry back**: a generation's new mechanic is met first in its region,
-  then works in every region from then on: breeding (Johto's Day Care) and Kurt's Apricorn
-  Balls so far; later generations' mechanics will follow the same rule.
+  then works in every region from then on: breeding (Johto's Day Care), Kurt's Apricorn Balls
+  and Headbutt trees; Orre's Snag Machine, Relic Stone and Poké Spots; and Hoenn's Double
+  Battles (a partner backs up the active Pokémon), Pokémon Contests (Pokéblocks, ribbons, Cosplay
+  Pikachu, Feebas's Beauty) and Bring a Partner (start a journey with a Hall of Fame Pokémon).
 - **Johto's legends and events**: Lugia, Ho-Oh, the legendary beasts, Celebi, the Spiky-eared
   Pichu and the Lake of Rage's Red Gyarados; the Odd Egg, Bill's Eevee and the other gifts and
   trades; and Red at the summit of Mt. Silver.

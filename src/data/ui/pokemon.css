@@ -1631,3 +1631,15 @@
 .pk-partner-choice.selected {
     border-color: #facc15;
 }
+
+/* The Contest Hall's running contest. */
+.pk-contest-running {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.pk-contest-running .pk-bar {
+    flex: 1;
+}

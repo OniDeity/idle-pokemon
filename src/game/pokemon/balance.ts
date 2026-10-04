@@ -473,8 +473,11 @@ export function bestMatchup(
 
 /**
  * Double battles (Hoenn's generation mechanic): a partner fights beside the active Pokémon. It's
- * the strongest other member still standing; it attacks the same target and isn't attacked.
+ * the strongest other member still standing; it attacks the same target, isn't attacked, and
+ * lands this share of its usual damage (it supports more than it leads).
  */
+export const PARTNER_DAMAGE = 0.5;
+
 export function battlePartner(
     party: PartyBattler[],
     target: BattlerStats,
@@ -510,7 +513,7 @@ export function wildDps(
     const partner = doubles ? battlePartner(party, target, damageBonus, index, null) : -1;
     return (
         memberDps(party[index], target, damageBonus) +
-        (partner === -1 ? 0 : memberDps(party[partner], target, damageBonus))
+        (partner === -1 ? 0 : PARTNER_DAMAGE * memberDps(party[partner], target, damageBonus))
     );
 }
 
@@ -623,7 +626,7 @@ export function stepTrainerBattle(
             rules.doubles === true ? battlePartner(party, enemy, damageBonus, active, partyHp) : -1;
         const ourDps =
             memberDps(member, enemy, damageBonus) +
-            (partner === -1 ? 0 : memberDps(party[partner], enemy, damageBonus));
+            (partner === -1 ? 0 : PARTNER_DAMAGE * memberDps(party[partner], enemy, damageBonus));
         const second = rules.enemyDoubles === true ? enemies[enemyIndex + 1] : undefined;
         const theirDps =
             damagePerHit(enemy, member) * attacksPerSecond(enemy.species) +

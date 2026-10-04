@@ -11,6 +11,7 @@ import {
     memberDps,
     simulateTrainerBattle,
     stepTrainerBattle,
+    PARTNER_DAMAGE,
     trainerTeam,
     wildDps,
     zoneRates
@@ -34,7 +35,17 @@ import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { JOHTO_SWARMS } from "game/pokemon/johto";
-import { MECHANIC_LIST } from "game/pokemon/mechanics";
+import { MECHANIC_LIST, MECHANICS } from "game/pokemon/mechanics";
+import {
+    CONTEST_CATEGORIES,
+    CONTEST_PIKACHU,
+    contestScore,
+    MAX_CONDITION,
+    nextRank,
+    RANK_SCORES,
+    typeAppeal,
+    winChance
+} from "game/pokemon/contests";
 import {
     isReleased,
     POKEDEX_IDS,
@@ -320,7 +331,7 @@ describe("battles", () => {
         const double = wildDps(team, starmie, 1, true);
         const dps = team.map(m => memberDps(m, starmie, 1)).sort((a, b) => b - a);
         expect(single).toBeCloseTo(dps[0], 9);
-        expect(double).toBeCloseTo(dps[0] + dps[1], 9);
+        expect(double).toBeCloseTo(dps[0] + PARTNER_DAMAGE * dps[1], 9);
         // A lone Pokémon has no partner.
         expect(wildDps(team.slice(0, 1), starmie, 1, true)).toBe(
             wildDps(team.slice(0, 1), starmie, 1)
@@ -585,7 +596,8 @@ describe("generation mechanics", () => {
             "relicStone",
             "pokeSpots",
             "doubleBattles",
-            "partner"
+            "partner",
+            "contests"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
@@ -679,6 +691,30 @@ describe("Hoenn", () => {
         const fishing = encounterOdds("route119", { oldRod: true, goodRod: true, superRod: true });
         expect(fishing.get(349) ?? 0).toBeGreaterThan(0);
         expect(getSpecies(349).evolutions[0].into).toBe(350);
+    });
+});
+
+describe("Pokémon Contests", () => {
+    test("scores, ranks and prizes", () => {
+        // Milotic is a Water type: full appeal in Beauty, none in Tough.
+        expect(typeAppeal(350, "beauty")).toBe(30);
+        expect(typeAppeal(350, "tough")).toBe(0);
+        // A second type counts for half (Gyarados is Water/Flying: Cool from Flying).
+        expect(typeAppeal(130, "cool")).toBe(15);
+        expect(contestScore(350, 40, 50, "beauty")).toBe(50 + 30 + 20);
+        expect(winChance(RANK_SCORES.normal, "normal")).toBe(0.5);
+        expect(winChance(0, "master")).toBe(0);
+        expect(winChance(1000, "master")).toBe(1);
+        // A perfect Pokémon (full condition, suited types, Lv. 100) is sure to win Master Rank.
+        expect(winChance(contestScore(350, 100, MAX_CONDITION, "beauty"), "master")).toBe(1);
+        expect(nextRank(undefined)).toBe("normal");
+        expect(nextRank("hyper")).toBe("master");
+        expect(nextRank("master")).toBeUndefined();
+        for (const category of CONTEST_CATEGORIES) {
+            const prize = getSpecies(CONTEST_PIKACHU[category]);
+            expect(prize.baseSpecies, category).toBe(25);
+        }
+        expect(MECHANICS.contests.region).toBe("hoenn");
     });
 });
 

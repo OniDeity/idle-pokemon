@@ -4,6 +4,17 @@
 import { EGG_BATTLES, main } from "data/projEntry";
 import { HEART_BATTLES } from "game/pokemon/balance";
 import { DAY_CARE_PLACE } from "game/pokemon/mechanics";
+import {
+    CATEGORY_NAMES,
+    CONTEST_CATEGORIES,
+    CONTEST_SECONDS,
+    MAX_CONDITION,
+    POKEBLOCK_COLORS,
+    POKEBLOCK_GAIN,
+    POKEBLOCK_PRICE,
+    RANK_NAMES,
+    winChance
+} from "game/pokemon/contests";
 import { createLayer } from "game/layers";
 import { memberMultiplier, effortMultiplier } from "game/pokemon/balance";
 import type { Evolution, PokemonType, StoneId } from "game/pokemon/data";
@@ -98,7 +109,9 @@ const layer = createLayer(id, () => {
             e.method === "level"
                 ? level >= (e.level ?? Infinity) ||
                   (e.friendship === true &&
-                      (have("sootheBell") || main.box.value[speciesId]?.friend === true))
+                      (have("sootheBell") ||
+                          main.box.value[speciesId]?.friend === true ||
+                          main.beautifulEnough(speciesId)))
                 : e.method === "stone"
                   ? have(e.stone!)
                   : have("linkCable") && (e.heldItem == null || have(e.heldItem))
@@ -262,6 +275,15 @@ const layer = createLayer(id, () => {
                                 onClick={() => main.evolveByLevel(speciesId, evo.into)}
                             >
                                 Evolve (Lv. {evo.level})
+                            </Button>
+                        ) : evo.friendship === true && main.beautifulEnough(speciesId) ? (
+                            <Button
+                                kind="primary"
+                                disabled={main.inTrainerBattle.value}
+                                onClick={() => main.evolveWithSootheBell(speciesId, evo.into)}
+                                title="Beautiful enough from Pokéblocks to evolve now"
+                            >
+                                💙 Evolve (beauty)
                             </Button>
                         ) : evo.friendship === true &&
                           main.box.value[speciesId]?.friend === true ? (
@@ -499,6 +521,78 @@ const layer = createLayer(id, () => {
     }
 
     /** The Day Care: leave a Pokémon, and its Eggs hatch into its family's first stage. */
+    /** Pokémon Contests: the selected Pokémon's conditions, Pokéblocks and contests to enter. */
+    function renderContestHall(id: number) {
+        const running = main.contest.value;
+        const ribbons = hof.ribbons.value[id] ?? {};
+        return (
+            <Panel title="Contest Hall">
+                <p class="pk-small pk-muted">
+                    Feed {getSpecies(id).name} Pokéblocks (₽{POKEBLOCK_PRICE} each, +
+                    {POKEBLOCK_GAIN} to a condition) and enter it in contests. Its score is its
+                    condition, plus up to 30 for types that suit the category, plus half its level.
+                    Win each rank to enter the next; a category's first Master Rank win earns a
+                    Cosplay Pikachu.
+                </p>
+                {running.speciesId !== 0 ? (
+                    <div class="pk-contest-running pk-small">
+                        <Sprite id={running.speciesId} size={40} />
+                        <span>
+                            {getSpecies(running.speciesId).name}: {CATEGORY_NAMES[running.category]}{" "}
+                            Contest, {RANK_NAMES[running.rank]}
+                        </span>
+                        <Bar
+                            value={CONTEST_SECONDS[running.rank] - running.remaining}
+                            max={CONTEST_SECONDS[running.rank]}
+                            kind="progress"
+                        />
+                    </div>
+                ) : null}
+                {CONTEST_CATEGORIES.map(category => {
+                    const condition = main.conditionOf(id, category);
+                    const rank = main.contestRankFor(id, category);
+                    const score = main.contestScoreOf(id, category);
+                    const won = ribbons[category];
+                    return (
+                        <div class="pk-shop-row">
+                            <div class="pk-shop-info">
+                                <b>
+                                    {CATEGORY_NAMES[category]}
+                                    {won != null ? ` 🎀 ${RANK_NAMES[won]}` : ""}
+                                </b>
+                                <Bar value={condition} max={MAX_CONDITION} kind="progress" />
+                                <span class="pk-small pk-muted">
+                                    Condition {condition}/{MAX_CONDITION} · score{" "}
+                                    {Math.round(score)}
+                                    {rank != null
+                                        ? ` · ${Math.round(winChance(score, rank) * 100)}% to win ${RANK_NAMES[rank]}`
+                                        : " · every rank won"}
+                                </span>
+                            </div>
+                            <Button
+                                kind="ghost"
+                                disabled={
+                                    condition >= MAX_CONDITION || main.money.value < POKEBLOCK_PRICE
+                                }
+                                onClick={() => main.feedPokeblock(id, category)}
+                                title={`${POKEBLOCK_COLORS[category]} Pokéblock`}
+                            >
+                                {POKEBLOCK_COLORS[category]} Pokéblock
+                            </Button>
+                            <Button
+                                kind="primary"
+                                disabled={rank == null || running.speciesId !== 0}
+                                onClick={() => main.enterContest(id, category)}
+                            >
+                                Enter
+                            </Button>
+                        </div>
+                    );
+                })}
+            </Panel>
+        );
+    }
+
     function renderDayCare() {
         const id = main.dayCareId.value;
         const inParty = id !== 0 && main.partyIds.value.includes(id);
@@ -691,6 +785,9 @@ const layer = createLayer(id, () => {
                     ) : null}
                     <div class="pk-party-grid">{main.partyIds.value.map(renderPartySlot)}</div>
                     {renderDetail(detailId)}
+                    {main.mechanicOn("contests") && detailId != null
+                        ? renderContestHall(detailId)
+                        : null}
                     {main.dayCareOpen.value ? renderDayCare() : null}
                     <Panel title={`PC Box (${allIds.value.length})`}>
                         <div class="pk-filter-row">

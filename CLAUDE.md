@@ -76,6 +76,13 @@ across journeys.
 - Region order changed once (Orre moved after Hoenn): `hof.regionUnlocked` keeps a region open if
   it was ever cleared or is the current journey, so a new region slotting in never locks a save
   out.
+- Hoenn mechanics (v2.5): `doubleBattles` (balance.ts `battlePartner`, `PARTNER_DAMAGE` = 0.5;
+  the partner isn't attacked; `TrainerDefinition.doubles` makes the trainer's next Pokémon attack
+  too; stepping stays exact), `partner` (`main.journeyPartner`, picked from Hall of Fame teams on
+  the starter screen), `contests` (`contests.ts`; conditions on `BoxEntry.condition`, ribbons by
+  species in `hof.ribbons`, first Master win per category gives Cosplay Pikachu 10080-10084,
+  Feebas evolves at Beauty ≥ 80 via `main.beautifulEnough`). A full 2× partner made Hoenn 3.7 h
+  and Orre 2.5 h in the sim, hence the half-damage partner.
 - The simulator purifies Shadow Pokémon (party only, like the game); scoring a member at the
   level cap instead of its level was tried and is wrong: wild XP is tiny next to a level's worth.
 
@@ -94,10 +101,8 @@ across journeys.
 
 ## Plans and ideas
 
-- Hoenn phase 2 (next): Gen 3 mechanics to design with the owner: double battles, Contests
-  (Pokéblocks/Beauty for Feebas, maybe ORAS Cosplay Pikachu as prizes), and ways to bring
-  Pokémon back to earlier generations' regions. Then Hoenn anime places and Pokémon (Alto Mare's
-  Latios/Latias already exist in Johto's anime places).
+- Next: Hoenn anime places and Pokémon (Alto Mare's Latios/Latias already exist in Johto's anime
+  places; Ash's Hoenn Cap Pikachu, 10095, isn't placed yet).
 - Future generation mechanics go in `mechanics.ts` with their regions: double battles (Hoenn),
   Mega Evolution (Kalos), etc.
 - Ideas offered but not picked up yet:

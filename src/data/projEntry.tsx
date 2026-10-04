@@ -20,6 +20,21 @@ import {
     trainerTeam,
     wildDps
 } from "game/pokemon/balance";
+import type { ContestCategory, ContestRank } from "game/pokemon/contests";
+import {
+    CATEGORY_NAMES,
+    CONTEST_PIKACHU,
+    CONTEST_PRIZE_MONEY,
+    CONTEST_SECONDS,
+    contestScore,
+    MAX_CONDITION,
+    MILOTIC_BEAUTY,
+    nextRank,
+    POKEBLOCK_GAIN,
+    POKEBLOCK_PRICE,
+    RANK_NAMES,
+    winChance
+} from "game/pokemon/contests";
 import type { StoneId } from "game/pokemon/data";
 import {
     ALTERNATE_EVOLUTIONS,
@@ -73,6 +88,16 @@ export type BoxEntry = {
     friend?: boolean;
     /** A Shadow Pokémon's closed heart: wild battles won in the party until it can be purified. */
     heart?: number;
+    /** Contest conditions raised with Pokéblocks (Cool, Beauty, Cute, Smart, Tough). */
+    condition?: Partial<Record<ContestCategory, number>>;
+};
+
+/** A contest under way: who's competing, where, and the seconds left. */
+export type ContestEntry = {
+    speciesId: number;
+    category: ContestCategory;
+    rank: ContestRank;
+    remaining: number;
 };
 
 export type CatchMode = "new" | "all" | "off";
@@ -604,11 +629,13 @@ export const main = createLayer("main", layer => {
         const evolution = getSpecies(fromId).evolutions.find(
             e => e.friendship === true && e.into === evolvesInto
         );
-        const friend = box.value[fromId]?.friend === true;
+        const friend = box.value[fromId]?.friend === true || beautifulEnough(fromId);
         if (evolution == null || (!friend && (stones.value.sootheBell ?? 0) <= 0)) return;
         const into = evolutionTarget(fromId, evolution.into);
         if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
-        if (friend) {
+        if (beautifulEnough(fromId)) {
+            evolve(fromId, into, " with its beauty");
+        } else if (friend) {
             evolve(fromId, into, " out of friendship (Friend Ball)");
         } else {
             useStone("sootheBell");
@@ -1024,6 +1051,101 @@ export const main = createLayer("main", layer => {
         showFlash(text, "catch");
     }
 
+    // ------------------------------------------------------------------
+    // Pokémon Contests (Hoenn's mechanic)
+    // ------------------------------------------------------------------
+
+    const contest = persistent<ContestEntry>(
+        { speciesId: 0, category: "cool", rank: "normal", remaining: 0 },
+        false
+    );
+
+    function conditionOf(id: number, category: ContestCategory): number {
+        return box.value[id]?.condition?.[category] ?? 0;
+    }
+
+    /** Feeds a Pokéblock: +10 to one condition, up to 100. */
+    function feedPokeblock(id: number, category: ContestCategory) {
+        const entry = box.value[id];
+        if (!mechanicOn("contests") || entry == null || money.value < POKEBLOCK_PRICE) return;
+        const current = conditionOf(id, category);
+        if (current >= MAX_CONDITION) return;
+        money.value -= POKEBLOCK_PRICE;
+        setBoxEntry(id, {
+            ...entry,
+            condition: {
+                ...entry.condition,
+                [category]: Math.min(MAX_CONDITION, current + POKEBLOCK_GAIN)
+            }
+        });
+    }
+
+    /** The rank a species can enter next in a category (undefined once Master Rank is won). */
+    function contestRankFor(id: number, category: ContestCategory): ContestRank | undefined {
+        return nextRank(hof.ribbons.value[id]?.[category]);
+    }
+
+    function contestScoreOf(id: number, category: ContestCategory): number {
+        return contestScore(id, box.value[id]?.level ?? 0, conditionOf(id, category), category);
+    }
+
+    function enterContest(id: number, category: ContestCategory) {
+        const rank = contestRankFor(id, category);
+        if (!mechanicOn("contests") || box.value[id] == null || rank == null) return;
+        if (contest.value.speciesId !== 0) return;
+        contest.value = { speciesId: id, category, rank, remaining: CONTEST_SECONDS[rank] };
+        addLog({
+            kind: "info",
+            text: `${getSpecies(id).name} enters the ${CATEGORY_NAMES[category]} Contest (${RANK_NAMES[rank]})!`,
+            speciesId: id
+        });
+    }
+
+    function judgeContest() {
+        const { speciesId, category, rank } = contest.value;
+        contest.value = { ...contest.value, speciesId: 0, remaining: 0 };
+        if (box.value[speciesId] == null) return;
+        const name = getSpecies(speciesId).name;
+        const label = `${CATEGORY_NAMES[category]} Contest (${RANK_NAMES[rank]})`;
+        if (Math.random() >= winChance(contestScoreOf(speciesId, category), rank)) {
+            addLog({ kind: "info", text: `${name} didn't win the ${label}.`, speciesId });
+            return;
+        }
+        money.value += CONTEST_PRIZE_MONEY[rank];
+        const prizeWonBefore = Object.values(hof.ribbons.value).some(r => r[category] === "master");
+        hof.ribbons.value = {
+            ...hof.ribbons.value,
+            [speciesId]: { ...hof.ribbons.value[speciesId], [category]: rank }
+        };
+        const text = `${name} won the ${label}! A ribbon and ₽${CONTEST_PRIZE_MONEY[rank].toLocaleString()}.`;
+        addLog({ kind: "badge", text, speciesId });
+        showFlash(text, "badge");
+        if (rank === "master" && !prizeWonBefore) {
+            const pikachu = CONTEST_PIKACHU[category];
+            receivePokemon(pikachu, Math.min(cap.value, 30), false);
+            addLog({
+                kind: "catch",
+                text: `The Contest Hall gives you ${getSpecies(pikachu).name} for your first ${CATEGORY_NAMES[category]} Master Rank win!`,
+                speciesId: pikachu
+            });
+        }
+    }
+
+    function advanceContest(dt: number) {
+        if (contest.value.speciesId === 0) return;
+        const remaining = contest.value.remaining - dt;
+        if (remaining > 0) {
+            contest.value = { ...contest.value, remaining };
+        } else {
+            judgeContest();
+        }
+    }
+
+    /** Feebas evolves once it's beautiful enough, like a friendship evolution. */
+    function beautifulEnough(id: number): boolean {
+        return id === 349 && conditionOf(id, "beauty") >= MILOTIC_BEAUTY;
+    }
+
     function startTrainerBattle(options: {
         label: string;
         trainers: TrainerDefinition[];
@@ -1286,6 +1408,7 @@ export const main = createLayer("main", layer => {
         checkMechanics();
         if (starter.value === 0 || partyIds.value.length === 0) return;
         runTime.value += diff;
+        advanceContest(diff);
         let remaining = diff;
         let encounters = 0;
         while (remaining > 1e-9 && encounters++ < MAX_ENCOUNTERS_PER_TICK) {
@@ -1457,6 +1580,13 @@ export const main = createLayer("main", layer => {
         minimizable: false,
         classes: mobileClasses("main"),
         starter,
+        contest,
+        conditionOf,
+        feedPokeblock,
+        contestRankFor,
+        contestScoreOf,
+        enterContest,
+        beautifulEnough,
         journeyPartner,
         partnerChoices,
         region,
