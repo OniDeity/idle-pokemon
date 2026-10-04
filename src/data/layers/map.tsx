@@ -2,7 +2,7 @@
  * The Kanto map: choose where to search for wild Pokémon, and visit the gifts, trades,
  * Game Corner prizes and legendary Pokémon scattered around the region.
  */
-import { main } from "data/projEntry";
+import { LUCKY_DRAW_BATTLES, main } from "data/projEntry";
 import { createLayer } from "game/layers";
 import type { PokemonType } from "game/pokemon/data";
 import type { EncounterPoolId } from "game/pokemon/data";
@@ -73,8 +73,8 @@ const layer = createLayer(id, () => {
      */
     function renderPokegear() {
         const radio = main.keyItems.value.radioCard === true;
-        const day = main.today();
-        const drawn = hof.luckyNumberDay.value === day;
+        const nextDraw = LUCKY_DRAW_BATTLES - (main.battlesWon.value % LUCKY_DRAW_BATTLES);
+        const last = main.lastLuckyNumber.value;
         const parkOpen = main.zoneUnlocked("nationalPark");
         return (
             <Panel title="Pokégear">
@@ -136,16 +136,14 @@ const layer = createLayer(id, () => {
                                 </div>
                             );
                         })}
-                        <div class="pk-small pk-filter-row">
-                            <span>
-                                🎟️ Lucky Number Show:{" "}
-                                {drawn
-                                    ? `today's number was ${String(main.luckyNumberOn(day)).padStart(5, "0")}. Come back tomorrow!`
-                                    : "match today's number with your Trainer ID for a prize."}
-                            </span>
-                            <Button kind="small" disabled={drawn} onClick={main.drawLuckyNumber}>
-                                Draw
-                            </Button>
+                        <div class="pk-small">
+                            🎟️ Lucky Number Show: a number is drawn every {LUCKY_DRAW_BATTLES} wild
+                            battles you win; match its last digits with your Trainer ID (
+                            {hof.trainerId.value > 0
+                                ? String(hof.trainerId.value).padStart(5, "0")
+                                : "given at the first draw"}
+                            ) for a prize. Next draw in {nextDraw} battles
+                            {last >= 0 ? `, last number ${String(last).padStart(5, "0")}` : ""}.
                         </div>
                     </>
                 ) : (

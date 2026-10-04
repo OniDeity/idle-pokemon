@@ -52,8 +52,8 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
   (in `hof.mechanics`) and on in every region. Gate features with `main.mechanicOn(id)`.
 - Johto ignores the real clock: time-of-day tables use average weights, and nothing is
   weekday-only. Swarms (₽3,000 each, Radio Card) and the Bug-Catching Contest (₽2,000) are
-  one-time purchases per journey that add a third to that place's pool. The Lucky Number Show is
-  still once per real day.
+  one-time purchases per journey that add a third to that place's pool. The Lucky Number Show
+  draws automatically every 100 wild battles (`LUCKY_DRAW_BATTLES`); nothing uses the real clock.
 - UI panels collapse by title, remembered in localStorage (`pk-collapsed-panels`).
 
 ## Done (v2.2 "Johto")
@@ -79,4 +79,3 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
 - Gen 3 anime Pokémon wait for Hoenn: Latios/Latias (Alto Mare already exists in Johto).
 - Ideas offered but not picked up yet:
   - Better shiny breeding odds the more a species is bred.
-  - The Lucky Number Show on a battle count instead of real days.
