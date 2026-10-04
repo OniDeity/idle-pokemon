@@ -19,6 +19,8 @@ export interface TrainerDefinition {
     statMultiplier: number;
     prizeMoney: number;
     quote: string;
+    /** Orre: Shadow Pokémon on the team (by species), snagged when the trainer is beaten. */
+    snag?: number[];
 }
 
 export interface GymDefinition extends TrainerDefinition {

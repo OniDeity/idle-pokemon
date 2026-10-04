@@ -103,7 +103,8 @@ export type VariantKind =
     | "pattern"
     | "cosmetic"
     | "giant"
-    | "clone";
+    | "clone"
+    | "shadow";
 
 interface FormData {
     id: number;
@@ -447,13 +448,26 @@ const FEMALE_FORMS: Species[] = SPECIES.filter(s => s.genderDifferences && s.gen
 );
 
 /** Every alternate form, whether or not it's placed in a region yet. */
+/** Offset added to a species id for its Shadow form (Orre's Cipher closes their hearts). */
+export const SHADOW_OFFSET = 8000;
+
+/**
+ * Every species has a Shadow form: snagged from Cipher in Orre (and, once the Snag Machine is
+ * unlocked, from Cipher Peons anywhere). Shadow forms can't evolve; purifying one at the Relic
+ * Stone turns it back into its species. Sprites are the species' own with a dark aura.
+ */
+const SHADOW_FORMS: Species[] = SPECIES.map(s =>
+    variant(s.id, SHADOW_OFFSET + s.id, "shadow", `Shadow ${s.name}`)
+);
+
 export const VARIANT_SPECIES: Species[] = [
     ...ANIME_VARIANTS,
     ...OFFICIAL_FORMS,
     ...FEMALE_FORMS,
     ...PATTERN_FORMS,
     ...COSMETIC_VARIANTS,
-    ...LEGENDARY_FORMS
+    ...LEGENDARY_FORMS,
+    ...SHADOW_FORMS
 ];
 
 const SPECIES_BY_ID = new Map<number, Species>(
@@ -470,7 +484,8 @@ const FIXED_FORMS: (VariantKind | undefined)[] = [
     "official",
     "cosmetic",
     "giant",
-    "clone"
+    "clone",
+    "shadow"
 ];
 for (const form of VARIANT_SPECIES) {
     if (FIXED_FORMS.includes(form.variant)) {
@@ -501,8 +516,22 @@ export function isVariant(id: number): boolean {
     return id > DEX_SIZE;
 }
 
+/** The dark aura drawn around Shadow Pokémon. */
+const SHADOW_FILTER =
+    "drop-shadow(0 0 2px #6d28d9) drop-shadow(0 0 4px #4c1d95) saturate(0.8) brightness(0.85)";
+
 export function variantFilter(id: number): string | undefined {
-    return VARIANT_FILTERS[id];
+    return isShadow(id) ? SHADOW_FILTER : VARIANT_FILTERS[id];
+}
+
+export function isShadow(id: number): boolean {
+    return id > SHADOW_OFFSET && id <= SHADOW_OFFSET + DEX_SIZE;
+}
+
+/** The Shadow form of a Pokémon's species (forms of any kind count as their species). */
+export function shadowOf(id: number): number {
+    const species = SPECIES_BY_ID.get(id);
+    return SHADOW_OFFSET + (species?.baseSpecies ?? id);
 }
 
 export function spriteAccessory(id: number): string | undefined {

@@ -10,7 +10,7 @@ import type { RegionDefinition } from "./regions";
 import { REGION_LIST } from "./regions";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "./specials";
 import type { RegionId } from "./zones";
-import { occasionalSpecies, zonePools, zonesIn } from "./zones";
+import { catchableIn, occasionalSpecies, zonePools, zonesIn } from "./zones";
 
 /**
  * The key items a journey in one of these regions can have: the region's own (starting and
@@ -29,7 +29,7 @@ function keyItemsIn(regions: RegionId[]): Set<string> {
     return items;
 }
 
-/** The regular species (#1-251) obtainable in these regions. */
+/** The regular species obtainable in these regions. */
 export function speciesObtainableIn(regions: RegionId[]): Set<number> {
     const found = new Set<number>();
     const add = (id: number) => {
@@ -44,7 +44,9 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
                 { id: number }[]
             ][]) {
                 // A pool needing an item from a later region (Kanto's Headbutt trees) waits for it.
-                if (pool === "walk" || items.has(pool)) entries.forEach(e => add(e.id));
+                if (pool === "walk" || items.has(pool)) {
+                    entries.filter(e => catchableIn(zone.id, e.id)).forEach(e => add(e.id));
+                }
             }
             const { swarm, contest } = occasionalSpecies(zone.id);
             [...swarm, ...contest].forEach(add);
@@ -54,6 +56,10 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
         );
         const def = REGION_LIST.find(r => r.id === region);
         [...(def?.starters ?? []), ...(def?.partnerStarters ?? [])].forEach(add);
+        // Shadow Pokémon snagged from Orre's admins (purified into their species).
+        if (def != null) {
+            [...def.trials, ...def.finale(def.starters[0])].forEach(t => t.snag?.forEach(add));
+        }
     }
     let changed = true;
     while (changed) {
@@ -67,6 +73,24 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
         }
     }
     return new Set([...found].filter(id => id <= DEX_SIZE));
+}
+
+/**
+ * The Pokédex as far as the game's regions go: #1-251, plus each later species once a region
+ * offers it (Orre's Hoenn Pokémon; the rest of Gen 3 arrives with Hoenn). Species data exists for
+ * all of #1-386, but a species outside this set never appears.
+ */
+export const POKEDEX_IDS: number[] = (() => {
+    const ids = new Set<number>(SPECIES.filter(s => s.id <= 251).map(s => s.id));
+    speciesObtainableIn(REGION_LIST.map(r => r.id)).forEach(id => ids.add(id));
+    return [...ids].sort((a, b) => a - b);
+})();
+export const POKEDEX_SET = new Set(POKEDEX_IDS);
+export const POKEDEX_SIZE = POKEDEX_IDS.length;
+
+/** Whether a species (or any form, which counts as released) can appear in the game. */
+export function isReleased(id: number): boolean {
+    return id > DEX_SIZE || POKEDEX_SET.has(id);
 }
 
 /** The species a region's Pokédex requirement asks for: everything the regions before it offer. */

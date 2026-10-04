@@ -11,12 +11,13 @@ import {
     SHINY_BONUS_PER_VARIANT
 } from "game/pokemon/balance";
 import type { Species } from "game/pokemon/data";
+import { POKEDEX_SET, POKEDEX_SIZE } from "game/pokemon/pokedex";
 import {
     ALTERNATE_EVOLUTIONS,
-    DEX_SIZE,
     getSpecies,
     isVariant,
     PRE_EVOLUTION,
+    shadowOf,
     SPECIES,
     VARIANT_SPECIES,
     WILD_VARIANTS
@@ -24,7 +25,9 @@ import {
 import { STONES } from "game/pokemon/items";
 import { REGION_LIST, REGIONS } from "game/pokemon/regions";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
+import type { RegionId } from "game/pokemon/zones";
 import { allZoneSpecies, ZONES } from "game/pokemon/zones";
+import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
@@ -48,7 +51,7 @@ export type DexEntry = {
 
 const EMPTY: DexEntry = { seen: false, caught: false, shiny: false, timesCaught: 0 };
 
-type Filter = "all" | "caught" | "missing" | "shiny" | "kanto" | "johto" | "variants";
+type Filter = "all" | "caught" | "missing" | "shiny" | "kanto" | "johto" | "hoenn" | "variants";
 
 /** Where a species can be found: wild zones, specials, or by evolving something. */
 function locationsOf(id: number): string[] {
@@ -58,10 +61,23 @@ function locationsOf(id: number): string[] {
     const wildId = species.variant === "female" ? species.baseSpecies! : id;
     for (const zone of ZONES) {
         if (allZoneSpecies(zone.id).includes(wildId)) {
+            const owner = SHADOW_TRAINERS[id];
             places.push(
-                `${REGIONS[zone.region].name}: ${zone.name}${zone.anime ? " (anime)" : ""}`
+                `${REGIONS[zone.region].name}: ${zone.name}${zone.anime ? " (anime)" : ""}${
+                    owner != null ? ` (snag from ${owner})` : ""
+                }`
             );
         }
+    }
+    if (species.variant === "shadow") {
+        for (const [region, trainer] of shadowSnagTrainers(species.baseSpecies!)) {
+            places.push(`${REGIONS[region].name}: snag from ${trainer} after beating them`);
+        }
+        places.push(
+            "Cipher Peons in every region outside Orre, once the Snag Machine is unlocked (2% of encounters)"
+        );
+    } else if (!isVariant(id) && shadowInOrre(id)) {
+        places.push("Purify its Shadow form, snagged in Orre, at the Relic Stone");
     }
     for (const special of SPECIAL_ENCOUNTERS) {
         if (special.kind !== "boss" && specialSpecies(special).includes(id)) {
@@ -140,10 +156,32 @@ function locationsOf(id: number): string[] {
     return places;
 }
 
+/** The trainers whose Shadow Pokémon of this species are snagged by beating them. */
+function shadowSnagTrainers(baseSpecies: number): [RegionId, string][] {
+    return REGION_LIST.flatMap(region =>
+        [...region.trials, ...region.finale(region.starters[0])]
+            .filter(t => t.snag?.includes(baseSpecies))
+            .map((t): [RegionId, string] => [region.id, `${t.title} ${t.name}`])
+    );
+}
+
+/** Whether a species' Shadow form is met in Orre (to snag, then purify). */
+function shadowInOrre(id: number): boolean {
+    const shadow = shadowOf(id);
+    return (
+        ZONES.some(zone => zone.trainerBattles && allZoneSpecies(zone.id).includes(shadow)) ||
+        shadowSnagTrainers(id).length > 0
+    );
+}
+
 /** Whether a form can be obtained in the regions that exist so far. */
 function obtainable(id: number, depth = 0): boolean {
     if (depth > 4) return false;
     const species = getSpecies(id);
+    // Shadow forms: Orre's, and Cipher Peons' Shadow versions of anything obtainable.
+    if (species.variant === "shadow") {
+        return shadowInOrre(species.baseSpecies!) || obtainable(species.baseSpecies!, depth + 1);
+    }
     const wildId = species.variant === "female" ? species.baseSpecies! : id;
     if (species.rodTier != null && species.baseSpecies === 129) return true;
     for (const [base, { variants }] of Object.entries(WILD_VARIANTS)) {
@@ -238,7 +276,10 @@ const layer = createLayer(id, () => {
     };
 
     const visibleSpecies = computed(() =>
-        (filter.value === "variants" ? PLACED_VARIANTS : SPECIES).filter(s => {
+        (filter.value === "variants"
+            ? PLACED_VARIANTS
+            : SPECIES.filter(s => POKEDEX_SET.has(s.id))
+        ).filter(s => {
             const e = entry(s.id);
             switch (filter.value) {
                 case "caught":
@@ -252,7 +293,9 @@ const layer = createLayer(id, () => {
                 case "variants":
                     return true;
                 case "johto":
-                    return s.id > 151;
+                    return s.id > 151 && s.id <= 251;
+                case "hoenn":
+                    return s.id > 251 && s.id <= 386;
                 default:
                     return true;
             }
@@ -327,6 +370,7 @@ const layer = createLayer(id, () => {
         ["shiny", "Shiny"],
         ["kanto", "#1–151"],
         ["johto", "#152–251"],
+        ...(POKEDEX_SIZE > 251 ? [["hoenn", "#252–386"] as [Filter, string]] : []),
         ["variants", "Variants"]
     ];
 
@@ -353,10 +397,10 @@ const layer = createLayer(id, () => {
                 <div class="pk-dex-summary">
                     <div>
                         Seen <b>{seenCount.value}</b> · Caught <b>{caughtCount.value}</b> /{" "}
-                        {DEX_SIZE} · Shiny <b>{shinyCount.value}</b> · Variants{" "}
+                        {POKEDEX_SIZE} · Shiny <b>{shinyCount.value}</b> · Variants{" "}
                         <b>{variantCaught.value}</b> / {PLACED_VARIANTS.length}
                     </div>
-                    <Bar value={caughtCount.value} max={DEX_SIZE} kind="progress" />
+                    <Bar value={caughtCount.value} max={POKEDEX_SIZE} kind="progress" />
                     <div class="pk-muted">
                         Every species caught gives +{DEX_DAMAGE_BONUS_PER_SPECIES * 100}% damage
                         (now +{Math.round(caughtCount.value * DEX_DAMAGE_BONUS_PER_SPECIES * 100)}

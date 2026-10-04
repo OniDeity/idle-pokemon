@@ -18,8 +18,11 @@ import {
     DEX_SIZE,
     femaleForm,
     getSpecies,
+    isShadow,
     magikarpPatterns,
     PRE_EVOLUTION,
+    SHADOW_OFFSET,
+    shadowOf,
     SPECIES,
     typeEffectiveness,
     VARIANT_SPECIES,
@@ -31,21 +34,30 @@ import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { JOHTO_SWARMS } from "game/pokemon/johto";
 import { MECHANIC_LIST } from "game/pokemon/mechanics";
-import { pokedexRequirement, speciesObtainableIn } from "game/pokemon/pokedex";
+import {
+    isReleased,
+    POKEDEX_IDS,
+    pokedexRequirement,
+    speciesObtainableIn
+} from "game/pokemon/pokedex";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
 import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
 import {
     activePools,
     allZoneSpecies,
     availableZoneSpecies,
+    catchableIn,
+    CIPHER_PEON_CHANCE,
     encounterOdds,
     EXTRA_SHARE,
     PATTERN_CHANCE,
     rollEncounter,
     ZONES,
+    ZONES_BY_ID,
     zonePools,
     zonesIn
 } from "game/pokemon/zones";
+import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
 import { describe, expect, test } from "vitest";
 
 function mulberry(seed: number): () => number {
@@ -62,9 +74,14 @@ function party(...members: [number, number][]): PartyBattler[] {
 }
 
 describe("data", () => {
-    test("has species #1-251 in order", () => {
-        expect(DEX_SIZE).toBe(251);
+    test("has species #1-386 in order, with the Pokédex only as far as the regions go", () => {
+        expect(DEX_SIZE).toBe(386);
         SPECIES.forEach((species, i) => expect(species.id).toBe(i + 1));
+        // Every Pokédex species is one a region offers; nothing past #251 without a region for it.
+        const offered = speciesObtainableIn(REGION_LIST.map(r => r.id));
+        expect(POKEDEX_IDS.filter(id => id > 251).every(id => offered.has(id))).toBe(true);
+        expect(POKEDEX_IDS.filter(id => id <= 251).length).toBe(251);
+        expect(isReleased(298)).toBe(offered.has(298)); // Azurill
     });
 
     test("every species can be obtained", () => {
@@ -117,7 +134,10 @@ describe("data", () => {
         const ids = new Set(ZONES.map(z => z.id));
         expect(ids.size).toBe(ZONES.length);
         for (const zone of ZONES) {
-            const species = allZoneSpecies(zone.id);
+            // Orre's places are trainer battles; some (Mt. Battle) have no Shadow Pokémon to snag.
+            const species = zone.trainerBattles
+                ? (zonePools(zone.id).walk ?? []).map(e => e.id)
+                : allZoneSpecies(zone.id);
             expect(species.length, zone.id).toBeGreaterThan(0);
             species.forEach(id => expect(getSpecies(id).id).toBe(id));
         }
@@ -142,7 +162,9 @@ describe("data", () => {
         expect(getSpecies(10091).evolutions[0].into).toBe(10092);
         expect(getSpecies(5025).evolutions.map(e => e.into)).toEqual([5026]);
         // All 28 Unown and the regional forms of every Kanto and Johto species are in the data.
-        expect(VARIANT_SPECIES.filter(v => v.baseSpecies === 201).length).toBe(28);
+        expect(
+            VARIANT_SPECIES.filter(v => v.baseSpecies === 201 && v.variant !== "shadow").length
+        ).toBe(28);
         expect(VARIANT_SPECIES.filter(v => v.variant === "regional").length).toBeGreaterThan(40);
     });
 
@@ -182,7 +204,7 @@ describe("data", () => {
             v =>
                 ["pinkan", "valencian", "unique", "giant", "clone"].includes(v.variant!) ||
                 v.nativeRegion === "kanto" ||
-                v.baseSpecies === 201
+                (v.baseSpecies === 201 && v.variant !== "shadow")
         );
         expect(shouldBeFound.filter(v => !found.has(v.id)).map(v => v.name)).toEqual([]);
         // Forms from regions not in the game yet (Alola, Galar, Hoenn caps...) wait for them.
@@ -425,7 +447,7 @@ describe("Cobblemon variants", () => {
         expect(needed.size).toBeGreaterThan(240);
         // Johto brings the rest (Sudowoodo, Elekid, Celebi…): the Pokédex can be completed.
         const all = speciesObtainableIn(REGION_LIST.map(r => r.id));
-        expect(SPECIES.filter(sp => !all.has(sp.id)).map(sp => sp.name)).toEqual([]);
+        expect(POKEDEX_IDS.filter(id => !all.has(id)).map(id => getSpecies(id).name)).toEqual([]);
     });
 });
 
@@ -508,7 +530,13 @@ describe("Apricorn Balls", () => {
 
 describe("generation mechanics", () => {
     test("each is reached partway through its own region", () => {
-        expect(MECHANIC_LIST.map(m => m.id)).toEqual(["breeding", "apricornBalls", "headbutt"]);
+        expect(MECHANIC_LIST.map(m => m.id)).toEqual([
+            "breeding",
+            "apricornBalls",
+            "headbutt",
+            "snagMachine",
+            "relicStone"
+        ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
         expect(zonePools("route1").headbutt?.map(e => e.id)).toContain(163);
@@ -537,6 +565,79 @@ describe("key items", () => {
                     expect(items.has(pool), `${zone.id} ${pool}`).toBe(true);
                 }
             }
+        }
+    });
+});
+
+describe("Orre (Colosseum)", () => {
+    test("comes after Johto, with both Espeon and Umbreon and the Snag Machine", () => {
+        const orre = REGIONS.orre;
+        expect(orre.requires).toBe("johto");
+        expect(orre.requiresCompletePokedex).toBe(true);
+        expect(orre.allStarters).toBe(true);
+        expect(orre.starters).toEqual([196, 197]);
+        expect(orre.startingKeyItems).toContain("snagMachine");
+        // Johto's whole Pokédex is the price of entry.
+        expect(pokedexRequirement(orre).size).toBe(251);
+    });
+
+    test("every species has a Shadow form, with an aura and no evolutions", () => {
+        expect(shadowOf(25)).toBe(8025);
+        expect(shadowOf(10091)).toBe(SHADOW_OFFSET + 19); // Alolan Rattata → Shadow Rattata
+        const shadow = getSpecies(8248);
+        expect(shadow.name).toBe("Shadow Tyranitar");
+        expect(shadow.evolutions).toEqual([]);
+        expect(isShadow(8248) && !isShadow(248)).toBe(true);
+        expect(variantFilter(8248)).toContain("drop-shadow");
+    });
+
+    test("places are trainer battles where only Shadow Pokémon can be snagged, once each", () => {
+        const pyrite = "pyriteTown";
+        expect(ZONES_BY_ID[pyrite].trainerBattles).toBe(true);
+        const all = allZoneSpecies(pyrite);
+        expect(all.length).toBeGreaterThan(5);
+        expect(all.every(isShadow)).toBe(true);
+        expect(catchableIn(pyrite, 262)).toBe(false);
+        expect(catchableIn(pyrite, 8193)).toBe(true);
+        expect(catchableIn("route1", 16)).toBe(true);
+        // A snagged Shadow Pokémon is gone from its place for the rest of the journey.
+        const ids = (snagged: Record<string, boolean>) =>
+            activePools(pyrite, {}, { snagged })[0].entries.map(e => e.id);
+        expect(ids({})).toContain(8193);
+        expect(ids({ 8193: true })).not.toContain(8193);
+    });
+
+    test("Cipher Peons turn a share of every other region's encounters into Shadow Pokémon", () => {
+        const plain = encounterOdds("route1", {});
+        const peons = encounterOdds("route1", {}, 0, { cipherPeons: true });
+        const total = [...peons.values()].reduce((a, b) => a + b, 0);
+        expect(total).toBeCloseTo(1, 9);
+        const shadows = [...peons].filter(([id]) => isShadow(id));
+        expect(shadows.reduce((a, [, p]) => a + p, 0)).toBeCloseTo(CIPHER_PEON_CHANCE, 9);
+        expect(peons.get(shadowOf(16))).toBeCloseTo((plain.get(16) ?? 0) * CIPHER_PEON_CHANCE, 9);
+    });
+
+    test("the admins hand over their Shadow legends, and Orre's Hoenn Pokémon join the Pokédex", () => {
+        const snags = [...REGIONS.orre.trials, ...REGIONS.orre.finale(196)].flatMap(
+            t => t.snag ?? []
+        );
+        expect(snags).toEqual([185, 244, 245, 243, 227, 376, 248]);
+        const gen3 = POKEDEX_IDS.filter(id => id > 251).map(id => getSpecies(id).name);
+        expect(gen3).toEqual(
+            expect.arrayContaining([
+                "Makuhita",
+                "Metagross",
+                "Absol",
+                "Tropius",
+                "Plusle",
+                "Flygon"
+            ])
+        );
+        // Every Shadow Pokémon met in Orre has a trainer to snag it from.
+        for (const zone of zonesIn("orre")) {
+            allZoneSpecies(zone.id).forEach(id =>
+                expect(SHADOW_TRAINERS[id], `${id}`).toBeDefined()
+            );
         }
     });
 });

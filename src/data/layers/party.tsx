@@ -1,7 +1,7 @@
 /**
  * Party & PC Box: choose your six, reorder them, and evolve Pokémon with stones or trades.
  */
-import { EGG_BATTLES, main } from "data/projEntry";
+import { EGG_BATTLES, HEART_BATTLES, main } from "data/projEntry";
 import { DAY_CARE_PLACE } from "game/pokemon/mechanics";
 import { createLayer } from "game/layers";
 import { memberMultiplier, effortMultiplier } from "game/pokemon/balance";
@@ -401,6 +401,30 @@ const layer = createLayer(id, () => {
                         )}%`}
                     />
                 </div>
+                {entry.heart != null ? (
+                    <div class="pk-small">
+                        <b>🟣 Shadow Pokémon</b>:{" "}
+                        {entry.heart > 0
+                            ? `its heart opens after ${entry.heart} more wild battles won in your party.`
+                            : main.canPurify(speciesId)
+                              ? "its heart is open: purify it at the Relic Stone."
+                              : "its heart is open. Reach the Relic Stone in Agate Village (Orre) to purify it."}
+                        <Bar
+                            value={HEART_BATTLES - entry.heart}
+                            max={HEART_BATTLES}
+                            kind="progress"
+                        />
+                        {main.canPurify(speciesId) ? (
+                            <Button
+                                kind="primary"
+                                disabled={main.inTrainerBattle.value}
+                                onClick={() => main.purify(speciesId)}
+                            >
+                                Purify
+                            </Button>
+                        ) : null}
+                    </div>
+                ) : null}
                 <div class="pk-detail-actions">
                     {inParty ? (
                         <>

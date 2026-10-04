@@ -48,8 +48,13 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   recolored after Pokémon Sleep's research areas (Taupe Hollow, Cyan Beach). Johto adds the
   wild Pudgy Pidgey, Silver the young Lugia, the Unown's Entei, Dark Celebi and
   Dark Tyranitar.
+- **Orre (Colosseum)**: no wild Pokémon, only trainers and Cipher's 48 Shadow Pokémon to snag
+  with the Snag Machine and purify at the Relic Stone, from Phenac City to Realgam Tower. Every
+  species has a Shadow form; once unlocked, Cipher Peons roam the other regions with Shadow
+  versions of their Pokémon.
 - **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands, then Johto,
-  which also needs every species the first three regions offer in your Pokédex.
+  then Orre; Johto and Orre also need every species the regions before them offer in your
+  Pokédex.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
   trainers in regions you haven't cleared grow tougher (Renown) as you conquer others,
   and rematches in cleared regions go faster. Experience past the level cap becomes Effort, a

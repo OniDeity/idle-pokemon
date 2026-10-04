@@ -3,6 +3,7 @@
  * Clearing the finale lets the player enter the Hall of Fame and start a new journey anywhere
  * they've unlocked.
  */
+import { COLOSSEUM_TRIALS, colosseumFinale } from "./colosseum";
 import type { KeyItemId } from "./items";
 import { JOHTO_GYMS, johtoFinale } from "./johto";
 import { ORANGE_TRIALS, orangeFinale } from "./orange";
@@ -38,6 +39,8 @@ export interface RegionDefinition {
     requires?: RegionId;
     /** Also needs every species the earlier regions offer in the Pokédex. */
     requiresCompletePokedex?: boolean;
+    /** Every starter joins the party, not just the one picked (Colosseum's Espeon and Umbreon). */
+    allStarters?: boolean;
 }
 
 export const REGIONS: Record<RegionId, RegionDefinition> = {
@@ -117,6 +120,27 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         fame: 18,
         requires: "sevii",
         requiresCompletePokedex: true
+    },
+    orre: {
+        id: "orre",
+        name: "Orre (Colosseum)",
+        blurb: "No wild Pokémon, only Cipher's Shadow Pokémon to snag and purify, from Phenac City to Realgam Tower.",
+        color: "#C2410C",
+        starters: [196, 197],
+        startLevel: 25,
+        startingKeyItems: ["snagMachine"],
+        shopTier: 4,
+        trials: COLOSSEUM_TRIALS,
+        trialNoun: "Cipher admins",
+        finaleName: "Realgam Tower",
+        finaleBlurb:
+            "Climb Realgam Tower's Colosseum: Gonzap, Nascour and Cipher's head Evice, back-to-back (your party is healed between battles).",
+        finale: () => colosseumFinale(),
+        levelCaps: [37, 42, 47, 50, 62, 100],
+        fame: 20,
+        requires: "johto",
+        requiresCompletePokedex: true,
+        allStarters: true
     }
 };
 

@@ -7,7 +7,7 @@
 import type { KeyItemId } from "./items";
 import type { RegionId } from "./zones";
 
-export type MechanicId = "breeding" | "apricornBalls" | "headbutt";
+export type MechanicId = "breeding" | "apricornBalls" | "headbutt" | "snagMachine" | "relicStone";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -51,6 +51,25 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         description:
             "Every journey starts with Headbutt, and Kanto's trees have their HeartGold/SoulSilver Pokémon.",
         keyItem: "headbutt"
+    },
+    snagMachine: {
+        id: "snagMachine",
+        name: "Snag Machine",
+        region: "orre",
+        unlockAt: "Team Snagem's hideout, at the start of Pokémon Colosseum",
+        trialsRequired: 0,
+        description:
+            "Every journey carries the Snag Machine, and Cipher Peons roam every region with Shadow versions of its Pokémon to snag.",
+        keyItem: "snagMachine"
+    },
+    relicStone: {
+        id: "relicStone",
+        name: "Relic Stone",
+        region: "orre",
+        unlockAt: "Agate Village's Relic Stone, after freeing Pyrite Town",
+        trialsRequired: 1,
+        description:
+            "A Shadow Pokémon whose heart has opened can be purified back into its species, in any region."
     }
 };
 
