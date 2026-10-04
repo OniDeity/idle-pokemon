@@ -26,11 +26,20 @@ import { zoneRates } from "game/pokemon/balance";
 import { computed, ref, shallowRef, watch } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
-import { Button, formatMoney, formatNumber, Panel, Sprite, TypeBadge } from "../ui/components";
+import type { TabOption } from "../ui/components";
+import {
+    Button,
+    currentTab,
+    formatMoney,
+    formatNumber,
+    Panel,
+    renderTabs,
+    Sprite,
+    TypeBadge
+} from "../ui/components";
 import dex from "./dex";
 import hof from "./hof";
 
-type Tab = "zones" | "specials";
 type ZoneSort = "story" | "efficient" | "level" | "new";
 type ZoneFilter = "new" | "notInBox" | "unlocked" | "anime" | "games";
 
@@ -53,7 +62,6 @@ const id = "map";
 const layer = createLayer(id, () => {
     const name = "Map";
     const color = "#22C55E";
-    const tab = ref<Tab>("zones");
     const zoneSort = ref<ZoneSort>("story");
     /** Tapping the active sort again flips it (lowest level first, least efficient first...). */
     const zoneSortReversed = ref(false);
@@ -77,7 +85,7 @@ const layer = createLayer(id, () => {
         const last = main.lastLuckyNumber.value;
         const parkOpen = main.zoneUnlocked("nationalPark");
         return (
-            <Panel title="Pokégear">
+            <Panel>
                 <div class="pk-small pk-filter-row">
                     <span>
                         🐛 Bug-Catching Contest:{" "}
@@ -720,44 +728,44 @@ const layer = createLayer(id, () => {
         minimizable: false,
         classes: mobileClasses(id),
         nav,
-        display: () => (
-            <div class="pk-layer">
-                {renderNav(true)}
-                <h2 class="pk-layer-title">{main.regionDef.value.name}</h2>
-                <div class="pk-filter-row">
-                    <Button
-                        kind={tab.value === "zones" ? "primary" : "ghost"}
-                        onClick={() => (tab.value = "zones")}
-                    >
-                        Routes & Dungeons
-                    </Button>
-                    <Button
-                        kind={tab.value === "specials" ? "primary" : "ghost"}
-                        onClick={() => (tab.value = "specials")}
-                    >
-                        Gifts, Trades & Legends
-                        {claimableSpecials.value.length > 0
+        display: () => {
+            const tabs: TabOption[] = [
+                { id: "zones", label: "Routes & Dungeons" },
+                {
+                    id: "specials",
+                    label: `Gifts, Trades & Legends${
+                        claimableSpecials.value.length > 0
                             ? ` (${claimableSpecials.value.length})`
-                            : ""}
-                    </Button>
+                            : ""
+                    }`
+                },
+                { id: "pokegear", label: "Pokégear", show: main.region.value === "johto" }
+            ];
+            const page = currentTab("map", tabs);
+            return (
+                <div class="pk-layer">
+                    {renderNav(true)}
+                    <h2 class="pk-layer-title">{main.regionDef.value.name}</h2>
+                    {renderTabs("map", tabs)}
+                    {page === "zones" ? (
+                        <>
+                            {renderZoneControls()}
+                            {renderZones()}
+                        </>
+                    ) : page === "pokegear" ? (
+                        renderPokegear()
+                    ) : (
+                        <Panel>
+                            <p class="pk-small pk-muted">
+                                Some Pokémon never appear in the wild. Trades only require showing
+                                the requested Pokémon — you keep yours.
+                            </p>
+                            {regionSpecials().map(renderSpecial)}
+                        </Panel>
+                    )}
                 </div>
-                {tab.value === "zones" ? (
-                    <>
-                        {main.region.value === "johto" ? renderPokegear() : null}
-                        {renderZoneControls()}
-                        {renderZones()}
-                    </>
-                ) : (
-                    <Panel>
-                        <p class="pk-small pk-muted">
-                            Some Pokémon never appear in the wild. Trades only require showing the
-                            requested Pokémon — you keep yours.
-                        </p>
-                        {regionSpecials().map(renderSpecial)}
-                    </Panel>
-                )}
-            </div>
-        )
+            );
+        }
     };
 });
 

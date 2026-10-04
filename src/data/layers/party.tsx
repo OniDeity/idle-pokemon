@@ -24,12 +24,15 @@ import { attacksPerSecond, maxHp, statAtLevel, xpForLevel } from "game/pokemon/s
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
+import type { TabOption } from "../ui/components";
 import {
     Bar,
     Button,
+    currentTab,
     DexNumber,
     ItemIcon,
     Panel,
+    renderTabs,
     Sprite,
     Stat,
     TypeBadge,
@@ -510,13 +513,104 @@ const layer = createLayer(id, () => {
         );
     }
 
+    function renderBox(detailId: number | undefined) {
+        return (
+            <Panel>
+                <div class="pk-filter-row">
+                    <input
+                        class="pk-search"
+                        type="search"
+                        placeholder="Search by name…"
+                        value={search.value}
+                        onInput={(e: Event) =>
+                            (search.value = (e.target as HTMLInputElement).value)
+                        }
+                    />
+                </div>
+                <div class="pk-filter-row">
+                    <span class="pk-small pk-muted">Sort:</span>
+                    {SORTS.map(([value, label]) => (
+                        <Button
+                            kind={sort.value === value ? "primary" : "ghost"}
+                            onClick={() => (sort.value = value)}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </div>
+                <div class="pk-filter-row">
+                    <span class="pk-small pk-muted">Show:</span>
+                    {QUICK_FILTERS.map(([value, label, title]) => (
+                        <Button
+                            kind={quickFilters.value.includes(value) ? "primary" : "ghost"}
+                            title={title}
+                            onClick={() => toggle(quickFilters, value)}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </div>
+                <div class="pk-filter-row">
+                    <span class="pk-small pk-muted">Type:</span>
+                    {boxTypes.value.map(type => (
+                        <button
+                            class={[
+                                "pk-type-toggle",
+                                typeFilters.value.includes(type) ? "active" : ""
+                            ]}
+                            onClick={() => toggle(typeFilters, type)}
+                        >
+                            <TypeBadge type={type} small />
+                        </button>
+                    ))}
+                </div>
+                {filtering.value ? (
+                    <div class="pk-filter-row pk-small pk-muted">
+                        Showing {boxIds.value.length} of {allIds.value.length}
+                        <Button kind="ghost" onClick={clearFilters}>
+                            Clear filters
+                        </Button>
+                    </div>
+                ) : null}
+                {boxIds.value.length === 0 ? (
+                    <p class="pk-muted">No Pokémon match these filters.</p>
+                ) : null}
+                <div class="pk-box-grid">
+                    {boxIds.value.map(sid => {
+                        const entry = main.box.value[sid];
+                        const inParty = main.partyIds.value.includes(sid);
+                        return (
+                            <button
+                                class={[
+                                    "pk-box-cell",
+                                    inParty ? "in-party" : "",
+                                    detailId === sid ? "selected" : ""
+                                ]}
+                                title={`${getSpecies(sid).name} Lv. ${entry.level}`}
+                                onClick={() => (selected.value = sid)}
+                            >
+                                <Sprite id={sid} size={42} shiny={entry.shiny} />
+                                <span class="pk-box-level">{entry.level}</span>
+                                {readyToEvolve(sid) ? (
+                                    <span class="pk-box-ready" title="Ready to evolve">
+                                        ▲
+                                    </span>
+                                ) : null}
+                            </button>
+                        );
+                    })}
+                </div>
+            </Panel>
+        );
+    }
+
     /** The Day Care: leave a Pokémon, and its Eggs hatch into its family's first stage. */
     /** Pokémon Contests: the selected Pokémon's conditions, Pokéblocks and contests to enter. */
     function renderContestHall(id: number) {
         const running = main.contest.value;
         const ribbons = hof.ribbons.value[id] ?? {};
         return (
-            <Panel title="Contest Hall">
+            <Panel>
                 <p class="pk-small pk-muted">
                     Pokéblocks: ₽{POKEBLOCK_PRICE}, +{POKEBLOCK_GAIN} condition. Score = condition +
                     type appeal (up to 30) + half the level. A category's first Master Rank win
@@ -587,13 +681,7 @@ const layer = createLayer(id, () => {
         const candidates = dayCareIds.value;
         const egg = id !== 0 ? main.eggSpeciesOf(id) : 0;
         return (
-            <Panel
-                title={
-                    DAY_CARE_PLACE[main.region.value] != null
-                        ? `Day Care (${DAY_CARE_PLACE[main.region.value]})`
-                        : "Day Care"
-                }
-            >
+            <Panel>
                 <p class="pk-small pk-muted">
                     Leave a Pokémon from your box and the Day Care couple finds an Egg every{" "}
                     {EGG_BATTLES} wild battles you win. Eggs hatch into the first stage of its
@@ -762,6 +850,20 @@ const layer = createLayer(id, () => {
                 selected.value != null && main.owns(selected.value)
                     ? selected.value
                     : main.partyIds.value[0];
+            const tabs: TabOption[] = [
+                { id: "party", label: "Party" },
+                { id: "box", label: `PC Box (${allIds.value.length})` },
+                {
+                    id: "daycare",
+                    label:
+                        DAY_CARE_PLACE[main.region.value] != null
+                            ? `Day Care (${DAY_CARE_PLACE[main.region.value]})`
+                            : "Day Care",
+                    show: main.dayCareOpen.value
+                },
+                { id: "contests", label: "Contests", show: main.mechanicOn("contests") }
+            ];
+            const page = currentTab("party", tabs);
             return (
                 <div class="pk-layer">
                     {renderNav(true)}
@@ -771,98 +873,29 @@ const layer = createLayer(id, () => {
                             You can't change your party in the middle of a battle.
                         </p>
                     ) : null}
-                    <div class="pk-party-grid">{main.partyIds.value.map(renderPartySlot)}</div>
-                    {renderDetail(detailId)}
-                    {main.mechanicOn("contests") && detailId != null
-                        ? renderContestHall(detailId)
-                        : null}
-                    {main.dayCareOpen.value ? renderDayCare() : null}
-                    <Panel title={`PC Box (${allIds.value.length})`}>
-                        <div class="pk-filter-row">
-                            <input
-                                class="pk-search"
-                                type="search"
-                                placeholder="Search by name…"
-                                value={search.value}
-                                onInput={(e: Event) =>
-                                    (search.value = (e.target as HTMLInputElement).value)
-                                }
-                            />
-                        </div>
-                        <div class="pk-filter-row">
-                            <span class="pk-small pk-muted">Sort:</span>
-                            {SORTS.map(([value, label]) => (
-                                <Button
-                                    kind={sort.value === value ? "primary" : "ghost"}
-                                    onClick={() => (sort.value = value)}
-                                >
-                                    {label}
-                                </Button>
-                            ))}
-                        </div>
-                        <div class="pk-filter-row">
-                            <span class="pk-small pk-muted">Show:</span>
-                            {QUICK_FILTERS.map(([value, label, title]) => (
-                                <Button
-                                    kind={quickFilters.value.includes(value) ? "primary" : "ghost"}
-                                    title={title}
-                                    onClick={() => toggle(quickFilters, value)}
-                                >
-                                    {label}
-                                </Button>
-                            ))}
-                        </div>
-                        <div class="pk-filter-row">
-                            <span class="pk-small pk-muted">Type:</span>
-                            {boxTypes.value.map(type => (
-                                <button
-                                    class={[
-                                        "pk-type-toggle",
-                                        typeFilters.value.includes(type) ? "active" : ""
-                                    ]}
-                                    onClick={() => toggle(typeFilters, type)}
-                                >
-                                    <TypeBadge type={type} small />
-                                </button>
-                            ))}
-                        </div>
-                        {filtering.value ? (
-                            <div class="pk-filter-row pk-small pk-muted">
-                                Showing {boxIds.value.length} of {allIds.value.length}
-                                <Button kind="ghost" onClick={clearFilters}>
-                                    Clear filters
-                                </Button>
+                    {renderTabs("party", tabs)}
+                    {page === "party" ? (
+                        <>
+                            <div class="pk-party-grid">
+                                {main.partyIds.value.map(renderPartySlot)}
                             </div>
-                        ) : null}
-                        {boxIds.value.length === 0 ? (
-                            <p class="pk-muted">No Pokémon match these filters.</p>
-                        ) : null}
-                        <div class="pk-box-grid">
-                            {boxIds.value.map(sid => {
-                                const entry = main.box.value[sid];
-                                const inParty = main.partyIds.value.includes(sid);
-                                return (
-                                    <button
-                                        class={[
-                                            "pk-box-cell",
-                                            inParty ? "in-party" : "",
-                                            detailId === sid ? "selected" : ""
-                                        ]}
-                                        title={`${getSpecies(sid).name} Lv. ${entry.level}`}
-                                        onClick={() => (selected.value = sid)}
-                                    >
-                                        <Sprite id={sid} size={42} shiny={entry.shiny} />
-                                        <span class="pk-box-level">{entry.level}</span>
-                                        {readyToEvolve(sid) ? (
-                                            <span class="pk-box-ready" title="Ready to evolve">
-                                                ▲
-                                            </span>
-                                        ) : null}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </Panel>
+                            {renderDetail(detailId)}
+                        </>
+                    ) : page === "box" ? (
+                        <>
+                            {renderDetail(detailId)}
+                            {renderBox(detailId)}
+                        </>
+                    ) : page === "daycare" ? (
+                        renderDayCare()
+                    ) : (
+                        <>
+                            <div class="pk-party-grid">
+                                {main.partyIds.value.map(renderPartySlot)}
+                            </div>
+                            {detailId != null ? renderContestHall(detailId) : null}
+                        </>
+                    )}
                 </div>
             );
         }

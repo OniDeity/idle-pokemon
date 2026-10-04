@@ -13,7 +13,8 @@ import { zonesIn } from "game/pokemon/zones";
 import { computed } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
-import { Button, formatMoney, ItemIcon, Panel } from "../ui/components";
+import type { TabOption } from "../ui/components";
+import { Button, currentTab, formatMoney, ItemIcon, Panel, renderTabs } from "../ui/components";
 
 const id = "mart";
 const layer = createLayer(id, () => {
@@ -124,108 +125,126 @@ const layer = createLayer(id, () => {
         levels,
         buyUpgrade,
         nav,
-        display: () => (
-            <div class="pk-layer">
-                {renderNav(true)}
-                <h2 class="pk-layer-title">Poké Mart</h2>
-                <div class="pk-money-big">{formatMoney(main.money.value)}</div>
+        display: () => {
+            const snacks = zonesIn(main.region.value).some(
+                z => z.pokeSpot === true && (z.mechanic == null || main.mechanicOn(z.mechanic))
+            );
+            const tabs: TabOption[] = [
+                { id: "balls", label: "Poké Balls" },
+                { id: "training", label: "Training" },
+                { id: "items", label: "Evolution items" },
+                { id: "snacks", label: "Poké Snacks", show: snacks }
+            ];
+            const page = currentTab("mart", tabs);
+            return (
+                <div class="pk-layer">
+                    {renderNav(true)}
+                    <h2 class="pk-layer-title">Poké Mart</h2>
+                    <div class="pk-money-big">{formatMoney(main.money.value)}</div>
+                    {renderTabs("mart", tabs)}
 
-                <Panel title="Poké Balls">
-                    {(["pokeBall", "greatBall", "ultraBall"] as BallId[]).map(renderBall)}
-                    {main.mechanicOn("apricornBalls") ? (
-                        <>
-                            <div class="pk-small pk-muted">
-                                Kurt's Apricorn Balls, stocked in every region once you've met him
-                                in Azalea Town. Smart throwing picks whichever ball works best.
-                            </div>
-                            {APRICORN_BALLS.map(renderBall)}
-                        </>
-                    ) : main.region.value === "johto" ? (
-                        <div class="pk-small pk-muted">
-                            🔒 Kurt's Apricorn Balls: reach Azalea Town after the Hive Badge, and
-                            every region's Poké Mart stocks them from then on.
-                        </div>
-                    ) : null}
-                    {main.balls.value.masterBall > 0 ? (
-                        <div class="pk-shop-row">
-                            <ItemIcon src={BALLS.masterBall.sprite} alt="Master Ball" />
-                            <div class="pk-shop-info">
-                                <b>Master Ball</b>{" "}
-                                <span class="pk-muted">×{main.balls.value.masterBall}</span>
-                                <div class="pk-small">
-                                    Never fails. Saved for legendary Pokémon.
+                    {page === "balls" ? (
+                        <Panel>
+                            {(["pokeBall", "greatBall", "ultraBall"] as BallId[]).map(renderBall)}
+                            {main.mechanicOn("apricornBalls") ? (
+                                <>
+                                    <div class="pk-small pk-muted">
+                                        Kurt's Apricorn Balls, stocked in every region once you've
+                                        met him in Azalea Town. Smart throwing picks whichever ball
+                                        works best.
+                                    </div>
+                                    {APRICORN_BALLS.map(renderBall)}
+                                </>
+                            ) : main.region.value === "johto" ? (
+                                <div class="pk-small pk-muted">
+                                    🔒 Kurt's Apricorn Balls: reach Azalea Town after the Hive
+                                    Badge, and every region's Poké Mart stocks them from then on.
                                 </div>
-                            </div>
-                        </div>
-                    ) : null}
-                </Panel>
-
-                {zonesIn(main.region.value).some(
-                    z => z.pokeSpot === true && (z.mechanic == null || main.mechanicOn(z.mechanic))
-                ) ? (
-                    <Panel title="Poké Snacks">
-                        <div class="pk-shop-row">
-                            <ItemIcon src={itemSprite("honey")} alt="Poké Snacks" />
-                            <div class="pk-shop-info">
-                                <b>Poké Snacks</b>{" "}
-                                <span class="pk-muted">×{main.pokeSnacks.value}</span>
-                                <div class="pk-small">
-                                    Lure wild Pokémon to the Poké Spots: each encounter there eats
-                                    one. {formatMoney(POKE_SNACK_PRICE)} each.
-                                </div>
-                            </div>
-                            <div class="pk-shop-actions">
-                                {[10, 100].map(n => (
-                                    <Button
-                                        kind="small"
-                                        disabled={main.money.value < POKE_SNACK_PRICE * n}
-                                        onClick={() => main.buyPokeSnacks(n)}
-                                    >
-                                        ×{n}
-                                    </Button>
-                                ))}
-                            </div>
-                        </div>
-                    </Panel>
-                ) : null}
-
-                <Panel title="Training supplies">{MART_UPGRADE_LIST.map(renderUpgrade)}</Panel>
-
-                <Panel title="Celadon Dept. Store">
-                    {Object.values(STONES).map(stone => {
-                        const unlocked = main.martTier.value >= stone.badgesRequired;
-                        return (
-                            <div class={["pk-shop-row", unlocked ? "" : "locked"]}>
-                                <ItemIcon src={stone.sprite} alt={stone.name} />
-                                <div class="pk-shop-info">
-                                    <b>{stone.name}</b>{" "}
-                                    <span class="pk-muted">
-                                        ×{main.stones.value[stone.id] ?? 0}
-                                    </span>
-                                    <div class="pk-small">
-                                        {unlocked
-                                            ? (STONE_DESCRIPTIONS[stone.id] ??
-                                              "Use from the Party screen to evolve certain Pokémon.")
-                                            : `Stocked after ${stone.badgesRequired} badge${
-                                                  stone.badgesRequired === 1 ? "" : "s"
-                                              }`}
+                            ) : null}
+                            {main.balls.value.masterBall > 0 ? (
+                                <div class="pk-shop-row">
+                                    <ItemIcon src={BALLS.masterBall.sprite} alt="Master Ball" />
+                                    <div class="pk-shop-info">
+                                        <b>Master Ball</b>{" "}
+                                        <span class="pk-muted">×{main.balls.value.masterBall}</span>
+                                        <div class="pk-small">
+                                            Never fails. Saved for legendary Pokémon.
+                                        </div>
                                     </div>
                                 </div>
-                                {unlocked ? (
-                                    <Button
-                                        kind="primary"
-                                        disabled={main.money.value < stone.price}
-                                        onClick={() => main.buyStone(stone.id)}
-                                    >
-                                        {formatMoney(stone.price)}
-                                    </Button>
-                                ) : null}
+                            ) : null}
+                        </Panel>
+                    ) : null}
+
+                    {page === "snacks" ? (
+                        <Panel>
+                            <div class="pk-shop-row">
+                                <ItemIcon src={itemSprite("honey")} alt="Poké Snacks" />
+                                <div class="pk-shop-info">
+                                    <b>Poké Snacks</b>{" "}
+                                    <span class="pk-muted">×{main.pokeSnacks.value}</span>
+                                    <div class="pk-small">
+                                        Lure wild Pokémon to the Poké Spots: each encounter there
+                                        eats one. {formatMoney(POKE_SNACK_PRICE)} each.
+                                    </div>
+                                </div>
+                                <div class="pk-shop-actions">
+                                    {[10, 100].map(n => (
+                                        <Button
+                                            kind="small"
+                                            disabled={main.money.value < POKE_SNACK_PRICE * n}
+                                            onClick={() => main.buyPokeSnacks(n)}
+                                        >
+                                            ×{n}
+                                        </Button>
+                                    ))}
+                                </div>
                             </div>
-                        );
-                    })}
-                </Panel>
-            </div>
-        )
+                        </Panel>
+                    ) : null}
+
+                    {page === "training" ? (
+                        <Panel>{MART_UPGRADE_LIST.map(renderUpgrade)}</Panel>
+                    ) : null}
+
+                    {page === "items" ? (
+                        <Panel>
+                            {Object.values(STONES).map(stone => {
+                                const unlocked = main.martTier.value >= stone.badgesRequired;
+                                return (
+                                    <div class={["pk-shop-row", unlocked ? "" : "locked"]}>
+                                        <ItemIcon src={stone.sprite} alt={stone.name} />
+                                        <div class="pk-shop-info">
+                                            <b>{stone.name}</b>{" "}
+                                            <span class="pk-muted">
+                                                ×{main.stones.value[stone.id] ?? 0}
+                                            </span>
+                                            <div class="pk-small">
+                                                {unlocked
+                                                    ? (STONE_DESCRIPTIONS[stone.id] ??
+                                                      "Use from the Party screen to evolve certain Pokémon.")
+                                                    : `Stocked after ${stone.badgesRequired} badge${
+                                                          stone.badgesRequired === 1 ? "" : "s"
+                                                      }`}
+                                            </div>
+                                        </div>
+                                        {unlocked ? (
+                                            <Button
+                                                kind="primary"
+                                                disabled={main.money.value < stone.price}
+                                                onClick={() => main.buyStone(stone.id)}
+                                            >
+                                                {formatMoney(stone.price)}
+                                            </Button>
+                                        ) : null}
+                                    </div>
+                                );
+                            })}
+                        </Panel>
+                    ) : null}
+                </div>
+            );
+        }
     };
 });
 
