@@ -8,16 +8,17 @@ import {
     BASE_SHINY_CHANCE,
     ballCatchChance,
     battleXp,
+    battlePartner,
     bestMatchup,
     computeBonuses,
     initialTrainerBattle,
-    memberDps,
     memberMultiplier,
     effortMultiplier,
     HEART_BATTLES,
     moneyYield,
     stepTrainerBattle,
-    trainerTeam
+    trainerTeam,
+    wildDps
 } from "game/pokemon/balance";
 import type { StoneId } from "game/pokemon/data";
 import {
@@ -97,7 +98,7 @@ export interface WildPokemon {
 
 export type BattleState =
     | { kind: "search"; remaining: number; total: number }
-    | { kind: "wild"; wild: WildPokemon; active: number }
+    | { kind: "wild"; wild: WildPokemon; active: number; partner?: number }
     | {
           kind: "trainer";
           label: string;
@@ -757,6 +758,18 @@ export const main = createLayer("main", layer => {
         battle.value = { kind: "search", remaining: total, total };
     }
 
+    /** Who fights a wild Pokémon: the best matchup, plus a partner in double battles. */
+    function wildFighters(target: BattlerStats): { active: number; partner: number } {
+        const party = partyBattlers.value;
+        const damage = bonuses.value.damage;
+        const active = bestMatchup(party, target, damage, null);
+        const partner =
+            active !== -1 && mechanicOn("doubleBattles")
+                ? battlePartner(party, target, damage, active, null)
+                : -1;
+        return { active, partner };
+    }
+
     function spawnWild() {
         // Poké Spots only draw Pokémon out with a Poké Snack.
         if (ZONES_BY_ID[zoneId.value]?.pokeSpot === true) {
@@ -791,7 +804,7 @@ export const main = createLayer("main", layer => {
         battle.value = {
             kind: "wild",
             wild: { ...rolled, shiny, hp, maxHp: hp },
-            active: bestMatchup(partyBattlers.value, target, bonuses.value.damage, null)
+            ...wildFighters(target)
         };
         if (shiny) {
             const text = `A shiny ${target.species.name} appeared!`;
@@ -1203,10 +1216,13 @@ export const main = createLayer("main", layer => {
             case "wild": {
                 const { wild } = current;
                 const target = { species: getSpecies(wild.speciesId), level: wild.level };
-                const party = partyBattlers.value;
-                const active = bestMatchup(party, target, bonuses.value.damage, null);
-                const dps =
-                    active === -1 ? 0 : memberDps(party[active], target, bonuses.value.damage);
+                const { active, partner } = wildFighters(target);
+                const dps = wildDps(
+                    partyBattlers.value,
+                    target,
+                    bonuses.value.damage,
+                    mechanicOn("doubleBattles")
+                );
                 if (dps <= 0) {
                     return 0;
                 }
@@ -1215,6 +1231,7 @@ export const main = createLayer("main", layer => {
                     battle.value = {
                         ...current,
                         active,
+                        partner,
                         wild: { ...wild, hp: wild.hp - dps * dt }
                     };
                     return 0;
@@ -1231,7 +1248,8 @@ export const main = createLayer("main", layer => {
                     current.state,
                     bonuses.value.damage,
                     dt,
-                    trainer.timeLimit
+                    trainer.timeLimit,
+                    { doubles: mechanicOn("doubleBattles"), enemyDoubles: trainer.doubles === true }
                 );
                 battle.value = { ...current, state };
                 if (done == null) {
@@ -1374,6 +1392,19 @@ export const main = createLayer("main", layer => {
         region.value = id;
     }
 
+    /**
+     * Bring a Partner (Hoenn's mechanic): one Hall of Fame Pokémon picked to start the next
+     * journey beside the starter (0 for none). Kept as the default for later journeys.
+     */
+    const journeyPartner = persistent<number>(0);
+    const partnerChoices = computed(() => {
+        const choices = new Map<number, boolean>();
+        for (const entry of [...hof.entries.value].reverse()) {
+            for (const p of entry.team) choices.set(p.id, (choices.get(p.id) ?? false) || p.shiny);
+        }
+        return [...choices.entries()].map(([id, shiny]) => ({ id, shiny }));
+    });
+
     function chooseStarter(id: number) {
         const def = regionDef.value;
         if (starter.value !== 0 || !startersFor(def, hof.clearCount(def.id)).includes(id)) return;
@@ -1390,10 +1421,22 @@ export const main = createLayer("main", layer => {
                 .filter(other => other !== id)
                 .forEach(other => receivePokemon(other, level, false));
         }
+        const partner = partnerChoices.value.find(p => p.id === journeyPartner.value);
+        const bringPartner =
+            mechanicOn("partner") && partner != null && box.value[partner.id] == null;
         addLog({
             kind: "info",
             text: `${getSpecies(id).name}, I choose you! Your ${def.name} journey begins.`
         });
+        if (bringPartner) {
+            receivePokemon(partner.id, level, partner.shiny, false);
+            addLog({
+                kind: "info",
+                text: `${getSpecies(partner.id).name} from your Hall of Fame comes along too.`,
+                speciesId: partner.id,
+                shiny: partner.shiny
+            });
+        }
         startSearch();
     }
 
@@ -1414,6 +1457,8 @@ export const main = createLayer("main", layer => {
         minimizable: false,
         classes: mobileClasses("main"),
         starter,
+        journeyPartner,
+        partnerChoices,
         region,
         regionDef,
         trials,

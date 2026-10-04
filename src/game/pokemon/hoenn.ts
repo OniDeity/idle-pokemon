@@ -494,6 +494,7 @@ export const HOENN_GYMS: GymDefinition[] = [
             { id: 338, level: 42 }
         ],
         keyItems: ["dive", "superRod"],
+        doubles: true,
         rewardText:
             "Steven teaches you HM08 Dive, and a fisherman in Mossdeep gives you the Super Rod.",
         quote: "Hehehe… Were you surprised? That there are two Gym Leaders?"

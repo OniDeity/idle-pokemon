@@ -659,6 +659,15 @@
     animation: pk-bob 1.6s ease-in-out infinite;
 }
 
+/* Double battles: the partner stands just behind and to the right of the active Pokémon. */
+.pk-platform .pk-partner-sprite {
+    position: absolute;
+    left: 84px;
+    bottom: 10px;
+    z-index: 0;
+    animation: pk-bob 1.6s ease-in-out 0.4s infinite;
+}
+
 @keyframes pk-enter {
     from {
         transform: translateX(40px);
@@ -814,6 +823,10 @@
 
 .pk-strip-mon.active {
     border-color: #facc15;
+}
+
+.pk-strip-mon.partner {
+    border-color: #60a5fa;
 }
 
 .pk-strip-mon.fainted {
@@ -1587,4 +1600,34 @@
 
 .pk-daycare-mark.new {
     color: #eab308;
+}
+
+/* Bring a Partner, on the starter screen. */
+.pk-partner-picker {
+    margin-top: 12px;
+}
+
+.pk-partner-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.pk-partner-choice {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--raised-background);
+    border: 2px solid var(--pk-line);
+    border-radius: 8px;
+    cursor: pointer;
+    color: inherit;
+}
+
+.pk-partner-choice.selected {
+    border-color: #facc15;
 }

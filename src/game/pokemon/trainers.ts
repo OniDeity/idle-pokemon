@@ -21,6 +21,8 @@ export interface TrainerDefinition {
     quote: string;
     /** Orre: Shadow Pokémon on the team (by species), snagged when the trainer is beaten. */
     snag?: number[];
+    /** A double battle: the trainer's next Pokémon attacks from the field too. */
+    doubles?: boolean;
 }
 
 export interface GymDefinition extends TrainerDefinition {

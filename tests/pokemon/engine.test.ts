@@ -12,6 +12,7 @@ import {
     simulateTrainerBattle,
     stepTrainerBattle,
     trainerTeam,
+    wildDps,
     zoneRates
 } from "game/pokemon/balance";
 import {
@@ -312,6 +313,50 @@ describe("battles", () => {
         expect(state.partyHp).toEqual(forecast.state.partyHp.map(hp => expect.closeTo(hp, 6)));
     });
 
+    test("double battles: a partner adds its damage, and a double trainer's second Pokémon hits too", () => {
+        const team = party([9, 45], [26, 44], [65, 45], [3, 45], [130, 44], [59, 45]);
+        const starmie = trainerTeam(GYMS[1])[1];
+        const single = wildDps(team, starmie, 1);
+        const double = wildDps(team, starmie, 1, true);
+        const dps = team.map(m => memberDps(m, starmie, 1)).sort((a, b) => b - a);
+        expect(single).toBeCloseTo(dps[0], 9);
+        expect(double).toBeCloseTo(dps[0] + dps[1], 9);
+        // A lone Pokémon has no partner.
+        expect(wildDps(team.slice(0, 1), starmie, 1, true)).toBe(
+            wildDps(team.slice(0, 1), starmie, 1)
+        );
+
+        const gym = GYMS[7];
+        const alone = simulateTrainerBattle(team, gym, 8, 3);
+        const together = simulateTrainerBattle(team, gym, 8, 3, true);
+        expect(alone.won).toBe(true);
+        expect(together.won).toBe(true);
+        expect(together.time).toBeLessThan(alone.time);
+        expect(together.hpRemaining).toBeGreaterThan(alone.hpRemaining);
+        const pair = { ...gym, doubles: true };
+        expect(simulateTrainerBattle(team, pair, 8, 3, true).hpRemaining).toBeLessThan(
+            together.hpRemaining
+        );
+
+        // Stepping stays exact with a partner and a double-battle trainer.
+        const forecast = simulateTrainerBattle(team, pair, 1.3, 1.2, true);
+        const enemies = trainerTeam(pair);
+        let state = initialTrainerBattle(team, enemies, 1.2);
+        let done = null;
+        for (let i = 0; i < 100000 && done == null; i++) {
+            const result = stepTrainerBattle(team, enemies, state, 1.3, 0.05, pair.timeLimit, {
+                doubles: true,
+                enemyDoubles: true
+            });
+            state = result.state;
+            done = result.done;
+        }
+        expect(done).toBe(forecast.reason);
+        expect(state.elapsed).toBeCloseTo(forecast.time, 6);
+        expect(state.partyHp).toEqual(forecast.state.partyHp.map(hp => expect.closeTo(hp, 6)));
+        expect(REGIONS.hoenn.trials.find(g => g.doubles)?.name).toBe("Tate & Liza");
+    });
+
     test("the Elite Four and Champion are beatable with a strong capped team", () => {
         const team = party([9, 65], [135, 65], [65, 65], [94, 65], [149, 65], [112, 65]);
         const { damage, hp } = computeBonuses({
@@ -538,7 +583,9 @@ describe("generation mechanics", () => {
             "headbutt",
             "snagMachine",
             "relicStone",
-            "pokeSpots"
+            "pokeSpots",
+            "doubleBattles",
+            "partner"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
