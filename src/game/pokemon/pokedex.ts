@@ -10,7 +10,7 @@ import type { RegionDefinition } from "./regions";
 import { REGION_LIST } from "./regions";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "./specials";
 import type { RegionId } from "./zones";
-import { occasionalSpecies, zonePools, zonesIn } from "./zones";
+import { catchableIn, occasionalSpecies, zonePools, zonesIn } from "./zones";
 
 /**
  * The key items a journey in one of these regions can have: the region's own (starting and
@@ -44,7 +44,9 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
                 { id: number }[]
             ][]) {
                 // A pool needing an item from a later region (Kanto's Headbutt trees) waits for it.
-                if (pool === "walk" || items.has(pool)) entries.forEach(e => add(e.id));
+                if (pool === "walk" || items.has(pool)) {
+                    entries.filter(e => catchableIn(zone.id, e.id)).forEach(e => add(e.id));
+                }
             }
             const { swarm, contest } = occasionalSpecies(zone.id);
             [...swarm, ...contest].forEach(add);
@@ -54,6 +56,10 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
         );
         const def = REGION_LIST.find(r => r.id === region);
         [...(def?.starters ?? []), ...(def?.partnerStarters ?? [])].forEach(add);
+        // Shadow Pokémon snagged from Orre's admins (purified into their species).
+        if (def != null) {
+            [...def.trials, ...def.finale(def.starters[0])].forEach(t => t.snag?.forEach(add));
+        }
     }
     let changed = true;
     while (changed) {

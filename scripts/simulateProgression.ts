@@ -24,7 +24,7 @@ import {
     upgradeCost,
     wildDps
 } from "../src/game/pokemon/balance";
-import { getSpecies, hallOfFameId } from "../src/game/pokemon/data";
+import { getSpecies, hallOfFameId, isShadow, shadowOf } from "../src/game/pokemon/data";
 import type { BallId, KeyItemId } from "../src/game/pokemon/items";
 import { AUTO_BALL_ORDER, BALLS, STONES } from "../src/game/pokemon/items";
 import type { RegionDefinition } from "../src/game/pokemon/regions";
@@ -33,7 +33,12 @@ import { SPECIAL_ENCOUNTERS } from "../src/game/pokemon/specials";
 import { levelForXp, maxHp, xpForLevel, xpYield } from "../src/game/pokemon/stats";
 import type { TrainerDefinition } from "../src/game/pokemon/trainers";
 import type { RegionId } from "../src/game/pokemon/zones";
-import { availableZoneSpecies, rollEncounter, zonesIn } from "../src/game/pokemon/zones";
+import {
+    availableZoneSpecies,
+    catchableIn,
+    rollEncounter,
+    zonesIn
+} from "../src/game/pokemon/zones";
 
 const plan = (process.argv[2] ?? "kanto,kanto,orange,sevii").split(",").map(part => {
     const [region, starter] = part.split(":");
@@ -135,6 +140,23 @@ function runJourney(region: RegionDefinition, starter: number) {
         });
     }
     catchSpecies(starter, region.startLevel + 5 * (hof.headStart ?? 0));
+    // Colosseum's Espeon and Umbreon come as a pair.
+    if (region.allStarters === true) {
+        region.starters
+            .filter(id => id !== starter)
+            .forEach(id => catchSpecies(id, region.startLevel + 5 * (hof.headStart ?? 0)));
+    }
+    // Orre's one-of-a-kind Shadow Pokémon snagged this journey.
+    const snagged: Record<string, boolean> = {};
+    const snagFrom = (trainers: TrainerDefinition[]) => {
+        for (const t of trainers) {
+            for (const id of t.snag ?? []) {
+                const level = t.team.find(p => p.id === id)?.level ?? 5;
+                snagged[shadowOf(id)] = true;
+                catchSpecies(shadowOf(id), level);
+            }
+        }
+    };
 
     const bonusInputs = (): BonusInputs => ({
         dexCaught: dexCaught(),
@@ -237,7 +259,7 @@ function runJourney(region: RegionDefinition, starter: number) {
         let xpPerSec = 0;
         const samples = 30;
         for (let i = 0; i < samples; i++) {
-            const e = rollEncounter(zoneId, keyItems, rng);
+            const e = rollEncounter(zoneId, keyItems, rng, 0, { snagged });
             if (!e) return 0;
             const target = { species: getSpecies(e.speciesId), level: e.level };
             const t = bonuses.searchTime + maxHp(target) / wildDps(members, target, bonuses.damage);
@@ -275,6 +297,7 @@ function runJourney(region: RegionDefinition, starter: number) {
             const members = party.map(battler);
             if (trainers.every(t => simulateTrainerBattle(members, t, damage, hp).won)) {
                 for (const t of trainers) money += t.prizeMoney;
+                snagFrom(trainers);
                 const summary = party.map(o => `${getSpecies(o.id).name} ${o.level}`).join(", ");
                 if (badges < region.trials.length) {
                     const trial = region.trials[badges];
@@ -306,7 +329,7 @@ function runJourney(region: RegionDefinition, starter: number) {
         step++;
 
         const bonuses = computeBonuses(bonusInputs());
-        const e = rollEncounter(zone, keyItems, rng, hof.roddysRod ?? 0);
+        const e = rollEncounter(zone, keyItems, rng, hof.roddysRod ?? 0, { snagged });
         if (!e) break;
         const target = { species: getSpecies(e.speciesId), level: e.level };
         time +=
@@ -324,7 +347,7 @@ function runJourney(region: RegionDefinition, starter: number) {
             evolve(o);
         }
 
-        if (!owned.has(e.speciesId)) {
+        if (!owned.has(e.speciesId) && catchableIn(zone, e.speciesId)) {
             let ball = AUTO_BALL_ORDER.find(b => (balls[b] ?? 0) > 0);
             if (ball == null) {
                 ball = AUTO_BALL_ORDER.find(
@@ -346,7 +369,10 @@ function runJourney(region: RegionDefinition, starter: number) {
                     BALLS[ball].catchMultiplier,
                     bonuses.catch
                 );
-                if (rng() < chance) catchSpecies(e.speciesId, e.level);
+                if (rng() < chance) {
+                    catchSpecies(e.speciesId, e.level);
+                    if (isShadow(e.speciesId)) snagged[e.speciesId] = true;
+                }
             }
         }
     }

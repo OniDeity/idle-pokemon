@@ -692,7 +692,7 @@ export const AUTOMATIONS: AutomationDefinition[] = [
         id: "autoEvolve",
         name: "Evolution Planner",
         description:
-            "Uses evolution stones and the Link Cable on new evolutions, buying them when you can afford it.",
+            "Uses evolution stones and the Link Cable on new evolutions, buying them when you can afford it, and purifies Shadow Pokémon whose hearts have opened.",
         cost: 8,
         sprite: itemSprite("moon-stone")
     },

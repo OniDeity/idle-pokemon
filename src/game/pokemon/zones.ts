@@ -1,13 +1,22 @@
 import type { EncounterEntry, EncounterPoolId } from "./data";
-import { enc, ENCOUNTERS, femaleForm, magikarpPatterns, WILD_VARIANTS } from "./data";
+import {
+    enc,
+    ENCOUNTERS,
+    femaleForm,
+    isShadow,
+    magikarpPatterns,
+    shadowOf,
+    WILD_VARIANTS
+} from "./data";
 import type { KeyItemId } from "./items";
+import { COLOSSEUM_ZONES } from "./colosseum";
 import { JOHTO_ANIME_ZONES } from "./johtoAnime";
 import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
 import { BUG_CONTEST_POOL, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
 import { SEVII_ZONES } from "./sevii";
 
-export type RegionId = "kanto" | "orange" | "sevii" | "johto";
+export type RegionId = "kanto" | "orange" | "sevii" | "johto" | "orre";
 
 export type ZonePools = Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 
@@ -24,6 +33,11 @@ export interface ZoneDefinition {
     blurb: string;
     /** Hand-authored encounter pools; zones without them use the generated game data. */
     encounters?: ZonePools;
+    /**
+     * Orre has no wild Pokémon: its encounters are trainers' Pokémon, which can't be caught,
+     * and the Shadow Pokémon of Cipher, which can be snagged.
+     */
+    trainerBattles?: boolean;
 }
 
 /** Kanto zones from the games, in the order the player reaches them. */
@@ -259,7 +273,8 @@ export const ZONES: ZoneDefinition[] = [
     ...KANTO_ZONES,
     ...ORANGE_ALL,
     ...SEVII_ZONES,
-    ...JOHTO_ALL
+    ...JOHTO_ALL,
+    ...COLOSSEUM_ZONES
 ];
 
 export function zonesIn(region: RegionId): ZoneDefinition[] {
@@ -323,7 +338,14 @@ export function zonePools(zoneId: string): ZonePools {
 export interface ZoneExtras {
     swarms?: Partial<Record<string, boolean>>;
     bugContest?: boolean;
+    /** Shadow Pokémon already snagged this journey: each is one of a kind. */
+    snagged?: Partial<Record<string, boolean>>;
+    /** Cipher Peons roam with Shadow versions of a place's Pokémon (the Snag Machine mechanic). */
+    cipherPeons?: boolean;
 }
+
+/** How often an encounter is a Cipher Peon's Shadow Pokémon, where Cipher Peons roam. */
+export const CIPHER_PEON_CHANCE = 0.02;
 
 /** A swarm or the contest's bugs make up this share of the pool they join. */
 export const EXTRA_SHARE = 1 / 3;
@@ -339,6 +361,11 @@ function joinPool(existing: EncounterEntry[], added: EncounterEntry[], share: nu
 /** A zone's pools with the journey's swarms and contest added. */
 function poolsWith(zoneId: string, extras: ZoneExtras): ZonePools {
     const pools: ZonePools = { ...zonePools(zoneId) };
+    if (extras.snagged != null) {
+        for (const pool of Object.keys(pools) as EncounterPoolId[]) {
+            pools[pool] = pools[pool]!.filter(e => !isShadow(e.id) || !extras.snagged![e.id]);
+        }
+    }
     if (zoneId === "nationalPark" && extras.bugContest === true) {
         pools.walk = joinPool(pools.walk ?? [], BUG_CONTEST_POOL, EXTRA_SHARE);
     }
@@ -388,6 +415,11 @@ export function activePools(
     return result;
 }
 
+/** Whether an encounter can be caught: in Orre, only Shadow Pokémon (snagged from trainers). */
+export function catchableIn(zoneId: string, speciesId: number): boolean {
+    return ZONES_BY_ID[zoneId]?.trainerBattles !== true || isShadow(speciesId);
+}
+
 /** Species a zone only gets once added: Pokégear swarms and the Bug-Catching Contest. */
 export function occasionalSpecies(zoneId: string): { swarm: number[]; contest: number[] } {
     return {
@@ -403,7 +435,9 @@ export function occasionalSpecies(zoneId: string): { swarm: number[]; contest: n
 export function allZoneSpecies(zoneId: string): number[] {
     const ids = new Set<number>();
     for (const entries of Object.values(zonePools(zoneId))) {
-        entries?.forEach(e => ids.add(e.id));
+        entries?.forEach(e => {
+            if (catchableIn(zoneId, e.id)) ids.add(e.id);
+        });
     }
     const { swarm, contest } = occasionalSpecies(zoneId);
     [...swarm, ...contest].forEach(id => ids.add(id));
@@ -418,7 +452,9 @@ export function availableZoneSpecies(
 ): number[] {
     const ids = new Set<number>();
     for (const pool of activePools(zoneId, keyItems, extras)) {
-        pool.entries.forEach(e => ids.add(e.id));
+        pool.entries.forEach(e => {
+            if (catchableIn(zoneId, e.id)) ids.add(e.id);
+        });
     }
     return [...ids].sort((a, b) => a - b);
 }
@@ -483,6 +519,9 @@ export function rollEncounter(
             rng
         ).id;
     }
+    if (extras.cipherPeons === true && !isShadow(speciesId) && rng() < CIPHER_PEON_CHANCE) {
+        speciesId = shadowOf(speciesId);
+    }
     return {
         speciesId,
         level: entry.minLevel + Math.floor(rng() * (entry.maxLevel - entry.minLevel + 1)),
@@ -502,7 +541,16 @@ export function encounterOdds(
     extras: ZoneExtras = {}
 ): Map<number, number> {
     const odds = new Map<number, number>();
-    const add = (id: number, p: number) => odds.set(id, (odds.get(id) ?? 0) + p);
+    const tally = (id: number, p: number) => odds.set(id, (odds.get(id) ?? 0) + p);
+    // Where Cipher Peons roam, a share of everything turns out to be its Shadow form.
+    const add = (id: number, p: number) => {
+        if (extras.cipherPeons === true && !isShadow(id)) {
+            tally(shadowOf(id), p * CIPHER_PEON_CHANCE);
+            tally(id, p * (1 - CIPHER_PEON_CHANCE));
+        } else {
+            tally(id, p);
+        }
+    };
     const pools = activePools(zoneId, keyItems, extras);
     const totalShare = pools.reduce((sum, pool) => sum + pool.share, 0);
     for (const pool of pools) {

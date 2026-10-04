@@ -261,7 +261,8 @@ export type KeyItemId =
     | "headbutt"
     | "rockSmash"
     | "squirtBottle"
-    | "radioCard";
+    | "radioCard"
+    | "snagMachine";
 
 export interface KeyItemDefinition {
     id: KeyItemId;
@@ -331,5 +332,12 @@ export const KEY_ITEMS: Record<KeyItemId, KeyItemDefinition> = {
         description:
             "Tunes the Pokégear to Johto's radio: a daily swarm report and the Lucky Number Show.",
         sprite: itemSprite("card-key")
+    },
+    snagMachine: {
+        id: "snagMachine",
+        name: "Snag Machine",
+        description:
+            "Team Snagem's arm-mounted device: throw a Poké Ball at a trainer's Shadow Pokémon to snag it.",
+        sprite: itemSprite("machine-part")
     }
 };
