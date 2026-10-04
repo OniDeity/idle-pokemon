@@ -2,13 +2,14 @@
  * The Poké Mart: balls, evolution items (stones, Link Cables, Soothe Bells), and Pokédollar upgrades.
  * Upgrades are part of the journey and reset on entering the Hall of Fame.
  */
-import { main } from "data/projEntry";
+import { main, POKE_SNACK_PRICE } from "data/projEntry";
 import { createLayer } from "game/layers";
 import { persistent } from "game/persistence";
 import type { MartUpgradeId, UpgradeDefinition } from "game/pokemon/balance";
 import { MART_UPGRADE_LIST, upgradeCost } from "game/pokemon/balance";
 import type { BallId } from "game/pokemon/items";
-import { APRICORN_BALLS, BALLS, STONE_DESCRIPTIONS, STONES } from "game/pokemon/items";
+import { APRICORN_BALLS, BALLS, itemSprite, STONE_DESCRIPTIONS, STONES } from "game/pokemon/items";
+import { zonesIn } from "game/pokemon/zones";
 import { computed } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
@@ -158,6 +159,35 @@ const layer = createLayer(id, () => {
                         </div>
                     ) : null}
                 </Panel>
+
+                {zonesIn(main.region.value).some(
+                    z => z.pokeSpot === true && (z.mechanic == null || main.mechanicOn(z.mechanic))
+                ) ? (
+                    <Panel title="Poké Snacks">
+                        <div class="pk-shop-row">
+                            <ItemIcon src={itemSprite("honey")} alt="Poké Snacks" />
+                            <div class="pk-shop-info">
+                                <b>Poké Snacks</b>{" "}
+                                <span class="pk-muted">×{main.pokeSnacks.value}</span>
+                                <div class="pk-small">
+                                    Lure wild Pokémon to the Poké Spots: each encounter there eats
+                                    one. {formatMoney(POKE_SNACK_PRICE)} each.
+                                </div>
+                            </div>
+                            <div class="pk-shop-actions">
+                                {[10, 100].map(n => (
+                                    <Button
+                                        kind="small"
+                                        disabled={main.money.value < POKE_SNACK_PRICE * n}
+                                        onClick={() => main.buyPokeSnacks(n)}
+                                    >
+                                        ×{n}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+                    </Panel>
+                ) : null}
 
                 <Panel title="Training supplies">{MART_UPGRADE_LIST.map(renderUpgrade)}</Panel>
 

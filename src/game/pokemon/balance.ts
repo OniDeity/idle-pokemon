@@ -771,3 +771,6 @@ export function zoneRates(
     if (seconds === 0) return { xpPerMinute: 0, moneyPerMinute: 0 };
     return { xpPerMinute: (xp / seconds) * 60, moneyPerMinute: (money / seconds) * 60 };
 }
+
+/** Wild battles a Shadow Pokémon must win in the party before its heart opens to purification. */
+export const HEART_BATTLES = 100;

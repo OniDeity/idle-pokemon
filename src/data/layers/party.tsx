@@ -1,7 +1,8 @@
 /**
  * Party & PC Box: choose your six, reorder them, and evolve Pokémon with stones or trades.
  */
-import { EGG_BATTLES, HEART_BATTLES, main } from "data/projEntry";
+import { EGG_BATTLES, main } from "data/projEntry";
+import { HEART_BATTLES } from "game/pokemon/balance";
 import { DAY_CARE_PLACE } from "game/pokemon/mechanics";
 import { createLayer } from "game/layers";
 import { memberMultiplier, effortMultiplier } from "game/pokemon/balance";
