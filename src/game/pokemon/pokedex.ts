@@ -5,7 +5,7 @@
  */
 import type { EncounterPoolId } from "./data";
 import { DEX_SIZE, getSpecies, PRE_EVOLUTION, SPECIES } from "./data";
-import { MECHANIC_LIST } from "./mechanics";
+import { MECHANIC_LIST, MECHANICS } from "./mechanics";
 import type { RegionDefinition } from "./regions";
 import { REGION_LIST } from "./regions";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "./specials";
@@ -38,7 +38,10 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
     };
     const items = keyItemsIn(regions);
     for (const region of regions) {
-        for (const zone of zonesIn(region)) {
+        // Zones a later mechanic brings (other regions' Poké Spots) wait for it.
+        for (const zone of zonesIn(region).filter(
+            z => z.mechanic == null || regions.includes(MECHANICS[z.mechanic].region)
+        )) {
             for (const [pool, entries] of Object.entries(zonePools(zone.id)) as [
                 EncounterPoolId,
                 { id: number }[]

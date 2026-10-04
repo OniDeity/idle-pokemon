@@ -1,7 +1,7 @@
 # Idle Pokémon: project memory
 
 An idle Pokémon game on Profectus 0.7 (Vue 3 TSX). Journeys through regions (Kanto → Orange
-Islands → Sevii Islands → Johto → Orre (Colosseum), with Orre (XD) next), Gyms/trials and a finale per region, a Hall of Fame prestige
+Islands → Sevii Islands → Johto → Orre (Colosseum) → Orre (XD)), Gyms/trials and a finale per region, a Hall of Fame prestige
 layer (Fame upgrades, automation), and a Pokédex kept across journeys.
 
 ## Workflow (how the owner wants changes shipped)
@@ -63,6 +63,10 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
   `heart` (100 wild battles in the party), then `purify()` at the Relic Stone turns them into
   their species. Mechanics `snagMachine` (Cipher Peons: `CIPHER_PEON_CHANCE` of encounters
   elsewhere are Shadow) and `relicStone` carry back.
+- Orre (XD) (`xd.ts`, region `orreXd`): same trainer-battle places; Poké Spot zones
+  (`pokeSpot`) use one Poké Snack per encounter. The `pokeSpots` mechanic adds a Poké Spots
+  zone to every other region (`CARRIED_POKE_SPOTS`, `mechanic: "pokeSpots"`); zones with a
+  `mechanic` stay hidden and don't count toward Pokédex requirements until it's unlocked.
 
 ## Done (v2.2 "Johto")
 
@@ -79,9 +83,7 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
 
 ## Plans and ideas
 
-- Orre (XD) is next: its own journey after Colosseum (Eevee start; Lovrina, Snattle, Gorigan,
-  Ardos, Eldes; Greevil and Shadow Lugia on Citadark Isle), with Poké Spots/Poké Snacks as a
-  carried-back mechanic. Hoenn is the next main-series region after that.
+- Hoenn is the next main-series region.
 - Future generation mechanics go in `mechanics.ts` with their regions: double battles (Hoenn),
   Mega Evolution (Kalos), etc.
 - Gen 3 (Hoenn) will bring Contests and ways to bring Pokémon back to earlier generations' regions.

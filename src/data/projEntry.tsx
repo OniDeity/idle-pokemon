@@ -14,6 +14,7 @@ import {
     memberDps,
     memberMultiplier,
     effortMultiplier,
+    HEART_BATTLES,
     moneyYield,
     stepTrainerBattle,
     trainerTeam
@@ -46,7 +47,7 @@ import {
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
 import type { EncounterKind, RegionId, ZoneExtras } from "game/pokemon/zones";
-import { catchableIn, rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
+import { catchableIn, rollEncounter, zonePools, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
 import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
 import { computed, ref } from "vue";
 import { useToast } from "vue-toastification";
@@ -129,8 +130,8 @@ const LOG_LENGTH = 40;
 const AUTOMATION_INTERVAL = 2;
 /** Catching one of these after entering the contest takes first place (Scyther, Pinsir). */
 const CONTEST_WINNERS = [123, 127];
-/** Wild battles a Shadow Pokémon must win in the party before its heart opens to purification. */
-export const HEART_BATTLES = 100;
+/** Price of one Poké Snack. */
+export const POKE_SNACK_PRICE = 30;
 /** Wild battles won between Lucky Number Show draws (with the Radio Card). */
 export const LUCKY_DRAW_BATTLES = 100;
 /** Wild battles won while a Pokémon is at the Day Care, per Egg. */
@@ -204,6 +205,8 @@ export const main = createLayer("main", layer => {
     const contestWon = persistent<boolean>(false);
     /** The places whose Pokégear swarm this journey tuned in to. */
     const swarmsJoined = persistent<Record<string, boolean>>({}, false);
+    /** Poké Snacks in the bag: each Poké Spot encounter uses one. */
+    const pokeSnacks = persistent<number>(0);
     /** Orre's one-of-a-kind Shadow Pokémon snagged this journey, by Shadow form id. */
     const snaggedShadows = persistent<Record<string, boolean>>({}, false);
     /** The Pokémon left at the Day Care (0 for none), and battles toward its Egg. */
@@ -229,6 +232,7 @@ export const main = createLayer("main", layer => {
     const flash = ref<Flash | null>(null);
     let logId = 0;
     let warnedNoBalls = false;
+    let warnedNoSnacks = false;
 
     function addLog(entry: Omit<LogEntry, "id">) {
         log.value = [{ ...entry, id: logId++ }, ...log.value].slice(0, LOG_LENGTH);
@@ -659,6 +663,13 @@ export const main = createLayer("main", layer => {
         warnedNoBalls = false;
     }
 
+    /** Poké Snacks come in tens. */
+    function buyPokeSnacks(count: number) {
+        if (count <= 0 || !spend(POKE_SNACK_PRICE * count)) return;
+        pokeSnacks.value += count;
+        warnedNoSnacks = false;
+    }
+
     function buyStone(id: StoneId) {
         if (martTier.value < STONES[id].badgesRequired || !spend(STONES[id].price)) return;
         stones.value = { ...stones.value, [id]: (stones.value[id] ?? 0) + 1 };
@@ -745,6 +756,21 @@ export const main = createLayer("main", layer => {
     }
 
     function spawnWild() {
+        // Poké Spots only draw Pokémon out with a Poké Snack.
+        if (ZONES_BY_ID[zoneId.value]?.pokeSpot === true) {
+            if (pokeSnacks.value <= 0) {
+                if (!warnedNoSnacks) {
+                    warnedNoSnacks = true;
+                    addLog({
+                        kind: "fail",
+                        text: "Out of Poké Snacks! Buy more at the Poké Mart to lure Pokémon to the Poké Spot."
+                    });
+                }
+                startSearch();
+                return;
+            }
+            pokeSnacks.value--;
+        }
         const rolled = rollEncounter(
             zoneId.value,
             keyItems.value,
@@ -806,7 +832,12 @@ export const main = createLayer("main", layer => {
                     const isNew = receivePokemon(wild.speciesId, wild.level, wild.shiny);
                     if (ball === "friendBall") befriend(wild.speciesId);
                     const shadow = isShadow(wild.speciesId);
-                    if (shadow && ZONES_BY_ID[zoneId.value]?.trainerBattles === true) {
+                    if (
+                        shadow &&
+                        Object.values(zonePools(zoneId.value)).some(entries =>
+                            entries?.some(e => e.id === wild.speciesId)
+                        )
+                    ) {
                         snaggedShadows.value = { ...snaggedShadows.value, [wild.speciesId]: true };
                     }
                     const owner = shadow
@@ -1258,7 +1289,8 @@ export const main = createLayer("main", layer => {
             z != null &&
             z.region === region.value &&
             badges.value >= z.badgesRequired &&
-            (!z.postGame || champion.value)
+            (!z.postGame || champion.value) &&
+            (z.mechanic == null || mechanicOn(z.mechanic))
         );
     }
 
@@ -1369,6 +1401,7 @@ export const main = createLayer("main", layer => {
         flash.value = null;
         battle.value = { kind: "search", remaining: 1, total: 1 };
         warnedNoBalls = false;
+        warnedNoSnacks = false;
     }
 
     const nav: NavNode[] = [map.nav, party.nav, mart.nav, league.nav, dex.nav, hof.nav];
@@ -1422,6 +1455,8 @@ export const main = createLayer("main", layer => {
         bestDayCareParent,
         mechanicOn,
         snaggedShadows,
+        pokeSnacks,
+        buyPokeSnacks,
         canPurify,
         purify,
         canBreed,
