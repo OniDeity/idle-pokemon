@@ -251,6 +251,13 @@ export const STONES: Record<StoneId, StoneDefinition> = {
         price: 3000,
         badgesRequired: 7,
         sprite: itemSprite("deep-sea-scale")
+    },
+    prismScale: {
+        id: "prismScale",
+        name: "Prism Scale",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("prism-scale")
     }
 };
 
@@ -264,7 +271,8 @@ export const STONE_DESCRIPTIONS: Partial<Record<StoneId, string>> = {
     dragonScale: "Held while trading: Seadra becomes Kingdra.",
     upGrade: "Held while trading: Porygon becomes Porygon2.",
     deepSeaTooth: "Held while trading: Clamperl becomes Huntail.",
-    deepSeaScale: "Held while trading: Clamperl becomes Gorebyss."
+    deepSeaScale: "Held while trading: Clamperl becomes Gorebyss.",
+    prismScale: "Held while trading: Feebas becomes Milotic."
 };
 
 export type KeyItemId =

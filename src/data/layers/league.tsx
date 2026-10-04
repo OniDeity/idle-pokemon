@@ -32,7 +32,8 @@ const layer = createLayer(id, () => {
             main.partyBattlers.value,
             trainer,
             main.bonuses.value.damage,
-            main.bonuses.value.hp
+            main.bonuses.value.hp,
+            main.mechanicOn("doubleBattles")
         );
     }
 

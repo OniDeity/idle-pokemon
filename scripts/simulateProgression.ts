@@ -30,6 +30,7 @@ import type { BallId, KeyItemId } from "../src/game/pokemon/items";
 import { AUTO_BALL_ORDER, BALLS, STONES } from "../src/game/pokemon/items";
 import type { RegionDefinition } from "../src/game/pokemon/regions";
 import { levelCap, REGIONS, strengthMultiplier, withStrength } from "../src/game/pokemon/regions";
+import { MECHANICS } from "../src/game/pokemon/mechanics";
 import { SPECIAL_ENCOUNTERS } from "../src/game/pokemon/specials";
 import { levelForXp, maxHp, xpForLevel, xpYield } from "../src/game/pokemon/stats";
 import type { TrainerDefinition } from "../src/game/pokemon/trainers";
@@ -107,6 +108,8 @@ const hof: Partial<Record<HofUpgradeId, number>> = {};
 const enshrined = new Set<number>();
 const clears: Partial<Record<RegionId, number>> = {};
 let totalTime = 0;
+/** Hoenn's double battles, once reached: a partner attacks beside the active Pokémon. */
+let doublesUnlocked = false;
 
 interface Owned {
     id: number;
@@ -129,6 +132,11 @@ function runJourney(region: RegionDefinition, starter: number) {
     const balls: Partial<Record<BallId, number>> = { pokeBall: 10 };
     const claimed = new Set<string>();
     const tier = () => badges + region.shopTier;
+    const doubles = () => {
+        const def = MECHANICS.doubleBattles;
+        if (region.id === def.region && badges >= def.trialsRequired) doublesUnlocked = true;
+        return doublesUnlocked;
+    };
     const cap = () => levelCap(region, badges, cleared);
 
     function catchSpecies(id: number, level: number) {
@@ -266,7 +274,9 @@ function runJourney(region: RegionDefinition, starter: number) {
             const e = rollEncounter(zoneId, keyItems, rng, 0, { snagged });
             if (!e) return 0;
             const target = { species: getSpecies(e.speciesId), level: e.level };
-            const t = bonuses.searchTime + maxHp(target) / wildDps(members, target, bonuses.damage);
+            const t =
+                bonuses.searchTime +
+                maxHp(target) / wildDps(members, target, bonuses.damage, doubles());
             xpPerSec += xpYield(target) / t;
         }
         const uncaught = availableZoneSpecies(zoneId, keyItems).filter(id => !owned.has(id)).length;
@@ -301,7 +311,7 @@ function runJourney(region: RegionDefinition, starter: number) {
             const { damage, hp } = computeBonuses(bonusInputs());
             const trainers = nextTrainers();
             const members = party.map(battler);
-            if (trainers.every(t => simulateTrainerBattle(members, t, damage, hp).won)) {
+            if (trainers.every(t => simulateTrainerBattle(members, t, damage, hp, doubles()).won)) {
                 for (const t of trainers) money += t.prizeMoney;
                 snagFrom(trainers);
                 const summary = party.map(o => `${getSpecies(o.id).name} ${o.level}`).join(", ");
@@ -340,7 +350,7 @@ function runJourney(region: RegionDefinition, starter: number) {
         const target = { species: getSpecies(e.speciesId), level: e.level };
         time +=
             bonuses.searchTime +
-            maxHp(target) / wildDps(party.map(battler), target, bonuses.damage);
+            maxHp(target) / wildDps(party.map(battler), target, bonuses.damage, doubles());
         money += moneyYield(e.level) * bonuses.money * MF;
 
         const gained = battleXp(target) * bonuses.xp * XPF;

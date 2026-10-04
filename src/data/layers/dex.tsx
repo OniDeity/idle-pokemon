@@ -2,6 +2,7 @@
  * The Pokédex. Permanent: survives Hall of Fame resets, and its milestones (and the damage
  * bonus from every species caught) carry into every future journey.
  */
+import { CATEGORY_NAMES, CONTEST_CATEGORIES, CONTEST_PIKACHU } from "game/pokemon/contests";
 import { createLayer } from "game/layers";
 import { persistent } from "game/persistence";
 import {
@@ -78,6 +79,13 @@ function locationsOf(id: number): string[] {
         );
     } else if (!isVariant(id) && shadowInOrre(id)) {
         places.push("Purify its Shadow form, snagged in Orre, at the Relic Stone");
+    }
+    for (const category of CONTEST_CATEGORIES) {
+        if (CONTEST_PIKACHU[category] === id) {
+            places.push(
+                `Contest Hall: your first ${CATEGORY_NAMES[category]} Master Rank win (Pokémon Contests, unlocked in Hoenn)`
+            );
+        }
     }
     for (const special of SPECIAL_ENCOUNTERS) {
         if (special.kind !== "boss" && specialSpecies(special).includes(id)) {
@@ -184,6 +192,7 @@ function obtainable(id: number, depth = 0): boolean {
     }
     const wildId = species.variant === "female" ? species.baseSpecies! : id;
     if (species.rodTier != null && species.baseSpecies === 129) return true;
+    if (Object.values(CONTEST_PIKACHU).includes(id)) return true;
     for (const [base, { variants }] of Object.entries(WILD_VARIANTS)) {
         if (variants.some(([v]) => v === id)) return obtainable(Number(base), depth + 1);
     }

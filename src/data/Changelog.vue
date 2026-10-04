@@ -5,6 +5,35 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.5 Contests and Double Battles</summary>
+                <ul>
+                    <li class="feature">
+                        Double Battles, Hoenn's generation mechanic (past the Stone Badge): your
+                        strongest other Pokémon still standing backs up the one sent out with half
+                        its damage, in every region, without being attacked. Tate &amp; Liza send
+                        out two at once
+                    </li>
+                    <li class="feature">
+                        Pokémon Contests (Verdanturf's Contest Hall, past the Dynamo Badge): feed
+                        Pokéblocks to raise Cool, Beauty, Cute, Smart and Tough, enter contests from
+                        the Party screen, and win ribbons up to Master Rank. A category's first
+                        Master Rank win earns its Cosplay Pikachu (Rock Star, Belle, Pop Star,
+                        Ph.D., Libre)
+                    </li>
+                    <li class="feature">
+                        Feebas evolves the later games' way: trade it holding a Prism Scale (in
+                        the Poké Mart from 5 badges), with a Link Cable
+                    </li>
+                    <li class="feature">
+                        Bring a Partner (the Cable Club, past the Dynamo Badge): start any new
+                        journey with one Pokémon from your Hall of Fame beside your starter
+                    </li>
+                    <li class="balancing">
+                        Hoenn and Orre are retuned for Double Battles
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.4 Hoenn</summary>
                 <ul>
                     <li class="feature">

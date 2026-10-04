@@ -205,6 +205,9 @@ function renderStarterSelect() {
                     </button>
                 ))}
             </div>
+            {again && hof.mechanicUnlocked("partner") && main.partnerChoices.value.length > 0
+                ? renderPartnerPicker()
+                : null}
             {region.allStarters === true ? (
                 <p class="pk-small pk-muted">
                     Both {region.starters.map(id => getSpecies(id).name).join(" and ")} join you;
@@ -217,6 +220,36 @@ function renderStarterSelect() {
                     make short work of them.
                 </p>
             ) : null}
+        </div>
+    );
+}
+
+/** Bring a Partner: one Hall of Fame Pokémon to start the journey beside the starter. */
+function renderPartnerPicker() {
+    const chosen = main.journeyPartner.value;
+    return (
+        <div class="pk-partner-picker">
+            <p class="pk-small">
+                <b>Bring a partner</b> from your Hall of Fame (joins at the starters' level):
+            </p>
+            <div class="pk-partner-choices">
+                <button
+                    class={["pk-partner-choice", chosen === 0 ? "selected" : ""]}
+                    onClick={() => (main.journeyPartner.value = 0)}
+                    title="No partner"
+                >
+                    —
+                </button>
+                {main.partnerChoices.value.map(p => (
+                    <button
+                        class={["pk-partner-choice", chosen === p.id ? "selected" : ""]}
+                        onClick={() => (main.journeyPartner.value = p.id)}
+                        title={`${getSpecies(p.id).name}${p.shiny ? " ✨" : ""}`}
+                    >
+                        <Sprite id={p.id} shiny={p.shiny} size={40} />
+                    </button>
+                ))}
+            </div>
         </div>
     );
 }
@@ -249,6 +282,8 @@ function renderScene() {
     const flash = main.flash.value;
     let foe = null;
     let ally = null;
+    /** In double battles, the party member fighting beside the active one. */
+    let partnerId: number | undefined;
     let banner: string;
     let balls = null;
 
@@ -292,6 +327,7 @@ function renderScene() {
             const entry = main.box.value[activeId];
             ally = { id: activeId, level: entry.level, shiny: entry.shiny, hp: 1, max: 1 };
         }
+        partnerId = main.partyIds.value[state.partner ?? -1];
     } else {
         const trainer = state.trainers[state.index];
         const enemy = state.enemies[Math.min(state.state.enemyIndex, state.enemies.length - 1)];
@@ -323,6 +359,7 @@ function renderScene() {
                 max
             };
         }
+        partnerId = state.partyIds[state.state.partner ?? -1];
         balls = (
             <div class="pk-scene-trainerballs">
                 {state.enemies.map((_, i) => (
@@ -380,6 +417,15 @@ function renderScene() {
             {ally ? (
                 <div class="pk-ally">
                     <div class="pk-platform pk-platform-ally">
+                        {partnerId != null && main.box.value[partnerId] != null ? (
+                            <Sprite
+                                id={partnerId}
+                                shiny={main.box.value[partnerId].shiny}
+                                back
+                                size={96}
+                                extraClass="pk-partner-sprite"
+                            />
+                        ) : null}
                         <Sprite
                             id={ally.id}
                             shiny={ally.shiny}
@@ -405,6 +451,12 @@ function renderPartyStrip() {
     const trainerHp = state.kind === "trainer" ? state.state.partyHp : null;
     const activeIndex =
         state.kind === "wild" ? state.active : state.kind === "trainer" ? state.state.active : -1;
+    const partnerIndex =
+        state.kind === "wild"
+            ? (state.partner ?? -1)
+            : state.kind === "trainer"
+              ? (state.state.partner ?? -1)
+              : -1;
     return (
         <div class="pk-strip">
             {main.partyIds.value.map((id, i) => {
@@ -420,6 +472,7 @@ function renderPartyStrip() {
                         class={[
                             "pk-strip-mon",
                             i === activeIndex ? "active" : "",
+                            i === partnerIndex ? "partner" : "",
                             fainted ? "fainted" : ""
                         ]}
                         title={`${species.name} Lv. ${entry.level}${capped ? " (level cap)" : ""}`}

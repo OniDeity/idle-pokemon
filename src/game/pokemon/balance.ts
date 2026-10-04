@@ -471,10 +471,50 @@ export function bestMatchup(
     return best;
 }
 
-/** Damage per second of whichever party member would be sent out against this wild Pokémon. */
-export function wildDps(party: PartyBattler[], target: BattlerStats, damageBonus: number) {
+/**
+ * Double battles (Hoenn's generation mechanic): a partner fights beside the active Pokémon. It's
+ * the strongest other member still standing; it attacks the same target, isn't attacked, and
+ * lands this share of its usual damage (it supports more than it leads).
+ */
+export const PARTNER_DAMAGE = 0.5;
+
+export function battlePartner(
+    party: PartyBattler[],
+    target: BattlerStats,
+    damageBonus: number,
+    active: number,
+    hp: number[] | null
+): number {
+    let best = -1;
+    let bestDps = 0;
+    party.forEach((member, i) => {
+        if (i === active || (hp != null && hp[i] <= 0)) return;
+        const dps = memberDps(member, target, damageBonus);
+        if (dps > bestDps) {
+            best = i;
+            bestDps = dps;
+        }
+    });
+    return best;
+}
+
+/**
+ * Damage per second against this wild Pokémon: whoever is sent out, plus a partner in double
+ * battles.
+ */
+export function wildDps(
+    party: PartyBattler[],
+    target: BattlerStats,
+    damageBonus: number,
+    doubles = false
+) {
     const index = bestMatchup(party, target, damageBonus, null);
-    return index === -1 ? 0 : memberDps(party[index], target, damageBonus);
+    if (index === -1) return 0;
+    const partner = doubles ? battlePartner(party, target, damageBonus, index, null) : -1;
+    return (
+        memberDps(party[index], target, damageBonus) +
+        (partner === -1 ? 0 : PARTNER_DAMAGE * memberDps(party[partner], target, damageBonus))
+    );
 }
 
 export function trainerBattler(
@@ -502,6 +542,14 @@ export interface TrainerBattleState {
     /** Remaining HP of each party member, in party order. */
     partyHp: number[];
     elapsed: number;
+    /** In double battles, the party member fighting beside the active one (-1 for none). */
+    partner?: number;
+}
+
+/** Who fights two at a time: the player (the double battles mechanic) and the trainer. */
+export interface BattleRules {
+    doubles?: boolean;
+    enemyDoubles?: boolean;
 }
 
 export interface TrainerBattleOutcome {
@@ -535,8 +583,10 @@ export function initialTrainerBattle(
 /**
  * Advances a two-sided battle by up to `dt` seconds. One Pokémon from each side battles at a
  * time; the player's side sends out its best matchup whenever a new opponent appears or its
- * active Pokémon faints. Damage is continuous and solved event-by-event, so the result is
- * exact for any step size (the real-time battle and the forecast always agree).
+ * active Pokémon faints. In double battles a partner attacks beside it, and a double-battle
+ * trainer's next Pokémon attacks from the field too. Damage is continuous and solved
+ * event-by-event, so the result is exact for any step size (the real-time battle and the
+ * forecast always agree).
  */
 export function stepTrainerBattle(
     party: PartyBattler[],
@@ -544,12 +594,14 @@ export function stepTrainerBattle(
     state: TrainerBattleState,
     damageBonus: number,
     dt: number,
-    timeLimit = Infinity
+    timeLimit = Infinity,
+    rules: BattleRules = {}
 ): { state: TrainerBattleState; done: TrainerBattleOutcome["reason"] | null } {
     let { enemyIndex, enemyHp, active, elapsed } = state;
+    let partner = state.partner ?? -1;
     const partyHp = [...state.partyHp];
     let remaining = Math.min(dt, timeLimit - elapsed);
-    const snapshot = () => ({ enemyIndex, enemyHp, active, partyHp, elapsed });
+    const snapshot = () => ({ enemyIndex, enemyHp, active, partyHp, elapsed, partner });
 
     for (;;) {
         if (enemyIndex >= enemies.length) {
@@ -570,8 +622,15 @@ export function stepTrainerBattle(
         }
 
         const member = party[active];
-        const ourDps = memberDps(member, enemy, damageBonus);
-        const theirDps = damagePerHit(enemy, member) * attacksPerSecond(enemy.species);
+        partner =
+            rules.doubles === true ? battlePartner(party, enemy, damageBonus, active, partyHp) : -1;
+        const ourDps =
+            memberDps(member, enemy, damageBonus) +
+            (partner === -1 ? 0 : PARTNER_DAMAGE * memberDps(party[partner], enemy, damageBonus));
+        const second = rules.enemyDoubles === true ? enemies[enemyIndex + 1] : undefined;
+        const theirDps =
+            damagePerHit(enemy, member) * attacksPerSecond(enemy.species) +
+            (second == null ? 0 : damagePerHit(second, member) * attacksPerSecond(second.species));
 
         const toKillEnemy = ourDps > 0 ? enemyHp / ourDps : Infinity;
         const toLoseActive = theirDps > 0 ? partyHp[active] / theirDps : Infinity;
@@ -601,9 +660,10 @@ export function stepTrainerBattle(
 /** Resolves a whole trainer battle instantly. The game's real-time battles match this exactly. */
 export function simulateTrainerBattle(
     party: PartyBattler[],
-    trainer: Pick<TrainerDefinition, "team" | "timeLimit" | "statMultiplier">,
+    trainer: Pick<TrainerDefinition, "team" | "timeLimit" | "statMultiplier" | "doubles">,
     damageBonus: number,
-    hpBonus: number
+    hpBonus: number,
+    doubles = false
 ): TrainerBattleOutcome {
     const enemies = trainerTeam(trainer);
     const start = initialTrainerBattle(party, enemies, hpBonus);
@@ -613,7 +673,8 @@ export function simulateTrainerBattle(
         start,
         damageBonus,
         Infinity,
-        trainer.timeLimit
+        trainer.timeLimit,
+        { doubles, enemyDoubles: trainer.doubles === true }
     );
     const total = start.partyHp.reduce((a, b) => a + b, 0);
     const left = state.partyHp.reduce((a, b) => a + Math.max(0, b), 0);
