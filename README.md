@@ -12,14 +12,15 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 
 ## How it plays
 
-- **Journeys through four regions.** Kanto (plus 52 anime-exclusive locations from
+- **Journeys through seven regions.** Kanto (plus 52 anime-exclusive locations from
   [Bulbapedia's list](https://bulbapedia.bulbagarden.net/wiki/List_of_animated_series-exclusive_locations),
   from Porta Vista to the Tree of Beginning), the Orange Islands (29 islands, the Orange Crew
   and Drake's Winner's Cup), and the Sevii Islands from FireRed/LeafGreen (Team Rocket, the
   Ruby & Sapphire quest and the Trainer Tower), and Johto from HeartGold/SoulSilver (eight Gyms,
   the Elite Four and Lance, with Headbutt trees and Rock Smash rocks, plus 58 anime-exclusive
-  locations from Palm Hills to Mount Quena). Each first clear is tuned
-  for about a day of play.
+  locations from Palm Hills to Mount Quena), Hoenn from Ruby/Sapphire/Emerald (Emerald's Gyms,
+  Elite Four and Wallace, Dive, Feebas, the fossils, Regis, Lati@s and the weather trio), and
+  Orre's two GameCube journeys. Each first clear is tuned for about a day of play.
 - **Johto's Gen 2 extras**: morning, day and night Pokémon all in the grass together, the
   Pokégear radio's swarms (a one-time fee adds each to its place) and Lucky Number Show, the
   Bug-Catching Contest (a one-time entry fee adds its bugs to the National Park), Kurt's seven
@@ -56,8 +57,9 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   admins and Citadark Isle, plus the Poké Spots, whose snack-loving wild Pokémon come to every
   region once unlocked.
 - **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands, then Johto,
-  then Orre (Colosseum), then Orre (XD); Johto and both Orre journeys also need every species
-  the regions before them offer in your Pokédex.
+  then Hoenn, then Orre (Colosseum), then Orre (XD); Johto, Hoenn and both Orre journeys also
+  need every species the regions before them offer in your Pokédex. A region you've already
+  journeyed to stays open when a new one slots in before it.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
   trainers in regions you haven't cleared grow tougher (Renown) as you conquer others,
   and rematches in cleared regions go faster. Experience past the level cap becomes Effort, a

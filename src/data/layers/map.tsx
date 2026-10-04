@@ -363,7 +363,8 @@ const layer = createLayer(id, () => {
         goodRod: "a better rod",
         superRod: "a better rod",
         headbutt: "Headbutt",
-        rockSmash: "Rock Smash"
+        rockSmash: "Rock Smash",
+        dive: "Dive"
     };
 
     /** What a Pokémon in a zone is waiting on: the gear for the pools it's in. */

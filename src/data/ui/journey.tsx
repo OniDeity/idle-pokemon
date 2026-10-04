@@ -270,7 +270,9 @@ function renderScene() {
                     ? "fell out of the tree"
                     : state.wild.kind === "rockSmash"
                       ? "was under the rock"
-                      : "appeared";
+                      : state.wild.kind === "dive"
+                        ? "swam out of the seaweed"
+                        : "appeared";
         const shadow = isShadow(state.wild.speciesId);
         const trainerBattle = ZONES_BY_ID[main.zoneId.value]?.trainerBattles === true;
         banner = shadow

@@ -5,6 +5,37 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.4 Hoenn</summary>
+                <ul>
+                    <li class="feature">
+                        Hoenn, from Ruby, Sapphire and Emerald: 54 places from Route 101 to Victory
+                        Road (sea routes with the same Pokémon are grouped), Treecko, Torchic or
+                        Mudkip, Emerald's eight Gyms, and the Elite Four and Champion Wallace.
+                        Unlocks after Johto, once your Pokédex has all 251
+                    </li>
+                    <li class="feature">
+                        All 135 Hoenn Pokémon join the Pokédex: Dive (from Tate &amp; Liza) reaches
+                        the seaweed under Routes 124 and 126, Feebas hides in Route 119's river,
+                        and Hoenn's gifts and trades cover the rest (the fossils, Castform,
+                        Wynaut and Azurill Eggs, Shedinja, Steven's Beldum)
+                    </li>
+                    <li class="feature">
+                        Hoenn's legends: Kyogre and Groudon in the Cave of Origin, then after the
+                        League Rayquaza, the three Regis, roaming Latias and Latios, Jirachi,
+                        Deoxys, and Emerald's ticket islands (Mew, Lugia, Ho-Oh)
+                    </li>
+                    <li class="feature">
+                        DeepSeaTooth and DeepSeaScale in the Poké Mart for Clamperl; Feebas
+                        evolves like a friendship Pokémon for now (Contests are coming)
+                    </li>
+                    <li class="balancing">
+                        Orre (Colosseum) now comes after Hoenn. If you've already been to Orre it
+                        stays open
+                    </li>
+                    <li class="fix">Johto's badges are called badges again ("Zephyr Badge")</li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.3.1 Pokémon XD</summary>
                 <ul>
                     <li class="feature">
@@ -23,7 +54,7 @@
                         XD's trades (Danny's Elekid, Duking's Meditite, Shuckle and Larvitar) and
                         Mt. Battle's Johto first partners after the finale
                     </li>
-                    <li class="fix">
+                    <li class="balancing">
                         Colosseum's Venus, Ein and Realgam Tower are easier now that Shadow
                         Pokémon get purified along the way (a first clear takes about 11 hours)
                     </li>
