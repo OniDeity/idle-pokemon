@@ -5898,7 +5898,14 @@
         "legendary": false,
         "genderRate": 4,
         "genderDifferences": false,
-        "evolutions": []
+        "evolutions": [
+            {
+                "into": 350,
+                "method": "level",
+                "level": 30,
+                "friendship": true
+            }
+        ]
     },
     {
         "id": 350,
@@ -6175,11 +6182,13 @@
         "evolutions": [
             {
                 "into": 367,
-                "method": "trade"
+                "method": "trade",
+                "heldItem": "deepSeaTooth"
             },
             {
                 "into": 368,
-                "method": "trade"
+                "method": "trade",
+                "heldItem": "deepSeaScale"
             }
         ]
     },

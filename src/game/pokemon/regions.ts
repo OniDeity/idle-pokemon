@@ -6,6 +6,7 @@
 import { COLOSSEUM_TRIALS, colosseumFinale } from "./colosseum";
 import { XD_TRIALS, xdFinale } from "./xd";
 import type { KeyItemId } from "./items";
+import { HOENN_GYMS, hoennFinale } from "./hoenn";
 import { JOHTO_GYMS, johtoFinale } from "./johto";
 import { ORANGE_TRIALS, orangeFinale } from "./orange";
 import { SEVII_TRIALS, seviiFinale } from "./sevii";
@@ -122,6 +123,26 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         requires: "sevii",
         requiresCompletePokedex: true
     },
+    hoenn: {
+        id: "hoenn",
+        name: "Hoenn",
+        blurb: "Eight Gyms from Rustboro to Sootopolis, Teams Magma and Aqua, and the Ever Grande Elite Four.",
+        color: "#0E7490",
+        starters: [252, 255, 258],
+        startLevel: 5,
+        startingKeyItems: [],
+        shopTier: 0,
+        trials: HOENN_GYMS,
+        trialNoun: "badges",
+        finaleName: "Ever Grande City",
+        finaleBlurb:
+            "Face Sidney, Phoebe, Glacia, Drake and Champion Wallace back-to-back (your party is healed between battles).",
+        finale: () => hoennFinale(),
+        levelCaps: [18, 22, 27, 31, 34, 37, 44, 48, 58, 100],
+        fame: 20,
+        requires: "johto",
+        requiresCompletePokedex: true
+    },
     orre: {
         id: "orre",
         name: "Orre (Colosseum)",
@@ -139,7 +160,7 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         finale: () => colosseumFinale(),
         levelCaps: [37, 42, 47, 50, 62, 100],
         fame: 20,
-        requires: "johto",
+        requires: "hoenn",
         requiresCompletePokedex: true,
         allStarters: true
     },

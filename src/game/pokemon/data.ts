@@ -39,7 +39,9 @@ export type StoneId =
     | "metalCoat"
     | "kingsRock"
     | "dragonScale"
-    | "upGrade";
+    | "upGrade"
+    | "deepSeaTooth"
+    | "deepSeaScale";
 
 export type GrowthRate = "slow" | "medium" | "fast" | "mediumSlow" | "erratic" | "fluctuating";
 
@@ -134,7 +136,8 @@ export type EncounterPoolId =
     | "goodRod"
     | "superRod"
     | "headbutt"
-    | "rockSmash";
+    | "rockSmash"
+    | "dive";
 
 export type TimeOfDay = "morning" | "day" | "night";
 

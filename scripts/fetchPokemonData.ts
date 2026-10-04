@@ -1,8 +1,8 @@
 /**
  * Regenerates the static Pokémon data the game ships with:
- *   - src/data/pokemon/species.json     Species #1-251 (stats, types, catch rate, evolutions)
+ *   - src/data/pokemon/species.json     Species #1-386 (stats, types, catch rate, evolutions)
  *   - src/data/pokemon/encounters.json  Wild encounter pools: Red/Blue for Kanto, FireRed/LeafGreen for Sevii,
- *                                      HeartGold/SoulSilver for Johto
+ *                                      HeartGold/SoulSilver for Johto, Ruby/Sapphire/Emerald for Hoenn
  *   - src/data/pokemon/typeChart.json   Non-neutral type matchups
  *   - src/data/pokemon/forms.json       Official alternate forms of #1-251 (regional forms, Pikachu
  *                                       caps, partner Pokémon, Unown letters, Spiky-eared Pichu)
@@ -18,11 +18,12 @@ import path from "node:path";
 const CSV_BASE = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv";
 /** Species data covers Gens 1-3; Gen 3 Pokémon join the Pokédex as regions bring them. */
 const MAX_SPECIES = 386;
-/** The game regions' own encounter tables and official forms stay Gen 1-2 for now. */
+/** Encounter tables before Hoenn, and official forms, stay Gen 1-2; Hoenn's go to #386. */
 const MAX_DEX = 251;
 const RED_BLUE_VERSION_IDS = new Set(["1", "2"]);
 const FRLG_VERSION_IDS = new Set(["10", "11"]);
 const HGSS_VERSION_IDS = new Set(["15", "16"]);
+const RSE_VERSION_IDS = new Set(["7", "8", "9"]);
 const ENGLISH = "9";
 
 /**
@@ -278,6 +279,97 @@ const JOHTO_ZONE_AREAS: Record<string, [string, string][]> = {
 };
 
 /**
+ * Hoenn zones from Ruby, Sapphire and Emerald. Sea routes with the same Surf and fishing tables
+ * are grouped, and multi-floor dungeons merged.
+ */
+const HOENN_ZONE_AREAS: Record<string, [string, string][]> = {
+    route101: [["hoenn-route-101", ""]],
+    route103: [["hoenn-route-103", ""]],
+    route102: [["hoenn-route-102", ""]],
+    petalburgCity: [["petalburg-city", ""]],
+    route104: [["hoenn-route-104", ""]],
+    petalburgWoods: [["petalburg-woods", ""]],
+    route116: [["hoenn-route-116", ""]],
+    rusturfTunnel: [["rusturf-tunnel", ""]],
+    dewfordTown: [["dewford-town", ""]],
+    graniteCave: ["1f", "1fsmall-room", "b1f", "b2f"].map(
+        a => ["granite-cave", a] as [string, string]
+    ),
+    slateportCity: [["slateport-city", ""]],
+    route110: [["hoenn-route-110", ""]],
+    route117: [["hoenn-route-117", ""]],
+    route118: [["hoenn-route-118", ""]],
+    route112: [["hoenn-route-112", ""]],
+    fieryPath: [["fiery-path", ""]],
+    route113: [["hoenn-route-113", ""]],
+    route114: [["hoenn-route-114", ""]],
+    meteorFalls: [["meteor-falls", ""]],
+    jaggedPass: [["jagged-pass", ""]],
+    newMauville: [
+        ["new-mauville", "entrance"],
+        ["new-mauville", ""]
+    ],
+    route111: [["hoenn-route-111", ""]],
+    mirageTower: [["mirage-tower", ""]],
+    hoennAlteringCave: [["hoenn-altering-cave", ""]],
+    seaRoutes105to109: ["105", "106", "107", "108", "109"].map(
+        n => [`hoenn-route-${n}`, ""] as [string, string]
+    ),
+    abandonedShip: [["abandoned-ship", ""]],
+    route119: [["hoenn-route-119", ""]],
+    route120: [["hoenn-route-120", ""]],
+    route121: [["hoenn-route-121", ""]],
+    hoennSafariZone: ["se", "sw", "neacro-bike-area", "nwmach-bike-area"].map(
+        a => ["hoenn-safari-zone", a] as [string, string]
+    ),
+    route122: [["hoenn-route-122", ""]],
+    mtPyre: ["1f", "2f", "3f", "4f", "5f", "6f"].map(a => ["mt-pyre", a] as [string, string]),
+    mtPyreSummit: [
+        ["mt-pyre", "outside"],
+        ["mt-pyre", "summit"]
+    ],
+    route123: [["hoenn-route-123", ""]],
+    lilycoveCity: [["lilycove-city", ""]],
+    magmaHideout: [["magma-hideout", ""]],
+    seaRoutes124to125: [
+        ["hoenn-route-124", ""],
+        ["hoenn-route-125", ""]
+    ],
+    mossdeepCity: [["mossdeep-city", ""]],
+    shoalCave: ["low-tide", "high-tide", "b1f", "b2f", "b3f"].map(
+        a => ["shoal-cave", a] as [string, string]
+    ),
+    underwater: [
+        ["hoenn-route-124", "underwater"],
+        ["hoenn-route-126", "underwater"]
+    ],
+    seafloorCavern: [["seafloor-cavern", ""]],
+    seaRoutes126to128: ["126", "127", "128"].map(n => [`hoenn-route-${n}`, ""] as [string, string]),
+    sootopolisCity: [["sootopolis-city", ""]],
+    caveOfOrigin: ["entrance", "1f", "b1f", "b2f", "b3f"].map(
+        a => ["cave-of-origin", a] as [string, string]
+    ),
+    seaRoutes129to131: ["129", "130", "131"].map(n => [`hoenn-route-${n}`, ""] as [string, string]),
+    skyPillar: ["1f", "3f", "5f"].map(a => ["sky-pillar", a] as [string, string]),
+    pacifidlogTown: [["pacifidlog-town", ""]],
+    seaRoutes132to134: ["132", "133", "134"].map(n => [`hoenn-route-${n}`, ""] as [string, string]),
+    everGrandeCity: [["ever-grande-city", ""]],
+    hoennVictoryRoad: ["1f", "b1f", "b2f"].map(a => ["hoenn-victory-road", a] as [string, string]),
+    meteorFallsDeep: [
+        ["meteor-falls", "b1f"],
+        ["meteor-falls", "back"],
+        ["meteor-falls", "backsmall-room"]
+    ],
+    desertUnderpass: [["desert-underpass", ""]],
+    safariZoneExpansion: [
+        ["hoenn-safari-zone", "expansion-north"],
+        ["hoenn-safari-zone", "expansion-south"]
+    ],
+    artisanCave: [["artisan-cave", ""]],
+    mirageIsland: [["mirage-island", ""]]
+};
+
+/**
  * HeartGold/SoulSilver encounters that only happen under conditions the game doesn't have
  * (radio shows playing Hoenn or Sinnoh sounds, swarms, the Bug-Catching Contest, Safari Zone
  * objects placed for a while). Swarms and the contest come back as their own features.
@@ -301,7 +393,8 @@ const POOL_BY_METHOD: Record<string, string> = {
     "good-rod": "goodRod",
     "super-rod": "superRod",
     headbutt: "headbutt",
-    "rock-smash": "rockSmash"
+    "rock-smash": "rockSmash",
+    seaweed: "dive"
 };
 
 const STONE_BY_ITEM_ID: Record<string, string> = {
@@ -318,7 +411,9 @@ const HELD_ITEM_BY_ITEM_ID: Record<string, string> = {
     "198": "kingsRock",
     "210": "metalCoat",
     "212": "dragonScale",
-    "229": "upGrade"
+    "229": "upGrade",
+    "203": "deepSeaTooth",
+    "204": "deepSeaScale"
 };
 
 const GROWTH_RATES: Record<string, string> = {
@@ -439,7 +534,11 @@ async function main() {
         let evolution: Evolution;
         if (r.evolution_trigger_id === "1" && r.minimum_level !== "") {
             evolution = { into, method: "level", level: Number(r.minimum_level) };
-        } else if (r.evolution_trigger_id === "1" && r.minimum_happiness !== "") {
+        } else if (
+            r.evolution_trigger_id === "1" &&
+            (r.minimum_happiness !== "" || r.minimum_beauty !== "")
+        ) {
+            // Beauty (Feebas) is raised like friendship until Contests and Pokéblocks exist.
             // Friendship evolutions become level evolutions (babies grow up fast, others at 30),
             // or happen early with a Soothe Bell.
             const baby = babies.has(String(from));
@@ -496,15 +595,22 @@ async function main() {
 
     const zoneByArea = new Map<string, string>();
     const zoneVersions = new Map<string, Set<string>>();
-    const allZones = { ...ZONE_AREAS, ...SEVII_ZONE_AREAS, ...JOHTO_ZONE_AREAS };
+    const allZones = {
+        ...ZONE_AREAS,
+        ...SEVII_ZONE_AREAS,
+        ...JOHTO_ZONE_AREAS,
+        ...HOENN_ZONE_AREAS
+    };
     for (const [zoneId, areas] of Object.entries(allZones)) {
         zoneVersions.set(
             zoneId,
-            zoneId in JOHTO_ZONE_AREAS
-                ? HGSS_VERSION_IDS
-                : zoneId in SEVII_ZONE_AREAS
-                  ? FRLG_VERSION_IDS
-                  : RED_BLUE_VERSION_IDS
+            zoneId in HOENN_ZONE_AREAS
+                ? RSE_VERSION_IDS
+                : zoneId in JOHTO_ZONE_AREAS
+                  ? HGSS_VERSION_IDS
+                  : zoneId in SEVII_ZONE_AREAS
+                    ? FRLG_VERSION_IDS
+                    : RED_BLUE_VERSION_IDS
         );
         for (const [location, area] of areas) {
             const id = areaKey.get(`${locationId.get(location)}/${area}`);
@@ -548,7 +654,8 @@ async function main() {
             continue;
         }
         const id = Number(r.pokemon_id);
-        if (zoneId == null || slot == null || pool == null || id > MAX_DEX) continue;
+        const maxDex = zoneId in HOENN_ZONE_AREAS ? MAX_SPECIES : MAX_DEX;
+        if (zoneId == null || slot == null || pool == null || id > maxDex) continue;
         const conditions = conditionsOf.get(r.id) ?? [];
         if (conditions.some(excludedCondition)) continue;
         const times = TIMES.filter(t => conditions.includes(`time-${t}`));

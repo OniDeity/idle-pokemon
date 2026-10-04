@@ -130,6 +130,11 @@ const layer = createLayer(id, () => {
     }
 
     function regionUnlocked(region: RegionId) {
+        // A region already journeyed to stays open when later regions slot in before it
+        // (Orre came out before Hoenn, then moved after it).
+        if (clearCount(region) > 0 || (main.region.value === region && main.starter.value > 0)) {
+            return true;
+        }
         const requires = REGIONS[region].requires;
         if (requires != null && clearCount(requires) === 0) return false;
         const progress = pokedexProgress(region);

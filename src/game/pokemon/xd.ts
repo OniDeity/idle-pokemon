@@ -345,6 +345,7 @@ const SPOT_LEVELS: Partial<Record<RegionId, [number, number]>> = {
     orange: [15, 25],
     sevii: [30, 40],
     johto: [12, 22],
+    hoenn: [14, 24],
     orre: [28, 36]
 };
 
@@ -367,8 +368,8 @@ export const CARRIED_POKE_SPOTS: ZoneDefinition[] = (
  * scripts/simulateProgression.ts: a first clear after Colosseum takes about 11.5 hours (Snattle
  * around 1.5 hours in, Eldes around 10).
  */
-const XD_ADMIN_STRENGTHS = [1.8, 2.4, 2.1, 2.2, 2.6];
-const CITADARK_STRENGTH = 2.9;
+const XD_ADMIN_STRENGTHS = [1.73, 2.3, 2.02, 2.11, 2.5];
+const CITADARK_STRENGTH = 2.78;
 
 function admin(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "keyItems">

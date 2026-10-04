@@ -188,7 +188,9 @@ export const main = createLayer("main", layer => {
             metalCoat: 0,
             kingsRock: 0,
             dragonScale: 0,
-            upGrade: 0
+            upGrade: 0,
+            deepSeaTooth: 0,
+            deepSeaScale: 0
         },
         false
     );
