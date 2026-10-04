@@ -5,6 +5,23 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.6.2 Menu pages</summary>
+                <ul>
+                    <li class="feature">
+                        Every menu is split into pages with tabs, remembered between visits: Party
+                        (Party, PC Box, Day Care, Contests), Poké Mart (Poké Balls, Training,
+                        Evolution items, Poké Snacks), League (Gyms, the finale, Level caps),
+                        Pokédex (Pokédex, Professor Oak's rewards), Hall of Fame (New journey, Fame
+                        upgrades, Automation, Mechanics, Champions) and the Map (Routes &amp;
+                        Dungeons, Gifts, Trades &amp; Legends, and Johto's Pokégear)
+                    </li>
+                    <li class="fix">
+                        The League explains Double Battles' backup instead of calling trainer
+                        battles one-on-one
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.6.1 Tidier menus</summary>
                 <ul>
                     <li class="feature">

@@ -189,6 +189,63 @@ function togglePanel(key: string) {
     }
 }
 
+const TABS_KEY = "pk-menu-tabs";
+
+/** Each menu's open page, by menu; remembered in this browser. */
+const openTabs = ref<Record<string, string>>(
+    (() => {
+        try {
+            return JSON.parse(localStorage.getItem(TABS_KEY) ?? "{}") as Record<string, string>;
+        } catch {
+            return {};
+        }
+    })()
+);
+
+export interface TabOption {
+    id: string;
+    label: string;
+    /** Hidden while false (a page whose feature isn't unlocked yet). */
+    show?: boolean;
+}
+
+/** The page a menu has open: the remembered one if it's still shown, else the first. */
+export function currentTab(menu: string, tabs: TabOption[]): string {
+    const shown = tabs.filter(t => t.show !== false);
+    const saved = openTabs.value[menu];
+    return shown.some(t => t.id === saved) ? saved! : (shown[0]?.id ?? "");
+}
+
+export function openTab(menu: string, id: string) {
+    openTabs.value = { ...openTabs.value, [menu]: id };
+    try {
+        localStorage.setItem(TABS_KEY, JSON.stringify(openTabs.value));
+    } catch {
+        // Storage can be unavailable (private browsing); the page just isn't remembered.
+    }
+}
+
+/** A row of page buttons for a menu (only shown when it has more than one page). */
+export function renderTabs(menu: string, tabs: TabOption[]) {
+    const shown = tabs.filter(t => t.show !== false);
+    if (shown.length < 2) return null;
+    const current = currentTab(menu, tabs);
+    return (
+        <div class="pk-tabs" role="tablist">
+            {shown.map(t => (
+                <button
+                    class={["pk-tab", t.id === current ? "active" : ""]}
+                    role="tab"
+                    aria-selected={t.id === current}
+                    onClick={() => openTab(menu, t.id)}
+                >
+                    {t.label}
+                </button>
+            ))}
+        </div>
+    );
+}
+
 /** A titled section; tap the title to collapse or expand it. */
 export const Panel = component<{ title?: string; extraClass?: string }>((props, { slots }) => {
     if (props.title == null) {

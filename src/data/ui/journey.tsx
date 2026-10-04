@@ -25,6 +25,7 @@ import {
     formatDuration,
     formatMoney,
     ItemIcon,
+    openTab,
     Sprite,
     TypeBadges
 } from "./components";
@@ -476,7 +477,10 @@ function renderPartyStrip() {
                             fainted ? "fainted" : ""
                         ]}
                         title={`${species.name} Lv. ${entry.level}${capped ? " (level cap)" : ""}`}
-                        onClick={() => openLayer("party")}
+                        onClick={() => {
+                            openTab("party", "party");
+                            openLayer("party");
+                        }}
                     >
                         <Sprite id={id} shiny={entry.shiny} size={40} />
                         <span class="pk-strip-level">{entry.level}</span>
@@ -527,7 +531,13 @@ function renderControls() {
         <div class="pk-controls">
             <div class="pk-control-row">
                 <span class="pk-control-label">Location</span>
-                <Button kind="ghost" onClick={() => openLayer("map")}>
+                <Button
+                    kind="ghost"
+                    onClick={() => {
+                        openTab("map", "zones");
+                        openLayer("map");
+                    }}
+                >
                     📍 {main.zone.value.name}
                 </Button>
                 {state.kind === "trainer" ? (
@@ -584,7 +594,13 @@ function renderControls() {
                             {main.balls.value[id] ?? 0}
                         </span>
                     ))}
-                <Button kind="small" onClick={() => openLayer("mart")}>
+                <Button
+                    kind="small"
+                    onClick={() => {
+                        openTab("mart", "balls");
+                        openLayer("mart");
+                    }}
+                >
                     Buy
                 </Button>
                 {chance != null && main.ballMode.value !== "smart" ? (
