@@ -345,6 +345,7 @@ const SPOT_LEVELS: Partial<Record<RegionId, [number, number]>> = {
     orange: [15, 25],
     sevii: [30, 40],
     johto: [12, 22],
+    hoenn: [14, 24],
     orre: [28, 36]
 };
 

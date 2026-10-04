@@ -409,7 +409,7 @@ export const JOHTO_GYMS: GymDefinition[] = [
         name: "Falkner",
         title: "Violet City Gym Leader",
         town: "Violet City",
-        badge: "Zephyr",
+        badge: "Zephyr Badge",
         badgeNumber: 1,
         specialty: "flying",
         team: [
@@ -425,7 +425,7 @@ export const JOHTO_GYMS: GymDefinition[] = [
         name: "Bugsy",
         title: "Azalea Town Gym Leader",
         town: "Azalea Town",
-        badge: "Hive",
+        badge: "Hive Badge",
         badgeNumber: 2,
         specialty: "bug",
         team: [
@@ -443,7 +443,7 @@ export const JOHTO_GYMS: GymDefinition[] = [
         name: "Whitney",
         title: "Goldenrod City Gym Leader",
         town: "Goldenrod City",
-        badge: "Plain",
+        badge: "Plain Badge",
         badgeNumber: 3,
         specialty: "normal",
         team: [
@@ -460,7 +460,7 @@ export const JOHTO_GYMS: GymDefinition[] = [
         name: "Morty",
         title: "Ecruteak City Gym Leader",
         town: "Ecruteak City",
-        badge: "Fog",
+        badge: "Fog Badge",
         badgeNumber: 4,
         specialty: "ghost",
         team: [
@@ -478,7 +478,7 @@ export const JOHTO_GYMS: GymDefinition[] = [
         name: "Chuck",
         title: "Cianwood City Gym Leader",
         town: "Cianwood City",
-        badge: "Storm",
+        badge: "Storm Badge",
         badgeNumber: 5,
         specialty: "fighting",
         team: [
@@ -495,7 +495,7 @@ export const JOHTO_GYMS: GymDefinition[] = [
         name: "Jasmine",
         title: "Olivine City Gym Leader",
         town: "Olivine City",
-        badge: "Mineral",
+        badge: "Mineral Badge",
         badgeNumber: 6,
         specialty: "steel",
         team: [
@@ -512,7 +512,7 @@ export const JOHTO_GYMS: GymDefinition[] = [
         name: "Pryce",
         title: "Mahogany Town Gym Leader",
         town: "Mahogany Town",
-        badge: "Glacier",
+        badge: "Glacier Badge",
         badgeNumber: 7,
         specialty: "ice",
         team: [
@@ -529,7 +529,7 @@ export const JOHTO_GYMS: GymDefinition[] = [
         name: "Clair",
         title: "Blackthorn City Gym Leader",
         town: "Blackthorn City",
-        badge: "Rising",
+        badge: "Rising Badge",
         badgeNumber: 8,
         specialty: "dragon",
         team: [

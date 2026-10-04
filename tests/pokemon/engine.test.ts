@@ -572,16 +572,82 @@ describe("key items", () => {
     });
 });
 
+describe("Hoenn", () => {
+    test("comes between Johto and Orre, after Johto and a complete Pokédex", () => {
+        const order = REGION_LIST.map(r => r.id);
+        expect(order.indexOf("hoenn")).toBe(order.indexOf("johto") + 1);
+        expect(order.indexOf("orre")).toBe(order.indexOf("hoenn") + 1);
+        const hoenn = REGIONS.hoenn;
+        expect(hoenn.requires).toBe("johto");
+        expect(hoenn.requiresCompletePokedex).toBe(true);
+        expect(hoenn.starters).toEqual([252, 255, 258]);
+        expect(hoenn.levelCaps).toHaveLength(hoenn.trials.length + 2);
+    });
+
+    test("Gyms, Elite Four and Champion Wallace use Emerald's teams and Hoenn's badges", () => {
+        const hoenn = REGIONS.hoenn;
+        expect(hoenn.trials.map(g => g.name)).toEqual([
+            "Roxanne",
+            "Brawly",
+            "Wattson",
+            "Flannery",
+            "Norman",
+            "Winona",
+            "Tate & Liza",
+            "Juan"
+        ]);
+        expect(hoenn.trials.map(g => g.badgeIcon)).toEqual(
+            Array.from({ length: 8 }, (_, i) => `badges/${i + 17}.png`)
+        );
+        const finale = hoenn.finale(252);
+        expect(finale.map(t => t.name)).toEqual(["Sidney", "Phoebe", "Glacia", "Drake", "Wallace"]);
+        for (const trainer of [...hoenn.trials, ...finale]) {
+            trainer.team.forEach(p => expect(getSpecies(p.id).id).toBe(p.id));
+        }
+        // Badge names read as badges ("You earned the Stone Badge!"), in every region with them.
+        for (const region of REGION_LIST.filter(r => r.trialNoun === "badges")) {
+            region.trials.forEach(g => expect(g.badge, g.name).toMatch(/Badge$/));
+        }
+    });
+
+    test("every Hoenn Pokémon (#252-386) can be caught there", () => {
+        const hoenn = speciesObtainableIn(["hoenn"]);
+        for (let id = 252; id <= 386; id++) expect(hoenn.has(id), String(id)).toBe(true);
+        // Wild pools reach past #251 in Hoenn only; earlier regions keep their own tables.
+        for (const zone of ZONES.filter(z => z.region !== "hoenn" && z.encounters == null)) {
+            for (const entries of Object.values(zonePools(zone.id))) {
+                entries?.forEach(e => expect(e.id > 251 && e.id <= 386, zone.id).toBe(false));
+            }
+        }
+    });
+
+    test("Dive reaches the seaweed, and Feebas hides in Route 119's river", () => {
+        expect(activePools("underwater", { surf: true })).toEqual([]);
+        const dive = activePools("underwater", { dive: true });
+        expect(dive.map(p => p.kind)).toEqual(["dive"]);
+        expect(dive[0].entries.map(e => e.id)).toEqual(expect.arrayContaining([366, 369]));
+        expect(REGIONS.hoenn.trials.find(g => g.keyItems.includes("dive"))?.name).toBe(
+            "Tate & Liza"
+        );
+        const fishing = encounterOdds("route119", { oldRod: true, goodRod: true, superRod: true });
+        expect(fishing.get(349) ?? 0).toBeGreaterThan(0);
+        expect(getSpecies(349).evolutions[0].into).toBe(350);
+    });
+});
+
 describe("Orre (Colosseum)", () => {
-    test("comes after Johto, with both Espeon and Umbreon and the Snag Machine", () => {
+    test("comes after Hoenn, with both Espeon and Umbreon and the Snag Machine", () => {
         const orre = REGIONS.orre;
-        expect(orre.requires).toBe("johto");
+        expect(orre.requires).toBe("hoenn");
         expect(orre.requiresCompletePokedex).toBe(true);
         expect(orre.allStarters).toBe(true);
         expect(orre.starters).toEqual([196, 197]);
         expect(orre.startingKeyItems).toContain("snagMachine");
-        // Johto's whole Pokédex is the price of entry.
-        expect(pokedexRequirement(orre).size).toBe(251);
+        // Everything from Kanto to Hoenn is the price of entry.
+        const hoenn = pokedexRequirement(REGIONS.hoenn);
+        expect(hoenn.size).toBe(251);
+        expect(pokedexRequirement(orre).size).toBeGreaterThan(251);
+        hoenn.forEach(id => expect(pokedexRequirement(orre).has(id)).toBe(true));
     });
 
     test("every species has a Shadow form, with an aura and no evolutions", () => {
@@ -818,7 +884,8 @@ describe("encounter odds", () => {
             superRod: true,
             surf: true,
             headbutt: true,
-            rockSmash: true
+            rockSmash: true,
+            dive: true
         };
         for (const zone of ZONES) {
             const total = [...encounterOdds(zone.id, gear, 3).values()].reduce((a, b) => a + b, 0);
@@ -881,6 +948,8 @@ describe("evolution items", () => {
         expect(friendship).toEqual(
             expect.arrayContaining(["42->169", "113->242", "175->176", "172->25", "133->196"])
         );
+        // Feebas's Beauty is raised like friendship (until Contests bring Pokéblocks).
+        expect(friendship).toContain("349->350");
         // Held-item trade evolutions need their item as well as a Link Cable.
         const held = SPECIES.flatMap(s =>
             s.evolutions
@@ -894,7 +963,9 @@ describe("evolution items", () => {
                 "137->233:upGrade",
                 "61->186:kingsRock",
                 "79->199:kingsRock",
-                "95->208:metalCoat"
+                "95->208:metalCoat",
+                "366->367:deepSeaTooth",
+                "366->368:deepSeaScale"
             ].sort()
         );
         held.forEach(h => expect(STONES[h.split(":")[1] as keyof typeof STONES]).toBeDefined());

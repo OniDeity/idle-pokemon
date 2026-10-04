@@ -237,6 +237,20 @@ export const STONES: Record<StoneId, StoneDefinition> = {
         price: 3000,
         badgesRequired: 5,
         sprite: itemSprite("up-grade")
+    },
+    deepSeaTooth: {
+        id: "deepSeaTooth",
+        name: "DeepSeaTooth",
+        price: 3000,
+        badgesRequired: 7,
+        sprite: itemSprite("deep-sea-tooth")
+    },
+    deepSeaScale: {
+        id: "deepSeaScale",
+        name: "DeepSeaScale",
+        price: 3000,
+        badgesRequired: 7,
+        sprite: itemSprite("deep-sea-scale")
     }
 };
 
@@ -248,7 +262,9 @@ export const STONE_DESCRIPTIONS: Partial<Record<StoneId, string>> = {
     metalCoat: "Held while trading: Onix becomes Steelix, Scyther becomes Scizor.",
     kingsRock: "Held while trading: Poliwhirl becomes Politoed, Slowpoke becomes Slowking.",
     dragonScale: "Held while trading: Seadra becomes Kingdra.",
-    upGrade: "Held while trading: Porygon becomes Porygon2."
+    upGrade: "Held while trading: Porygon becomes Porygon2.",
+    deepSeaTooth: "Held while trading: Clamperl becomes Huntail.",
+    deepSeaScale: "Held while trading: Clamperl becomes Gorebyss."
 };
 
 export type KeyItemId =
@@ -260,6 +276,7 @@ export type KeyItemId =
     | "pokeFlute"
     | "headbutt"
     | "rockSmash"
+    | "dive"
     | "squirtBottle"
     | "radioCard"
     | "snagMachine";
@@ -319,6 +336,12 @@ export const KEY_ITEMS: Record<KeyItemId, KeyItemDefinition> = {
         name: "HM06 Rock Smash",
         description: "Smash cracked rocks to find the Pokémon hiding underneath.",
         sprite: itemSprite("hm-fighting")
+    },
+    dive: {
+        id: "dive",
+        name: "HM08 Dive",
+        description: "Dive into Hoenn's deep water to meet the Pokémon in the seaweed below.",
+        sprite: itemSprite("hm-water")
     },
     squirtBottle: {
         id: "squirtBottle",

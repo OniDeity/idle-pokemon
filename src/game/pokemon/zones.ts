@@ -15,10 +15,11 @@ import { CARRIED_POKE_SPOTS, XD_ZONES } from "./xd";
 import { JOHTO_ANIME_ZONES } from "./johtoAnime";
 import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
+import { HOENN_ZONES } from "./hoenn";
 import { BUG_CONTEST_POOL, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
 import { SEVII_ZONES } from "./sevii";
 
-export type RegionId = "kanto" | "orange" | "sevii" | "johto" | "orre" | "orreXd";
+export type RegionId = "kanto" | "orange" | "sevii" | "johto" | "hoenn" | "orre" | "orreXd";
 
 export type ZonePools = Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 
@@ -280,6 +281,7 @@ export const ZONES: ZoneDefinition[] = [
     ...ORANGE_ALL,
     ...SEVII_ZONES,
     ...JOHTO_ALL,
+    ...HOENN_ZONES,
     ...COLOSSEUM_ZONES,
     ...XD_ZONES,
     ...CARRIED_POKE_SPOTS
@@ -299,13 +301,21 @@ const POOL_KEY_ITEM: Record<Exclude<EncounterPoolId, "walk">, KeyItemId> = {
     goodRod: "goodRod",
     superRod: "superRod",
     headbutt: "headbutt",
-    rockSmash: "rockSmash"
+    rockSmash: "rockSmash",
+    dive: "dive"
 };
 
 /** How often each kind of encounter comes up, relative to each other, when available. */
-const POOL_SHARE = { walk: 0.7, surf: 0.15, fishing: 0.15, headbutt: 0.12, rockSmash: 0.06 };
+const POOL_SHARE = {
+    walk: 0.7,
+    surf: 0.15,
+    fishing: 0.15,
+    headbutt: 0.12,
+    rockSmash: 0.06,
+    dive: 0.15
+};
 
-export type EncounterKind = "walk" | "surf" | "fishing" | "headbutt" | "rockSmash";
+export type EncounterKind = "walk" | "surf" | "fishing" | "headbutt" | "rockSmash" | "dive";
 
 export interface ActivePool {
     kind: EncounterKind;
@@ -324,7 +334,13 @@ const EXTRA_ENCOUNTERS: Record<string, ZonePools> = {
     route19: { surf: [enc(3100, 20, 30, 3)] },
     route20: { surf: [enc(3100, 20, 30, 3)] },
     // Puka, the Alola-bias Pikachu that rode the Humungadunga off Seafoam Island.
-    seafoamIslands: { walk: [enc(7014, 30, 33, 12)] }
+    seafoamIslands: { walk: [enc(7014, 30, 33, 12)] },
+    // Feebas lives under just a few tiles of Route 119's river, about 1 cast in 20 there.
+    route119: {
+        oldRod: [enc(349, 20, 25, 15)],
+        goodRod: [enc(349, 20, 25, 15)],
+        superRod: [enc(349, 20, 25, 15)]
+    }
 };
 
 export function zonePools(zoneId: string): ZonePools {
@@ -414,7 +430,7 @@ export function activePools(
     if (fishing.length > 0) {
         result.push({ kind: "fishing", share: POOL_SHARE.fishing, entries: fishing });
     }
-    for (const kind of ["headbutt", "rockSmash"] as const) {
+    for (const kind of ["headbutt", "rockSmash", "dive"] as const) {
         const entries = pools[kind];
         if (entries != null && entries.length > 0 && keyItems[POOL_KEY_ITEM[kind]] === true) {
             result.push({ kind, share: POOL_SHARE[kind], entries });

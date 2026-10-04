@@ -1,8 +1,9 @@
 # Idle Pokémon: project memory
 
 An idle Pokémon game on Profectus 0.7 (Vue 3 TSX). Journeys through regions (Kanto → Orange
-Islands → Sevii Islands → Johto → Orre (Colosseum) → Orre (XD)), Gyms/trials and a finale per region, a Hall of Fame prestige
-layer (Fame upgrades, automation), and a Pokédex kept across journeys.
+Islands → Sevii Islands → Johto → Hoenn → Orre (Colosseum) → Orre (XD)), Gyms/trials and a
+finale per region, a Hall of Fame prestige layer (Fame upgrades, automation), and a Pokédex kept
+across journeys.
 
 ## Workflow (how the owner wants changes shipped)
 
@@ -32,7 +33,8 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
 - `src/game/pokemon/`: pure engine. `data.ts` (species, forms, variant ids), `zones.ts`
   (encounters, `ZoneExtras`), `regions.ts`, `trainers.ts`, `specials.ts` (gifts/trades/legendaries/
   bosses), `balance.ts`, `items.ts`, `mechanics.ts` (generation mechanics), `pokedex.ts`, and region
-  files `kantoAnime.ts`, `orange.ts`, `sevii.ts`, `johto.ts`, `johtoAnime.ts`.
+  files `kantoAnime.ts`, `orange.ts`, `sevii.ts`, `johto.ts`, `johtoAnime.ts`, `hoenn.ts`,
+  `colosseum.ts`, `xd.ts`.
 - `src/data/projEntry.tsx`: main layer state and game loop. Layers in `src/data/layers/`
   (party, map, mart, dex, hof); `src/data/automation.ts`; UI kit in `src/data/ui/components.tsx`.
 - Data: `scripts/fetchPokemonData.ts` (PokeAPI CSV → `src/data/pokemon/*.json`), sprite
@@ -67,6 +69,15 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
   (`pokeSpot`) use one Poké Snack per encounter. The `pokeSpots` mechanic adds a Poké Spots
   zone to every other region (`CARRIED_POKE_SPOTS`, `mechanic: "pokeSpots"`); zones with a
   `mechanic` stay hidden and don't count toward Pokédex requirements until it's unlocked.
+- Hoenn (`hoenn.ts`): RSE encounters (the fetch script allows #252-386 only in Hoenn zones;
+  sea routes with identical tables are grouped), Emerald's Gyms/E4/Wallace, the Dive pool
+  (`dive` key item, PokeAPI's "seaweed" method), Feebas on Route 119 (`EXTRA_ENCOUNTERS`).
+  Beauty evolutions (Feebas) are mapped like friendship until Contests exist.
+- Region order changed once (Orre moved after Hoenn): `hof.regionUnlocked` keeps a region open if
+  it was ever cleared or is the current journey, so a new region slotting in never locks a save
+  out.
+- The simulator purifies Shadow Pokémon (party only, like the game); scoring a member at the
+  level cap instead of its level was tried and is wrong: wild XP is tiny next to a level's worth.
 
 ## Done (v2.2 "Johto")
 
@@ -83,10 +94,11 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
 
 ## Plans and ideas
 
-- Hoenn is the next main-series region.
+- Hoenn phase 2 (next): Gen 3 mechanics to design with the owner: double battles, Contests
+  (Pokéblocks/Beauty for Feebas, maybe ORAS Cosplay Pikachu as prizes), and ways to bring
+  Pokémon back to earlier generations' regions. Then Hoenn anime places and Pokémon (Alto Mare's
+  Latios/Latias already exist in Johto's anime places).
 - Future generation mechanics go in `mechanics.ts` with their regions: double battles (Hoenn),
   Mega Evolution (Kalos), etc.
-- Gen 3 (Hoenn) will bring Contests and ways to bring Pokémon back to earlier generations' regions.
-- Gen 3 anime Pokémon wait for Hoenn: Latios/Latias (Alto Mare already exists in Johto).
 - Ideas offered but not picked up yet:
   - Better shiny breeding odds the more a species is bred.

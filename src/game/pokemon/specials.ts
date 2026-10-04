@@ -1,4 +1,5 @@
 import type { BallId, KeyItemId } from "./items";
+import { HOENN_SPECIALS } from "./hoenn";
 import { JOHTO_SPECIALS } from "./johto";
 import { COLOSSEUM_SPECIALS } from "./colosseum";
 import { XD_SPECIALS } from "./xd";
@@ -401,6 +402,7 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
     ...SEVII_SPECIALS,
     ...JOHTO_SPECIALS,
     ...JOHTO_ANIME_SPECIALS,
+    ...HOENN_SPECIALS,
     ...COLOSSEUM_SPECIALS,
     ...XD_SPECIALS
 ];
