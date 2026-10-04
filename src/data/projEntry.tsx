@@ -192,6 +192,8 @@ export const main = createLayer("main", layer => {
     /** The Pokémon left at the Day Care (0 for none), and battles toward its Egg. */
     const dayCareId = persistent<number>(0);
     const dayCareProgress = persistent<number>(0);
+    /** Eggs the Day Care has found this journey. */
+    const eggsHatched = persistent<number>(0);
 
     /** What this journey has added to its places' pools: swarms and the contest. */
     const zoneExtras = computed<ZoneExtras>(() => ({
@@ -483,12 +485,66 @@ export const main = createLayer("main", layer => {
     }
 
     /** Each wild battle won brings the Day Care's Egg closer, while its Pokémon isn't in the party. */
+    /**
+     * How useful a parent's Egg is: 2 if it hatches a Pokémon your Pokédex doesn't have, 1 if
+     * it's one you haven't got this journey, 0 otherwise.
+     */
+    function eggValue(parentId: number): number {
+        const egg = eggSpeciesOf(parentId);
+        return !dex.entry(egg).caught ? 2 : !owns(egg) ? 1 : 0;
+    }
+
+    /** Pokémon that could be left at the Day Care right now (bred, and not in the party). */
+    function dayCareCandidates(): number[] {
+        return Object.keys(box.value)
+            .map(Number)
+            .filter(id => canBreed(id) && !partyIds.value.includes(id));
+    }
+
+    /**
+     * The Pokémon whose Egg is most useful, or undefined when no Egg would be. Ties go to a
+     * shiny parent (its Eggs are shiny 1 time in 64), then to the lowest Pokédex number.
+     */
+    function bestDayCareParent(): number | undefined {
+        let best: number | undefined;
+        let bestScore = 0;
+        for (const id of dayCareCandidates()) {
+            const score = eggValue(id) * 2 + (box.value[id]?.shiny === true ? 1 : 0);
+            if (eggValue(id) > 0 && score > bestScore) {
+                best = id;
+                bestScore = score;
+            }
+        }
+        return best;
+    }
+
+    /** With auto-swap on, moves the Day Care to a parent with a more useful Egg. */
+    function rotateDayCare() {
+        const current = dayCareId.value;
+        const stuck = current === 0 || !canBreed(current) || partyIds.value.includes(current);
+        const best = bestDayCareParent();
+        if (best == null || best === current) return;
+        if (!stuck && eggValue(best) <= eggValue(current)) return;
+        leaveAtDayCare(best);
+        addLog({
+            kind: "info",
+            text: `Day Care: left ${getSpecies(best).name} for a ${getSpecies(eggSpeciesOf(best)).name} Egg.`,
+            speciesId: best
+        });
+    }
+
     function tendDayCare() {
+        if (!dayCareOpen.value) return;
         const id = dayCareId.value;
-        if (!dayCareOpen.value || id === 0 || !canBreed(id) || partyIds.value.includes(id)) return;
+        if (id === 0 || !canBreed(id) || partyIds.value.includes(id)) {
+            // Nobody's breeding: auto-swap looks for someone now and then.
+            if (hof.dayCareRotate.value && battlesWon.value % EGG_BATTLES === 0) rotateDayCare();
+            return;
+        }
         dayCareProgress.value++;
         if (dayCareProgress.value < EGG_BATTLES) return;
         dayCareProgress.value = 0;
+        eggsHatched.value++;
         const babyId = eggSpeciesOf(id);
         // A shiny parent passes its colors on 1 time in 64, as in Gold and Silver.
         const shiny =
@@ -505,6 +561,7 @@ export const main = createLayer("main", layer => {
             shiny
         });
         showFlash(text, "catch");
+        if (hof.dayCareRotate.value) rotateDayCare();
     }
 
     /** A Pokémon caught in a Friend Ball evolves by friendship without a Soothe Bell. */
@@ -1257,6 +1314,9 @@ export const main = createLayer("main", layer => {
         dayCareId,
         dayCareProgress,
         dayCareOpen,
+        eggsHatched,
+        eggValue,
+        bestDayCareParent,
         mechanicOn,
         canBreed,
         eggSpeciesOf,

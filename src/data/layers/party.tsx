@@ -24,6 +24,7 @@ import {
     TypeBadges
 } from "../ui/components";
 import dex from "./dex";
+import hof from "./hof";
 
 type Sort = "dex" | "level" | "strongest" | "name";
 type QuickFilter = "canEvolve" | "ready" | "shiny" | "forms" | "boxed" | "capped";
@@ -48,6 +49,21 @@ const QUICK_FILTERS: [QuickFilter, string, string][] = [
     ["capped", "At level cap", "Can't gain levels until the next badge"]
 ];
 
+type DayCareSort = "useful" | "dex" | "name";
+type DayCareFilter = "newDex" | "notInBox" | "shiny";
+
+const DAY_CARE_SORTS: [DayCareSort, string][] = [
+    ["useful", "Most useful"],
+    ["dex", "Dex no."],
+    ["name", "Name"]
+];
+
+const DAY_CARE_FILTERS: [DayCareFilter, string, string][] = [
+    ["newDex", "New for Pokédex", "Its Egg hatches a Pokémon your Pokédex doesn't have"],
+    ["notInBox", "Not in box", "Its Egg hatches a Pokémon you don't have this journey"],
+    ["shiny", "Shiny parents", "Shiny Pokémon, whose Eggs are shiny 1 time in 64"]
+];
+
 const id = "party";
 const layer = createLayer(id, () => {
     const name = "Party";
@@ -57,6 +73,10 @@ const layer = createLayer(id, () => {
     const search = ref("");
     const quickFilters = ref<QuickFilter[]>([]);
     const typeFilters = ref<PokemonType[]>([]);
+
+    const dayCareSearch = ref("");
+    const dayCareFilters = ref<DayCareFilter[]>([]);
+    const dayCareSort = ref<DayCareSort>("useful");
 
     /** Every Pokémon in the box, unfiltered. */
     const allIds = computed(() => Object.keys(main.box.value).map(Number));
@@ -169,6 +189,41 @@ const layer = createLayer(id, () => {
         quickFilters.value = [];
         typeFilters.value = [];
     }
+
+    /** Pokémon that could go to the Day Care, filtered and sorted for its picker. */
+    const dayCareIds = computed(() => {
+        const query = dayCareSearch.value.trim().toLowerCase();
+        const ids = allIds.value.filter(sid => {
+            if (!main.canBreed(sid) || main.partyIds.value.includes(sid)) return false;
+            const egg = main.eggSpeciesOf(sid);
+            if (
+                query !== "" &&
+                !getSpecies(sid).name.toLowerCase().includes(query) &&
+                !getSpecies(egg).name.toLowerCase().includes(query)
+            ) {
+                return false;
+            }
+            const value = main.eggValue(sid);
+            return dayCareFilters.value.every(filter =>
+                filter === "newDex"
+                    ? value === 2
+                    : filter === "notInBox"
+                      ? value >= 1
+                      : main.box.value[sid]?.shiny === true
+            );
+        });
+        const dexOrder = (sid: number) => (getSpecies(sid).baseSpecies ?? sid) * 100000 + sid;
+        switch (dayCareSort.value) {
+            case "name":
+                return ids.sort((a, b) => getSpecies(a).name.localeCompare(getSpecies(b).name));
+            case "dex":
+                return ids.sort((a, b) => dexOrder(a) - dexOrder(b));
+            default:
+                return ids.sort(
+                    (a, b) => main.eggValue(b) - main.eggValue(a) || dexOrder(a) - dexOrder(b)
+                );
+        }
+    });
 
     /** Something in the box can evolve right now; lights up the Party button. */
     const evolutionReady = computed(() => allIds.value.some(readyToEvolve));
@@ -421,10 +476,9 @@ const layer = createLayer(id, () => {
     /** The Day Care: leave a Pokémon, and its Eggs hatch into its family's first stage. */
     function renderDayCare() {
         const id = main.dayCareId.value;
-        const options = allIds.value.filter(
-            sid => main.canBreed(sid) && !main.partyIds.value.includes(sid)
-        );
         const inParty = id !== 0 && main.partyIds.value.includes(id);
+        const candidates = dayCareIds.value;
+        const egg = id !== 0 ? main.eggSpeciesOf(id) : 0;
         return (
             <Panel
                 title={
@@ -439,34 +493,145 @@ const layer = createLayer(id, () => {
                     family, babies included (Pikachu → Pichu, Electabuzz → Elekid). A shiny parent
                     passes its colors on 1 time in 64.
                 </p>
-                <div class="pk-filter-row">
-                    <select
-                        class="pk-search"
-                        value={String(id)}
-                        onChange={(e: Event) =>
-                            main.leaveAtDayCare(Number((e.target as HTMLSelectElement).value))
-                        }
-                    >
-                        <option value="0">Nobody</option>
-                        {(id !== 0 && !options.includes(id) ? [id, ...options] : options).map(
-                            sid => (
-                                <option value={String(sid)}>{getSpecies(sid).name}</option>
-                            )
-                        )}
-                    </select>
-                </div>
                 {id !== 0 ? (
-                    <div class="pk-small">
-                        {inParty
-                            ? `${getSpecies(id).name} is in your party, so it isn't at the Day Care right now.`
-                            : `Next Egg (${getSpecies(main.eggSpeciesOf(id)).name}) in ${
-                                  EGG_BATTLES - main.dayCareProgress.value
-                              } battles.`}
-                        <Bar value={main.dayCareProgress.value} max={EGG_BATTLES} kind="progress" />
+                    <div class="pk-daycare-current">
+                        <Sprite id={id} size={56} shiny={main.box.value[id]?.shiny} />
+                        <span class="pk-muted">→ 🥚 →</span>
+                        <Sprite id={egg} size={56} silhouette={!dex.entry(egg).seen} />
+                        <div class="pk-daycare-info pk-small">
+                            <div>
+                                <b>{getSpecies(id).name}</b> → {getSpecies(egg).name} Egg{" "}
+                                {eggTag(id)}
+                            </div>
+                            {inParty ? (
+                                <div class="pk-warning">
+                                    {getSpecies(id).name} is in your party, so it isn't at the Day
+                                    Care right now.
+                                </div>
+                            ) : (
+                                <div>
+                                    Next Egg in {EGG_BATTLES - main.dayCareProgress.value} battles
+                                </div>
+                            )}
+                            <Bar
+                                value={main.dayCareProgress.value}
+                                max={EGG_BATTLES}
+                                kind="progress"
+                            />
+                        </div>
+                        <Button kind="ghost" onClick={() => main.leaveAtDayCare(0)}>
+                            Take back
+                        </Button>
                     </div>
+                ) : (
+                    <p class="pk-small">Nobody is at the Day Care. Pick a Pokémon below.</p>
+                )}
+                <div class="pk-filter-row pk-small">
+                    <Button
+                        kind={hof.dayCareRotate.value ? "primary" : "ghost"}
+                        title="After each Egg, leave whichever Pokémon's Egg would be new to your Pokédex (or to your box this journey) instead"
+                        onClick={() => (hof.dayCareRotate.value = !hof.dayCareRotate.value)}
+                    >
+                        Auto-swap: {hof.dayCareRotate.value ? "On" : "Off"}
+                    </Button>
+                    <Button
+                        kind="ghost"
+                        disabled={main.bestDayCareParent() == null}
+                        title="Leave the Pokémon whose Egg is most useful right now"
+                        onClick={() => {
+                            const best = main.bestDayCareParent();
+                            if (best != null) main.leaveAtDayCare(best);
+                        }}
+                    >
+                        Pick best
+                    </Button>
+                    <span class="pk-muted">
+                        {main.eggsHatched.value} Egg{main.eggsHatched.value === 1 ? "" : "s"} this
+                        journey
+                    </span>
+                </div>
+                <div class="pk-filter-row">
+                    <input
+                        class="pk-search"
+                        type="search"
+                        placeholder="Search parents or Eggs…"
+                        value={dayCareSearch.value}
+                        onInput={(e: Event) =>
+                            (dayCareSearch.value = (e.target as HTMLInputElement).value)
+                        }
+                    />
+                </div>
+                <div class="pk-filter-row">
+                    <span class="pk-small pk-muted">Show:</span>
+                    {DAY_CARE_FILTERS.map(([value, label, title]) => (
+                        <Button
+                            kind={dayCareFilters.value.includes(value) ? "primary" : "ghost"}
+                            title={title}
+                            onClick={() => toggle(dayCareFilters, value)}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </div>
+                <div class="pk-filter-row">
+                    <span class="pk-small pk-muted">Sort:</span>
+                    {DAY_CARE_SORTS.map(([value, label]) => (
+                        <Button
+                            kind={dayCareSort.value === value ? "primary" : "ghost"}
+                            onClick={() => (dayCareSort.value = value)}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </div>
+                {candidates.length === 0 ? (
+                    <p class="pk-muted pk-small">No Pokémon in your box match.</p>
                 ) : null}
+                <div class="pk-box-grid">
+                    {candidates.map(sid => {
+                        const eggId = main.eggSpeciesOf(sid);
+                        const value = main.eggValue(sid);
+                        return (
+                            <button
+                                class={["pk-box-cell", id === sid ? "selected" : ""]}
+                                title={`${getSpecies(sid).name} → ${getSpecies(eggId).name} Egg${
+                                    value === 2
+                                        ? " (new to your Pokédex!)"
+                                        : value === 1
+                                          ? " (not in your box this journey)"
+                                          : ""
+                                }`}
+                                onClick={() => main.leaveAtDayCare(sid)}
+                            >
+                                <Sprite id={sid} size={48} shiny={main.box.value[sid]?.shiny} />
+                                <span class="pk-daycare-egg">
+                                    <Sprite
+                                        id={eggId}
+                                        size={24}
+                                        silhouette={!dex.entry(eggId).seen}
+                                    />
+                                </span>
+                                {value > 0 ? (
+                                    <span class={["pk-daycare-mark", value === 2 ? "new" : ""]}>
+                                        {value === 2 ? "★" : "•"}
+                                    </span>
+                                ) : null}
+                            </button>
+                        );
+                    })}
+                </div>
             </Panel>
         );
+    }
+
+    /** A tag for how useful a parent's Egg is. */
+    function eggTag(parentId: number) {
+        const value = main.eggValue(parentId);
+        return value === 2 ? (
+            <span class="pk-new-tag">New</span>
+        ) : value === 1 ? (
+            <span class="pk-new-tag">Not in box</span>
+        ) : null;
     }
 
     return {

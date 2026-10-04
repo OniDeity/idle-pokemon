@@ -1527,3 +1527,38 @@
     color: var(--pk-good);
     margin-top: 2px;
 }
+
+.pk-daycare-current {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.pk-daycare-info {
+    flex: 1;
+    min-width: 160px;
+}
+
+.pk-daycare-egg {
+    position: absolute;
+    bottom: 1px;
+    left: 1px;
+    line-height: 0;
+    background: rgba(0, 0, 0, 0.28);
+    border-radius: 50%;
+}
+
+.pk-daycare-mark {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 11px;
+    line-height: 1;
+    color: var(--pk-good);
+}
+
+.pk-daycare-mark.new {
+    color: #eab308;
+}
