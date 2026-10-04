@@ -11,9 +11,9 @@ import {
     SHINY_BONUS_PER_VARIANT
 } from "game/pokemon/balance";
 import type { Species } from "game/pokemon/data";
+import { POKEDEX_SET, POKEDEX_SIZE } from "game/pokemon/pokedex";
 import {
     ALTERNATE_EVOLUTIONS,
-    DEX_SIZE,
     getSpecies,
     isVariant,
     PRE_EVOLUTION,
@@ -48,7 +48,7 @@ export type DexEntry = {
 
 const EMPTY: DexEntry = { seen: false, caught: false, shiny: false, timesCaught: 0 };
 
-type Filter = "all" | "caught" | "missing" | "shiny" | "kanto" | "johto" | "variants";
+type Filter = "all" | "caught" | "missing" | "shiny" | "kanto" | "johto" | "hoenn" | "variants";
 
 /** Where a species can be found: wild zones, specials, or by evolving something. */
 function locationsOf(id: number): string[] {
@@ -238,7 +238,10 @@ const layer = createLayer(id, () => {
     };
 
     const visibleSpecies = computed(() =>
-        (filter.value === "variants" ? PLACED_VARIANTS : SPECIES).filter(s => {
+        (filter.value === "variants"
+            ? PLACED_VARIANTS
+            : SPECIES.filter(s => POKEDEX_SET.has(s.id))
+        ).filter(s => {
             const e = entry(s.id);
             switch (filter.value) {
                 case "caught":
@@ -252,7 +255,9 @@ const layer = createLayer(id, () => {
                 case "variants":
                     return true;
                 case "johto":
-                    return s.id > 151;
+                    return s.id > 151 && s.id <= 251;
+                case "hoenn":
+                    return s.id > 251 && s.id <= 386;
                 default:
                     return true;
             }
@@ -327,6 +332,7 @@ const layer = createLayer(id, () => {
         ["shiny", "Shiny"],
         ["kanto", "#1–151"],
         ["johto", "#152–251"],
+        ...(POKEDEX_SIZE > 251 ? [["hoenn", "#252–386"] as [Filter, string]] : []),
         ["variants", "Variants"]
     ];
 
@@ -353,10 +359,10 @@ const layer = createLayer(id, () => {
                 <div class="pk-dex-summary">
                     <div>
                         Seen <b>{seenCount.value}</b> · Caught <b>{caughtCount.value}</b> /{" "}
-                        {DEX_SIZE} · Shiny <b>{shinyCount.value}</b> · Variants{" "}
+                        {POKEDEX_SIZE} · Shiny <b>{shinyCount.value}</b> · Variants{" "}
                         <b>{variantCaught.value}</b> / {PLACED_VARIANTS.length}
                     </div>
-                    <Bar value={caughtCount.value} max={DEX_SIZE} kind="progress" />
+                    <Bar value={caughtCount.value} max={POKEDEX_SIZE} kind="progress" />
                     <div class="pk-muted">
                         Every species caught gives +{DEX_DAMAGE_BONUS_PER_SPECIES * 100}% damage
                         (now +{Math.round(caughtCount.value * DEX_DAMAGE_BONUS_PER_SPECIES * 100)}

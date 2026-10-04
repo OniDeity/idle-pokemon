@@ -31,7 +31,12 @@ import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { JOHTO_SWARMS } from "game/pokemon/johto";
 import { MECHANIC_LIST } from "game/pokemon/mechanics";
-import { pokedexRequirement, speciesObtainableIn } from "game/pokemon/pokedex";
+import {
+    isReleased,
+    POKEDEX_IDS,
+    pokedexRequirement,
+    speciesObtainableIn
+} from "game/pokemon/pokedex";
 import { REGION_LIST, REGIONS, strengthMultiplier } from "game/pokemon/regions";
 import { championFor, ELITE_FOUR, GYMS } from "game/pokemon/trainers";
 import {
@@ -62,9 +67,14 @@ function party(...members: [number, number][]): PartyBattler[] {
 }
 
 describe("data", () => {
-    test("has species #1-251 in order", () => {
-        expect(DEX_SIZE).toBe(251);
+    test("has species #1-386 in order, with the Pokédex only as far as the regions go", () => {
+        expect(DEX_SIZE).toBe(386);
         SPECIES.forEach((species, i) => expect(species.id).toBe(i + 1));
+        // Every Pokédex species is one a region offers; nothing past #251 without a region for it.
+        const offered = speciesObtainableIn(REGION_LIST.map(r => r.id));
+        expect(POKEDEX_IDS.filter(id => id > 251).every(id => offered.has(id))).toBe(true);
+        expect(POKEDEX_IDS.filter(id => id <= 251).length).toBe(251);
+        expect(isReleased(298)).toBe(offered.has(298)); // Azurill
     });
 
     test("every species can be obtained", () => {
@@ -425,7 +435,7 @@ describe("Cobblemon variants", () => {
         expect(needed.size).toBeGreaterThan(240);
         // Johto brings the rest (Sudowoodo, Elekid, Celebi…): the Pokédex can be completed.
         const all = speciesObtainableIn(REGION_LIST.map(r => r.id));
-        expect(SPECIES.filter(sp => !all.has(sp.id)).map(sp => sp.name)).toEqual([]);
+        expect(POKEDEX_IDS.filter(id => !all.has(id)).map(id => getSpecies(id).name)).toEqual([]);
     });
 });
 
