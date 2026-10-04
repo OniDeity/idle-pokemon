@@ -5,6 +5,31 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.3.1 Pokémon XD</summary>
+                <ul>
+                    <li class="feature">
+                        Orre, from Pokémon XD: its own journey after Colosseum. Eevee starts; snag
+                        XD's Shadow Pokémon around Gateon Port, Phenac and the Cipher Key Lair, beat
+                        Lovrina, Snattle, Gorigan, Ardos and Eldes, then face XD001 (Shadow Lugia)
+                        and Greevil's Shadow legendary birds on Citadark Isle
+                    </li>
+                    <li class="feature">
+                        Poké Spots: XD's Rock, Oasis and Cave Spots lure wild Sandshrew, Gligar,
+                        Trapinch, Hoppip, Phanpy, Surskit, Zubat, Aron and Wooper with Poké Snacks
+                        (one per encounter, sold at the Poké Mart). Unlocked in XD, then every
+                        region gets Poké Spots
+                    </li>
+                    <li class="feature">
+                        XD's trades (Danny's Elekid, Duking's Meditite, Shuckle and Larvitar) and
+                        Mt. Battle's Johto first partners after the finale
+                    </li>
+                    <li class="fix">
+                        Colosseum's Venus, Ein and Realgam Tower are easier now that Shadow
+                        Pokémon get purified along the way (a first clear takes about 11 hours)
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.3 Orre</summary>
                 <ul>
                     <li class="feature">
@@ -28,22 +53,6 @@
                         Two new generation mechanics carry back: the Snag Machine (Cipher Peons roam
                         every other region with Shadow versions of its Pokémon, 2% of encounters)
                         and the Relic Stone (purify anywhere)
-                    </li>
-                    <li class="feature">
-                        Orre, from Pokémon XD: its own journey after Colosseum. Eevee starts; snag
-                        XD's Shadow Pokémon around Gateon Port, Phenac and the Cipher Key Lair, beat
-                        Lovrina, Snattle, Gorigan, Ardos and Eldes, then face XD001 (Shadow Lugia)
-                        and Greevil's Shadow legendary birds on Citadark Isle
-                    </li>
-                    <li class="feature">
-                        Poké Spots: XD's Rock, Oasis and Cave Spots lure wild Sandshrew, Gligar,
-                        Trapinch, Hoppip, Phanpy, Surskit, Zubat, Aron and Wooper with Poké Snacks
-                        (one per encounter, sold at the Poké Mart). Unlocked in XD, then every
-                        region gets Poké Spots
-                    </li>
-                    <li class="feature">
-                        XD's trades (Danny's Elekid, Duking's Meditite, Shuckle and Larvitar) and
-                        Mt. Battle's Johto first partners after the finale
                     </li>
                     <li class="feature">
                         Orre's Hoenn Pokémon join the Pokédex: Makuhita, Meditite, Swablu, Plusle,

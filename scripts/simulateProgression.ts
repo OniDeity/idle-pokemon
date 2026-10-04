@@ -353,7 +353,9 @@ function runJourney(region: RegionDefinition, starter: number) {
                 owned.delete(o.id);
                 o.id = getSpecies(o.id).baseSpecies!;
                 delete o.heart;
-                if (!owned.has(o.id)) owned.set(o.id, o);
+                // The game purifies in place; keep whichever copy has the higher level.
+                const prev = owned.get(o.id);
+                if (prev == null || prev.level < o.level) owned.set(o.id, o);
                 dex.set(o.id, (dex.get(o.id) ?? 0) + 1);
             }
         }
