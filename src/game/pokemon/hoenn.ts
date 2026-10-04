@@ -350,13 +350,14 @@ export const HOENN_ZONES: ZoneDefinition[] = [
 ];
 
 /**
- * Stat multipliers for Hoenn's leaders, tuned with scripts/simulateProgression.ts: a first clear
- * after Johto takes about 8-11 hours (Norman around 4.5 hours in, Juan around 8). Tate & Liza
- * and Juan come in near the level cap, so theirs come back down.
+ * Stat multipliers for Hoenn's leaders, tuned with scripts/simulateProgression.ts with Double
+ * Battles (unlocked past Roxanne): a first clear after Johto takes about 9.5-13 hours (Winona
+ * around 5.5 hours in). Tate & Liza fight a double battle and Juan comes in near the level cap,
+ * so theirs come back down.
  */
-const HOENN_GYM_STRENGTHS = [2.0, 3.0, 3.5, 4.6, 3.8, 4.4, 3.0, 3.5];
-const HOENN_ELITE_FOUR_STRENGTH = 2.575;
-const HOENN_CHAMPION_STRENGTH = 2.73;
+const HOENN_GYM_STRENGTHS = [2.0, 3.6, 4.3, 5.5, 4.5, 5.1, 3.3, 4.1];
+const HOENN_ELITE_FOUR_STRENGTH = 3.09;
+const HOENN_CHAMPION_STRENGTH = 3.28;
 
 function hoennGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">

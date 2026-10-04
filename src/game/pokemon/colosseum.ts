@@ -268,12 +268,12 @@ export const COLOSSEUM_ZONES: ZoneDefinition[] = [
 
 /**
  * Stat multipliers for the Cipher admins and Realgam Tower, tuned with
- * scripts/simulateProgression.ts (which purifies Shadow Pokémon as they open their hearts): a
- * first clear after Hoenn takes about 11 hours (Miror B. around 40 minutes in, Ein around 7.5
+ * scripts/simulateProgression.ts (which purifies Shadow Pokémon as they open their hearts, and has
+ * Hoenn's Double Battles): a first clear after Hoenn takes about 11 hours (Miror B. around 40 minutes in, Ein around 7.5
  * hours).
  */
-const ADMIN_STRENGTHS = [2.54, 3.22, 3.41, 3.61];
-const REALGAM_STRENGTH = 2.54;
+const ADMIN_STRENGTHS = [3.0, 3.8, 4.02, 4.26];
+const REALGAM_STRENGTH = 3.0;
 
 function admin(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "keyItems"> & {
