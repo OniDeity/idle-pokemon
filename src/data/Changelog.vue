@@ -90,6 +90,10 @@
                         your Pokémon back, "Pick best", and Auto-swap to the most useful parent
                         after each Egg
                     </li>
+                    <li class="feature">
+                        Every panel (PC Box, Day Care, Map tiers, Mart sections…) collapses with a
+                        tap on its title, and remembers it in this browser
+                    </li>
                 </ul>
             </details>
             <details>
