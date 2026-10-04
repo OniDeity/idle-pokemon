@@ -72,7 +72,8 @@ across journeys.
 - Hoenn (`hoenn.ts`): RSE encounters (the fetch script allows #252-386 only in Hoenn zones;
   sea routes with identical tables are grouped), Emerald's Gyms/E4/Wallace, the Dive pool
   (`dive` key item, PokeAPI's "seaweed" method), Feebas on Route 119 (`EXTRA_ENCOUNTERS`).
-  Beauty evolutions (Feebas) are mapped like friendship until Contests exist.
+  Evolutions use later generations' easier methods where they replaced one (the owner's call):
+  Feebas trades holding a Prism Scale, not Gen 3's Beauty (the fetch skips Beauty rows).
 - Region order changed once (Orre moved after Hoenn): `hof.regionUnlocked` keeps a region open if
   it was ever cleared or is the current journey, so a new region slotting in never locks a save
   out.
@@ -80,8 +81,7 @@ across journeys.
   the partner isn't attacked; `TrainerDefinition.doubles` makes the trainer's next Pokémon attack
   too; stepping stays exact), `partner` (`main.journeyPartner`, picked from Hall of Fame teams on
   the starter screen), `contests` (`contests.ts`; conditions on `BoxEntry.condition`, ribbons by
-  species in `hof.ribbons`, first Master win per category gives Cosplay Pikachu 10080-10084,
-  Feebas evolves at Beauty ≥ 80 via `main.beautifulEnough`). A full 2× partner made Hoenn 3.7 h
+  species in `hof.ribbons`, first Master win per category gives Cosplay Pikachu 10080-10084). A full 2× partner made Hoenn 3.7 h
   and Orre 2.5 h in the sim, hence the half-damage partner.
 - The simulator purifies Shadow Pokémon (party only, like the game); scoring a member at the
   level cap instead of its level was tried and is wrong: wild XP is tiny next to a level's worth.

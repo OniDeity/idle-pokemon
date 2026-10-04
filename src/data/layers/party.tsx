@@ -109,9 +109,7 @@ const layer = createLayer(id, () => {
             e.method === "level"
                 ? level >= (e.level ?? Infinity) ||
                   (e.friendship === true &&
-                      (have("sootheBell") ||
-                          main.box.value[speciesId]?.friend === true ||
-                          main.beautifulEnough(speciesId)))
+                      (have("sootheBell") || main.box.value[speciesId]?.friend === true))
                 : e.method === "stone"
                   ? have(e.stone!)
                   : have("linkCable") && (e.heldItem == null || have(e.heldItem))
@@ -275,15 +273,6 @@ const layer = createLayer(id, () => {
                                 onClick={() => main.evolveByLevel(speciesId, evo.into)}
                             >
                                 Evolve (Lv. {evo.level})
-                            </Button>
-                        ) : evo.friendship === true && main.beautifulEnough(speciesId) ? (
-                            <Button
-                                kind="primary"
-                                disabled={main.inTrainerBattle.value}
-                                onClick={() => main.evolveWithSootheBell(speciesId, evo.into)}
-                                title="Beautiful enough from Pokéblocks to evolve now"
-                            >
-                                💙 Evolve (beauty)
                             </Button>
                         ) : evo.friendship === true &&
                           main.box.value[speciesId]?.friend === true ? (

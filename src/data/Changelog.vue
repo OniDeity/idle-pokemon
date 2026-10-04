@@ -18,7 +18,11 @@
                         Pokéblocks to raise Cool, Beauty, Cute, Smart and Tough, enter contests from
                         the Party screen, and win ribbons up to Master Rank. A category's first
                         Master Rank win earns its Cosplay Pikachu (Rock Star, Belle, Pop Star,
-                        Ph.D., Libre), and Feebas evolves into Milotic once it's beautiful enough
+                        Ph.D., Libre)
+                    </li>
+                    <li class="feature">
+                        Feebas evolves the later games' way: trade it holding a Prism Scale (in
+                        the Poké Mart from 5 badges), with a Link Cable
                     </li>
                     <li class="feature">
                         Bring a Partner (the Cable Club, past the Dynamo Badge): start any new

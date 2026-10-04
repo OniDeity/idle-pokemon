@@ -84,9 +84,6 @@ export const CONTEST_PIKACHU: Record<ContestCategory, number> = {
     tough: 10084
 };
 
-/** Feebas evolves into Milotic once its Beauty condition reaches this. */
-export const MILOTIC_BEAUTY = 80;
-
 /** How well a species' types suit a category: 30 for its first type, 15 for its second. */
 export function typeAppeal(speciesId: number, category: ContestCategory): number {
     const types = getSpecies(speciesId).types;

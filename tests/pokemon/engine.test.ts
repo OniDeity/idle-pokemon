@@ -690,7 +690,11 @@ describe("Hoenn", () => {
         );
         const fishing = encounterOdds("route119", { oldRod: true, goodRod: true, superRod: true });
         expect(fishing.get(349) ?? 0).toBeGreaterThan(0);
-        expect(getSpecies(349).evolutions[0].into).toBe(350);
+        expect(getSpecies(349).evolutions[0]).toEqual({
+            into: 350,
+            method: "trade",
+            heldItem: "prismScale"
+        });
     });
 });
 
@@ -1031,8 +1035,8 @@ describe("evolution items", () => {
         expect(friendship).toEqual(
             expect.arrayContaining(["42->169", "113->242", "175->176", "172->25", "133->196"])
         );
-        // Feebas's Beauty is raised like friendship (until Contests bring Pokéblocks).
-        expect(friendship).toContain("349->350");
+        // Later generations' methods: Feebas trades holding a Prism Scale (not Gen 3's Beauty).
+        expect(friendship).not.toContain("349->350");
         // Held-item trade evolutions need their item as well as a Link Cable.
         const held = SPECIES.flatMap(s =>
             s.evolutions
@@ -1048,7 +1052,8 @@ describe("evolution items", () => {
                 "79->199:kingsRock",
                 "95->208:metalCoat",
                 "366->367:deepSeaTooth",
-                "366->368:deepSeaScale"
+                "366->368:deepSeaScale",
+                "349->350:prismScale"
             ].sort()
         );
         held.forEach(h => expect(STONES[h.split(":")[1] as keyof typeof STONES]).toBeDefined());

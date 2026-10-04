@@ -114,7 +114,7 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         unlockAt: "Verdanturf Town's Contest Hall, past the Dynamo Badge",
         trialsRequired: 3,
         description:
-            "A Contest Hall in every region: raise Cool, Beauty, Cute, Smart and Tough with Pokéblocks, win ribbons up to Master Rank, and earn a Cosplay Pikachu for each category. Feebas evolves once it's beautiful enough."
+            "A Contest Hall in every region: raise Cool, Beauty, Cute, Smart and Tough with Pokéblocks, win ribbons up to Master Rank, and earn a Cosplay Pikachu for each category."
     }
 };
 

@@ -28,7 +28,6 @@ import {
     CONTEST_SECONDS,
     contestScore,
     MAX_CONDITION,
-    MILOTIC_BEAUTY,
     nextRank,
     POKEBLOCK_GAIN,
     POKEBLOCK_PRICE,
@@ -216,7 +215,8 @@ export const main = createLayer("main", layer => {
             dragonScale: 0,
             upGrade: 0,
             deepSeaTooth: 0,
-            deepSeaScale: 0
+            deepSeaScale: 0,
+            prismScale: 0
         },
         false
     );
@@ -629,13 +629,11 @@ export const main = createLayer("main", layer => {
         const evolution = getSpecies(fromId).evolutions.find(
             e => e.friendship === true && e.into === evolvesInto
         );
-        const friend = box.value[fromId]?.friend === true || beautifulEnough(fromId);
+        const friend = box.value[fromId]?.friend === true;
         if (evolution == null || (!friend && (stones.value.sootheBell ?? 0) <= 0)) return;
         const into = evolutionTarget(fromId, evolution.into);
         if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
-        if (beautifulEnough(fromId)) {
-            evolve(fromId, into, " with its beauty");
-        } else if (friend) {
+        if (friend) {
             evolve(fromId, into, " out of friendship (Friend Ball)");
         } else {
             useStone("sootheBell");
@@ -1141,11 +1139,6 @@ export const main = createLayer("main", layer => {
         }
     }
 
-    /** Feebas evolves once it's beautiful enough, like a friendship evolution. */
-    function beautifulEnough(id: number): boolean {
-        return id === 349 && conditionOf(id, "beauty") >= MILOTIC_BEAUTY;
-    }
-
     function startTrainerBattle(options: {
         label: string;
         trainers: TrainerDefinition[];
@@ -1586,7 +1579,6 @@ export const main = createLayer("main", layer => {
         contestRankFor,
         contestScoreOf,
         enterContest,
-        beautifulEnough,
         journeyPartner,
         partnerChoices,
         region,

@@ -5901,9 +5901,8 @@
         "evolutions": [
             {
                 "into": 350,
-                "method": "level",
-                "level": 30,
-                "friendship": true
+                "method": "trade",
+                "heldItem": "prismScale"
             }
         ]
     },

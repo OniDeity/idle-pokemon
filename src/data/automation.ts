@@ -136,9 +136,7 @@ function autoEvolve() {
                     main.evolveByLevel(id, evolution.into);
                 } else if (
                     evolution.friendship === true &&
-                    (main.box.value[id]?.friend === true ||
-                        main.beautifulEnough(id) ||
-                        buyIfAffordable("sootheBell"))
+                    (main.box.value[id]?.friend === true || buyIfAffordable("sootheBell"))
                 ) {
                     // ...and friendship Pokémon early, with a Soothe Bell.
                     main.evolveWithSootheBell(id, evolution.into);
