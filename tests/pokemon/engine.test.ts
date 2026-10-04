@@ -11,7 +11,9 @@ import {
     memberDps,
     simulateTrainerBattle,
     stepTrainerBattle,
+    PARTNER_DAMAGE,
     trainerTeam,
+    wildDps,
     zoneRates
 } from "game/pokemon/balance";
 import {
@@ -33,7 +35,17 @@ import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import { bestTypeMultiplier, levelForXp, xpForLevel } from "game/pokemon/stats";
 import { JOHTO_SWARMS } from "game/pokemon/johto";
-import { MECHANIC_LIST } from "game/pokemon/mechanics";
+import { MECHANIC_LIST, MECHANICS } from "game/pokemon/mechanics";
+import {
+    CONTEST_CATEGORIES,
+    CONTEST_PIKACHU,
+    contestScore,
+    MAX_CONDITION,
+    nextRank,
+    RANK_SCORES,
+    typeAppeal,
+    winChance
+} from "game/pokemon/contests";
 import {
     isReleased,
     POKEDEX_IDS,
@@ -312,6 +324,50 @@ describe("battles", () => {
         expect(state.partyHp).toEqual(forecast.state.partyHp.map(hp => expect.closeTo(hp, 6)));
     });
 
+    test("double battles: a partner adds its damage, and a double trainer's second Pokémon hits too", () => {
+        const team = party([9, 45], [26, 44], [65, 45], [3, 45], [130, 44], [59, 45]);
+        const starmie = trainerTeam(GYMS[1])[1];
+        const single = wildDps(team, starmie, 1);
+        const double = wildDps(team, starmie, 1, true);
+        const dps = team.map(m => memberDps(m, starmie, 1)).sort((a, b) => b - a);
+        expect(single).toBeCloseTo(dps[0], 9);
+        expect(double).toBeCloseTo(dps[0] + PARTNER_DAMAGE * dps[1], 9);
+        // A lone Pokémon has no partner.
+        expect(wildDps(team.slice(0, 1), starmie, 1, true)).toBe(
+            wildDps(team.slice(0, 1), starmie, 1)
+        );
+
+        const gym = GYMS[7];
+        const alone = simulateTrainerBattle(team, gym, 8, 3);
+        const together = simulateTrainerBattle(team, gym, 8, 3, true);
+        expect(alone.won).toBe(true);
+        expect(together.won).toBe(true);
+        expect(together.time).toBeLessThan(alone.time);
+        expect(together.hpRemaining).toBeGreaterThan(alone.hpRemaining);
+        const pair = { ...gym, doubles: true };
+        expect(simulateTrainerBattle(team, pair, 8, 3, true).hpRemaining).toBeLessThan(
+            together.hpRemaining
+        );
+
+        // Stepping stays exact with a partner and a double-battle trainer.
+        const forecast = simulateTrainerBattle(team, pair, 1.3, 1.2, true);
+        const enemies = trainerTeam(pair);
+        let state = initialTrainerBattle(team, enemies, 1.2);
+        let done = null;
+        for (let i = 0; i < 100000 && done == null; i++) {
+            const result = stepTrainerBattle(team, enemies, state, 1.3, 0.05, pair.timeLimit, {
+                doubles: true,
+                enemyDoubles: true
+            });
+            state = result.state;
+            done = result.done;
+        }
+        expect(done).toBe(forecast.reason);
+        expect(state.elapsed).toBeCloseTo(forecast.time, 6);
+        expect(state.partyHp).toEqual(forecast.state.partyHp.map(hp => expect.closeTo(hp, 6)));
+        expect(REGIONS.hoenn.trials.find(g => g.doubles)?.name).toBe("Tate & Liza");
+    });
+
     test("the Elite Four and Champion are beatable with a strong capped team", () => {
         const team = party([9, 65], [135, 65], [65, 65], [94, 65], [149, 65], [112, 65]);
         const { damage, hp } = computeBonuses({
@@ -538,7 +594,10 @@ describe("generation mechanics", () => {
             "headbutt",
             "snagMachine",
             "relicStone",
-            "pokeSpots"
+            "pokeSpots",
+            "doubleBattles",
+            "partner",
+            "contests"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
@@ -631,7 +690,35 @@ describe("Hoenn", () => {
         );
         const fishing = encounterOdds("route119", { oldRod: true, goodRod: true, superRod: true });
         expect(fishing.get(349) ?? 0).toBeGreaterThan(0);
-        expect(getSpecies(349).evolutions[0].into).toBe(350);
+        expect(getSpecies(349).evolutions[0]).toEqual({
+            into: 350,
+            method: "trade",
+            heldItem: "prismScale"
+        });
+    });
+});
+
+describe("Pokémon Contests", () => {
+    test("scores, ranks and prizes", () => {
+        // Milotic is a Water type: full appeal in Beauty, none in Tough.
+        expect(typeAppeal(350, "beauty")).toBe(30);
+        expect(typeAppeal(350, "tough")).toBe(0);
+        // A second type counts for half (Gyarados is Water/Flying: Cool from Flying).
+        expect(typeAppeal(130, "cool")).toBe(15);
+        expect(contestScore(350, 40, 50, "beauty")).toBe(50 + 30 + 20);
+        expect(winChance(RANK_SCORES.normal, "normal")).toBe(0.5);
+        expect(winChance(0, "master")).toBe(0);
+        expect(winChance(1000, "master")).toBe(1);
+        // A perfect Pokémon (full condition, suited types, Lv. 100) is sure to win Master Rank.
+        expect(winChance(contestScore(350, 100, MAX_CONDITION, "beauty"), "master")).toBe(1);
+        expect(nextRank(undefined)).toBe("normal");
+        expect(nextRank("hyper")).toBe("master");
+        expect(nextRank("master")).toBeUndefined();
+        for (const category of CONTEST_CATEGORIES) {
+            const prize = getSpecies(CONTEST_PIKACHU[category]);
+            expect(prize.baseSpecies, category).toBe(25);
+        }
+        expect(MECHANICS.contests.region).toBe("hoenn");
     });
 });
 
@@ -948,8 +1035,8 @@ describe("evolution items", () => {
         expect(friendship).toEqual(
             expect.arrayContaining(["42->169", "113->242", "175->176", "172->25", "133->196"])
         );
-        // Feebas's Beauty is raised like friendship (until Contests bring Pokéblocks).
-        expect(friendship).toContain("349->350");
+        // Later generations' methods: Feebas trades holding a Prism Scale (not Gen 3's Beauty).
+        expect(friendship).not.toContain("349->350");
         // Held-item trade evolutions need their item as well as a Link Cable.
         const held = SPECIES.flatMap(s =>
             s.evolutions
@@ -965,7 +1052,8 @@ describe("evolution items", () => {
                 "79->199:kingsRock",
                 "95->208:metalCoat",
                 "366->367:deepSeaTooth",
-                "366->368:deepSeaScale"
+                "366->368:deepSeaScale",
+                "349->350:prismScale"
             ].sort()
         );
         held.forEach(h => expect(STONES[h.split(":")[1] as keyof typeof STONES]).toBeDefined());

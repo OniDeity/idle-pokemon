@@ -13,7 +13,10 @@ export type MechanicId =
     | "headbutt"
     | "snagMachine"
     | "relicStone"
-    | "pokeSpots";
+    | "pokeSpots"
+    | "doubleBattles"
+    | "partner"
+    | "contests";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -85,6 +88,33 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 1,
         description:
             "Every region gets Poké Spots, where Sandshrew, Gligar, Trapinch, Hoppip, Phanpy, Surskit, Zubat, Aron and Wooper come for Poké Snacks."
+    },
+    doubleBattles: {
+        id: "doubleBattles",
+        name: "Double Battles",
+        region: "hoenn",
+        unlockAt: "Hoenn's first double battles, past the Stone Badge",
+        trialsRequired: 1,
+        description:
+            "Two of your Pokémon fight at once: the strongest other member still standing backs up the one sent out with half its usual damage (it isn't attacked). Tate & Liza send out two at once too."
+    },
+    partner: {
+        id: "partner",
+        name: "Bring a Partner",
+        region: "hoenn",
+        unlockAt: "the Pokémon Center's Cable Club, past the Dynamo Badge",
+        trialsRequired: 3,
+        description:
+            "Every new journey can start with one Pokémon from your Hall of Fame beside your starter, at the starters' level, in any region."
+    },
+    contests: {
+        id: "contests",
+        name: "Pokémon Contests",
+        region: "hoenn",
+        unlockAt: "Verdanturf Town's Contest Hall, past the Dynamo Badge",
+        trialsRequired: 3,
+        description:
+            "A Contest Hall in every region: raise Cool, Beauty, Cute, Smart and Tough with Pokéblocks, win ribbons up to Master Rank, and earn a Cosplay Pikachu for each category."
     }
 };
 

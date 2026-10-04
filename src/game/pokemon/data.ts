@@ -41,7 +41,8 @@ export type StoneId =
     | "dragonScale"
     | "upGrade"
     | "deepSeaTooth"
-    | "deepSeaScale";
+    | "deepSeaScale"
+    | "prismScale";
 
 export type GrowthRate = "slow" | "medium" | "fast" | "mediumSlow" | "erratic" | "fluctuating";
 

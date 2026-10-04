@@ -413,7 +413,8 @@ const HELD_ITEM_BY_ITEM_ID: Record<string, string> = {
     "212": "dragonScale",
     "229": "upGrade",
     "203": "deepSeaTooth",
-    "204": "deepSeaScale"
+    "204": "deepSeaScale",
+    "580": "prismScale"
 };
 
 const GROWTH_RATES: Record<string, string> = {
@@ -526,6 +527,9 @@ async function main() {
         const into = Number(r.evolved_species_id);
         const from = Number(preEvolutionOf.get(r.evolved_species_id));
         if (into > MAX_SPECIES || !from || from > MAX_SPECIES) continue;
+        // The game uses later generations' easier methods where they replaced one: Feebas's
+        // Beauty became trading while holding a Prism Scale (Black/White onward).
+        if (r.minimum_beauty !== "") continue;
         // Later generations add alternate rows (regional forms, new items); the first is the original.
         const key = `${from}->${into}`;
         if (seenEvolutions.has(key)) continue;
@@ -534,11 +538,7 @@ async function main() {
         let evolution: Evolution;
         if (r.evolution_trigger_id === "1" && r.minimum_level !== "") {
             evolution = { into, method: "level", level: Number(r.minimum_level) };
-        } else if (
-            r.evolution_trigger_id === "1" &&
-            (r.minimum_happiness !== "" || r.minimum_beauty !== "")
-        ) {
-            // Beauty (Feebas) is raised like friendship until Contests and Pokéblocks exist.
+        } else if (r.evolution_trigger_id === "1" && r.minimum_happiness !== "") {
             // Friendship evolutions become level evolutions (babies grow up fast, others at 30),
             // or happen early with a Soothe Bell.
             const baby = babies.has(String(from));

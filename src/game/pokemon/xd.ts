@@ -365,11 +365,11 @@ export const CARRIED_POKE_SPOTS: ZoneDefinition[] = (
 
 /**
  * Stat multipliers for XD's admins and Citadark Isle, tuned with
- * scripts/simulateProgression.ts: a first clear after Colosseum takes about 11.5 hours (Snattle
- * around 1.5 hours in, Eldes around 10).
+ * scripts/simulateProgression.ts (with Double Battles): a first clear after Colosseum takes about
+ * 10-11 hours.
  */
-const XD_ADMIN_STRENGTHS = [1.73, 2.3, 2.02, 2.11, 2.5];
-const CITADARK_STRENGTH = 2.78;
+const XD_ADMIN_STRENGTHS = [1.97, 2.62, 2.3, 2.41, 2.85];
+const CITADARK_STRENGTH = 3.17;
 
 function admin(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "keyItems">

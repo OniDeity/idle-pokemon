@@ -180,6 +180,7 @@ function autoParty() {
  */
 function newFacesParty(ranked: number[], trainers: TrainerDefinition[]): number[] | undefined {
     const { damage, hp } = main.bonuses.value;
+    const doubles = main.mechanicOn("doubleBattles");
     // Strongest first; a Gyarados and a Gyarados ♀ are one Hall of Fame entry.
     const fresh = ranked.filter(
         (id, i) =>
@@ -190,7 +191,9 @@ function newFacesParty(ranked: number[], trainers: TrainerDefinition[]): number[
         const team = fresh.slice(0, count);
         team.push(...ranked.filter(id => !team.includes(id)).slice(0, 6 - count));
         const party = team.map(id => main.battlerFor(id));
-        if (trainers.every(t => simulateTrainerBattle(party, t, damage, hp).won)) return team;
+        if (trainers.every(t => simulateTrainerBattle(party, t, damage, hp, doubles).won)) {
+            return team;
+        }
     }
     return undefined;
 }
@@ -261,7 +264,8 @@ function autoChallenge() {
     if (trainers.length === 0) return;
     const { damage, hp } = main.bonuses.value;
     const party = main.partyBattlers.value;
-    if (!trainers.every(t => simulateTrainerBattle(party, t, damage, hp).won)) return;
+    const doubles = main.mechanicOn("doubleBattles");
+    if (!trainers.every(t => simulateTrainerBattle(party, t, damage, hp, doubles).won)) return;
     const trial = main.nextTrial.value;
     if (trial != null) {
         main.challengeGym(trial);

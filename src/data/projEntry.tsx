@@ -8,17 +8,32 @@ import {
     BASE_SHINY_CHANCE,
     ballCatchChance,
     battleXp,
+    battlePartner,
     bestMatchup,
     computeBonuses,
     initialTrainerBattle,
-    memberDps,
     memberMultiplier,
     effortMultiplier,
     HEART_BATTLES,
     moneyYield,
     stepTrainerBattle,
-    trainerTeam
+    trainerTeam,
+    wildDps
 } from "game/pokemon/balance";
+import type { ContestCategory, ContestRank } from "game/pokemon/contests";
+import {
+    CATEGORY_NAMES,
+    CONTEST_PIKACHU,
+    CONTEST_PRIZE_MONEY,
+    CONTEST_SECONDS,
+    contestScore,
+    MAX_CONDITION,
+    nextRank,
+    POKEBLOCK_GAIN,
+    POKEBLOCK_PRICE,
+    RANK_NAMES,
+    winChance
+} from "game/pokemon/contests";
 import type { StoneId } from "game/pokemon/data";
 import {
     ALTERNATE_EVOLUTIONS,
@@ -72,6 +87,16 @@ export type BoxEntry = {
     friend?: boolean;
     /** A Shadow Pokémon's closed heart: wild battles won in the party until it can be purified. */
     heart?: number;
+    /** Contest conditions raised with Pokéblocks (Cool, Beauty, Cute, Smart, Tough). */
+    condition?: Partial<Record<ContestCategory, number>>;
+};
+
+/** A contest under way: who's competing, where, and the seconds left. */
+export type ContestEntry = {
+    speciesId: number;
+    category: ContestCategory;
+    rank: ContestRank;
+    remaining: number;
 };
 
 export type CatchMode = "new" | "all" | "off";
@@ -97,7 +122,7 @@ export interface WildPokemon {
 
 export type BattleState =
     | { kind: "search"; remaining: number; total: number }
-    | { kind: "wild"; wild: WildPokemon; active: number }
+    | { kind: "wild"; wild: WildPokemon; active: number; partner?: number }
     | {
           kind: "trainer";
           label: string;
@@ -190,7 +215,8 @@ export const main = createLayer("main", layer => {
             dragonScale: 0,
             upGrade: 0,
             deepSeaTooth: 0,
-            deepSeaScale: 0
+            deepSeaScale: 0,
+            prismScale: 0
         },
         false
     );
@@ -757,6 +783,18 @@ export const main = createLayer("main", layer => {
         battle.value = { kind: "search", remaining: total, total };
     }
 
+    /** Who fights a wild Pokémon: the best matchup, plus a partner in double battles. */
+    function wildFighters(target: BattlerStats): { active: number; partner: number } {
+        const party = partyBattlers.value;
+        const damage = bonuses.value.damage;
+        const active = bestMatchup(party, target, damage, null);
+        const partner =
+            active !== -1 && mechanicOn("doubleBattles")
+                ? battlePartner(party, target, damage, active, null)
+                : -1;
+        return { active, partner };
+    }
+
     function spawnWild() {
         // Poké Spots only draw Pokémon out with a Poké Snack.
         if (ZONES_BY_ID[zoneId.value]?.pokeSpot === true) {
@@ -791,7 +829,7 @@ export const main = createLayer("main", layer => {
         battle.value = {
             kind: "wild",
             wild: { ...rolled, shiny, hp, maxHp: hp },
-            active: bestMatchup(partyBattlers.value, target, bonuses.value.damage, null)
+            ...wildFighters(target)
         };
         if (shiny) {
             const text = `A shiny ${target.species.name} appeared!`;
@@ -1011,6 +1049,96 @@ export const main = createLayer("main", layer => {
         showFlash(text, "catch");
     }
 
+    // ------------------------------------------------------------------
+    // Pokémon Contests (Hoenn's mechanic)
+    // ------------------------------------------------------------------
+
+    const contest = persistent<ContestEntry>(
+        { speciesId: 0, category: "cool", rank: "normal", remaining: 0 },
+        false
+    );
+
+    function conditionOf(id: number, category: ContestCategory): number {
+        return box.value[id]?.condition?.[category] ?? 0;
+    }
+
+    /** Feeds a Pokéblock: +10 to one condition, up to 100. */
+    function feedPokeblock(id: number, category: ContestCategory) {
+        const entry = box.value[id];
+        if (!mechanicOn("contests") || entry == null || money.value < POKEBLOCK_PRICE) return;
+        const current = conditionOf(id, category);
+        if (current >= MAX_CONDITION) return;
+        money.value -= POKEBLOCK_PRICE;
+        setBoxEntry(id, {
+            ...entry,
+            condition: {
+                ...entry.condition,
+                [category]: Math.min(MAX_CONDITION, current + POKEBLOCK_GAIN)
+            }
+        });
+    }
+
+    /** The rank a species can enter next in a category (undefined once Master Rank is won). */
+    function contestRankFor(id: number, category: ContestCategory): ContestRank | undefined {
+        return nextRank(hof.ribbons.value[id]?.[category]);
+    }
+
+    function contestScoreOf(id: number, category: ContestCategory): number {
+        return contestScore(id, box.value[id]?.level ?? 0, conditionOf(id, category), category);
+    }
+
+    function enterContest(id: number, category: ContestCategory) {
+        const rank = contestRankFor(id, category);
+        if (!mechanicOn("contests") || box.value[id] == null || rank == null) return;
+        if (contest.value.speciesId !== 0) return;
+        contest.value = { speciesId: id, category, rank, remaining: CONTEST_SECONDS[rank] };
+        addLog({
+            kind: "info",
+            text: `${getSpecies(id).name} enters the ${CATEGORY_NAMES[category]} Contest (${RANK_NAMES[rank]})!`,
+            speciesId: id
+        });
+    }
+
+    function judgeContest() {
+        const { speciesId, category, rank } = contest.value;
+        contest.value = { ...contest.value, speciesId: 0, remaining: 0 };
+        if (box.value[speciesId] == null) return;
+        const name = getSpecies(speciesId).name;
+        const label = `${CATEGORY_NAMES[category]} Contest (${RANK_NAMES[rank]})`;
+        if (Math.random() >= winChance(contestScoreOf(speciesId, category), rank)) {
+            addLog({ kind: "info", text: `${name} didn't win the ${label}.`, speciesId });
+            return;
+        }
+        money.value += CONTEST_PRIZE_MONEY[rank];
+        const prizeWonBefore = Object.values(hof.ribbons.value).some(r => r[category] === "master");
+        hof.ribbons.value = {
+            ...hof.ribbons.value,
+            [speciesId]: { ...hof.ribbons.value[speciesId], [category]: rank }
+        };
+        const text = `${name} won the ${label}! A ribbon and ₽${CONTEST_PRIZE_MONEY[rank].toLocaleString()}.`;
+        addLog({ kind: "badge", text, speciesId });
+        showFlash(text, "badge");
+        if (rank === "master" && !prizeWonBefore) {
+            const pikachu = CONTEST_PIKACHU[category];
+            receivePokemon(pikachu, Math.min(cap.value, 30), false);
+            addLog({
+                kind: "catch",
+                text: `The Contest Hall gives you ${getSpecies(pikachu).name} for your first ${CATEGORY_NAMES[category]} Master Rank win!`,
+                speciesId: pikachu
+            });
+        }
+    }
+
+    function advanceContest(dt: number) {
+        if (contest.value.speciesId === 0) return;
+        const remaining = contest.value.remaining - dt;
+        if (remaining > 0) {
+            contest.value = { ...contest.value, remaining };
+        } else {
+            judgeContest();
+        }
+    }
+
     function startTrainerBattle(options: {
         label: string;
         trainers: TrainerDefinition[];
@@ -1203,10 +1331,13 @@ export const main = createLayer("main", layer => {
             case "wild": {
                 const { wild } = current;
                 const target = { species: getSpecies(wild.speciesId), level: wild.level };
-                const party = partyBattlers.value;
-                const active = bestMatchup(party, target, bonuses.value.damage, null);
-                const dps =
-                    active === -1 ? 0 : memberDps(party[active], target, bonuses.value.damage);
+                const { active, partner } = wildFighters(target);
+                const dps = wildDps(
+                    partyBattlers.value,
+                    target,
+                    bonuses.value.damage,
+                    mechanicOn("doubleBattles")
+                );
                 if (dps <= 0) {
                     return 0;
                 }
@@ -1215,6 +1346,7 @@ export const main = createLayer("main", layer => {
                     battle.value = {
                         ...current,
                         active,
+                        partner,
                         wild: { ...wild, hp: wild.hp - dps * dt }
                     };
                     return 0;
@@ -1231,7 +1363,8 @@ export const main = createLayer("main", layer => {
                     current.state,
                     bonuses.value.damage,
                     dt,
-                    trainer.timeLimit
+                    trainer.timeLimit,
+                    { doubles: mechanicOn("doubleBattles"), enemyDoubles: trainer.doubles === true }
                 );
                 battle.value = { ...current, state };
                 if (done == null) {
@@ -1268,6 +1401,7 @@ export const main = createLayer("main", layer => {
         checkMechanics();
         if (starter.value === 0 || partyIds.value.length === 0) return;
         runTime.value += diff;
+        advanceContest(diff);
         let remaining = diff;
         let encounters = 0;
         while (remaining > 1e-9 && encounters++ < MAX_ENCOUNTERS_PER_TICK) {
@@ -1374,6 +1508,19 @@ export const main = createLayer("main", layer => {
         region.value = id;
     }
 
+    /**
+     * Bring a Partner (Hoenn's mechanic): one Hall of Fame Pokémon picked to start the next
+     * journey beside the starter (0 for none). Kept as the default for later journeys.
+     */
+    const journeyPartner = persistent<number>(0);
+    const partnerChoices = computed(() => {
+        const choices = new Map<number, boolean>();
+        for (const entry of [...hof.entries.value].reverse()) {
+            for (const p of entry.team) choices.set(p.id, (choices.get(p.id) ?? false) || p.shiny);
+        }
+        return [...choices.entries()].map(([id, shiny]) => ({ id, shiny }));
+    });
+
     function chooseStarter(id: number) {
         const def = regionDef.value;
         if (starter.value !== 0 || !startersFor(def, hof.clearCount(def.id)).includes(id)) return;
@@ -1390,10 +1537,22 @@ export const main = createLayer("main", layer => {
                 .filter(other => other !== id)
                 .forEach(other => receivePokemon(other, level, false));
         }
+        const partner = partnerChoices.value.find(p => p.id === journeyPartner.value);
+        const bringPartner =
+            mechanicOn("partner") && partner != null && box.value[partner.id] == null;
         addLog({
             kind: "info",
             text: `${getSpecies(id).name}, I choose you! Your ${def.name} journey begins.`
         });
+        if (bringPartner) {
+            receivePokemon(partner.id, level, partner.shiny, false);
+            addLog({
+                kind: "info",
+                text: `${getSpecies(partner.id).name} from your Hall of Fame comes along too.`,
+                speciesId: partner.id,
+                shiny: partner.shiny
+            });
+        }
         startSearch();
     }
 
@@ -1414,6 +1573,14 @@ export const main = createLayer("main", layer => {
         minimizable: false,
         classes: mobileClasses("main"),
         starter,
+        contest,
+        conditionOf,
+        feedPokeblock,
+        contestRankFor,
+        contestScoreOf,
+        enterContest,
+        journeyPartner,
+        partnerChoices,
         region,
         regionDef,
         trials,
