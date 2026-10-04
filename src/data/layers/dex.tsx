@@ -32,12 +32,15 @@ import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
+import type { TabOption } from "../ui/components";
 import {
     Bar,
     Button,
+    currentTab,
     DexNumber,
     ItemIcon,
     Panel,
+    renderTabs,
     Sprite,
     Stat,
     TypeBadges
@@ -399,94 +402,114 @@ const layer = createLayer(id, () => {
         timesCaught,
         entry,
         nav,
-        display: () => (
-            <div class="pk-layer">
-                {renderNav(true)}
-                <h2 class="pk-layer-title">Pokédex</h2>
-                <div class="pk-dex-summary">
-                    <div>
-                        Seen <b>{seenCount.value}</b> · Caught <b>{caughtCount.value}</b> /{" "}
-                        {POKEDEX_SIZE} · Shiny <b>{shinyCount.value}</b> · Variants{" "}
-                        <b>{variantCaught.value}</b> / {PLACED_VARIANTS.length}
+        display: () => {
+            const tabs: TabOption[] = [
+                { id: "dex", label: "Pokédex" },
+                { id: "rewards", label: "Professor Oak's rewards" }
+            ];
+            const page = currentTab("dex", tabs);
+            return (
+                <div class="pk-layer">
+                    {renderNav(true)}
+                    <h2 class="pk-layer-title">Pokédex</h2>
+                    <div class="pk-dex-summary">
+                        <div>
+                            Seen <b>{seenCount.value}</b> · Caught <b>{caughtCount.value}</b> /{" "}
+                            {POKEDEX_SIZE} · Shiny <b>{shinyCount.value}</b> · Variants{" "}
+                            <b>{variantCaught.value}</b> / {PLACED_VARIANTS.length}
+                        </div>
+                        <Bar value={caughtCount.value} max={POKEDEX_SIZE} kind="progress" />
+                        <div class="pk-muted">
+                            Every species caught gives +{DEX_DAMAGE_BONUS_PER_SPECIES * 100}% damage
+                            (now +
+                            {Math.round(caughtCount.value * DEX_DAMAGE_BONUS_PER_SPECIES * 100)}
+                            %); every variant gives +{SHINY_BONUS_PER_VARIANT * 100}% shiny chance
+                            (now +{Math.round(variantCaught.value * SHINY_BONUS_PER_VARIANT * 100)}
+                            %). The Pokédex is never reset.
+                        </div>
                     </div>
-                    <Bar value={caughtCount.value} max={POKEDEX_SIZE} kind="progress" />
-                    <div class="pk-muted">
-                        Every species caught gives +{DEX_DAMAGE_BONUS_PER_SPECIES * 100}% damage
-                        (now +{Math.round(caughtCount.value * DEX_DAMAGE_BONUS_PER_SPECIES * 100)}
-                        %); every variant gives +{SHINY_BONUS_PER_VARIANT * 100}% shiny chance (now
-                        +{Math.round(variantCaught.value * SHINY_BONUS_PER_VARIANT * 100)}%). The
-                        Pokédex is never reset.
-                    </div>
-                </div>
+                    {renderTabs("dex", tabs)}
 
-                <Panel title="Professor Oak's rewards">
-                    <div class="pk-milestones">
-                        {DEX_MILESTONES.map(m => {
-                            const earned = caughtCount.value >= m.caught;
-                            return (
-                                <div class={["pk-milestone", earned ? "earned" : ""]}>
-                                    <ItemIcon src={m.sprite} alt={m.name} />
-                                    <div>
-                                        <b>{m.name}</b>{" "}
-                                        <span class="pk-muted">({m.caught} caught)</span>
-                                        <div class="pk-small">{m.description}</div>
-                                    </div>
+                    {page === "rewards" ? (
+                        <Panel>
+                            <div class="pk-milestones">
+                                {DEX_MILESTONES.map(m => {
+                                    const earned = caughtCount.value >= m.caught;
+                                    return (
+                                        <div class={["pk-milestone", earned ? "earned" : ""]}>
+                                            <ItemIcon src={m.sprite} alt={m.name} />
+                                            <div>
+                                                <b>{m.name}</b>{" "}
+                                                <span class="pk-muted">({m.caught} caught)</span>
+                                                <div class="pk-small">{m.description}</div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </Panel>
+                    ) : (
+                        <>
+                            <div class="pk-filter-row">
+                                {filters.map(([value, label]) => (
+                                    <Button
+                                        kind={filter.value === value ? "primary" : "ghost"}
+                                        onClick={() => (filter.value = value)}
+                                    >
+                                        {label}
+                                    </Button>
+                                ))}
+                            </div>
+
+                            {filter.value === "variants" ? (
+                                <p class="pk-small pk-muted">
+                                    Anime variants, legendary giants and clones, regional and
+                                    official forms, female forms, Magikarp Jump patterns and fan
+                                    favorites from Cobblemon. {FUTURE_VARIANTS} more forms arrive
+                                    with regions still to come.
+                                </p>
+                            ) : null}
+                            <div class="pk-dex-layout">
+                                <div class="pk-dex-grid">
+                                    {visibleSpecies.value.map(species => {
+                                        const e = entry(species.id);
+                                        return (
+                                            <button
+                                                class={[
+                                                    "pk-dex-cell",
+                                                    e.caught
+                                                        ? "caught"
+                                                        : e.seen
+                                                          ? "seen"
+                                                          : "unseen",
+                                                    selected.value === species.id ? "selected" : ""
+                                                ]}
+                                                title={e.seen ? species.name : "???"}
+                                                onClick={() => (selected.value = species.id)}
+                                            >
+                                                <Sprite
+                                                    id={species.id}
+                                                    size={42}
+                                                    shiny={e.shiny}
+                                                    silhouette={!e.seen}
+                                                />
+                                                <span class="pk-dex-cell-num">
+                                                    {species.baseSpecies ?? species.id}
+                                                </span>
+                                                {e.shiny ? (
+                                                    <span class="pk-dex-cell-shiny">✨</span>
+                                                ) : null}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
-                            );
-                        })}
-                    </div>
-                </Panel>
-
-                <div class="pk-filter-row">
-                    {filters.map(([value, label]) => (
-                        <Button
-                            kind={filter.value === value ? "primary" : "ghost"}
-                            onClick={() => (filter.value = value)}
-                        >
-                            {label}
-                        </Button>
-                    ))}
+                                {renderDetail(getSpecies(selected.value))}
+                            </div>
+                        </>
+                    )}
                 </div>
-
-                {filter.value === "variants" ? (
-                    <p class="pk-small pk-muted">
-                        Anime variants, legendary giants and clones, regional and official forms,
-                        female forms, Magikarp Jump patterns and fan favorites from Cobblemon.{" "}
-                        {FUTURE_VARIANTS} more forms arrive with regions still to come.
-                    </p>
-                ) : null}
-                <div class="pk-dex-layout">
-                    <div class="pk-dex-grid">
-                        {visibleSpecies.value.map(species => {
-                            const e = entry(species.id);
-                            return (
-                                <button
-                                    class={[
-                                        "pk-dex-cell",
-                                        e.caught ? "caught" : e.seen ? "seen" : "unseen",
-                                        selected.value === species.id ? "selected" : ""
-                                    ]}
-                                    title={e.seen ? species.name : "???"}
-                                    onClick={() => (selected.value = species.id)}
-                                >
-                                    <Sprite
-                                        id={species.id}
-                                        size={42}
-                                        shiny={e.shiny}
-                                        silhouette={!e.seen}
-                                    />
-                                    <span class="pk-dex-cell-num">
-                                        {species.baseSpecies ?? species.id}
-                                    </span>
-                                    {e.shiny ? <span class="pk-dex-cell-shiny">✨</span> : null}
-                                </button>
-                            );
-                        })}
-                    </div>
-                    {renderDetail(getSpecies(selected.value))}
-                </div>
-            </div>
-        )
+            );
+        }
     };
 });
 

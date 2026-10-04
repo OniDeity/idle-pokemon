@@ -56,7 +56,11 @@ across journeys.
   weekday-only. Swarms (₽3,000 each, Radio Card) and the Bug-Catching Contest (₽2,000) are
   one-time purchases per journey that add a third to that place's pool. The Lucky Number Show
   draws automatically every 100 wild battles (`LUCKY_DRAW_BATTLES`); nothing uses the real clock.
-- UI panels collapse by title, remembered in localStorage (`pk-collapsed-panels`).
+- UI panels collapse by title, remembered in localStorage (`pk-collapsed-panels`). Menus are split
+  into pages with `renderTabs(menu, tabs)` / `currentTab(menu, tabs)` (components.tsx; the open
+  page per menu is remembered in `pk-menu-tabs`; a tab with `show: false` is hidden). Panels that
+  fill a whole page have no title (the tab names them). Shortcuts call `openTab` before
+  `openLayer` to land on the right page.
 - Gen 3: species data covers #1-386, but the Pokédex (`POKEDEX_IDS`) only lists species some
   region offers; `isReleased()` gates the rest (Day Care Eggs stop at released species).
 - Orre (`colosseum.ts`): places have `trainerBattles` (trainers' Pokémon can't be caught; only

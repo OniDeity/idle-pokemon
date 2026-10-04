@@ -10,12 +10,15 @@ import { getSpecies } from "game/pokemon/data";
 import { KEY_ITEMS } from "game/pokemon/items";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
 import { computed } from "vue";
+import type { TabOption } from "../ui/components";
 import {
     BadgeIcon,
     Button,
+    currentTab,
     formatDuration,
     formatMoney,
     Panel,
+    renderTabs,
     Sprite,
     TypeBadge
 } from "../ui/components";
@@ -156,7 +159,7 @@ const layer = createLayer(id, () => {
         const outcomes = unlocked ? trainers.map(forecast) : [];
         const allWin = outcomes.every(o => o.won);
         return (
-            <Panel title={region.finaleName}>
+            <Panel>
                 {!unlocked ? (
                     <p class="pk-muted">
                         Complete all {region.trials.length} {region.trialNoun} to take on the{" "}
@@ -204,6 +207,13 @@ const layer = createLayer(id, () => {
         nav,
         display: () => {
             const region = main.regionDef.value;
+            const noun = region.trialNoun === "badges" ? "Gyms" : region.trialNoun;
+            const tabs: TabOption[] = [
+                { id: "trials", label: noun.charAt(0).toUpperCase() + noun.slice(1) },
+                { id: "finale", label: region.finaleName },
+                { id: "caps", label: "Level caps" }
+            ];
+            const page = currentTab("league", tabs);
             return (
                 <div class="pk-layer">
                     {renderNav(true)}
@@ -228,36 +238,46 @@ const layer = createLayer(id, () => {
                         </p>
                     ) : null}
                     <p class="pk-small pk-muted">
-                        Trainer battles are one-on-one: you automatically send out your best matchup
-                        against each opponent, and switch when a Pokémon faints. Party order breaks
-                        ties. Every forecast is exact.
+                        {`You automatically send out your best matchup against each opponent, and switch when a Pokémon faints${
+                            main.mechanicOn("doubleBattles")
+                                ? "; with Double Battles, your strongest other Pokémon backs it up"
+                                : ""
+                        }. Party order breaks ties. Every forecast is exact.`}
                     </p>
-                    <Panel title={`${region.name} ${region.trialNoun}`}>
-                        {main.trials.value.map(renderTrial)}
-                    </Panel>
-                    {renderFinale()}
-                    <Panel title="Level caps">
-                        <p class="pk-small">
-                            Pokémon won't grow past the level cap until you make more progress.
-                            Current cap: <b>Lv. {main.cap.value}</b>.
-                        </p>
-                        <div class="pk-caps">
-                            {region.levelCaps.map((capLevel, i) => (
-                                <div
-                                    class={["pk-cap", main.cap.value === capLevel ? "current" : ""]}
-                                >
-                                    {i === 0 ? (
-                                        <span class="pk-small">Start</span>
-                                    ) : i === region.levelCaps.length - 1 ? (
-                                        <span class="pk-small">🏆</span>
-                                    ) : (
-                                        <BadgeIcon gym={region.trials[i - 1]} earned size={20} />
-                                    )}
-                                    <span>{capLevel}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </Panel>
+                    {renderTabs("league", tabs)}
+                    {page === "trials" ? <Panel>{main.trials.value.map(renderTrial)}</Panel> : null}
+                    {page === "finale" ? renderFinale() : null}
+                    {page === "caps" ? (
+                        <Panel>
+                            <p class="pk-small">
+                                Pokémon won't grow past the level cap until you make more progress.
+                                Current cap: <b>Lv. {main.cap.value}</b>.
+                            </p>
+                            <div class="pk-caps">
+                                {region.levelCaps.map((capLevel, i) => (
+                                    <div
+                                        class={[
+                                            "pk-cap",
+                                            main.cap.value === capLevel ? "current" : ""
+                                        ]}
+                                    >
+                                        {i === 0 ? (
+                                            <span class="pk-small">Start</span>
+                                        ) : i === region.levelCaps.length - 1 ? (
+                                            <span class="pk-small">🏆</span>
+                                        ) : (
+                                            <BadgeIcon
+                                                gym={region.trials[i - 1]}
+                                                earned
+                                                size={20}
+                                            />
+                                        )}
+                                        <span>{capLevel}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </Panel>
+                    ) : null}
                 </div>
             );
         }

@@ -25,7 +25,17 @@ import { pokedexRequirement } from "game/pokemon/pokedex";
 import { REGIONS } from "game/pokemon/regions";
 import type { RegionId } from "game/pokemon/zones";
 import { computed } from "vue";
-import { Button, formatDuration, formatNumber, ItemIcon, Panel, Sprite } from "../ui/components";
+import type { TabOption } from "../ui/components";
+import {
+    Button,
+    currentTab,
+    formatDuration,
+    formatNumber,
+    ItemIcon,
+    Panel,
+    renderTabs,
+    Sprite
+} from "../ui/components";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
 import dex from "./dex";
@@ -86,7 +96,7 @@ const layer = createLayer(id, () => {
 
     function renderMechanics() {
         return (
-            <Panel title="Mechanics">
+            <Panel>
                 <p class="pk-small pk-muted">
                     Each generation's new mechanics are met first in its region. Once you reach one,
                     it works in every region from then on.
@@ -261,7 +271,7 @@ const layer = createLayer(id, () => {
     function renderEnter() {
         const region = main.regionDef.value;
         return (
-            <Panel title="Enter the Hall of Fame">
+            <Panel>
                 <p>
                     Enshrine your team and begin a <b>new journey</b> in any region you've unlocked.
                     You'll pick a new starter and lose your money, badges, Pokémon, items and Poké
@@ -311,7 +321,7 @@ const layer = createLayer(id, () => {
 
     function renderAutomation() {
         return (
-            <Panel title="Automation">
+            <Panel>
                 <p class="pk-small pk-muted">
                     One-time purchases that play parts of the game for you. Switch them on or off
                     here or from the Journey panel.
@@ -407,73 +417,92 @@ const layer = createLayer(id, () => {
         toggleAutomation,
         reset,
         nav,
-        display: () => (
-            <div class="pk-layer">
-                {renderNav(true)}
-                <h2 class="pk-layer-title">Hall of Fame</h2>
-                <div class="pk-money-big">{formatNumber(fame.value)} Fame</div>
+        display: () => {
+            const tabs: TabOption[] = [
+                { id: "enter", label: "New journey" },
+                { id: "upgrades", label: "Fame upgrades" },
+                { id: "automation", label: "Automation" },
+                { id: "mechanics", label: "Mechanics" },
+                { id: "champions", label: `Champions (${entries.value.length})` }
+            ];
+            const page = currentTab("hof", tabs);
+            return (
+                <div class="pk-layer">
+                    {renderNav(true)}
+                    <h2 class="pk-layer-title">Hall of Fame</h2>
+                    <div class="pk-money-big">{formatNumber(fame.value)} Fame</div>
+                    {renderTabs("hof", tabs)}
 
-                {renderEnter()}
-                {renderAutomation()}
-                {renderMechanics()}
+                    {page === "enter" ? renderEnter() : null}
+                    {page === "automation" ? renderAutomation() : null}
+                    {page === "mechanics" ? renderMechanics() : null}
 
-                <Panel title="Fame upgrades">
-                    {HOF_UPGRADE_LIST.map(upgrade => {
-                        const current = level(upgrade.id);
-                        const cost = upgradeCost(upgrade, current);
-                        const maxed = current >= upgrade.maxLevel;
-                        return (
-                            <div class="pk-shop-row">
-                                <ItemIcon src={upgrade.sprite} alt={upgrade.name} />
-                                <div class="pk-shop-info">
-                                    <b>{upgrade.name}</b>{" "}
-                                    <span class="pk-muted">
-                                        Lv. {current}/{upgrade.maxLevel}
-                                    </span>
-                                    <div class="pk-small">{upgrade.description}</div>
-                                </div>
-                                <Button
-                                    kind="primary"
-                                    disabled={maxed || fame.value < cost}
-                                    onClick={() => buyUpgrade(upgrade)}
-                                >
-                                    {maxed ? "Maxed" : `${formatNumber(cost)} Fame`}
-                                </Button>
-                            </div>
-                        );
-                    })}
-                </Panel>
-
-                <Panel title="Champions">
-                    {entries.value.length === 0 ? (
-                        <p class="pk-muted">No one has been enshrined yet.</p>
-                    ) : (
-                        [...entries.value].reverse().map(entry => (
-                            <div class="pk-hof-entry">
-                                <div class="pk-hof-entry-head">
-                                    <b>
-                                        Journey #{entry.run} ·{" "}
-                                        {REGIONS[entry.region ?? "kanto"].name}
-                                    </b>
-                                    <span class="pk-muted">
-                                        {formatDuration(entry.time)} · {entry.dexCaught} species
-                                        {entry.fame != null ? ` · +${entry.fame} Fame` : ""}
-                                    </span>
-                                </div>
-                                <div class="pk-hof-team">
-                                    {entry.team.map(p => (
-                                        <div class="pk-hof-mon" title={getSpecies(p.id).name}>
-                                            <Sprite id={p.id} shiny={p.shiny} size={48} />
-                                            <span class="pk-small">Lv. {p.level}</span>
+                    {page === "upgrades" ? (
+                        <Panel>
+                            {HOF_UPGRADE_LIST.map(upgrade => {
+                                const current = level(upgrade.id);
+                                const cost = upgradeCost(upgrade, current);
+                                const maxed = current >= upgrade.maxLevel;
+                                return (
+                                    <div class="pk-shop-row">
+                                        <ItemIcon src={upgrade.sprite} alt={upgrade.name} />
+                                        <div class="pk-shop-info">
+                                            <b>{upgrade.name}</b>{" "}
+                                            <span class="pk-muted">
+                                                Lv. {current}/{upgrade.maxLevel}
+                                            </span>
+                                            <div class="pk-small">{upgrade.description}</div>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </Panel>
-            </div>
-        )
+                                        <Button
+                                            kind="primary"
+                                            disabled={maxed || fame.value < cost}
+                                            onClick={() => buyUpgrade(upgrade)}
+                                        >
+                                            {maxed ? "Maxed" : `${formatNumber(cost)} Fame`}
+                                        </Button>
+                                    </div>
+                                );
+                            })}
+                        </Panel>
+                    ) : null}
+
+                    {page === "champions" ? (
+                        <Panel>
+                            {entries.value.length === 0 ? (
+                                <p class="pk-muted">No one has been enshrined yet.</p>
+                            ) : (
+                                [...entries.value].reverse().map(entry => (
+                                    <div class="pk-hof-entry">
+                                        <div class="pk-hof-entry-head">
+                                            <b>
+                                                Journey #{entry.run} ·{" "}
+                                                {REGIONS[entry.region ?? "kanto"].name}
+                                            </b>
+                                            <span class="pk-muted">
+                                                {formatDuration(entry.time)} · {entry.dexCaught}{" "}
+                                                species
+                                                {entry.fame != null ? ` · +${entry.fame} Fame` : ""}
+                                            </span>
+                                        </div>
+                                        <div class="pk-hof-team">
+                                            {entry.team.map(p => (
+                                                <div
+                                                    class="pk-hof-mon"
+                                                    title={getSpecies(p.id).name}
+                                                >
+                                                    <Sprite id={p.id} shiny={p.shiny} size={48} />
+                                                    <span class="pk-small">Lv. {p.level}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </Panel>
+                    ) : null}
+                </div>
+            );
+        }
     };
 });
 
