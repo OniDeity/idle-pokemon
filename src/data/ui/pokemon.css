@@ -34,12 +34,12 @@
 }
 
 .pk-layer h4 {
-    margin: 10px 0 4px;
+    margin: 8px 0 3px;
 }
 
 .pk-layer p,
 .pk-journey p {
-    margin: 6px 0;
+    margin: 4px 0;
 }
 
 /* ---------- Layout ---------- */
@@ -56,7 +56,8 @@
 
 .pk-layer-title {
     text-align: center;
-    margin: 6px 0 10px;
+    font-size: 22px;
+    margin: 2px 0 6px;
     color: var(--layer-color);
     letter-spacing: 0.5px;
 }
@@ -65,14 +66,14 @@
     background: var(--raised-background);
     border: 1px solid var(--pk-line);
     border-radius: 10px;
-    padding: 12px 14px;
-    margin: 12px 0;
+    padding: 9px 12px;
+    margin: 8px 0;
     box-shadow: var(--pk-shadow);
 }
 
 .pk-panel-title {
-    margin: 0 0 8px;
-    font-size: 15px;
+    margin: 0 0 5px;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--layer-color, var(--foreground));
@@ -110,8 +111,8 @@
 }
 
 .pk-small {
-    font-size: 12.5px;
-    line-height: 1.4;
+    font-size: 12px;
+    line-height: 1.35;
 }
 
 .pk-setting {
@@ -218,7 +219,7 @@
     background: var(--pk-soft);
     border: 1px solid var(--pk-line);
     border-radius: 8px;
-    padding: 6px 12px;
+    padding: 5px 10px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -948,8 +949,8 @@
 .pk-zone {
     border: 1px solid var(--pk-line);
     border-radius: 10px;
-    padding: 8px 10px;
-    margin: 8px 0;
+    padding: 6px 9px;
+    margin: 5px 0;
     background: var(--pk-soft);
 }
 
@@ -975,7 +976,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
-    margin: 6px 0 2px;
+    margin: 4px 0 1px;
 }
 
 .pk-zone-mon {
@@ -1018,8 +1019,8 @@
 
 .pk-party-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 6px;
 }
 
 .pk-party-slot {
@@ -1051,6 +1052,7 @@
 
 .pk-party-info {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -1088,8 +1090,8 @@
 .pk-box-grid,
 .pk-dex-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
-    gap: 4px;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 3px;
 }
 
 .pk-box-cell,
@@ -1253,7 +1255,8 @@
 
 .pk-money-big {
     text-align: center;
-    font-size: 26px;
+    font-size: 20px;
+    margin-top: -4px;
     font-weight: 700;
     color: #facc15;
     font-family: "Roboto Mono", monospace;
@@ -1262,8 +1265,8 @@
 .pk-shop-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 7px 0;
+    gap: 8px;
+    padding: 4px 0;
     border-bottom: 1px solid var(--pk-line);
 }
 
@@ -1642,4 +1645,29 @@
 
 .pk-contest-running .pk-bar {
     flex: 1;
+}
+
+/* Party slots: name and level on one line, three slots to a row. */
+.pk-party-name {
+    display: flex;
+    gap: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* A long name gives way ("Cyndaq…"); the level always shows. */
+.pk-party-name b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pk-party-name span {
+    flex-shrink: 0;
+}
+
+/* On phones, one party slot per row keeps names readable. */
+@media (max-width: 520px) {
+    .pk-party-grid {
+        grid-template-columns: 1fr;
+    }
 }
