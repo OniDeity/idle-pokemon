@@ -16,6 +16,7 @@ import {
 import { format } from "util/bignum";
 import type { GymDefinition } from "game/pokemon/trainers";
 import type { FunctionalComponent } from "vue";
+import { ref } from "vue";
 import "./pokemon.css";
 
 export function formatMoney(amount: number): string {
@@ -158,12 +159,60 @@ export const Button = component<{
     </button>
 ));
 
-export const Panel = component<{ title?: string; extraClass?: string }>((props, { slots }) => (
-    <section class={["pk-panel", props.extraClass ?? ""]}>
-        {props.title != null ? <h3 class="pk-panel-title">{props.title}</h3> : null}
-        {slots.default?.()}
-    </section>
-));
+const COLLAPSED_KEY = "pk-collapsed-panels";
+
+/** Panels the player has collapsed, by title; remembered in this browser. */
+const collapsedPanels = ref<Set<string>>(
+    (() => {
+        try {
+            return new Set<string>(JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? "[]"));
+        } catch {
+            return new Set<string>();
+        }
+    })()
+);
+
+/** A panel's title without its changing counts or places: "PC Box (12)" → "PC Box". */
+function panelKey(title: string): string {
+    return title.replace(/\s*\([^)]*\)\s*$/, "").trim();
+}
+
+function togglePanel(key: string) {
+    const next = new Set(collapsedPanels.value);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    collapsedPanels.value = next;
+    try {
+        localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...next]));
+    } catch {
+        // Storage unavailable (private window): collapsing still works until reload.
+    }
+}
+
+/** A titled section; tap the title to collapse or expand it. */
+export const Panel = component<{ title?: string; extraClass?: string }>((props, { slots }) => {
+    if (props.title == null) {
+        return <section class={["pk-panel", props.extraClass ?? ""]}>{slots.default?.()}</section>;
+    }
+    const key = panelKey(props.title);
+    const collapsed = collapsedPanels.value.has(key);
+    return (
+        <section class={["pk-panel", collapsed ? "collapsed" : "", props.extraClass ?? ""]}>
+            <h3 class="pk-panel-title">
+                <button
+                    class="pk-panel-toggle"
+                    aria-expanded={!collapsed}
+                    title={collapsed ? "Expand" : "Collapse"}
+                    onClick={() => togglePanel(key)}
+                >
+                    <span class="pk-panel-chevron">{collapsed ? "▸" : "▾"}</span>
+                    {props.title}
+                </button>
+            </h3>
+            {collapsed ? null : slots.default?.()}
+        </section>
+    );
+});
 
 /** A labeled key/value row used in stat blocks. */
 export const Stat = component<{ label: string; value: string | number }>(props => (
