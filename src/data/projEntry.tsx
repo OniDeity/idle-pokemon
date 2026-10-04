@@ -1130,6 +1130,11 @@ export const main = createLayer("main", layer => {
         // Journeys started before a region gained a starting key item (Rock Smash in the Sevii
         // Islands) get it now.
         if (starter.value !== 0) {
+            for (const def of MECHANIC_LIST) {
+                if (def.keyItem != null && !keyItems.value[def.keyItem] && mechanicOn(def.id)) {
+                    grantKeyItem(def.keyItem);
+                }
+            }
             regionDef.value.startingKeyItems
                 .filter(item => !keyItems.value[item])
                 .forEach(grantKeyItem);

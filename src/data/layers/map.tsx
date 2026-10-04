@@ -5,6 +5,7 @@
 import { main } from "data/projEntry";
 import { createLayer } from "game/layers";
 import type { PokemonType } from "game/pokemon/data";
+import type { EncounterPoolId } from "game/pokemon/data";
 import { getSpecies, TYPE_COLORS } from "game/pokemon/data";
 import { KEY_ITEMS } from "game/pokemon/items";
 import type { SpecialEncounter } from "game/pokemon/specials";
@@ -15,6 +16,7 @@ import {
     availableZoneSpecies,
     occasionalSpecies,
     typicalLevel,
+    zonePools,
     zonesIn,
     ZONES_BY_ID
 } from "game/pokemon/zones";
@@ -355,10 +357,30 @@ const layer = createLayer(id, () => {
     }
 
     /** What hidden encounters need: Johto adds Headbutt trees and Rock Smash rocks. */
-    function gearNeeded() {
-        return main.region.value === "johto"
-            ? "rods, Surf, Headbutt or Rock Smash"
-            : "better fishing gear or Surf";
+    const POOL_GEAR: Record<Exclude<EncounterPoolId, "walk">, string> = {
+        surf: "Surf",
+        oldRod: "a rod",
+        goodRod: "a better rod",
+        superRod: "a better rod",
+        headbutt: "Headbutt",
+        rockSmash: "Rock Smash"
+    };
+
+    /** What a Pokémon in a zone is waiting on: the gear for the pools it's in. */
+    function gearNeeded(zoneId: string, speciesId: number) {
+        const gear = new Set<string>();
+        for (const [pool, entries] of Object.entries(zonePools(zoneId)) as [
+            EncounterPoolId,
+            { id: number }[]
+        ][]) {
+            if (pool === "walk" || !entries.some(e => e.id === speciesId)) continue;
+            gear.add(
+                pool === "headbutt" && !main.mechanicOn("headbutt")
+                    ? "Headbutt (unlocked in Johto)"
+                    : POOL_GEAR[pool]
+            );
+        }
+        return gear.size > 0 ? [...gear].join(" or ") : "better gear";
     }
 
     function renderZone(zone: ZoneDefinition) {
@@ -371,12 +393,14 @@ const layer = createLayer(id, () => {
         const withoutExtras = new Set(availableZoneSpecies(zone.id, main.keyItems.value));
         const caughtHere = all.filter(s => dex.entry(s).caught).length;
         const ownedHere = all.filter(s => main.owns(s)).length;
-        const hidden = all.filter(
+        const hiddenIds = all.filter(
             s =>
                 !withoutExtras.has(s) &&
                 !occasionalSpecies(zone.id).swarm.includes(s) &&
                 !occasionalSpecies(zone.id).contest.includes(s)
-        ).length;
+        );
+        const hidden = hiddenIds.length;
+        const hiddenGear = [...new Set(hiddenIds.map(s => gearNeeded(zone.id, s)))].join(" or ");
         const swarm = JOHTO_SWARMS.find(sw => sw.zoneId === zone.id);
         const swarming =
             swarm != null && main.swarmsJoined.value[zone.id] === true
@@ -436,7 +460,7 @@ const layer = createLayer(id, () => {
                                         : occasional.contest.includes(s) && !reachable
                                           ? " (enter the Bug-Catching Contest on the Pokégear)"
                                           : !reachable
-                                            ? ` (needs ${gearNeeded()})`
+                                            ? ` (needs ${gearNeeded(zone.id, s)})`
                                             : "";
                                 return (
                                     <span
@@ -455,7 +479,7 @@ const layer = createLayer(id, () => {
                         <div class="pk-small pk-muted">
                             {ownedHere}/{all.length} in your box this journey · {caughtHere}/
                             {all.length} in Pokédex
-                            {hidden > 0 ? ` · ${hidden} more with ${gearNeeded()}` : ""}
+                            {hidden > 0 ? ` · ${hidden} more with ${hiddenGear}` : ""}
                         </div>
                     </>
                 ) : null}

@@ -102,6 +102,35 @@ const ZONE_AREAS: Record<string, [string, string][]> = {
     ]
 };
 
+/**
+ * Kanto's Headbutt trees, which Red/Blue never had, come from HeartGold/SoulSilver's Kanto.
+ * HGSS tunes them for its postgame, so they take their zone's grass levels instead.
+ */
+const KANTO_HEADBUTT_AREAS: Record<string, [string, string][]> = {
+    route1: [["kanto-route-1", ""]],
+    route22: [["kanto-route-22", ""]],
+    route2: [
+        ["kanto-route-2", "south-towards-viridian-city"],
+        ["kanto-route-2", "north-towards-pewter-city"]
+    ],
+    viridianForest: [["viridian-forest", ""]],
+    route3: [["kanto-route-3", ""]],
+    route4: [["kanto-route-4", ""]],
+    route25: [["kanto-route-25", ""]],
+    route5: [["kanto-route-5", ""]],
+    route6: [["kanto-route-6", ""]],
+    route11: [["kanto-route-11", ""]],
+    route8: [["kanto-route-8", ""]],
+    route7: [["kanto-route-7", ""]],
+    route12: [["kanto-route-12", ""]],
+    route13: [["kanto-route-13", ""]],
+    route14: [["kanto-route-14", ""]],
+    route15: [["kanto-route-15", ""]],
+    route16: [["kanto-route-16", ""]],
+    route18: [["kanto-route-18", ""]],
+    route21: [["kanto-sea-route-21", ""]]
+};
+
 /** Sevii Islands zones use FireRed/LeafGreen data (the islands aren't in Red/Blue). */
 const SEVII_ZONE_AREAS: Record<string, [string, string][]> = {
     kindleRoad: [["kindle-road", ""]],
@@ -481,6 +510,15 @@ async function main() {
         }
     }
 
+    const headbuttZoneByArea = new Map<string, string>();
+    for (const [zoneId, areas] of Object.entries(KANTO_HEADBUTT_AREAS)) {
+        for (const [location, area] of areas) {
+            const id = areaKey.get(`${locationId.get(location)}/${area}`);
+            if (id == null) throw new Error(`Unknown location area ${location}/${area}`);
+            headbuttZoneByArea.set(id, zoneId);
+        }
+    }
+
     const conditionName = new Map(conditionValueRows.map(r => [r.id, r.identifier]));
     const conditionsOf = new Map<string, string[]>();
     for (const r of conditionMapRows) {
@@ -497,10 +535,15 @@ async function main() {
     const pools: Record<string, Record<string, Map<number, Acc>>> = {};
     const timedPools = new Set<string>();
     for (const r of encounterRows) {
-        const zoneId = zoneByArea.get(r.location_area_id);
-        if (zoneId == null || !zoneVersions.get(zoneId)?.has(r.version_id)) continue;
         const slot = slots.get(r.encounter_slot_id);
         const pool = POOL_BY_METHOD[methodName.get(slot?.encounter_method_id ?? "") ?? ""];
+        const headbuttZone = headbuttZoneByArea.get(r.location_area_id);
+        const borrowed =
+            pool === "headbutt" && headbuttZone != null && HGSS_VERSION_IDS.has(r.version_id);
+        const zoneId = borrowed ? headbuttZone : zoneByArea.get(r.location_area_id);
+        if (zoneId == null || (!borrowed && !zoneVersions.get(zoneId)?.has(r.version_id))) {
+            continue;
+        }
         const id = Number(r.pokemon_id);
         if (zoneId == null || slot == null || pool == null || id > MAX_DEX) continue;
         const conditions = conditionsOf.get(r.id) ?? [];
@@ -549,6 +592,16 @@ async function main() {
             )
         ])
     );
+
+    // Borrowed Kanto Headbutt trees take their zone's grass levels.
+    for (const zoneId of Object.keys(KANTO_HEADBUTT_AREAS)) {
+        const zone = encounters[zoneId] as Record<string, { minLevel: number; maxLevel: number }[]>;
+        const walk = zone.walk ?? [];
+        if (zone.headbutt == null || walk.length === 0) continue;
+        const min = Math.min(...walk.map(e => e.minLevel));
+        const max = Math.max(...walk.map(e => e.maxLevel));
+        zone.headbutt.forEach(e => Object.assign(e, { minLevel: min, maxLevel: max }));
+    }
 
     // Official alternate forms. Battle-only forms (Mega, Gigantamax, Totem) are left out: they
     // belong to future regions' battle mechanics, not to catching.
