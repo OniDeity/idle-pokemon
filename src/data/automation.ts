@@ -99,6 +99,11 @@ function buyIfAffordable(id: StoneId): boolean {
 function autoEvolve() {
     for (const key of Object.keys(main.box.value)) {
         const id = Number(key);
+        // Shadow Pokémon whose hearts have opened get purified at the Relic Stone.
+        if (main.canPurify(id)) {
+            main.purify(id);
+            continue;
+        }
         for (const evolution of getSpecies(id).evolutions) {
             if (main.owns(main.evolutionTarget(id, evolution.into))) continue;
             if (evolution.method === "stone" && evolution.stone != null) {

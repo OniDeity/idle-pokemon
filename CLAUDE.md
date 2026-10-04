@@ -1,7 +1,7 @@
 # Idle Pokémon: project memory
 
 An idle Pokémon game on Profectus 0.7 (Vue 3 TSX). Journeys through regions (Kanto → Orange
-Islands → Sevii Islands → Johto), Gyms/trials and a finale per region, a Hall of Fame prestige
+Islands → Sevii Islands → Johto → Orre (Colosseum), with Orre (XD) next), Gyms/trials and a finale per region, a Hall of Fame prestige
 layer (Fame upgrades, automation), and a Pokédex kept across journeys.
 
 ## Workflow (how the owner wants changes shipped)
@@ -55,6 +55,14 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
   one-time purchases per journey that add a third to that place's pool. The Lucky Number Show
   draws automatically every 100 wild battles (`LUCKY_DRAW_BATTLES`); nothing uses the real clock.
 - UI panels collapse by title, remembered in localStorage (`pk-collapsed-panels`).
+- Gen 3: species data covers #1-386, but the Pokédex (`POKEDEX_IDS`) only lists species some
+  region offers; `isReleased()` gates the rest (Day Care Eggs stop at released species).
+- Orre (`colosseum.ts`): places have `trainerBattles` (trainers' Pokémon can't be caught; only
+  Shadow forms, `8000 + species`, can be snagged, once each per journey via `ZoneExtras.snagged`).
+  Admins' `snag` lists hand over their Shadow Pokémon when beaten. Shadow box entries have a
+  `heart` (100 wild battles in the party), then `purify()` at the Relic Stone turns them into
+  their species. Mechanics `snagMachine` (Cipher Peons: `CIPHER_PEON_CHANCE` of encounters
+  elsewhere are Shadow) and `relicStone` carry back.
 
 ## Done (v2.2 "Johto")
 
@@ -71,8 +79,9 @@ layer (Fame upgrades, automation), and a Pokédex kept across journeys.
 
 ## Plans and ideas
 
-- Orre comes after Johto (Shadow Pokémon); nothing is implemented for it yet. Hoenn is the next
-  main-series region.
+- Orre (XD) is next: its own journey after Colosseum (Eevee start; Lovrina, Snattle, Gorigan,
+  Ardos, Eldes; Greevil and Shadow Lugia on Citadark Isle), with Poké Spots/Poké Snacks as a
+  carried-back mechanic. Hoenn is the next main-series region after that.
 - Future generation mechanics go in `mechanics.ts` with their regions: double battles (Hoenn),
   Mega Evolution (Kalos), etc.
 - Gen 3 (Hoenn) will bring Contests and ways to bring Pokémon back to earlier generations' regions.

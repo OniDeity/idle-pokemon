@@ -5,6 +5,41 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.3 Orre</summary>
+                <ul>
+                    <li class="feature">
+                        Orre, from Pokémon Colosseum: no wild Pokémon, only trainers, and Cipher's
+                        Shadow Pokémon to snag with the Snag Machine. Espeon and Umbreon start
+                        together; beat Miror B., Dakim, Venus and Ein, then climb Realgam Tower.
+                        Unlocks after Johto, once your Pokédex has all 251
+                    </li>
+                    <li class="feature">
+                        Shadow Pokémon: every species has a Shadow form with its own Pokédex entry.
+                        Snag Colosseum's 48 Shadow Pokémon from their trainers (one each per
+                        journey), and Entei, Suicune, Raikou, Metagross and Tyranitar by beating the
+                        admins who hold them
+                    </li>
+                    <li class="feature">
+                        Purification: a Shadow Pokémon's heart opens after 100 wild battles won in
+                        your party; purify it at the Relic Stone and it becomes its species again
+                        (the Evolution Planner automation does it for you)
+                    </li>
+                    <li class="feature">
+                        Two new generation mechanics carry back: the Snag Machine (Cipher Peons roam
+                        every other region with Shadow versions of its Pokémon, 2% of encounters)
+                        and the Relic Stone (purify anywhere)
+                    </li>
+                    <li class="feature">
+                        Orre's Hoenn Pokémon join the Pokédex: Makuhita, Meditite, Swablu, Plusle,
+                        Vibrava, Absol, Tropius, Metagross and their evolutions; Duking's Plusle and
+                        Mt. Battle's Ho-Oh too
+                    </li>
+                    <li class="feature">
+                        The Lucky Number Show draws every 100 wild battles instead of once a day
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.2 Johto</summary>
                 <ul>
                     <li class="feature">

@@ -8,7 +8,9 @@ import type { BallMode, BattleState, CatchMode, LogEntry } from "data/projEntry"
 import { main } from "data/projEntry";
 import player from "game/player";
 import { AUTOMATIONS, ballCatchChance } from "game/pokemon/balance";
-import { getSpecies } from "game/pokemon/data";
+import { getSpecies, isShadow } from "game/pokemon/data";
+import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
+import { ZONES_BY_ID } from "game/pokemon/zones";
 import { POKEDEX_SIZE } from "game/pokemon/pokedex";
 import type { BallId } from "game/pokemon/items";
 import { APRICORN_BALLS, BALLS } from "game/pokemon/items";
@@ -203,6 +205,12 @@ function renderStarterSelect() {
                     </button>
                 ))}
             </div>
+            {region.allStarters === true ? (
+                <p class="pk-small pk-muted">
+                    Both {region.starters.map(id => getSpecies(id).name).join(" and ")} join you;
+                    pick who leads.
+                </p>
+            ) : null}
             {region.id === "kanto" ? (
                 <p class="pk-small pk-muted">
                     Tip: Brock's Rock types are tough for Charmander, but Bulbasaur and Squirtle
@@ -263,7 +271,13 @@ function renderScene() {
                     : state.wild.kind === "rockSmash"
                       ? "was under the rock"
                       : "appeared";
-        banner = `A wild ${species.name} ${where}!`;
+        const shadow = isShadow(state.wild.speciesId);
+        const trainerBattle = ZONES_BY_ID[main.zoneId.value]?.trainerBattles === true;
+        banner = shadow
+            ? `${SHADOW_TRAINERS[state.wild.speciesId] ?? "A Cipher Peon"} sent out ${species.name}!`
+            : trainerBattle
+              ? `A Trainer sent out ${species.name}!`
+              : `A wild ${species.name} ${where}!`;
         foe = {
             id: state.wild.speciesId,
             level: state.wild.level,

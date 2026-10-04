@@ -19,7 +19,15 @@ import {
     trainerTeam
 } from "game/pokemon/balance";
 import type { StoneId } from "game/pokemon/data";
-import { ALTERNATE_EVOLUTIONS, femaleForm, getSpecies, PRE_EVOLUTION } from "game/pokemon/data";
+import {
+    ALTERNATE_EVOLUTIONS,
+    femaleForm,
+    getSpecies,
+    isShadow,
+    PRE_EVOLUTION,
+    shadowOf
+} from "game/pokemon/data";
+import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
 import type { BallId, KeyItemId } from "game/pokemon/items";
 import { APRICORN_BALLS, BALLS, KEY_ITEMS, STONES } from "game/pokemon/items";
 import type { MechanicDefinition, MechanicId } from "game/pokemon/mechanics";
@@ -38,7 +46,7 @@ import {
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
 import type { EncounterKind, RegionId, ZoneExtras } from "game/pokemon/zones";
-import { rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
+import { catchableIn, rollEncounter, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
 import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
 import { computed, ref } from "vue";
 import { useToast } from "vue-toastification";
@@ -61,6 +69,8 @@ export type BoxEntry = {
     effort?: number;
     /** Caught in a Friend Ball: evolves by friendship without a Soothe Bell. */
     friend?: boolean;
+    /** A Shadow Pokémon's closed heart: wild battles won in the party until it can be purified. */
+    heart?: number;
 };
 
 export type CatchMode = "new" | "all" | "off";
@@ -119,6 +129,8 @@ const LOG_LENGTH = 40;
 const AUTOMATION_INTERVAL = 2;
 /** Catching one of these after entering the contest takes first place (Scyther, Pinsir). */
 const CONTEST_WINNERS = [123, 127];
+/** Wild battles a Shadow Pokémon must win in the party before its heart opens to purification. */
+export const HEART_BATTLES = 100;
 /** Wild battles won between Lucky Number Show draws (with the Radio Card). */
 export const LUCKY_DRAW_BATTLES = 100;
 /** Wild battles won while a Pokémon is at the Day Care, per Egg. */
@@ -192,6 +204,8 @@ export const main = createLayer("main", layer => {
     const contestWon = persistent<boolean>(false);
     /** The places whose Pokégear swarm this journey tuned in to. */
     const swarmsJoined = persistent<Record<string, boolean>>({}, false);
+    /** Orre's one-of-a-kind Shadow Pokémon snagged this journey, by Shadow form id. */
+    const snaggedShadows = persistent<Record<string, boolean>>({}, false);
     /** The Pokémon left at the Day Care (0 for none), and battles toward its Egg. */
     const dayCareId = persistent<number>(0);
     const dayCareProgress = persistent<number>(0);
@@ -203,7 +217,10 @@ export const main = createLayer("main", layer => {
     /** What this journey has added to its places' pools: swarms and the contest. */
     const zoneExtras = computed<ZoneExtras>(() => ({
         swarms: swarmsJoined.value,
-        bugContest: contestEntered.value
+        bugContest: contestEntered.value,
+        snagged: snaggedShadows.value,
+        // Outside Orre, Cipher Peons roam once the Snag Machine is unlocked.
+        cipherPeons: ZONES_BY_ID[zoneId.value]?.trainerBattles !== true && mechanicOn("snagMachine")
     }));
 
     // Transient state: rebuilt on load.
@@ -300,7 +317,8 @@ export const main = createLayer("main", layer => {
             setBoxEntry(id, {
                 level: clampedLevel,
                 xp: xpForLevel(species.growthRate, clampedLevel),
-                shiny
+                shiny,
+                ...(isShadow(id) ? { heart: HEART_BATTLES } : {})
             });
             if (partyIds.value.length < 6) {
                 partyIds.value = [...partyIds.value, id];
@@ -757,6 +775,9 @@ export const main = createLayer("main", layer => {
 
     function shouldTryCatch(wild: WildPokemon) {
         if (catchMode.value === "off") return false;
+        // Orre's trainers keep their own Pokémon; only Shadow Pokémon can be snagged.
+        if (!catchableIn(zoneId.value, wild.speciesId)) return false;
+        if (isShadow(wild.speciesId) && keyItems.value.snagMachine !== true) return false;
         if (catchMode.value === "all") return true;
         const entry = box.value[wild.speciesId];
         return entry == null || (wild.shiny && !entry.shiny);
@@ -768,6 +789,7 @@ export const main = createLayer("main", layer => {
         money.value += moneyYield(wild.level) * bonuses.value.money;
         gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp);
         tendDayCare();
+        openHearts();
         if (battlesWon.value % LUCKY_DRAW_BATTLES === 0) drawLuckyNumber();
 
         if (shouldTryCatch(wild)) {
@@ -783,7 +805,17 @@ export const main = createLayer("main", layer => {
                 if (Math.random() < chance) {
                     const isNew = receivePokemon(wild.speciesId, wild.level, wild.shiny);
                     if (ball === "friendBall") befriend(wild.speciesId);
-                    const text = `Caught ${wild.shiny ? "a shiny " : ""}${species.name}!`;
+                    const shadow = isShadow(wild.speciesId);
+                    if (shadow && ZONES_BY_ID[zoneId.value]?.trainerBattles === true) {
+                        snaggedShadows.value = { ...snaggedShadows.value, [wild.speciesId]: true };
+                    }
+                    const owner = shadow
+                        ? (SHADOW_TRAINERS[wild.speciesId] ?? "a Cipher Peon")
+                        : undefined;
+                    const text =
+                        owner != null
+                            ? `Snagged ${owner}'s ${wild.shiny ? "shiny " : ""}${species.name}!`
+                            : `Caught ${wild.shiny ? "a shiny " : ""}${species.name}!`;
                     addLog({
                         kind: wild.shiny ? "shiny" : "catch",
                         text: isNew ? text : `${text} (x${dex.timesCaught(wild.speciesId)})`,
@@ -884,6 +916,66 @@ export const main = createLayer("main", layer => {
         const text = `Lucky Number Show: the number is ${lucky}. Your ID ${id} matches ${digits} digit${digits === 1 ? "" : "s"}: ${prizes[digits]}!`;
         addLog({ kind: digits > 0 ? "badge" : "info", text });
         if (digits > 0) notify(`📻 ${text}`, "success");
+    }
+
+    /** Snags a beaten trainer's Shadow Pokémon (Orre's admins), once each per journey. */
+    function snagFrom(trainer: TrainerDefinition) {
+        if (keyItems.value.snagMachine !== true) return;
+        for (const speciesId of trainer.snag ?? []) {
+            const id = shadowOf(speciesId);
+            if (snaggedShadows.value[id] || owns(id)) continue;
+            const level = trainer.team.find(p => p.id === speciesId)?.level ?? 5;
+            snaggedShadows.value = { ...snaggedShadows.value, [id]: true };
+            receivePokemon(id, level, false);
+            const text = `Snagged ${trainer.name}'s ${getSpecies(id).name}!`;
+            addLog({ kind: "catch", text, speciesId: id });
+            notify(`🟣 ${text}`, "success");
+        }
+    }
+
+    /** Each wild battle won, Shadow Pokémon in the party open their hearts a little. */
+    function openHearts() {
+        for (const id of partyIds.value) {
+            const entry = box.value[id];
+            if (entry?.heart == null || entry.heart <= 0) continue;
+            setBoxEntry(id, { ...entry, heart: entry.heart - 1 });
+            if (entry.heart - 1 === 0) {
+                addLog({
+                    kind: "info",
+                    text: mechanicOn("relicStone")
+                        ? `${getSpecies(id).name}'s heart has opened! It can be purified at the Relic Stone.`
+                        : `${getSpecies(id).name}'s heart has opened! Find the Relic Stone in Agate Village to purify it.`,
+                    speciesId: id
+                });
+            }
+        }
+    }
+
+    function canPurify(id: number): boolean {
+        return isShadow(id) && box.value[id]?.heart === 0 && mechanicOn("relicStone");
+    }
+
+    /** Purifies an opened Shadow Pokémon at the Relic Stone: it becomes its species again. */
+    function purify(id: number) {
+        if (!canPurify(id) || inTrainerBattle.value) return;
+        const entry = box.value[id]!;
+        const base = getSpecies(id).baseSpecies!;
+        const inParty = partyIds.value.includes(id);
+        const rest = { ...box.value };
+        delete rest[id];
+        box.value = rest;
+        partyIds.value = partyIds.value.filter(p => p !== id);
+        const had = box.value[base];
+        receivePokemon(base, entry.level, entry.shiny);
+        if (had != null && entry.level > had.level) {
+            setBoxEntry(base, { ...box.value[base]!, level: entry.level, xp: entry.xp });
+        }
+        if (inParty && !partyIds.value.includes(base) && partyIds.value.length < 6) {
+            partyIds.value = [...partyIds.value, base];
+        }
+        const text = `${getSpecies(base).name}'s heart is purified! It's a normal Pokémon again.`;
+        addLog({ kind: "evolve", text, speciesId: base });
+        showFlash(text, "catch");
     }
 
     function startTrainerBattle(options: {
@@ -1046,6 +1138,7 @@ export const main = createLayer("main", layer => {
         for (const enemy of current.enemies) {
             gainXp(battleXp(enemy, true) * bonuses.value.xp);
         }
+        snagFrom(trainer);
         const nextIndex = current.index + 1;
         if (nextIndex < current.trainers.length) {
             // Next trainer in a gauntlet: heal up between battles.
@@ -1257,6 +1350,12 @@ export const main = createLayer("main", layer => {
         );
         const level = def.startLevel + 5 * (hof.levels.value.headStart ?? 0);
         receivePokemon(id, level, false);
+        // Colosseum's Espeon and Umbreon come as a pair.
+        if (def.allStarters === true) {
+            def.starters
+                .filter(other => other !== id)
+                .forEach(other => receivePokemon(other, level, false));
+        }
         addLog({
             kind: "info",
             text: `${getSpecies(id).name}, I choose you! Your ${def.name} journey begins.`
@@ -1322,6 +1421,9 @@ export const main = createLayer("main", layer => {
         eggValue,
         bestDayCareParent,
         mechanicOn,
+        snaggedShadows,
+        canPurify,
+        purify,
         canBreed,
         eggSpeciesOf,
         leaveAtDayCare,
