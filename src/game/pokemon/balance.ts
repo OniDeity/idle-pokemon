@@ -738,7 +738,7 @@ export const AUTOMATIONS: AutomationDefinition[] = [
         id: "autoShop",
         name: "Shopping List",
         description:
-            "Keeps your balls stocked, buys the cheapest Poké Mart upgrade, and pays for Johto's Bug-Catching Contest and swarms, when you can easily afford them.",
+            "Keeps every Poké Mart ball stocked (Kurt's Apricorn Balls too, once unlocked), buys the cheapest Poké Mart upgrade, and pays for Johto's Bug-Catching Contest and swarms, when you can easily afford them.",
         cost: 5,
         sprite: itemSprite("coin-case")
     },

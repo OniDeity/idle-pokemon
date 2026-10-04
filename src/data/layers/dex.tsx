@@ -471,7 +471,7 @@ const layer = createLayer(id, () => {
                                 >
                                     <Sprite
                                         id={species.id}
-                                        size={48}
+                                        size={42}
                                         shiny={e.shiny}
                                         silhouette={!e.seen}
                                     />

@@ -14,7 +14,7 @@ import {
 import { getSpecies, hallOfFameId } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
 import type { StoneId } from "game/pokemon/data";
-import { BALLS, STONES } from "game/pokemon/items";
+import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
 import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
 import { maxHp } from "game/pokemon/stats";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
@@ -37,16 +37,23 @@ function enabled(id: AutomationId) {
 }
 
 function autoShop() {
-    // Keep each unlocked ball type stocked.
+    // Keep every ball the Mart sells stocked: lots of the everyday ones, a few of Kurt's
+    // Apricorn Balls (each only shines in its own situation) once they're unlocked.
     const targets: [BallId, number][] = [
         ["pokeBall", 30],
         ["greatBall", 20],
-        ["ultraBall", 20]
+        ["ultraBall", 20],
+        ...APRICORN_BALLS.map((ball): [BallId, number] => [ball, 10])
     ];
     for (const [ball, target] of targets) {
         const def = BALLS[ball];
-        const have = main.balls.value[ball];
-        if (def.price == null || main.martTier.value < def.badgesRequired || have >= target / 2) {
+        const have = main.balls.value[ball] ?? 0;
+        if (
+            def.price == null ||
+            main.martTier.value < def.badgesRequired ||
+            (def.mechanic != null && !main.mechanicOn(def.mechanic)) ||
+            have >= target / 2
+        ) {
             continue;
         }
         const count = Math.min(target - have, Math.floor((main.money.value * 0.25) / def.price));

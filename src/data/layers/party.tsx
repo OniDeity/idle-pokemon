@@ -493,10 +493,11 @@ const layer = createLayer(id, () => {
                 onClick={() => (selected.value = speciesId)}
             >
                 <span class="pk-party-index">{index + 1}</span>
-                <Sprite id={speciesId} size={56} shiny={entry.shiny} />
+                <Sprite id={speciesId} size={44} shiny={entry.shiny} />
                 <div class="pk-party-info">
-                    <div>
-                        <b>{species.name}</b> <span class="pk-muted">Lv. {entry.level}</span>
+                    <div class="pk-party-name" title={`${species.name} Lv. ${entry.level}`}>
+                        <b>{species.name}</b>
+                        <span class="pk-muted">Lv. {entry.level}</span>
                     </div>
                     <TypeBadges id={speciesId} small />
                     <Bar
@@ -517,11 +518,9 @@ const layer = createLayer(id, () => {
         return (
             <Panel title="Contest Hall">
                 <p class="pk-small pk-muted">
-                    Feed {getSpecies(id).name} Pokéblocks (₽{POKEBLOCK_PRICE} each, +
-                    {POKEBLOCK_GAIN} to a condition) and enter it in contests. Its score is its
-                    condition, plus up to 30 for types that suit the category, plus half its level.
-                    Win each rank to enter the next; a category's first Master Rank win earns a
-                    Cosplay Pikachu.
+                    Pokéblocks: ₽{POKEBLOCK_PRICE}, +{POKEBLOCK_GAIN} condition. Score = condition +
+                    type appeal (up to 30) + half the level. A category's first Master Rank win
+                    earns a Cosplay Pikachu.
                 </p>
                 {running.speciesId !== 0 ? (
                     <div class="pk-contest-running pk-small">
@@ -852,7 +851,7 @@ const layer = createLayer(id, () => {
                                         title={`${getSpecies(sid).name} Lv. ${entry.level}`}
                                         onClick={() => (selected.value = sid)}
                                     >
-                                        <Sprite id={sid} size={48} shiny={entry.shiny} />
+                                        <Sprite id={sid} size={42} shiny={entry.shiny} />
                                         <span class="pk-box-level">{entry.level}</span>
                                         {readyToEvolve(sid) ? (
                                             <span class="pk-box-ready" title="Ready to evolve">
