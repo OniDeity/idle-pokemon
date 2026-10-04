@@ -70,6 +70,7 @@ import {
     zonesIn
 } from "game/pokemon/zones";
 import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
+import { META_GROUDON } from "game/pokemon/hoennAnime";
 import { describe, expect, test } from "vitest";
 
 function mulberry(seed: number): () => number {
@@ -165,7 +166,7 @@ describe("data", () => {
         const anime = VARIANT_SPECIES.filter(v =>
             ["pinkan", "valencian", "unique"].includes(v.variant!)
         );
-        expect(anime.length).toBe(38);
+        expect(anime.length).toBe(39);
         anime
             .filter(v => v.accessory == null && !v.localSprite)
             .forEach(v => expect(variantFilter(v.id), v.name).toBeDefined());
@@ -225,7 +226,7 @@ describe("data", () => {
         const early = VARIANT_SPECIES.filter(
             v =>
                 v.nativeRegion != null &&
-                !["kanto", "johto"].includes(v.nativeRegion) &&
+                !["kanto", "johto", "hoenn"].includes(v.nativeRegion) &&
                 found.has(v.id)
         );
         expect(early.map(v => v.name)).toEqual([]);
@@ -695,6 +696,23 @@ describe("Hoenn", () => {
             method: "trade",
             heldItem: "prismScale"
         });
+    });
+});
+
+describe("Hoenn's anime", () => {
+    test("anime places, Meta Groudon and Ash's Hoenn Cap Pikachu", () => {
+        const anime = zonesIn("hoenn").filter(z => z.anime);
+        expect(anime.length).toBe(34);
+        expect(anime.every(z => (z.encounters?.walk?.length ?? 0) > 0)).toBe(true);
+        const meta = getSpecies(META_GROUDON);
+        expect(meta.baseSpecies).toBe(383);
+        expect(meta.name).toBe("Meta Groudon");
+        const special = SPECIAL_ENCOUNTERS.find(s => s.speciesId === META_GROUDON);
+        expect(special?.kind).toBe("legendary");
+        expect(special?.kind === "legendary" && ZONES_BY_ID[special.zoneId].name).toBe("Forina");
+        expect(SPECIAL_ENCOUNTERS.some(s => s.speciesId === 10095 && s.region === "hoenn")).toBe(
+            true
+        );
     });
 });
 

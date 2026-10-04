@@ -34,7 +34,7 @@ across journeys.
   (encounters, `ZoneExtras`), `regions.ts`, `trainers.ts`, `specials.ts` (gifts/trades/legendaries/
   bosses), `balance.ts`, `items.ts`, `mechanics.ts` (generation mechanics), `pokedex.ts`, and region
   files `kantoAnime.ts`, `orange.ts`, `sevii.ts`, `johto.ts`, `johtoAnime.ts`, `hoenn.ts`,
-  `colosseum.ts`, `xd.ts`.
+  `hoennAnime.ts`, `colosseum.ts`, `xd.ts`.
 - `src/data/projEntry.tsx`: main layer state and game loop. Layers in `src/data/layers/`
   (party, map, mart, dex, hof); `src/data/automation.ts`; UI kit in `src/data/ui/components.tsx`.
 - Data: `scripts/fetchPokemonData.ts` (PokeAPI CSV → `src/data/pokemon/*.json`), sprite
@@ -44,7 +44,7 @@ across journeys.
 ## Conventions and gotchas
 
 - Variant ids: 1000+ Pinkan, 2000+ Valencian, 3xxx one-of-a-kind (3016 Pudgy Pidgey,
-  3244 Unown Entei, 3248 Dark Tyranitar, 3249 Silver, 3251 Dark Celebi), 4000–4027 Unown, 4028
+  3244 Unown Entei, 3248 Dark Tyranitar, 3249 Silver, 3251 Dark Celebi, 3383 Meta Groudon), 4000–4027 Unown, 4028
   Spiky-eared Pichu, 5000+ female, 6000+/6100+ Magikarp/Gyarados patterns, 7001+ cosmetic,
   7150–7153 giants, 7200+base clones.
 - Local sprites need literal `itemSprite("slug")` calls (fetchSprites scans for them).
@@ -101,8 +101,10 @@ across journeys.
 
 ## Plans and ideas
 
-- Next: Hoenn anime places and Pokémon (Alto Mare's Latios/Latias already exist in Johto's anime
-  places; Ash's Hoenn Cap Pikachu, 10095, isn't placed yet).
+- Hoenn's anime (v2.6, `hoennAnime.ts`): 34 places from Fandom's "Anime locations" ∩ "Hoenn
+  locations" categories (Bulbapedia is blocked), Meta Groudon (3383, Forina, post-League), Hoenn
+  Cap Pikachu (Littleroot gift). Alto Mare's Latios/Latias stay in Johto's anime places.
+- Next: Orre is done and Hoenn is complete; Sinnoh (Gen 4) would be the next main-series region.
 - Future generation mechanics go in `mechanics.ts` with their regions: double battles (Hoenn),
   Mega Evolution (Kalos), etc.
 - Ideas offered but not picked up yet:

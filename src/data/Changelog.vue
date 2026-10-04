@@ -5,6 +5,25 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.6 Hoenn's anime</summary>
+                <ul>
+                    <li class="feature">
+                        34 anime-only Hoenn places from Advanced Generation and the Hoenn movies:
+                        the Oldale Ruins, the Mirage Kingdom and Togepi Paradise, the Valley of
+                        Steel, the Forbidden Forest, Muscle Island, the A-B-C Islands, Wales
+                        Island's fossil Pokémon, Wailmer Island, Forina, LaRousse City and more
+                    </li>
+                    <li class="feature">
+                        Meta Groudon, the artificial Groudon from "Jirachi: Wish Maker", rises in
+                        Forina after the League: a one-of-a-kind legendary encounter with its own
+                        Pokédex entry
+                    </li>
+                    <li class="feature">
+                        Ash's Hoenn Cap Pikachu waits in Littleroot Town after the League
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.5 Contests and Double Battles</summary>
                 <ul>
                     <li class="feature">

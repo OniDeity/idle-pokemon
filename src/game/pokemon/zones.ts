@@ -16,6 +16,7 @@ import { JOHTO_ANIME_ZONES } from "./johtoAnime";
 import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
 import { HOENN_ZONES } from "./hoenn";
+import { HOENN_ANIME_ZONES } from "./hoennAnime";
 import { BUG_CONTEST_POOL, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
 import { SEVII_ZONES } from "./sevii";
 
@@ -275,13 +276,17 @@ const JOHTO_ALL: ZoneDefinition[] = [...JOHTO_ZONES, ...JOHTO_ANIME_ZONES].sort(
     (a, b) => a.badgesRequired - b.badgesRequired || Number(!!a.postGame) - Number(!!b.postGame)
 );
 
+const HOENN_ALL: ZoneDefinition[] = [...HOENN_ZONES, ...HOENN_ANIME_ZONES].sort(
+    (a, b) => a.badgesRequired - b.badgesRequired || Number(!!a.postGame) - Number(!!b.postGame)
+);
+
 /** Every explorable zone in every region. */
 export const ZONES: ZoneDefinition[] = [
     ...KANTO_ZONES,
     ...ORANGE_ALL,
     ...SEVII_ZONES,
     ...JOHTO_ALL,
-    ...HOENN_ZONES,
+    ...HOENN_ALL,
     ...COLOSSEUM_ZONES,
     ...XD_ZONES,
     ...CARRIED_POKE_SPOTS
