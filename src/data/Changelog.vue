@@ -38,8 +38,8 @@
                     <li class="feature">
                         Pokégear: win the Radio Card in Goldenrod to tune in to Johto's seven swarms
                         (a one-time fee each adds the swarm to that place for the journey) and the
-                        Lucky Number Show (match today's number with your Trainer ID for prizes, up
-                        to a Master Ball)
+                        Lucky Number Show (drawn automatically every 100 wild battles; match its
+                        last digits with your Trainer ID for prizes, up to a Master Ball)
                     </li>
                     <li class="feature">
                         Bug-Catching Contest: a one-time entry fee adds its bugs to the National

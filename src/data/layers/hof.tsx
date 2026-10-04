@@ -56,6 +56,7 @@ const layer = createLayer(id, () => {
     /** The player's five-digit Trainer ID (0 until first needed), for the Lucky Number Show. */
     const trainerId = persistent<number>(0);
     /** The last day (see Moment.day) the Lucky Number Show was drawn; once a day, every journey. */
+    /** No longer used (the Lucky Number Show was once daily); kept so older saves load as-is. */
     const luckyNumberDay = persistent<number>(-1);
     /** Team Strategist setting: bring Pokémon new to the Hall of Fame to the finale. */
     const newFacesForFinale = persistent<boolean>(false);
