@@ -52,9 +52,12 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   with the Snag Machine and purify at the Relic Stone, from Phenac City to Realgam Tower. Every
   species has a Shadow form; once unlocked, Cipher Peons roam the other regions with Shadow
   versions of their Pokémon.
+- **Orre (XD)**: Cipher returns with XD001, Shadow Lugia. Eevee starts; XD's Shadow Pokémon,
+  admins and Citadark Isle, plus the Poké Spots, whose snack-loving wild Pokémon come to every
+  region once unlocked.
 - **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands, then Johto,
-  then Orre; Johto and Orre also need every species the regions before them offer in your
-  Pokédex.
+  then Orre (Colosseum), then Orre (XD); Johto and both Orre journeys also need every species
+  the regions before them offer in your Pokédex.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
   trainers in regions you haven't cleared grow tougher (Renown) as you conquer others,
   and rematches in cleared regions go faster. Experience past the level cap becomes Effort, a

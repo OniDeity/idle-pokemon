@@ -10,13 +10,15 @@ import {
 } from "./data";
 import type { KeyItemId } from "./items";
 import { COLOSSEUM_ZONES } from "./colosseum";
+import type { MechanicId } from "./mechanics";
+import { CARRIED_POKE_SPOTS, XD_ZONES } from "./xd";
 import { JOHTO_ANIME_ZONES } from "./johtoAnime";
 import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
 import { BUG_CONTEST_POOL, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
 import { SEVII_ZONES } from "./sevii";
 
-export type RegionId = "kanto" | "orange" | "sevii" | "johto" | "orre";
+export type RegionId = "kanto" | "orange" | "sevii" | "johto" | "orre" | "orreXd";
 
 export type ZonePools = Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 
@@ -38,6 +40,10 @@ export interface ZoneDefinition {
      * and the Shadow Pokémon of Cipher, which can be snagged.
      */
     trainerBattles?: boolean;
+    /** A Poké Spot: wild Pokémon that come out for Poké Snacks, one per encounter. */
+    pokeSpot?: boolean;
+    /** Only there once this generation mechanic is unlocked (other regions' Poké Spots). */
+    mechanic?: MechanicId;
 }
 
 /** Kanto zones from the games, in the order the player reaches them. */
@@ -274,7 +280,9 @@ export const ZONES: ZoneDefinition[] = [
     ...ORANGE_ALL,
     ...SEVII_ZONES,
     ...JOHTO_ALL,
-    ...COLOSSEUM_ZONES
+    ...COLOSSEUM_ZONES,
+    ...XD_ZONES,
+    ...CARRIED_POKE_SPOTS
 ];
 
 export function zonesIn(region: RegionId): ZoneDefinition[] {

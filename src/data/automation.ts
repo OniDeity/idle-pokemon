@@ -20,11 +20,17 @@ import { maxHp } from "game/pokemon/stats";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import type { TrainerDefinition } from "game/pokemon/trainers";
 import type { ZoneDefinition } from "game/pokemon/zones";
-import { availableZoneSpecies, encounterOdds, typicalLevel, zonesIn } from "game/pokemon/zones";
+import {
+    availableZoneSpecies,
+    encounterOdds,
+    typicalLevel,
+    zonesIn,
+    ZONES_BY_ID
+} from "game/pokemon/zones";
 import dex from "./layers/dex";
 import hof from "./layers/hof";
 import mart from "./layers/mart";
-import { main } from "./projEntry";
+import { main, POKE_SNACK_PRICE } from "./projEntry";
 
 function enabled(id: AutomationId) {
     return hof.automationActive(id);
@@ -53,6 +59,11 @@ function autoShop() {
     for (const swarm of JOHTO_SWARMS) {
         if (main.money.value < SWARM_PRICE * 4) break;
         if (main.swarmsJoined.value[swarm.zoneId] !== true) main.joinSwarm(swarm.zoneId);
+    }
+    // Poké Snacks for the Poké Spot we're at.
+    if (ZONES_BY_ID[main.zoneId.value]?.pokeSpot === true && main.pokeSnacks.value < 20) {
+        const count = Math.min(50, Math.floor((main.money.value * 0.25) / POKE_SNACK_PRICE));
+        if (count > 0) main.buyPokeSnacks(count);
     }
     // Then the cheapest upgrade, if it costs under half of what we have.
     const options = MART_UPGRADE_LIST.filter(

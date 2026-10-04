@@ -109,8 +109,10 @@ describe("data", () => {
     test("trades ask for species that can be obtained before the trade unlocks", () => {
         for (const special of SPECIAL_ENCOUNTERS) {
             if (special.kind !== "trade") continue;
-            expect(special.wants).toBeGreaterThan(0);
-            expect(special.wants).toBeLessThanOrEqual(151);
+            // Whatever the NPC wants to see can be had in their region (or the ones before it).
+            const index = REGION_LIST.findIndex(r => r.id === special.region);
+            const available = speciesObtainableIn(REGION_LIST.slice(0, index + 1).map(r => r.id));
+            expect(available.has(special.wants), special.id).toBe(true);
         }
     });
 
@@ -535,7 +537,8 @@ describe("generation mechanics", () => {
             "apricornBalls",
             "headbutt",
             "snagMachine",
-            "relicStone"
+            "relicStone",
+            "pokeSpots"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
@@ -634,11 +637,66 @@ describe("Orre (Colosseum)", () => {
             ])
         );
         // Every Shadow Pokémon met in Orre has a trainer to snag it from.
-        for (const zone of zonesIn("orre")) {
+        for (const zone of zonesIn("orre").filter(z => z.trainerBattles)) {
             allZoneSpecies(zone.id).forEach(id =>
                 expect(SHADOW_TRAINERS[id], `${id}`).toBeDefined()
             );
         }
+    });
+});
+
+describe("Orre (XD)", () => {
+    test("comes after Colosseum, with Eevee, XD's admins and Citadark Isle", () => {
+        const xd = REGIONS.orreXd;
+        expect(xd.requires).toBe("orre");
+        expect(xd.starters).toEqual([133]);
+        expect(xd.trials.map(t => t.name)).toEqual([
+            "Lovrina",
+            "Snattle",
+            "Gorigan",
+            "Ardos",
+            "Eldes"
+        ]);
+        const finale = xd.finale(133);
+        // XD001, Shadow Lugia, then Greevil's six Shadow Pokémon, all snagged when beaten.
+        expect(finale[0].snag).toEqual([249]);
+        expect(finale[1].snag).toEqual([146, 112, 144, 103, 145, 128]);
+    });
+
+    test("Poké Spots: XD's own, and every other region's once the mechanic is unlocked", () => {
+        expect(ZONES_BY_ID.rockPokeSpot.pokeSpot).toBe(true);
+        expect(allZoneSpecies("rockPokeSpot")).toEqual(expect.arrayContaining([27, 207, 328]));
+        const kantoSpots = ZONES_BY_ID.kantoPokeSpots;
+        expect(kantoSpots.mechanic).toBe("pokeSpots");
+        // They don't count toward earlier regions' Pokédex requirements.
+        expect(speciesObtainableIn(["kanto", "orange", "sevii", "johto", "orre"]).has(328)).toBe(
+            false
+        );
+        expect(speciesObtainableIn(["orreXd"]).has(328)).toBe(true);
+        // The Cave Spot is also where Wanderer Miror B. turns up with a Shadow Voltorb.
+        expect(allZoneSpecies("cavePokeSpot")).toContain(shadowOf(100));
+    });
+
+    test("XD's Hoenn Pokémon join the Pokédex, and Duking's trades want spot Pokémon", () => {
+        const gen3 = POKEDEX_IDS.filter(id => id > 251).map(id => getSpecies(id).name);
+        expect(gen3).toEqual(
+            expect.arrayContaining([
+                "Trapinch",
+                "Aron",
+                "Surskit",
+                "Zangoose",
+                "Salamence",
+                "Ralts"
+            ])
+        );
+        const duking = SPECIAL_ENCOUNTERS.flatMap(s =>
+            s.kind === "trade" && s.id.startsWith("duking") ? [[s.wants, s.speciesId]] : []
+        );
+        expect(duking).toEqual([
+            [328, 307],
+            [283, 213],
+            [194, 246]
+        ]);
     });
 });
 
@@ -647,7 +705,7 @@ describe("Johto anime", () => {
         const anime = zonesIn("johto").filter(z => z.anime);
         expect(anime.length).toBe(58);
         // Anime places come after the game's own within each badge tier.
-        const johto = zonesIn("johto");
+        const johto = zonesIn("johto").filter(z => z.mechanic == null);
         johto.forEach((zone, i) => {
             if (i > 0)
                 expect(zone.badgesRequired).toBeGreaterThanOrEqual(johto[i - 1].badgesRequired);

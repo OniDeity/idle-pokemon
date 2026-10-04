@@ -7,7 +7,13 @@
 import type { KeyItemId } from "./items";
 import type { RegionId } from "./zones";
 
-export type MechanicId = "breeding" | "apricornBalls" | "headbutt" | "snagMachine" | "relicStone";
+export type MechanicId =
+    | "breeding"
+    | "apricornBalls"
+    | "headbutt"
+    | "snagMachine"
+    | "relicStone"
+    | "pokeSpots";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -70,6 +76,15 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 1,
         description:
             "A Shadow Pokémon whose heart has opened can be purified back into its species, in any region."
+    },
+    pokeSpots: {
+        id: "pokeSpots",
+        name: "Poké Spots",
+        region: "orreXd",
+        unlockAt: "the desert's Poké Spots, after raiding the Cipher Lab",
+        trialsRequired: 1,
+        description:
+            "Every region gets Poké Spots, where Sandshrew, Gligar, Trapinch, Hoppip, Phanpy, Surskit, Zubat, Aron and Wooper come for Poké Snacks."
     }
 };
 

@@ -244,6 +244,8 @@ const layer = createLayer(id, () => {
     const visibleZones = computed(() => {
         const query = zoneSearch.value.trim().toLowerCase();
         const zones = zonesIn(main.region.value).filter(zone => {
+            // Places a mechanic brings (other regions' Poké Spots) appear once it's unlocked.
+            if (zone.mechanic != null && !main.mechanicOn(zone.mechanic)) return false;
             if (query !== "") {
                 // Match the place, or any Pokémon you've seen there ("where's Pikachu?").
                 const named =

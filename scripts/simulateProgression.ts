@@ -13,6 +13,7 @@ import {
     catchChance,
     computeBonuses,
     effortMultiplier,
+    HEART_BATTLES,
     fameGain,
     HOF_UPGRADE_LIST,
     MART_UPGRADE_LIST,
@@ -112,6 +113,8 @@ interface Owned {
     xp: number;
     level: number;
     effort: number;
+    /** A Shadow Pokémon's closed heart: wild battles left in the party before purification. */
+    heart?: number;
 }
 
 function runJourney(region: RegionDefinition, starter: number) {
@@ -136,7 +139,8 @@ function runJourney(region: RegionDefinition, starter: number) {
             id,
             level: lvl,
             xp: xpForLevel(getSpecies(id).growthRate, lvl),
-            effort: 0
+            effort: 0,
+            ...(isShadow(id) ? { heart: HEART_BATTLES } : {})
         });
     }
     catchSpecies(starter, region.startLevel + 5 * (hof.headStart ?? 0));
@@ -270,7 +274,9 @@ function runJourney(region: RegionDefinition, starter: number) {
     }
 
     const unlockedZones = () =>
-        zonesIn(region.id).filter(z => badges >= z.badgesRequired && (!z.postGame || cleared));
+        zonesIn(region.id).filter(
+            z => badges >= z.badgesRequired && (!z.postGame || cleared) && z.mechanic == null
+        );
 
     const log = (msg: string) =>
         console.log(
@@ -338,6 +344,19 @@ function runJourney(region: RegionDefinition, starter: number) {
         money += moneyYield(e.level) * bonuses.money * MF;
 
         const gained = battleXp(target) * bonuses.xp * XPF;
+        // Shadow Pokémon open their hearts in the party; Orre's Relic Stone purifies them (in
+        // Colosseum after freeing Pyrite Town; by XD it's long been reached).
+        const relicStone = region.id === "orreXd" || (region.id === "orre" && badges >= 1);
+        for (const o of party) {
+            if (o.heart != null && o.heart > 0) o.heart--;
+            if (o.heart === 0 && relicStone) {
+                owned.delete(o.id);
+                o.id = getSpecies(o.id).baseSpecies!;
+                delete o.heart;
+                if (!owned.has(o.id)) owned.set(o.id, o);
+                dex.set(o.id, (dex.get(o.id) ?? 0) + 1);
+            }
+        }
         for (const o of party) {
             const growth = getSpecies(o.id).growthRate;
             const maxXp = xpForLevel(growth, cap());

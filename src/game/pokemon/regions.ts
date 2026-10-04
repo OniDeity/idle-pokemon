@@ -4,6 +4,7 @@
  * they've unlocked.
  */
 import { COLOSSEUM_TRIALS, colosseumFinale } from "./colosseum";
+import { XD_TRIALS, xdFinale } from "./xd";
 import type { KeyItemId } from "./items";
 import { JOHTO_GYMS, johtoFinale } from "./johto";
 import { ORANGE_TRIALS, orangeFinale } from "./orange";
@@ -141,6 +142,26 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         requires: "johto",
         requiresCompletePokedex: true,
         allStarters: true
+    },
+    orreXd: {
+        id: "orreXd",
+        name: "Orre (XD)",
+        blurb: "Five years on, Cipher is back with XD001, Shadow Lugia. Snag, purify, and feed the Poké Spots.",
+        color: "#5B21B6",
+        starters: [133],
+        startLevel: 10,
+        startingKeyItems: ["snagMachine"],
+        shopTier: 1,
+        trials: XD_TRIALS,
+        trialNoun: "Cipher admins",
+        finaleName: "Citadark Isle",
+        finaleBlurb:
+            "Face XD001, Shadow Lugia, then Grand Master Greevil and his Shadow legendary birds, back-to-back.",
+        finale: () => xdFinale(),
+        levelCaps: [21, 29, 37, 45, 51, 56, 100],
+        fame: 22,
+        requires: "orre",
+        requiresCompletePokedex: true
     }
 };
 
