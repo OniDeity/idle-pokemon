@@ -118,6 +118,8 @@ const LOG_LENGTH = 40;
 const AUTOMATION_INTERVAL = 2;
 /** Catching one of these after entering the contest takes first place (Scyther, Pinsir). */
 const CONTEST_WINNERS = [123, 127];
+/** Wild battles won between Lucky Number Show draws (with the Radio Card). */
+export const LUCKY_DRAW_BATTLES = 100;
 /** Wild battles won while a Pokémon is at the Day Care, per Egg. */
 export const EGG_BATTLES = 40;
 /**
@@ -192,6 +194,8 @@ export const main = createLayer("main", layer => {
     /** The Pokémon left at the Day Care (0 for none), and battles toward its Egg. */
     const dayCareId = persistent<number>(0);
     const dayCareProgress = persistent<number>(0);
+    /** The Lucky Number Show's last number this journey (-1 before the first draw). */
+    const lastLuckyNumber = persistent<number>(-1);
     /** Eggs the Day Care has found this journey. */
     const eggsHatched = persistent<number>(0);
 
@@ -758,6 +762,7 @@ export const main = createLayer("main", layer => {
         money.value += moneyYield(wild.level) * bonuses.value.money;
         gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp);
         tendDayCare();
+        if (battlesWon.value % LUCKY_DRAW_BATTLES === 0) drawLuckyNumber();
 
         if (shouldTryCatch(wild)) {
             const ball = chooseBall(wild, wild.shiny);
@@ -827,33 +832,22 @@ export const main = createLayer("main", layer => {
         });
     }
 
-    /** Today, as days since 1 January 1970 in the player's time zone. */
-    function today() {
-        const now = new Date();
-        return Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86_400_000);
-    }
-
-    /** The Radio Tower's Lucky Number for a day: the same for everyone. */
-    function luckyNumberOn(day: number) {
-        return (Math.imul(day ^ 0x5bd1e995, 0x27d4eb2d) >>> 0) % 100000;
-    }
-
     function ensureTrainerId() {
         if (hof.trainerId.value === 0) hof.trainerId.value = 1 + Math.floor(Math.random() * 99999);
         return hof.trainerId.value;
     }
 
     /**
-     * The Lucky Number Show (Radio Card): once a day, match the trailing digits of today's number
-     * with your Trainer ID. One digit wins Great Balls, two Ultra Balls, three a Sun Stone, four a
-     * Link Cable and Soothe Bell, all five a Master Ball.
+     * The Lucky Number Show (Radio Card): drawn every LUCKY_DRAW_BATTLES wild battles won. Match
+     * the trailing digits of the number with your Trainer ID: one digit wins Great Balls, two
+     * Ultra Balls, three a Sun Stone, four a Link Cable and Soothe Bell, all five a Master Ball.
      */
     function drawLuckyNumber() {
-        const day = today();
-        if (keyItems.value.radioCard !== true || hof.luckyNumberDay.value === day) return;
-        hof.luckyNumberDay.value = day;
+        if (keyItems.value.radioCard !== true) return;
+        const number = Math.floor(Math.random() * 100000);
+        lastLuckyNumber.value = number;
         const id = String(ensureTrainerId()).padStart(5, "0");
-        const lucky = String(luckyNumberOn(day)).padStart(5, "0");
+        const lucky = String(number).padStart(5, "0");
         let digits = 0;
         while (digits < 5 && id[4 - digits] === lucky[4 - digits]) digits++;
         const add = (kind: "balls" | "stones", key: string, n: number) => {
@@ -881,7 +875,7 @@ export const main = createLayer("main", layer => {
             add("stones", "sootheBell", 1);
         }
         if (digits === 5) add("balls", "masterBall", 1);
-        const text = `Lucky Number Show: today's number is ${lucky}. Your ID ${id} matches ${digits} digit${digits === 1 ? "" : "s"}: ${prizes[digits]}!`;
+        const text = `Lucky Number Show: the number is ${lucky}. Your ID ${id} matches ${digits} digit${digits === 1 ? "" : "s"}: ${prizes[digits]}!`;
         addLog({ kind: digits > 0 ? "badge" : "info", text });
         if (digits > 0) notify(`📻 ${text}`, "success");
     }
@@ -1311,8 +1305,7 @@ export const main = createLayer("main", layer => {
         swarmsJoined,
         enterBugContest,
         joinSwarm,
-        today,
-        luckyNumberOn,
+        lastLuckyNumber,
         ensureTrainerId,
         drawLuckyNumber,
         ballContext,
