@@ -508,7 +508,11 @@ describe("Apricorn Balls", () => {
 
 describe("generation mechanics", () => {
     test("each is reached partway through its own region", () => {
-        expect(MECHANIC_LIST.map(m => m.id)).toEqual(["breeding", "apricornBalls"]);
+        expect(MECHANIC_LIST.map(m => m.id)).toEqual(["breeding", "apricornBalls", "headbutt"]);
+        // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
+        // they don't change the Pokédex Johto asks for.
+        expect(zonePools("route1").headbutt?.map(e => e.id)).toContain(163);
+        expect(pokedexRequirement(REGIONS.johto).size).toBe(248);
         for (const mechanic of MECHANIC_LIST) {
             const region = REGIONS[mechanic.region];
             expect(region, mechanic.id).toBeDefined();
@@ -521,9 +525,11 @@ describe("key items", () => {
     test("every encounter pool's key item can be had in that zone's region", () => {
         // Kindle Road's Rock Smash rocks were once out of reach: the Sevii Islands never gave it.
         for (const region of REGION_LIST) {
+            // Generation mechanics' key items (Headbutt) reach every region once unlocked.
             const items = new Set<string>([
                 ...region.startingKeyItems,
-                ...region.trials.flatMap(t => t.keyItems)
+                ...region.trials.flatMap(t => t.keyItems),
+                ...MECHANIC_LIST.flatMap(m => (m.keyItem != null ? [m.keyItem] : []))
             ]);
             for (const zone of zonesIn(region.id)) {
                 for (const [pool, entries] of Object.entries(zonePools(zone.id))) {

@@ -3,12 +3,31 @@
  * special encounters, starters, and everything those evolve into. A form counts as its species.
  * New regions unlock once the Pokédex holds everything the earlier regions offer.
  */
+import type { EncounterPoolId } from "./data";
 import { DEX_SIZE, getSpecies, PRE_EVOLUTION, SPECIES } from "./data";
+import { MECHANIC_LIST } from "./mechanics";
 import type { RegionDefinition } from "./regions";
 import { REGION_LIST } from "./regions";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "./specials";
 import type { RegionId } from "./zones";
-import { allZoneSpecies, zonesIn } from "./zones";
+import { occasionalSpecies, zonePools, zonesIn } from "./zones";
+
+/**
+ * The key items a journey in one of these regions can have: the region's own (starting and
+ * from trials), plus those of mechanics these regions introduce, which every journey gets.
+ */
+function keyItemsIn(regions: RegionId[]): Set<string> {
+    const items = new Set<string>();
+    for (const region of regions) {
+        const def = REGION_LIST.find(r => r.id === region);
+        def?.startingKeyItems.forEach(item => items.add(item));
+        def?.trials.forEach(trial => trial.keyItems.forEach(item => items.add(item)));
+    }
+    MECHANIC_LIST.filter(m => m.keyItem != null && regions.includes(m.region)).forEach(m =>
+        items.add(m.keyItem!)
+    );
+    return items;
+}
 
 /** The regular species (#1-251) obtainable in these regions. */
 export function speciesObtainableIn(regions: RegionId[]): Set<number> {
@@ -17,8 +36,19 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
         const species = getSpecies(id);
         found.add(id > DEX_SIZE ? (species.baseSpecies ?? id) : id);
     };
+    const items = keyItemsIn(regions);
     for (const region of regions) {
-        zonesIn(region).forEach(zone => allZoneSpecies(zone.id).forEach(add));
+        for (const zone of zonesIn(region)) {
+            for (const [pool, entries] of Object.entries(zonePools(zone.id)) as [
+                EncounterPoolId,
+                { id: number }[]
+            ][]) {
+                // A pool needing an item from a later region (Kanto's Headbutt trees) waits for it.
+                if (pool === "walk" || items.has(pool)) entries.forEach(e => add(e.id));
+            }
+            const { swarm, contest } = occasionalSpecies(zone.id);
+            [...swarm, ...contest].forEach(add);
+        }
         SPECIAL_ENCOUNTERS.filter(s => s.region === region).forEach(s =>
             specialSpecies(s).forEach(add)
         );
