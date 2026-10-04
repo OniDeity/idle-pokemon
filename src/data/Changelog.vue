@@ -5,6 +5,23 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.6.1 Tidier menus</summary>
+                <ul>
+                    <li class="feature">
+                        The Shopping List automation keeps Kurt's Apricorn Balls stocked too (10
+                        of each, once they're unlocked)
+                    </li>
+                    <li class="feature">
+                        More compact menus: tighter panels, rows and map cards, smaller Pokédex and
+                        PC Box cells, three party slots to a row, and a shorter Contest Hall
+                    </li>
+                    <li class="fix">
+                        Map cards no longer repeat their gear ("Surf or a rod or a better rod or
+                        Surf…")
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.6 Hoenn's anime</summary>
                 <ul>
                     <li class="feature">

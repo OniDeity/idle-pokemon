@@ -368,7 +368,7 @@ const layer = createLayer(id, () => {
     };
 
     /** What a Pokémon in a zone is waiting on: the gear for the pools it's in. */
-    function gearNeeded(zoneId: string, speciesId: number) {
+    function gearList(zoneId: string, speciesId: number): string[] {
         const gear = new Set<string>();
         for (const [pool, entries] of Object.entries(zonePools(zoneId)) as [
             EncounterPoolId,
@@ -381,7 +381,22 @@ const layer = createLayer(id, () => {
                     : POOL_GEAR[pool]
             );
         }
-        return gear.size > 0 ? [...gear].join(" or ") : "better gear";
+        return [...gear];
+    }
+
+    /** The gear a set of hidden species waits on, each named once ("Surf or rods"). */
+    function describeGear(gear: string[]): string {
+        const set = new Set(gear);
+        if (set.has("a rod") && set.has("a better rod")) {
+            set.delete("a rod");
+            set.delete("a better rod");
+            set.add("rods");
+        }
+        return set.size > 0 ? [...set].join(" or ") : "better gear";
+    }
+
+    function gearNeeded(zoneId: string, speciesId: number) {
+        return describeGear(gearList(zoneId, speciesId));
     }
 
     function renderZone(zone: ZoneDefinition) {
@@ -401,7 +416,7 @@ const layer = createLayer(id, () => {
                 !occasionalSpecies(zone.id).contest.includes(s)
         );
         const hidden = hiddenIds.length;
-        const hiddenGear = [...new Set(hiddenIds.map(s => gearNeeded(zone.id, s)))].join(" or ");
+        const hiddenGear = describeGear(hiddenIds.flatMap(s => gearList(zone.id, s)));
         const swarm = JOHTO_SWARMS.find(sw => sw.zoneId === zone.id);
         const swarming =
             swarm != null && main.swarmsJoined.value[zone.id] === true
@@ -472,7 +487,7 @@ const layer = createLayer(id, () => {
                                         ]}
                                         title={entry.seen ? `${getSpecies(s).name}${why}` : "???"}
                                     >
-                                        <Sprite id={s} size={40} silhouette={!entry.seen} />
+                                        <Sprite id={s} size={34} silhouette={!entry.seen} />
                                     </span>
                                 );
                             })}
@@ -675,7 +690,7 @@ const layer = createLayer(id, () => {
 
         return (
             <div class={["pk-special", available ? "" : "locked"]}>
-                <Sprite id={special.speciesId} size={56} silhouette={!seen} />
+                <Sprite id={special.speciesId} size={44} silhouette={!seen} />
                 <div class="pk-special-body">
                     <b>
                         {isBoss
