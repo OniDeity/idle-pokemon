@@ -84,6 +84,12 @@
                         The Sevii Islands now give Rock Smash, so the rocks on Kindle Road, Mt.
                         Ember and Sevault Canyon can be smashed
                     </li>
+                    <li class="feature">
+                        Day Care: search parents or Eggs, see what each Pokémon's Egg hatches into
+                        (★ new to your Pokédex, • not in your box), filter and sort them, take
+                        your Pokémon back, "Pick best", and Auto-swap to the most useful parent
+                        after each Egg
+                    </li>
                 </ul>
             </details>
             <details>

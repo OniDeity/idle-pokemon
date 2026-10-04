@@ -61,6 +61,8 @@ const layer = createLayer(id, () => {
     const newFacesForFinale = persistent<boolean>(false);
     /** Travel Planner setting: re-catch Pokédex Pokémon missing from the box, at any level. */
     const catchEmAll = persistent<boolean>(false);
+    /** After each Egg, swap the Day Care's Pokémon for the one whose Egg is most useful. */
+    const dayCareRotate = persistent<boolean>(false);
     /** Generation mechanics reached in their own region, now on everywhere. */
     const mechanics = persistent<Partial<Record<MechanicId, boolean>>>({}, false);
 
@@ -378,6 +380,7 @@ const layer = createLayer(id, () => {
         trainerId,
         luckyNumberDay,
         catchEmAll,
+        dayCareRotate,
         mechanics,
         mechanicUnlocked,
         unlockMechanic,
