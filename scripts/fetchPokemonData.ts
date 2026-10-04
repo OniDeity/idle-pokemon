@@ -16,6 +16,9 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const CSV_BASE = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv";
+/** Species data covers Gens 1-3; Gen 3 Pokémon join the Pokédex as regions bring them. */
+const MAX_SPECIES = 386;
+/** The game regions' own encounter tables and official forms stay Gen 1-2 for now. */
 const MAX_DEX = 251;
 const RED_BLUE_VERSION_IDS = new Set(["1", "2"]);
 const FRLG_VERSION_IDS = new Set(["10", "11"]);
@@ -427,7 +430,7 @@ async function main() {
     for (const r of evolutionRows) {
         const into = Number(r.evolved_species_id);
         const from = Number(preEvolutionOf.get(r.evolved_species_id));
-        if (into > MAX_DEX || !from || from > MAX_DEX) continue;
+        if (into > MAX_SPECIES || !from || from > MAX_SPECIES) continue;
         // Later generations add alternate rows (regional forms, new items); the first is the original.
         const key = `${from}->${into}`;
         if (seenEvolutions.has(key)) continue;
@@ -454,7 +457,7 @@ async function main() {
     }
 
     const species = speciesRows
-        .filter(r => Number(r.id) <= MAX_DEX)
+        .filter(r => Number(r.id) <= MAX_SPECIES)
         .map(r => ({
             id: Number(r.id),
             name: displayName.get(r.id) ?? r.identifier,

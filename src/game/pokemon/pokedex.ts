@@ -29,7 +29,7 @@ function keyItemsIn(regions: RegionId[]): Set<string> {
     return items;
 }
 
-/** The regular species (#1-251) obtainable in these regions. */
+/** The regular species obtainable in these regions. */
 export function speciesObtainableIn(regions: RegionId[]): Set<number> {
     const found = new Set<number>();
     const add = (id: number) => {
@@ -67,6 +67,24 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
         }
     }
     return new Set([...found].filter(id => id <= DEX_SIZE));
+}
+
+/**
+ * The Pokédex as far as the game's regions go: #1-251, plus each later species once a region
+ * offers it (Orre's Hoenn Pokémon; the rest of Gen 3 arrives with Hoenn). Species data exists for
+ * all of #1-386, but a species outside this set never appears.
+ */
+export const POKEDEX_IDS: number[] = (() => {
+    const ids = new Set<number>(SPECIES.filter(s => s.id <= 251).map(s => s.id));
+    speciesObtainableIn(REGION_LIST.map(r => r.id)).forEach(id => ids.add(id));
+    return [...ids].sort((a, b) => a - b);
+})();
+export const POKEDEX_SET = new Set(POKEDEX_IDS);
+export const POKEDEX_SIZE = POKEDEX_IDS.length;
+
+/** Whether a species (or any form, which counts as released) can appear in the game. */
+export function isReleased(id: number): boolean {
+    return id > DEX_SIZE || POKEDEX_SET.has(id);
 }
 
 /** The species a region's Pokédex requirement asks for: everything the regions before it offer. */

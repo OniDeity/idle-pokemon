@@ -8,7 +8,8 @@ import type { BallMode, BattleState, CatchMode, LogEntry } from "data/projEntry"
 import { main } from "data/projEntry";
 import player from "game/player";
 import { AUTOMATIONS, ballCatchChance } from "game/pokemon/balance";
-import { DEX_SIZE, getSpecies } from "game/pokemon/data";
+import { getSpecies } from "game/pokemon/data";
+import { POKEDEX_SIZE } from "game/pokemon/pokedex";
 import type { BallId } from "game/pokemon/items";
 import { APRICORN_BALLS, BALLS } from "game/pokemon/items";
 import { maxHp, xpForLevel } from "game/pokemon/stats";
@@ -129,7 +130,7 @@ function renderHud() {
                 {main.champion.value ? <span title="Champion">🏆</span> : null}
             </div>
             <div class="pk-hud-stat" title="Species caught / total">
-                Dex {dex.caughtCount.value}/{DEX_SIZE}
+                Dex {dex.caughtCount.value}/{POKEDEX_SIZE}
             </div>
             <div class="pk-hud-stat" title="Level cap">
                 Cap Lv. {main.cap.value}

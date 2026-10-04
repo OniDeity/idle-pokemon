@@ -23,6 +23,7 @@ import { ALTERNATE_EVOLUTIONS, femaleForm, getSpecies, PRE_EVOLUTION } from "gam
 import type { BallId, KeyItemId } from "game/pokemon/items";
 import { APRICORN_BALLS, BALLS, KEY_ITEMS, STONES } from "game/pokemon/items";
 import type { MechanicDefinition, MechanicId } from "game/pokemon/mechanics";
+import { isReleased } from "game/pokemon/pokedex";
 import { MECHANIC_LIST, MECHANICS } from "game/pokemon/mechanics";
 import type { SpecialEncounter } from "game/pokemon/specials";
 import { LEGENDARY_TIME_LIMIT } from "game/pokemon/specials";
@@ -690,10 +691,15 @@ export const main = createLayer("main", layer => {
         return good ?? best;
     }
 
-    /** The first Pokémon of a species' evolution family (forms count as their species). */
+    /**
+     * The first Pokémon of a species' evolution family (forms count as their species), among
+     * species the game has released (Marill's Eggs stay Marill until Azurill arrives).
+     */
     function familyRoot(id: number): number {
         let root = getSpecies(id).baseSpecies ?? id;
-        while (PRE_EVOLUTION[root] != null) root = PRE_EVOLUTION[root]!;
+        while (PRE_EVOLUTION[root] != null && isReleased(PRE_EVOLUTION[root]!)) {
+            root = PRE_EVOLUTION[root]!;
+        }
         return root;
     }
 
