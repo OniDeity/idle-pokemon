@@ -369,6 +369,13 @@ const LEGENDARY_FORMS: Species[] = [
         spriteKey: "248-dark",
         localSprite: true
     }),
+    // Hoenn's: Meta Groudon, which Butler built from Groudon's fossil and Jirachi's power
+    // ("Jirachi: Wish Maker").
+    variant(383, 3383, "unique", "Meta Groudon", {
+        spriteKey: "383-meta",
+        localSprite: true,
+        types: ["ground", "dark"]
+    }),
     // Mewtwo's clones of great Trainers' Pokémon in "Mewtwo Strikes Back", marked with stripes.
     ...[1, 4, 7, 3, 6, 9, 25, 52, 31, 18, 111, 27, 28, 123, 106, 87, 45, 55, 54, 117, 73, 130]
         .concat([38, 37, 78, 134, 40])
