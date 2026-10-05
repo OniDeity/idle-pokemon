@@ -1,7 +1,9 @@
+import type { FieldNeed } from "./data";
 import type { BallId, KeyItemId } from "./items";
 import { HOENN_SPECIALS } from "./hoenn";
 import { HOENN_ANIME_SPECIALS } from "./hoennAnime";
 import { SINNOH_SPECIALS } from "./sinnoh";
+import { ALMIA_SPECIALS } from "./almia";
 import { FIORE_SPECIALS } from "./fiore";
 import { JOHTO_SPECIALS } from "./johto";
 import { COLOSSEUM_SPECIALS } from "./colosseum";
@@ -60,6 +62,8 @@ export type SpecialEncounter =
           badgesRequired: number;
           postGame?: boolean;
           keyItem?: KeyItemId;
+          /** Behind an obstacle that needs a box Pokémon's Field Ability (Almia's Regis). */
+          fieldNeed?: FieldNeed;
           /** Stat multiplier, like a trainer's; legendaries are tough. */
           strength: number;
           text: string;
@@ -414,7 +418,8 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
     ...COLOSSEUM_SPECIALS,
     ...XD_SPECIALS,
     ...SINNOH_SPECIALS,
-    ...FIORE_SPECIALS
+    ...FIORE_SPECIALS,
+    ...ALMIA_SPECIALS
 ];
 
 /** Seconds allowed to defeat a legendary before it flees. */

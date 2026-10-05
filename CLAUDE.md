@@ -1,7 +1,7 @@
 # Idle Pokémon: project memory
 
 An idle Pokémon game on Profectus 0.7 (Vue 3 TSX). Journeys through regions (Kanto → Orange
-Islands → Sevii Islands → Johto → Hoenn → Orre (Colosseum) → Orre (XD) → Sinnoh → Fiore), Gyms/trials and a
+Islands → Sevii Islands → Johto → Hoenn → Orre (Colosseum) → Orre (XD) → Sinnoh → Fiore → Almia), Gyms/trials and a
 finale per region, a Hall of Fame prestige layer (Fame upgrades, automation), and a Pokédex kept
 across journeys.
 
@@ -36,7 +36,7 @@ across journeys.
   (encounters, `ZoneExtras`), `regions.ts`, `trainers.ts`, `specials.ts` (gifts/trades/legendaries/
   bosses), `balance.ts`, `items.ts`, `mechanics.ts` (generation mechanics), `pokedex.ts`, and region
   files `kantoAnime.ts`, `orange.ts`, `sevii.ts`, `johto.ts`, `johtoAnime.ts`, `hoenn.ts`,
-  `hoennAnime.ts`, `colosseum.ts`, `xd.ts`, `sinnoh.ts` (+ `underground.ts`), `fiore.ts`.
+  `hoennAnime.ts`, `colosseum.ts`, `xd.ts`, `sinnoh.ts` (+ `underground.ts`), `fiore.ts`, `almia.ts`.
 - `src/data/projEntry.tsx`: main layer state and game loop. Layers in `src/data/layers/`
   (party, map, mart, dex, hof); `src/data/automation.ts`; UI kit in `src/data/ui/components.tsx`.
 - Data: `scripts/fetchPokemonData.ts` (PokeAPI CSV → `src/data/pokemon/*.json`, plus
@@ -127,6 +127,13 @@ across journeys.
   pools come from Serebii's Browser list (10/6/3 weights by evolution stage). Mechanic
   `pokeAssist`: a box Pokémon (not in the party) super effective against the wild Pokémon adds
   `POKE_ASSIST_BONUS` damage.
+- Almia (`almia.ts`, v2.9, Shadows of Almia): a styler region like Fiore (missions against Team
+  Dim Sun; finale: the Sinis Trio, then Blake Hall's Dusknoir and Darkrai). Field Abilities:
+  `fieldAbilityOf(species)` is the Browser's [ability, power] (Serebii), else from the first type
+  and evolution stage (max ×4, so ×5 needs Almia's own Pokémon). `EncounterEntry.obstacle` hides
+  an entry until `ZoneExtras.fieldPowers` (the box's best per ability) is high enough; legendary
+  specials take `fieldNeed` (the Regis need ×5). Not a carried mechanic: only Almia has
+  obstacles. Staraptor's Fly points and Salamence's late Vien Forest spot are left out of pools.
 
 ## Done (v2.2 "Johto")
 
@@ -146,9 +153,8 @@ across journeys.
 - Hoenn's anime (v2.6, `hoennAnime.ts`): 34 places from Fandom's "Anime locations" ∩ "Hoenn
   locations" categories (Bulbapedia is blocked), Meta Groudon (3383, Forina, post-League), Hoenn
   Cap Pikachu (Littleroot gift). Alto Mare's Latios/Latias stay in Johto's anime places.
-- Next: the other two Pokémon Ranger games as separate regions after Fiore: Almia (Shadows of
-  Almia, Serebii's /ranger2/; idea: Field Move gates) and Oblivia (Guardian Signs, /ranger3/;
-  idea: Ranger Signs).
+- Next: Oblivia (Pokémon Ranger: Guardian Signs, Serebii's /ranger3/) as the region after
+  Almia; idea: Ranger Signs.
 - Later: Pokémon Conquest with Gen 5 (Unova); Mystery Dungeon after Gen 7 (the owner plans other
   games and romhacks as a "multiverse"). Not wanted: Pokéwalker, Pokéathlon. Not done yet:
   Sinnoh's swarms (PokeAPI's tables are in `sinnohExtras.json`), Sinnoh anime places.

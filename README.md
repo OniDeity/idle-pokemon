@@ -24,7 +24,8 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   Orre's two GameCube journeys, and Sinnoh from Diamond/Pearl/Platinum (Platinum's Gyms, Elite
   Four and Cynthia, Honey Trees, Pal Park and the Distortion World), and Fiore from Pokémon
   Ranger (no Poké Balls: the Capture Styler, and missions against the Go-Rock Squad instead of
-  Gyms). Each first clear is tuned for about a day of play.
+  Gyms), and Almia from Shadows of Almia (Team Dim Sun, and Field Abilities that clear obstacles
+  for hidden Pokémon). Each first clear is tuned for about a day of play.
 - **Johto's Gen 2 extras**: morning, day and night Pokémon all in the grass together, the
   Pokégear radio's swarms (a one-time fee adds each to its place) and Lucky Number Show, the
   Bug-Catching Contest (a one-time entry fee adds its bugs to the National Park), Kurt's seven
@@ -69,8 +70,8 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   admins and Citadark Isle, plus the Poké Spots, whose snack-loving wild Pokémon come to every
   region once unlocked.
 - **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands, then Johto,
-  then Hoenn, then Orre (Colosseum), then Orre (XD), then Sinnoh, then Fiore; Johto, Hoenn,
-  both Orre journeys, Sinnoh and Fiore also
+  then Hoenn, then Orre (Colosseum), then Orre (XD), then Sinnoh, then Fiore, then Almia; Johto,
+  Hoenn, both Orre journeys, Sinnoh, Fiore and Almia also
   need every species the regions before them offer in your Pokédex. A region you've already
   journeyed to stays open when a new one slots in before it.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);

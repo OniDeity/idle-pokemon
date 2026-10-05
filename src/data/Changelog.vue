@@ -5,6 +5,31 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.9 Almia</summary>
+                <ul>
+                    <li class="feature">
+                        Almia, from Pokémon Ranger: Shadows of Almia, after Fiore and a complete
+                        Pokédex: 21 places from the Ranger School to Altru Tower, with the wild
+                        Pokémon of the game's Browser. Start with Starly, Pachirisu or Munchlax
+                    </li>
+                    <li class="feature">
+                        Eight missions against Team Dim Sun, from the Ranger School's graduation to
+                        the three Gems, then Operation Brighton: the Sinis Trio, Blake Hall's
+                        Dusknoir and Darkrai at the top of Altru Tower
+                    </li>
+                    <li class="feature">
+                        Field Abilities: every Pokémon has one (Cut, Crush, Tackle, Burn, Soak,
+                        Electrify, Recharge or Psy Power, ×1 to ×5). Some of Almia's Pokémon hide
+                        behind obstacles and come out once a Pokémon in your box is strong enough
+                    </li>
+                    <li class="feature">
+                        Almia's legends: Spiritomb, Heatran and Cresselia during the story, and
+                        afterwards Darkrai, Dialga, Palkia, Shaymin, Celebi, the Regis (behind ×5
+                        obstacles) and Regigigas, plus the Manaphy Egg and Kaito's Riolu
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.8 Fiore</summary>
                 <ul>
                     <li class="feature">

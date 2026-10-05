@@ -1,4 +1,4 @@
-import type { EncounterEntry, EncounterPoolId } from "./data";
+import type { EncounterEntry, EncounterPoolId, FieldAbility } from "./data";
 import {
     enc,
     ENCOUNTERS,
@@ -19,6 +19,7 @@ import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
 import { HOENN_ZONES } from "./hoenn";
 import { HOENN_ANIME_ZONES } from "./hoennAnime";
 import { SINNOH_EXTRAS, SINNOH_ZONES } from "./sinnoh";
+import { ALMIA_ZONES } from "./almia";
 import { FIORE_ZONES } from "./fiore";
 import { BUG_CONTEST_POOL, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
 import { SEVII_ZONES } from "./sevii";
@@ -32,7 +33,8 @@ export type RegionId =
     | "orre"
     | "orreXd"
     | "sinnoh"
-    | "fiore";
+    | "fiore"
+    | "almia";
 
 export type ZonePools = Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 
@@ -305,6 +307,7 @@ export const ZONES: ZoneDefinition[] = [
     ...XD_ZONES,
     ...SINNOH_ZONES,
     ...FIORE_ZONES,
+    ...ALMIA_ZONES,
     ...CARRIED_POKE_SPOTS
 ];
 
@@ -409,6 +412,11 @@ export interface ZoneExtras {
      * and Sinnoh's dual-slot Pokémon for the Game Boy Advance games set there.
      */
     palPark?: RegionId[];
+    /**
+     * The strongest Field Ability powers among the box's Pokémon: Almia's Pokémon behind
+     * obstacles only appear once one is strong enough.
+     */
+    fieldPowers?: Partial<Record<FieldAbility, number>>;
 }
 
 /** Share of Sinnoh's grass the Poké Radar's patches bring (two slots of twelve, 10% each). */
@@ -451,6 +459,15 @@ function joinPool(existing: EncounterEntry[], added: EncounterEntry[], share: nu
 /** A zone's pools with the journey's swarms and contest added. */
 function poolsWith(zoneId: string, extras: ZoneExtras): ZonePools {
     const pools: ZonePools = { ...zonePools(zoneId) };
+    for (const pool of Object.keys(pools) as EncounterPoolId[]) {
+        if (pools[pool]!.some(e => e.obstacle != null)) {
+            pools[pool] = pools[pool]!.filter(
+                e =>
+                    e.obstacle == null ||
+                    (extras.fieldPowers?.[e.obstacle.ability] ?? 0) >= e.obstacle.power
+            );
+        }
+    }
     if (extras.snagged != null) {
         for (const pool of Object.keys(pools) as EncounterPoolId[]) {
             pools[pool] = pools[pool]!.filter(e => !isShadow(e.id) || !extras.snagged![e.id]);
