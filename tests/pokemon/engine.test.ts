@@ -71,6 +71,19 @@ import {
 } from "game/pokemon/zones";
 import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
 import { META_GROUDON } from "game/pokemon/hoennAnime";
+import {
+    DISTORTION_FAME_BONUS,
+    HONEY_SPECIES,
+    HONEY_TREES,
+    MUNCHLAX_TREES,
+    munchlaxTrees,
+    rollHoneyTree,
+    SINNOH_EXTRAS
+} from "game/pokemon/sinnoh";
+import { digWall, diggable, FOSSIL_SPECIES, UNDERGROUND_ITEMS } from "game/pokemon/underground";
+import { DEX_MILESTONES, fameGain } from "game/pokemon/balance";
+import { arceusForm } from "game/pokemon/data";
+import { MAX_RADAR_CHAIN, RADAR_CHAIN_PULL, radarShinyMultiplier } from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
 
 function mulberry(seed: number): () => number {
@@ -87,8 +100,8 @@ function party(...members: [number, number][]): PartyBattler[] {
 }
 
 describe("data", () => {
-    test("has species #1-386 in order, with the Pokédex only as far as the regions go", () => {
-        expect(DEX_SIZE).toBe(386);
+    test("has species #1-493 in order, with the Pokédex only as far as the regions go", () => {
+        expect(DEX_SIZE).toBe(493);
         SPECIES.forEach((species, i) => expect(species.id).toBe(i + 1));
         // Every Pokédex species is one a region offers; nothing past #251 without a region for it.
         const offered = speciesObtainableIn(REGION_LIST.map(r => r.id));
@@ -149,6 +162,8 @@ describe("data", () => {
         const ids = new Set(ZONES.map(z => z.id));
         expect(ids.size).toBe(ZONES.length);
         for (const zone of ZONES) {
+            // Pal Park only has what's migrated to it (see the Sinnoh tests).
+            if (zone.palPark === true) continue;
             // Orre's places are trainer battles; some (Mt. Battle) have no Shadow Pokémon to snag.
             const species = zone.trainerBattles
                 ? (zonePools(zone.id).walk ?? []).map(e => e.id)
@@ -195,9 +210,10 @@ describe("data", () => {
             expect(getSpecies(special.speciesId).variant, id).toBe("giant");
             expect(wild.has(special.speciesId), id).toBe(false);
         }
-        // Every legendary encounter is a Pokémon you can't just meet in the wild.
+        // Every legendary encounter is a Pokémon you can't just meet in its region's wild.
         for (const special of SPECIAL_ENCOUNTERS.filter(s => s.kind === "legendary")) {
-            expect(wild.has(special.speciesId), special.id).toBe(false);
+            const regionWild = new Set(zonesIn(special.region).flatMap(z => allZoneSpecies(z.id)));
+            expect(regionWild.has(special.speciesId), special.id).toBe(false);
         }
         // New Island is nothing but Mewtwo's clones, and clones stay clones.
         const clones = allZoneSpecies("newIsland").map(getSpecies);
@@ -226,7 +242,7 @@ describe("data", () => {
         const early = VARIANT_SPECIES.filter(
             v =>
                 v.nativeRegion != null &&
-                !["kanto", "johto", "hoenn"].includes(v.nativeRegion) &&
+                !["kanto", "johto", "hoenn", "sinnoh"].includes(v.nativeRegion) &&
                 found.has(v.id)
         );
         expect(early.map(v => v.name)).toEqual([]);
@@ -598,7 +614,9 @@ describe("generation mechanics", () => {
             "pokeSpots",
             "doubleBattles",
             "partner",
-            "contests"
+            "contests",
+            "underground",
+            "sinnohEvolutions"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
@@ -673,8 +691,11 @@ describe("Hoenn", () => {
     test("every Hoenn Pokémon (#252-386) can be caught there", () => {
         const hoenn = speciesObtainableIn(["hoenn"]);
         for (let id = 252; id <= 386; id++) expect(hoenn.has(id), String(id)).toBe(true);
-        // Wild pools reach past #251 in Hoenn only; earlier regions keep their own tables.
-        for (const zone of ZONES.filter(z => z.region !== "hoenn" && z.encounters == null)) {
+        // Wild pools reach past #251 in Hoenn (and Sinnoh) only; earlier regions keep their own
+        // tables.
+        for (const zone of ZONES.filter(
+            z => !["hoenn", "sinnoh"].includes(z.region) && z.encounters == null
+        )) {
             for (const entries of Object.values(zonePools(zone.id))) {
                 entries?.forEach(e => expect(e.id > 251 && e.id <= 386, zone.id).toBe(false));
             }
@@ -993,7 +1014,10 @@ describe("encounter odds", () => {
             dive: true
         };
         for (const zone of ZONES) {
-            const total = [...encounterOdds(zone.id, gear, 3).values()].reduce((a, b) => a + b, 0);
+            // Pal Park is empty until a region's Pokémon migrate there.
+            const extras = zone.palPark === true ? { palPark: ["kanto" as const] } : {};
+            const odds = encounterOdds(zone.id, gear, 3, extras);
+            const total = [...odds.values()].reduce((a, b) => a + b, 0);
             expect(total, zone.id).toBeCloseTo(1, 6);
         }
         // Patterns and cosmetic variants apply to the whole species, females included: 30% of
@@ -1071,11 +1095,196 @@ describe("evolution items", () => {
                 "95->208:metalCoat",
                 "366->367:deepSeaTooth",
                 "366->368:deepSeaScale",
-                "349->350:prismScale"
+                "349->350:prismScale",
+                "112->464:protector",
+                "125->466:electirizer",
+                "126->467:magmarizer",
+                "233->474:dubiousDisc",
+                "356->477:reaperCloth"
             ].sort()
         );
         held.forEach(h => expect(STONES[h.split(":")[1] as keyof typeof STONES]).toBeDefined());
         expect(STONES.linkCable.price).toBeGreaterThan(0);
         expect(STONES.sootheBell.price).toBeGreaterThan(0);
+    });
+});
+
+describe("Sinnoh", () => {
+    test("comes after Orre (XD) and a Pokédex of everything before it", () => {
+        const order = REGION_LIST.map(r => r.id);
+        expect(order.indexOf("sinnoh")).toBe(order.indexOf("orreXd") + 1);
+        const sinnoh = REGIONS.sinnoh;
+        expect(sinnoh.requires).toBe("orreXd");
+        expect(sinnoh.requiresCompletePokedex).toBe(true);
+        expect(sinnoh.starters).toEqual([387, 390, 393]);
+        // Gen 4's evolutions of older Pokémon (Electivire) don't join earlier regions' Pokédex.
+        const required = pokedexRequirement(sinnoh);
+        expect([...required].filter(id => id > 386)).toEqual([]);
+        expect(required.size).toBe(386);
+        expect(pokedexRequirement(REGIONS.orreXd).has(466)).toBe(false);
+    });
+
+    test("Gyms, Elite Four and Champion Cynthia use Platinum's teams and Sinnoh's badges", () => {
+        const sinnoh = REGIONS.sinnoh;
+        expect(sinnoh.trials.map(g => g.name)).toEqual([
+            "Roark",
+            "Gardenia",
+            "Fantina",
+            "Maylene",
+            "Crasher Wake",
+            "Byron",
+            "Candice",
+            "Volkner"
+        ]);
+        expect(sinnoh.trials.map(g => g.badgeIcon)).toEqual(
+            Array.from({ length: 8 }, (_, i) => `badges/${i + 25}.png`)
+        );
+        const finale = sinnoh.finale(387);
+        expect(finale.map(t => t.name)).toEqual(["Aaron", "Bertha", "Flint", "Lucian", "Cynthia"]);
+        expect(finale[4].team.map(p => p.id)).toEqual([442, 407, 468, 448, 350, 445]);
+    });
+
+    test("every Sinnoh Pokémon (#387-493) can be had there, and only there in the wild", () => {
+        const sinnoh = speciesObtainableIn(["sinnoh"]);
+        for (let id = 387; id <= 493; id++) expect(sinnoh.has(id), String(id)).toBe(true);
+        expect(POKEDEX_IDS.length).toBe(493);
+        for (const zone of ZONES.filter(z => z.region !== "sinnoh")) {
+            for (const entries of Object.values(zonePools(zone.id))) {
+                entries?.forEach(e => expect(e.id > 386 && e.id <= 493, zone.id).toBe(false));
+            }
+        }
+        // East of Mt. Coronet, Shellos and Gastrodon are the East Sea forms.
+        expect(allZoneSpecies("route213")).toContain(4204);
+        expect(allZoneSpecies("route213")).not.toContain(422);
+        expect(allZoneSpecies("route205")).toContain(422);
+        // Feebas hides under Mt. Coronet too.
+        expect(availableZoneSpecies("mtCoronetPeak", { oldRod: true })).toContain(349);
+    });
+
+    test("Gen 4 evolutions use later generations' easier methods", () => {
+        const evolution = (from: number, into: number) =>
+            getSpecies(from).evolutions.find(e => e.into === into);
+        expect(evolution(82, 462)).toEqual({ into: 462, method: "stone", stone: "thunderStone" });
+        expect(evolution(133, 470)?.stone).toBe("leafStone");
+        expect(evolution(133, 471)?.stone).toBe("iceStone");
+        expect(evolution(215, 461)?.stone).toBe("razorClaw");
+        expect(evolution(190, 424)).toEqual({ into: 424, method: "level", level: 32 });
+        // Only Combee ♀ becomes Vespiquen; Burmy's cloaks carry over to Wormadam.
+        expect(evolution(415, 416)).toBeUndefined();
+        expect(getSpecies(5415).evolutions.map(e => e.into)).toEqual([416]);
+        expect(getSpecies(4200).evolutions.map(e => e.into)).toEqual([10004, 414]);
+        expect(getSpecies(4204).evolutions.map(e => e.into)).toEqual([4205]);
+        // Kirlia and Snorunt have no female form, so both branches stay open.
+        expect(getSpecies(281).evolutions.map(e => e.into)).toEqual([282, 475]);
+        expect(STONES.dawnStone.price).toBeGreaterThan(0);
+    });
+
+    test("Honey Trees: shared tables, and four Munchlax trees by Trainer ID", () => {
+        expect(HONEY_TREES.length).toBe(21);
+        for (const tree of HONEY_TREES) {
+            if (tree.zoneId != null) expect(ZONES_BY_ID[tree.zoneId]?.region).toBe("sinnoh");
+        }
+        expect(HONEY_SPECIES).toEqual(expect.arrayContaining([412, 415, 420, 190, 214, 446]));
+        const trees = munchlaxTrees(12345);
+        expect(new Set(trees).size).toBe(MUNCHLAX_TREES);
+        expect(munchlaxTrees(12345)).toEqual(trees);
+        const rng = mulberry(3);
+        let munchlax = 0;
+        for (let i = 0; i < 5000; i++) {
+            const plain = rollHoneyTree(false, rng);
+            expect(plain.speciesId).not.toBe(446);
+            expect(HONEY_SPECIES).toContain(
+                getSpecies(plain.speciesId).baseSpecies ?? plain.speciesId
+            );
+            if (rollHoneyTree(true, rng).speciesId === 446) munchlax++;
+        }
+        expect(munchlax).toBeGreaterThan(20);
+        expect(munchlax).toBeLessThan(100);
+    });
+
+    test("the Underground: walls of two to four treasures, fossils after the League", () => {
+        expect(MECHANICS.underground.region).toBe("sinnoh");
+        const rng = mulberry(5);
+        for (let i = 0; i < 200; i++) {
+            const found = digWall(2, false, rng);
+            expect(found.length).toBeGreaterThanOrEqual(2);
+            expect(found.length).toBeLessThanOrEqual(4);
+        }
+        const before = diggable(2, false).map(([item]) => item.id);
+        expect(before).toContain("armor-fossil");
+        expect(before).not.toContain("skull-fossil");
+        expect(before).not.toContain("helix-fossil");
+        expect(diggable(3, true).map(([item]) => item.id)).toEqual(
+            expect.arrayContaining(["skull-fossil", "helix-fossil", "old-amber", "odd-keystone"])
+        );
+        expect(FOSSIL_SPECIES.sort((a, b) => a - b)).toEqual([138, 140, 142, 345, 347, 408, 410]);
+        // Every Plate turns Arceus into a form of its type.
+        for (const item of UNDERGROUND_ITEMS.filter(i => i.plate != null)) {
+            expect(getSpecies(arceusForm(item.plate!)).types).toEqual([item.plate]);
+        }
+    });
+
+    test("the Poké Radar: a Pokédex reward whose chain draws its species and its shinies", () => {
+        expect(DEX_MILESTONES.find(m => m.name === "Poké Radar")?.caught).toBe(250);
+        expect(radarShinyMultiplier(0)).toBe(1);
+        expect(radarShinyMultiplier(MAX_RADAR_CHAIN + 10)).toBe(6);
+        // Radar patches bring their own Pokémon to Sinnoh's grass.
+        expect(SINNOH_EXTRAS.radar.route201.walk?.map(e => e.id)).toEqual(
+            expect.arrayContaining([29, 32])
+        );
+        expect(availableZoneSpecies("route201", {}, { pokeRadar: true })).toContain(29);
+        expect(availableZoneSpecies("route201", {})).not.toContain(29);
+        // A chain on Bidoof makes it turn up at least half the time, and rolls agree with odds.
+        const extras = { radarChain: { speciesId: 399, count: 10 } };
+        const odds = encounterOdds("route201", {}, 0, extras);
+        // (Bidoof ♀ counts toward the chain too.)
+        const chance = (odds.get(399) ?? 0) + (odds.get(5399) ?? 0);
+        expect(chance).toBeGreaterThan(RADAR_CHAIN_PULL);
+        const rng = mulberry(11);
+        let bidoof = 0;
+        for (let i = 0; i < 20000; i++) {
+            const id = rollEncounter("route201", {}, rng, 0, extras)?.speciesId;
+            if (id === 399 || id === 5399) bidoof++;
+        }
+        expect(bidoof / 20000).toBeCloseTo(chance, 2);
+    });
+
+    test("Pal Park: Pokémon from regions cleared after Sinnoh, and their dual-slot Pokémon", () => {
+        expect(availableZoneSpecies("palPark", {})).toEqual([]);
+        const kanto = availableZoneSpecies("palPark", {}, { palPark: ["kanto"] });
+        expect(kanto).toEqual(expect.arrayContaining([16, 19, 74, 129]));
+        // Orre's Shadow Pokémon migrate as their species.
+        const orre = availableZoneSpecies("palPark", {}, { palPark: ["orre"] });
+        expect(orre.length).toBeGreaterThan(0);
+        expect(orre.some(isShadow)).toBe(false);
+        // A Hoenn game in the DS's second slot brings Hoenn Pokémon to Sinnoh's grass.
+        const ruby = SINNOH_EXTRAS.dualSlot.ruby.route201.walk!.map(e => e.id);
+        expect(availableZoneSpecies("route201", {}, { palPark: ["hoenn"] })).toEqual(
+            expect.arrayContaining(ruby)
+        );
+        expect(availableZoneSpecies("route201", {}, { palPark: ["johto"] })).toEqual(
+            availableZoneSpecies("route201", {})
+        );
+    });
+
+    test("the Distortion World: Cyrus after the League, for Fame and Giratina's Origin Forme", () => {
+        const world = SPECIAL_ENCOUNTERS.find(s => s.id === "distortionWorld");
+        expect(world?.kind).toBe("boss");
+        if (world?.kind !== "boss") return;
+        expect(world.postGame).toBe(true);
+        expect(world.keyItem).toBe("griseousOrb");
+        expect(world.fameBonus).toBe(DISTORTION_FAME_BONUS);
+        const origin = SPECIAL_ENCOUNTERS.find(s => s.id === "distortionGiratina");
+        expect(origin?.kind === "legendary" && origin.keyItem).toBe("griseousOrb");
+        expect(getSpecies(origin!.speciesId).baseSpecies).toBe(487);
+        const fame = {
+            regionFame: 24,
+            dexCaught: 400,
+            shinyCaught: 0,
+            newSpecies: 2,
+            firstClear: false
+        };
+        const ratio = fameGain({ ...fame, bonus: DISTORTION_FAME_BONUS }) / fameGain(fame);
+        expect(ratio).toBeCloseTo(DISTORTION_FAME_BONUS, 1);
     });
 });

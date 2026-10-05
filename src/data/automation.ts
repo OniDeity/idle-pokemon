@@ -11,11 +11,12 @@ import {
     trainerTeam,
     upgradeCost
 } from "game/pokemon/balance";
-import { getSpecies, hallOfFameId } from "game/pokemon/data";
+import { hallOfFameId } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
 import type { StoneId } from "game/pokemon/data";
 import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
 import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
+import { HONEY_PRICE, HONEY_TREES } from "game/pokemon/sinnoh";
 import { maxHp } from "game/pokemon/stats";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import type { TrainerDefinition } from "game/pokemon/trainers";
@@ -122,7 +123,7 @@ function autoEvolve() {
             main.purify(id);
             continue;
         }
-        for (const evolution of getSpecies(id).evolutions) {
+        for (const evolution of main.evolutionsOf(id)) {
             if (main.owns(main.evolutionTarget(id, evolution.into))) continue;
             if (evolution.method === "stone" && evolution.stone != null) {
                 const stone = STONES[evolution.stone];
@@ -281,12 +282,32 @@ function autoChallenge() {
     }
 }
 
+/**
+ * The Pokétch: shakes a Honey Tree with a Pokémon waiting (between wild battles), slathers the
+ * empty ones while Honey is cheap for us, and digs every fresh Underground wall.
+ */
+function autoPoketch() {
+    while (main.undergroundWalls.value > 0 && main.digUnderground().length > 0) {
+        // Keep digging until the walls run out.
+    }
+    const open = HONEY_TREES.filter(tree => main.honeyTreeOpen(tree));
+    if (main.battle.value.kind === "search") {
+        const ready = open.find(tree => main.honeyTreeReady(tree.id));
+        if (ready != null) main.shakeHoneyTree(ready.id);
+    }
+    for (const tree of open) {
+        if (main.money.value < HONEY_PRICE * 10) break;
+        if (main.honeyTrees.value[tree.id] == null) main.slatherHoney(tree.id);
+    }
+}
+
 /** Runs every owned, enabled automation once. */
 export function runAutomation() {
     if (main.starter.value === 0) return;
     if (enabled("autoShop")) autoShop();
     if (enabled("autoClaim")) autoClaim();
     if (main.inTrainerBattle.value) return;
+    if (enabled("autoPoketch")) autoPoketch();
     if (enabled("autoEvolve")) autoEvolve();
     if (enabled("autoParty")) autoParty();
     if (enabled("autoTravel")) autoTravel();

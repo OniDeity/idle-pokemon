@@ -18,6 +18,7 @@ import {
     upgradeCost
 } from "game/pokemon/balance";
 import type { UpgradeDefinition } from "game/pokemon/balance";
+import type { PokemonType } from "game/pokemon/data";
 import { getSpecies, hallOfFameId } from "game/pokemon/data";
 import type { MechanicId } from "game/pokemon/mechanics";
 import { MECHANIC_LIST } from "game/pokemon/mechanics";
@@ -77,11 +78,23 @@ const layer = createLayer(id, () => {
     const dayCareRotate = persistent<boolean>(false);
     /** Generation mechanics reached in their own region, now on everywhere. */
     const mechanics = persistent<Partial<Record<MechanicId, boolean>>>({}, false);
+    /** Arceus's Plates dug up in the Underground: kept for good, like the Pokédex. */
+    const plates = persistent<Partial<Record<PokemonType, boolean>>>({}, false);
+    /** Regions cleared after Sinnoh, whose Pokémon have migrated to Pal Park. */
+    const palPark = persistent<Partial<Record<RegionId, boolean>>>({}, false);
+    const palParkRegions = computed(() =>
+        (Object.keys(palPark.value) as RegionId[]).filter(r => palPark.value[r] === true)
+    );
     /** Contest ribbons by species: the highest rank won in each category. */
     const ribbons = persistent<Record<string, Partial<Record<ContestCategory, ContestRank>>>>(
         {},
         false
     );
+
+    function collectPlate(type: PokemonType) {
+        if (plates.value[type] === true) return;
+        plates.value = { ...plates.value, [type]: true };
+    }
 
     function mechanicUnlocked(id: MechanicId): boolean {
         return mechanics.value[id] === true;
@@ -191,7 +204,8 @@ const layer = createLayer(id, () => {
             shinyCaught: dex.shinyCount.value,
             newSpecies: newSpecies.value.length,
             firstClear: clearCount(main.region.value) === 0,
-            rematch: main.rematch.value
+            rematch: main.rematch.value,
+            bonus: main.fameBonus.value
         })
     );
 
@@ -222,6 +236,9 @@ const layer = createLayer(id, () => {
             ...enshrined.value,
             ...Object.fromEntries(clearingTeam.value.map(id => [hallOfFameId(id), true]))
         };
+        // Once Sinnoh has been cleared, every other region cleared sends its Pokémon to Pal Park.
+        const migrates = region !== "sinnoh" && clearCount("sinnoh") > 0 && !palPark.value[region];
+        if (migrates) palPark.value = { ...palPark.value, [region]: true };
         clears.value = { ...clears.value, [region]: clearCount(region) + 1 };
         fame.value += gain;
         timesEntered.value = run;
@@ -231,6 +248,12 @@ const layer = createLayer(id, () => {
             kind: "badge",
             text: `Your team was enshrined in the Hall of Fame (+${gain} Fame). Choose where your next journey begins!`
         });
+        if (migrates) {
+            main.addLog({
+                kind: "info",
+                text: `${REGIONS[region].name}'s Pokémon have migrated to Sinnoh's Pal Park.`
+            });
+        }
         openLayer("map");
     }
 
@@ -287,6 +310,9 @@ const layer = createLayer(id, () => {
                             {dex.shinyCount.value * 2} · New to the Hall of Fame:{" "}
                             {newSpecies.value.length} × {FAME_PER_NEW_SPECIES}
                             {clearCount(region.id) === 0 ? " · First clear ×1.5" : ""}
+                            {main.fameBonus.value > 1
+                                ? ` · Distortion World ×${main.fameBonus.value}`
+                                : ""}
                             {main.rematch.value > 1
                                 ? ` · ${main.rematchClears.value > 0 ? "Rematch" : "Renown"} ×${main.rematch.value.toFixed(1)}`
                                 : ""}
@@ -405,6 +431,10 @@ const layer = createLayer(id, () => {
         dayCareRotate,
         mechanics,
         mechanicUnlocked,
+        plates,
+        collectPlate,
+        palPark,
+        palParkRegions,
         ribbons,
         unlockMechanic,
         isEnshrined,

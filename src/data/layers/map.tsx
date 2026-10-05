@@ -7,7 +7,7 @@ import { createLayer } from "game/layers";
 import type { PokemonType } from "game/pokemon/data";
 import type { EncounterPoolId } from "game/pokemon/data";
 import { getSpecies, TYPE_COLORS } from "game/pokemon/data";
-import { KEY_ITEMS } from "game/pokemon/items";
+import { itemSprite, KEY_ITEMS } from "game/pokemon/items";
 import type { SpecialEncounter } from "game/pokemon/specials";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import type { ZoneDefinition } from "game/pokemon/zones";
@@ -21,6 +21,22 @@ import {
     ZONES_BY_ID
 } from "game/pokemon/zones";
 import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
+import { REGIONS } from "game/pokemon/regions";
+import {
+    HONEY_BATTLES,
+    HONEY_PRICE,
+    HONEY_SPECIES,
+    HONEY_TREES,
+    munchlaxTrees
+} from "game/pokemon/sinnoh";
+import {
+    diggable,
+    MAX_WALLS,
+    PLATE_TYPES,
+    UNDERGROUND_BATTLES,
+    UNDERGROUND_ITEMS
+} from "game/pokemon/underground";
+import { radarShinyMultiplier } from "game/pokemon/zones";
 import type { ZoneRates } from "game/pokemon/balance";
 import { zoneRates } from "game/pokemon/balance";
 import { computed, ref, shallowRef, watch } from "vue";
@@ -28,10 +44,12 @@ import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
 import type { TabOption } from "../ui/components";
 import {
+    Bar,
     Button,
     currentTab,
     formatMoney,
     formatNumber,
+    ItemIcon,
     Panel,
     renderTabs,
     Sprite,
@@ -161,6 +179,197 @@ const layer = createLayer(id, () => {
                     </div>
                 )}
             </Panel>
+        );
+    }
+
+    /**
+     * Sinnoh's Honey Trees: slather Honey on a tree, and after some wild battles a Pokémon is on
+     * it, waiting to be shaken down. A few trees (by your Trainer ID) are Munchlax trees.
+     */
+    function renderHoneyTrees() {
+        const munchlax =
+            hof.trainerId.value > 0 ? munchlaxTrees(hof.trainerId.value) : ([] as string[]);
+        return (
+            <Panel>
+                <p class="pk-small pk-muted">
+                    Slather Honey ({formatMoney(HONEY_PRICE)}) on a tree, and after {HONEY_BATTLES}{" "}
+                    wild battles won a Pokémon comes to it: shake it down to battle it. Combee,
+                    Burmy, Cherubi, Aipom, Wurmple and, rarely, Heracross come to every tree; four
+                    trees, decided by your Trainer ID, sometimes draw a Munchlax.
+                </p>
+                <div class="pk-zone-species">
+                    {HONEY_SPECIES.map(s => (
+                        <span
+                            class={[
+                                "pk-zone-mon",
+                                main.owns(s) ? "owned" : dex.entry(s).caught ? "caught" : ""
+                            ]}
+                            title={dex.entry(s).seen ? getSpecies(s).name : "???"}
+                        >
+                            <Sprite id={s} size={34} silhouette={!dex.entry(s).seen} />
+                        </span>
+                    ))}
+                </div>
+                {HONEY_TREES.map(tree => {
+                    const open = main.honeyTreeOpen(tree);
+                    const state = main.honeyTrees.value[tree.id];
+                    const ready = main.honeyTreeReady(tree.id);
+                    const left = state != null ? state.readyAt - main.battlesWon.value : 0;
+                    return (
+                        <div class={["pk-special", open ? "" : "locked"]}>
+                            {ready ? (
+                                <Sprite id={state!.speciesId} size={40} />
+                            ) : (
+                                <ItemIcon src={itemSprite("honey")} alt="Honey" />
+                            )}
+                            <div class="pk-special-body">
+                                <b>{tree.name}</b>{" "}
+                                {munchlax.includes(tree.id) ? (
+                                    <span class="pk-new-tag" title="Munchlax sometimes comes here">
+                                        Munchlax tree
+                                    </span>
+                                ) : null}
+                                <div class="pk-small">
+                                    {!open
+                                        ? `Opens after ${tree.badgesRequired} badge${tree.badgesRequired === 1 ? "" : "s"}${
+                                              tree.zoneId != null
+                                                  ? `, with ${ZONES_BY_ID[tree.zoneId]?.name}`
+                                                  : ""
+                                          }.`
+                                        : ready
+                                          ? `The tree is shaking! A ${getSpecies(state!.speciesId).name} (Lv. ${state!.level}) is on it.`
+                                          : state != null
+                                            ? `Slathered. Something comes in ${left} more wild battle${left === 1 ? "" : "s"}.`
+                                            : "A sweet-smelling tree, waiting for Honey."}
+                                </div>
+                            </div>
+                            {!open ? (
+                                <span class="pk-small pk-muted">🔒</span>
+                            ) : ready ? (
+                                <Button
+                                    kind="danger"
+                                    disabled={main.inTrainerBattle.value}
+                                    onClick={() => main.shakeHoneyTree(tree.id)}
+                                >
+                                    Shake
+                                </Button>
+                            ) : state == null ? (
+                                <Button
+                                    kind="primary"
+                                    disabled={main.money.value < HONEY_PRICE}
+                                    onClick={() => main.slatherHoney(tree.id)}
+                                >
+                                    Honey ({formatMoney(HONEY_PRICE)})
+                                </Button>
+                            ) : null}
+                        </div>
+                    );
+                })}
+            </Panel>
+        );
+    }
+
+    /** What the Underground's walls can hold right now, with how likely each is per treasure. */
+    function undergroundOdds(): [string, number][] {
+        const table = diggable(Math.max(1, hof.trainerId.value), main.undergroundPostGame.value);
+        const total = table.reduce((sum, [, w]) => sum + w, 0);
+        return table.map(([item, w]) => [item.id, w / total]);
+    }
+
+    /**
+     * The Underground (Sinnoh's mechanic): wild battles uncover fresh walls; dig them for
+     * Spheres, stones, fossils, Plates and the Odd Keystone.
+     */
+    function renderUnderground() {
+        const walls = main.undergroundWalls.value;
+        const odds = new Map(undergroundOdds());
+        const platesFound = PLATE_TYPES.filter(type => hof.plates.value[type] === true).length;
+        return (
+            <Panel>
+                <p class="pk-small pk-muted">
+                    Every {UNDERGROUND_BATTLES} wild battles you win uncover a fresh wall in the
+                    Underground (up to {MAX_WALLS} at a time). Each holds two to four treasures:
+                    Spheres and shards sell, stones go in your bag, fossils are revived on the spot,
+                    and Plates stay with you for good. Most fossils only turn up once Sinnoh has
+                    been cleared.
+                </p>
+                <div class="pk-filter-row">
+                    <span>
+                        ⛏️ <b>{walls}</b> / {MAX_WALLS} walls ready
+                    </span>
+                    <Button kind="primary" disabled={walls === 0} onClick={main.digUnderground}>
+                        Dig
+                    </Button>
+                </div>
+                {walls < MAX_WALLS ? (
+                    <Bar
+                        value={main.undergroundProgress.value}
+                        max={UNDERGROUND_BATTLES}
+                        kind="progress"
+                    />
+                ) : null}
+                <div class="pk-small">
+                    Arceus's Plates: {platesFound}/{PLATE_TYPES.length}
+                    {platesFound > 0 ? " (each turns your Arceus into its type)" : ""}
+                </div>
+                <div class="pk-underground-items">
+                    {UNDERGROUND_ITEMS.map(item => {
+                        const chance = odds.get(item.id);
+                        const plateFound = item.plate != null && hof.plates.value[item.plate];
+                        return (
+                            <span
+                                class={[
+                                    "pk-underground-item",
+                                    chance == null ? "unavailable" : "",
+                                    plateFound ? "found" : ""
+                                ]}
+                                title={`${item.name}${
+                                    chance != null
+                                        ? ` · ${(chance * 100).toFixed(chance < 0.01 ? 1 : 0)}% per treasure`
+                                        : item.trainerId != null
+                                          ? " · not with your Trainer ID"
+                                          : " · after Sinnoh is cleared"
+                                }`}
+                            >
+                                <ItemIcon src={item.sprite} alt={item.name} />
+                            </span>
+                        );
+                    })}
+                </div>
+            </Panel>
+        );
+    }
+
+    /** The Poké Radar's chain in the current place. */
+    function renderRadar(zone: ZoneDefinition) {
+        const chain = main.radarChain.value;
+        const active = chain.zoneId === zone.id && chain.speciesId !== 0;
+        return (
+            <div class="pk-small pk-filter-row">
+                <span>
+                    📡 Poké Radar:{" "}
+                    {active
+                        ? `chaining ${getSpecies(chain.speciesId).name} ×${chain.count} (shiny odds ×${radarShinyMultiplier(chain.count)})`
+                        : "locks on to the next grass Pokémon you meet here."}
+                </span>
+                {active ? (
+                    <Button kind="small" onClick={main.breakRadarChain}>
+                        Break chain
+                    </Button>
+                ) : null}
+            </div>
+        );
+    }
+
+    /** Pal Park: which regions' Pokémon have migrated. */
+    function renderPalPark() {
+        const regions = hof.palParkRegions.value;
+        return (
+            <div class="pk-small">
+                {regions.length > 0
+                    ? `Migrated: ${regions.map(r => REGIONS[r].name).join(", ")}. Their Game Boy Advance games also bring Pokémon to Sinnoh's grass.`
+                    : "No Pokémon have migrated yet: clear another region now that you've cleared Sinnoh."}
+            </div>
         );
     }
 
@@ -459,6 +668,10 @@ const layer = createLayer(id, () => {
                             </div>
                         ) : null}
                         <div class="pk-small pk-muted">{zone.blurb}</div>
+                        {zone.palPark === true ? renderPalPark() : null}
+                        {current && main.hasPokeRadar.value && zonePools(zone.id).walk != null
+                            ? renderRadar(zone)
+                            : null}
                     </div>
                     {unlocked ? (
                         <Button
@@ -739,7 +952,15 @@ const layer = createLayer(id, () => {
                             : ""
                     }`
                 },
-                { id: "pokegear", label: "Pokégear", show: main.region.value === "johto" }
+                { id: "pokegear", label: "Pokégear", show: main.region.value === "johto" },
+                { id: "honey", label: "Honey Trees", show: main.region.value === "sinnoh" },
+                {
+                    id: "underground",
+                    label: `Underground${
+                        main.undergroundWalls.value > 0 ? ` (${main.undergroundWalls.value})` : ""
+                    }`,
+                    show: main.mechanicOn("underground")
+                }
             ];
             const page = currentTab("map", tabs);
             return (
@@ -754,6 +975,10 @@ const layer = createLayer(id, () => {
                         </>
                     ) : page === "pokegear" ? (
                         renderPokegear()
+                    ) : page === "honey" ? (
+                        renderHoneyTrees()
+                    ) : page === "underground" ? (
+                        renderUnderground()
                     ) : (
                         <Panel>
                             <p class="pk-small pk-muted">

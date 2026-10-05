@@ -15,6 +15,7 @@ import type { Species } from "game/pokemon/data";
 import { POKEDEX_SET, POKEDEX_SIZE } from "game/pokemon/pokedex";
 import {
     ALTERNATE_EVOLUTIONS,
+    arceusForm,
     getSpecies,
     isVariant,
     PRE_EVOLUTION,
@@ -27,7 +28,9 @@ import { STONES } from "game/pokemon/items";
 import { REGION_LIST, REGIONS } from "game/pokemon/regions";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "game/pokemon/specials";
 import type { RegionId } from "game/pokemon/zones";
-import { allZoneSpecies, ZONES } from "game/pokemon/zones";
+import { allZoneSpecies, DUAL_SLOT_GAMES, ZONES, ZONES_BY_ID } from "game/pokemon/zones";
+import { HONEY_SPECIES, SINNOH_EXTRAS } from "game/pokemon/sinnoh";
+import { UNDERGROUND_ITEMS } from "game/pokemon/underground";
 import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
@@ -55,7 +58,62 @@ export type DexEntry = {
 
 const EMPTY: DexEntry = { seen: false, caught: false, shiny: false, timesCaught: 0 };
 
-type Filter = "all" | "caught" | "missing" | "shiny" | "kanto" | "johto" | "hoenn" | "variants";
+type Filter =
+    | "all"
+    | "caught"
+    | "missing"
+    | "shiny"
+    | "kanto"
+    | "johto"
+    | "hoenn"
+    | "sinnoh"
+    | "variants";
+
+/** Where Sinnoh's features bring a species: Honey Trees, the Underground, the Poké Radar, Pal Park. */
+function featureSources(id: number): string[] {
+    const sources: string[] = [];
+    const species = getSpecies(id);
+    if (HONEY_SPECIES.includes(id)) {
+        sources.push(
+            id === 446
+                ? "Sinnoh: Honey Trees (now and then on the four Munchlax trees your Trainer ID picks)"
+                : "Sinnoh: Honey Trees"
+        );
+    }
+    const fossil = UNDERGROUND_ITEMS.find(item => item.fossil === id);
+    if (fossil != null) {
+        sources.push(
+            `The Underground: dig up the ${fossil.name} and it's revived (unlocked in Sinnoh)`
+        );
+    }
+    const plate = UNDERGROUND_ITEMS.find(
+        item => item.plate != null && arceusForm(item.plate) === id
+    );
+    if (plate != null) {
+        sources.push(`The Underground: dig up the ${plate.name} while you have Arceus`);
+    }
+    const radar = Object.entries(SINNOH_EXTRAS.radar).filter(([, pools]) =>
+        pools.walk?.some(e => e.id === (species.variant === "female" ? species.baseSpecies : id))
+    );
+    if (radar.length > 0) {
+        sources.push(
+            `Sinnoh, with the Poké Radar: ${radar.map(([zoneId]) => ZONES_BY_ID[zoneId]?.name).join(", ")}`
+        );
+    }
+    const games = Object.entries(DUAL_SLOT_GAMES).filter(([, list]) =>
+        list!.some(game =>
+            Object.values(SINNOH_EXTRAS.dualSlot[game] ?? {}).some(pools =>
+                pools.walk?.some(e => e.id === id)
+            )
+        )
+    );
+    if (games.length > 0) {
+        sources.push(
+            `Sinnoh's grass, once ${games.map(([region]) => REGIONS[region as RegionId].name).join(" or ")} Pokémon migrate to Pal Park`
+        );
+    }
+    return sources;
+}
 
 /** Where a species can be found: wild zones, specials, or by evolving something. */
 function locationsOf(id: number): string[] {
@@ -90,6 +148,7 @@ function locationsOf(id: number): string[] {
             );
         }
     }
+    places.push(...featureSources(id));
     for (const special of SPECIAL_ENCOUNTERS) {
         if (special.kind !== "boss" && specialSpecies(special).includes(id)) {
             const how =
@@ -196,6 +255,7 @@ function obtainable(id: number, depth = 0): boolean {
     const wildId = species.variant === "female" ? species.baseSpecies! : id;
     if (species.rodTier != null && species.baseSpecies === 129) return true;
     if (Object.values(CONTEST_PIKACHU).includes(id)) return true;
+    if (featureSources(id).length > 0) return true;
     for (const [base, { variants }] of Object.entries(WILD_VARIANTS)) {
         if (variants.some(([v]) => v === id)) return obtainable(Number(base), depth + 1);
     }
@@ -308,6 +368,8 @@ const layer = createLayer(id, () => {
                     return s.id > 151 && s.id <= 251;
                 case "hoenn":
                     return s.id > 251 && s.id <= 386;
+                case "sinnoh":
+                    return s.id > 386 && s.id <= 493;
                 default:
                     return true;
             }
@@ -383,6 +445,7 @@ const layer = createLayer(id, () => {
         ["kanto", "#1–151"],
         ["johto", "#152–251"],
         ...(POKEDEX_SIZE > 251 ? [["hoenn", "#252–386"] as [Filter, string]] : []),
+        ...(POKEDEX_SIZE > 386 ? [["sinnoh", "#387–493"] as [Filter, string]] : []),
         ["variants", "Variants"]
     ];
 

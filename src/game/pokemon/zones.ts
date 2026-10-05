@@ -5,6 +5,7 @@ import {
     femaleForm,
     isShadow,
     magikarpPatterns,
+    SHADOW_OFFSET,
     shadowOf,
     WILD_VARIANTS
 } from "./data";
@@ -17,10 +18,19 @@ import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
 import { HOENN_ZONES } from "./hoenn";
 import { HOENN_ANIME_ZONES } from "./hoennAnime";
+import { SINNOH_EXTRAS, SINNOH_ZONES } from "./sinnoh";
 import { BUG_CONTEST_POOL, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
 import { SEVII_ZONES } from "./sevii";
 
-export type RegionId = "kanto" | "orange" | "sevii" | "johto" | "hoenn" | "orre" | "orreXd";
+export type RegionId =
+    | "kanto"
+    | "orange"
+    | "sevii"
+    | "johto"
+    | "hoenn"
+    | "orre"
+    | "orreXd"
+    | "sinnoh";
 
 export type ZonePools = Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 
@@ -46,6 +56,8 @@ export interface ZoneDefinition {
     pokeSpot?: boolean;
     /** Only there once this generation mechanic is unlocked (other regions' Poké Spots). */
     mechanic?: MechanicId;
+    /** Pal Park: its Pokémon are the ones migrated from regions cleared after Sinnoh. */
+    palPark?: boolean;
 }
 
 /** Kanto zones from the games, in the order the player reaches them. */
@@ -289,6 +301,7 @@ export const ZONES: ZoneDefinition[] = [
     ...HOENN_ALL,
     ...COLOSSEUM_ZONES,
     ...XD_ZONES,
+    ...SINNOH_ZONES,
     ...CARRIED_POKE_SPOTS
 ];
 
@@ -320,7 +333,14 @@ const POOL_SHARE = {
     dive: 0.15
 };
 
-export type EncounterKind = "walk" | "surf" | "fishing" | "headbutt" | "rockSmash" | "dive";
+export type EncounterKind =
+    | "walk"
+    | "surf"
+    | "fishing"
+    | "headbutt"
+    | "rockSmash"
+    | "dive"
+    | "honey";
 
 export interface ActivePool {
     kind: EncounterKind;
@@ -345,6 +365,12 @@ const EXTRA_ENCOUNTERS: Record<string, ZonePools> = {
         oldRod: [enc(349, 20, 25, 15)],
         goodRod: [enc(349, 20, 25, 15)],
         superRod: [enc(349, 20, 25, 15)]
+    },
+    // ...and under four tiles of the lake in Mt. Coronet's basement.
+    mtCoronetPeak: {
+        oldRod: [enc(349, 10, 20, 15)],
+        goodRod: [enc(349, 10, 20, 15)],
+        superRod: [enc(349, 10, 20, 15)]
     }
 };
 
@@ -371,7 +397,39 @@ export interface ZoneExtras {
     snagged?: Partial<Record<string, boolean>>;
     /** Cipher Peons roam with Shadow versions of a place's Pokémon (the Snag Machine mechanic). */
     cipherPeons?: boolean;
+    /** The Poké Radar (a Pokédex reward): Sinnoh's radar-only Pokémon join the grass. */
+    pokeRadar?: boolean;
+    /** The Poké Radar's chain: the species it's locked on and how long the chain is. */
+    radarChain?: { speciesId: number; count: number };
+    /**
+     * Regions whose Pokémon have migrated to Pal Park (cleared after Sinnoh): Pal Park's pool,
+     * and Sinnoh's dual-slot Pokémon for the Game Boy Advance games set there.
+     */
+    palPark?: RegionId[];
 }
+
+/** Share of Sinnoh's grass the Poké Radar's patches bring (two slots of twelve, 10% each). */
+export const RADAR_SHARE = 0.2;
+/** Chance a grass encounter is the Poké Radar's chained species, when it lives there. */
+export const RADAR_CHAIN_PULL = 0.5;
+/** A chain stops growing here (40 in the games). */
+export const MAX_RADAR_CHAIN = 40;
+/**
+ * Shiny odds for the chained species: ×(1 + chain / 8), so ×6 at 40. (The games reach ×41, but
+ * there every link takes careful play; here chains build themselves.)
+ */
+export function radarShinyMultiplier(chain: number): number {
+    return 1 + Math.min(chain, MAX_RADAR_CHAIN) / 8;
+}
+
+/** Share of Sinnoh's grass a Game Boy Advance game in the second slot brings (two 4% slots). */
+export const DUAL_SLOT_SHARE = 0.08;
+/** The Game Boy Advance games whose dual-slot Pokémon come with each region's migrants. */
+export const DUAL_SLOT_GAMES: Partial<Record<RegionId, string[]>> = {
+    kanto: ["firered", "leafgreen"],
+    sevii: ["firered", "leafgreen"],
+    hoenn: ["ruby", "sapphire", "emerald"]
+};
 
 /** How often an encounter is a Cipher Peon's Shadow Pokémon, where Cipher Peons roam. */
 export const CIPHER_PEON_CHANCE = 0.02;
@@ -398,6 +456,17 @@ function poolsWith(zoneId: string, extras: ZoneExtras): ZonePools {
     if (zoneId === "nationalPark" && extras.bugContest === true) {
         pools.walk = joinPool(pools.walk ?? [], BUG_CONTEST_POOL, EXTRA_SHARE);
     }
+    if (extras.pokeRadar === true && SINNOH_EXTRAS.radar[zoneId]?.walk != null) {
+        pools.walk = joinPool(pools.walk ?? [], SINNOH_EXTRAS.radar[zoneId].walk!, RADAR_SHARE);
+    }
+    const games = [...new Set((extras.palPark ?? []).flatMap(r => DUAL_SLOT_GAMES[r] ?? []))];
+    const dual = games.flatMap(game => SINNOH_EXTRAS.dualSlot[game]?.[zoneId]?.walk ?? []);
+    if (dual.length > 0 && pools.walk != null) {
+        pools.walk = joinPool(pools.walk, dual, DUAL_SLOT_SHARE);
+    }
+    if (ZONES_BY_ID[zoneId]?.palPark === true) {
+        pools.walk = palParkPool(extras.palPark ?? []);
+    }
     for (const swarm of JOHTO_SWARMS) {
         if (swarm.zoneId !== zoneId || extras.swarms?.[zoneId] !== true) continue;
         for (const [pool, entries] of Object.entries(swarm.pools) as [
@@ -408,6 +477,33 @@ function poolsWith(zoneId: string, extras: ZoneExtras): ZonePools {
         }
     }
     return pools;
+}
+
+/**
+ * Pal Park's grass: every Pokémon the migrated regions' game places offer (Shadow Pokémon as
+ * their species), equally likely, at levels between their lowest and highest there.
+ */
+const palParkPools = new Map<string, EncounterEntry[]>();
+function palParkPool(regions: RegionId[]): EncounterEntry[] {
+    const key = [...regions].sort().join();
+    const cached = palParkPools.get(key);
+    if (cached != null) return cached;
+    const levels = new Map<number, [number, number]>();
+    for (const zone of ZONES.filter(
+        z => regions.includes(z.region) && z.anime !== true && z.mechanic == null
+    )) {
+        for (const entries of Object.values(zonePools(zone.id))) {
+            for (const e of entries ?? []) {
+                if (!catchableIn(zone.id, e.id)) continue;
+                const id = isShadow(e.id) ? e.id - SHADOW_OFFSET : e.id;
+                const [min, max] = levels.get(id) ?? [Infinity, -Infinity];
+                levels.set(id, [Math.min(min, e.minLevel), Math.max(max, e.maxLevel)]);
+            }
+        }
+    }
+    const pool = [...levels.entries()].map(([id, [min, max]]) => enc(id, min, max, 10));
+    palParkPools.set(key, pool);
+    return pool;
 }
 
 export function activePools(
@@ -506,6 +602,13 @@ function pickWeighted<T extends { weight: number }>(entries: T[], rng: () => num
     return entries[entries.length - 1];
 }
 
+/** The grass entry the Poké Radar's chain is locked on, if it lives in this pool. */
+function radarChained(pool: ActivePool, extras: ZoneExtras): EncounterEntry | undefined {
+    const chain = extras.radarChain;
+    if (pool.kind !== "walk" || chain == null) return undefined;
+    return pool.entries.find(e => e.id === chain.speciesId);
+}
+
 /** Chance a Magikarp bites with a Magikarp Jump pattern once Roddy's Old Rod has a level. */
 export const PATTERN_CHANCE = 0.3;
 
@@ -527,7 +630,10 @@ export function rollEncounter(
         pools.map(p => ({ ...p, weight: p.share })),
         rng
     );
-    const entry = pickWeighted(pool.entries, rng);
+    let entry = pickWeighted(pool.entries, rng);
+    // The Poké Radar keeps turning up its chained species in the grass.
+    const chained = radarChained(pool, extras);
+    if (chained != null && rng() < RADAR_CHAIN_PULL) entry = chained;
     // Species with visible gender differences show up as their female form genderRate/8 of the time.
     const female = femaleForm(entry.id);
     let speciesId = female != null && rng() < female.genderRate / 8 ? female.id : entry.id;
@@ -584,8 +690,13 @@ export function encounterOdds(
     const totalShare = pools.reduce((sum, pool) => sum + pool.share, 0);
     for (const pool of pools) {
         const totalWeight = pool.entries.reduce((sum, e) => sum + e.weight, 0);
+        const chained = radarChained(pool, extras);
         for (const entry of pool.entries) {
-            let plain = (pool.share / totalShare) * (entry.weight / totalWeight);
+            let pick = entry.weight / totalWeight;
+            if (chained != null) {
+                pick = (1 - RADAR_CHAIN_PULL) * pick + (entry === chained ? RADAR_CHAIN_PULL : 0);
+            }
+            let plain = (pool.share / totalShare) * pick;
             const cosmetic = WILD_VARIANTS[entry.id];
             if (cosmetic != null) {
                 const total = cosmetic.variants.reduce((sum, [, w]) => sum + w, 0);
