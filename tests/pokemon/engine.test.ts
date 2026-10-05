@@ -84,6 +84,7 @@ import { digWall, diggable, FOSSIL_SPECIES, UNDERGROUND_ITEMS } from "game/pokem
 import { DEX_MILESTONES, fameGain, HOF_UPGRADE_LIST } from "game/pokemon/balance";
 import { arceusForm } from "game/pokemon/data";
 import { FIORE_MISSIONS, FIORE_ZONES } from "game/pokemon/fiore";
+import { ALMIA_MISSIONS, ALMIA_ZONES, fieldAbilityOf, fieldPowers } from "game/pokemon/almia";
 import { POKE_ASSIST_BONUS, STYLER_POWER } from "game/pokemon/balance";
 import { MAX_RADAR_CHAIN, RADAR_CHAIN_PULL, radarShinyMultiplier } from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
@@ -1147,11 +1148,12 @@ describe("Sinnoh", () => {
         expect(finale[4].team.map(p => p.id)).toEqual([442, 407, 468, 448, 350, 445]);
     });
 
-    test("every Sinnoh Pokémon (#387-493) can be had there, and only there in the wild", () => {
+    test("every Sinnoh Pokémon (#387-493) can be had there, and in the wild only there or Almia", () => {
         const sinnoh = speciesObtainableIn(["sinnoh"]);
         for (let id = 387; id <= 493; id++) expect(sinnoh.has(id), String(id)).toBe(true);
         expect(POKEDEX_IDS.length).toBe(493);
-        for (const zone of ZONES.filter(z => z.region !== "sinnoh")) {
+        // Almia (Shadows of Almia, after Sinnoh) has Gen 4 Pokémon in its Browser too.
+        for (const zone of ZONES.filter(z => z.region !== "sinnoh" && z.region !== "almia")) {
             for (const entries of Object.values(zonePools(zone.id))) {
                 entries?.forEach(e => expect(e.id > 386 && e.id <= 493, zone.id).toBe(false));
             }
@@ -1339,6 +1341,74 @@ describe("Fiore", () => {
             catchChance(45, BALLS.pokeBall.catchMultiplier, 1)
         );
         expect(POKE_ASSIST_BONUS).toBeGreaterThan(1);
+    });
+});
+
+describe("Almia", () => {
+    test("comes after Fiore, with the Capture Styler and Team Dim Sun's missions", () => {
+        const order = REGION_LIST.map(r => r.id);
+        expect(order.indexOf("almia")).toBe(order.indexOf("fiore") + 1);
+        const almia = REGIONS.almia;
+        expect(almia.requires).toBe("fiore");
+        expect(almia.requiresCompletePokedex).toBe(true);
+        expect(almia.styler).toBe(true);
+        expect(almia.trialNoun).toBe("missions");
+        // Shadows of Almia's first partners: Starly, Pachirisu and Munchlax.
+        expect(almia.starters).toEqual([396, 417, 446]);
+        expect(almia.trials.map(m => m.badge)).toEqual(ALMIA_MISSIONS.map(m => m.badge));
+        expect(almia.trials).toHaveLength(8);
+        const finale = almia.finale(396);
+        expect(finale.map(t => t.name)).toEqual([
+            "Heath & Ice",
+            "Heath, Lavana & Ice",
+            "Blake Hall"
+        ]);
+        // Blake Hall's Dusknoir, then Darkrai.
+        expect(finale[2].team.map(p => p.id)).toEqual([477, 491]);
+    });
+
+    test("its wild Pokémon are from the Browser, all released, its legends in Almia", () => {
+        expect(zonesIn("almia").length).toBe(ALMIA_ZONES.length);
+        for (const zone of zonesIn("almia")) {
+            const species = allZoneSpecies(zone.id);
+            expect(species.length, zone.id).toBeGreaterThan(0);
+            species.forEach(id =>
+                expect(getSpecies(id).baseSpecies ?? id).toBeLessThanOrEqual(493)
+            );
+        }
+        const legends = SPECIAL_ENCOUNTERS.filter(
+            s => s.region === "almia" && s.kind === "legendary"
+        );
+        expect(legends.map(s => s.speciesId)).toEqual(
+            expect.arrayContaining([442, 485, 488, 491, 377, 378, 379, 486])
+        );
+        legends.forEach(
+            s => s.kind === "legendary" && expect(ZONES_BY_ID[s.zoneId]?.region, s.id).toBe("almia")
+        );
+    });
+
+    test("Field Abilities: the Browser's, then by type and stage; obstacles need enough power", () => {
+        expect(fieldAbilityOf(399)).toEqual(["crush", 1]); // Bidoof
+        expect(fieldAbilityOf(475)).toEqual(["cut", 5]); // Gallade
+        // Not in Almia's Browser: Bulbasaur (Grass, first stage) and Venusaur.
+        expect(fieldAbilityOf(1)).toEqual(["cut", 1]);
+        expect(fieldAbilityOf(3)[1]).toBeGreaterThanOrEqual(3);
+        // Bidoof (Crush ×1), Golbat (Crush ×2) and Gallade: the strongest of each ability.
+        expect(fieldPowers([399, 42, 475])).toEqual({ crush: 2, cut: 5 });
+
+        // Torterra hides behind Tackle ×4 in Vien Forest.
+        const torterra = (extras: Parameters<typeof availableZoneSpecies>[2]) =>
+            availableZoneSpecies("vienForest", {}, extras).includes(389);
+        expect(allZoneSpecies("vienForest")).toContain(389);
+        expect(torterra({})).toBe(false);
+        expect(torterra({ fieldPowers: { tackle: 3 } })).toBe(false);
+        expect(torterra({ fieldPowers: { tackle: 4 } })).toBe(true);
+        // The Regis wait behind obstacles that need ×5.
+        const regis = SPECIAL_ENCOUNTERS.filter(
+            s => s.region === "almia" && [377, 378, 379].includes(s.speciesId)
+        );
+        expect(regis).toHaveLength(3);
+        regis.forEach(s => expect(s.kind === "legendary" && s.fieldNeed?.power).toBe(5));
     });
 });
 

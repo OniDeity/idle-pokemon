@@ -2,10 +2,11 @@
  * The Kanto map: choose where to search for wild Pokémon, and visit the gifts, trades,
  * Game Corner prizes and legendary Pokémon scattered around the region.
  */
+import { FIELD_ABILITY_NAMES, meetsFieldNeed } from "game/pokemon/almia";
 import { LUCKY_DRAW_BATTLES, main } from "data/projEntry";
 import { createLayer } from "game/layers";
 import type { PokemonType } from "game/pokemon/data";
-import type { EncounterPoolId } from "game/pokemon/data";
+import type { EncounterEntry, EncounterPoolId, FieldAbility } from "game/pokemon/data";
 import { getSpecies, TYPE_COLORS } from "game/pokemon/data";
 import { itemSprite, KEY_ITEMS } from "game/pokemon/items";
 import type { SpecialEncounter } from "game/pokemon/specials";
@@ -589,9 +590,17 @@ const layer = createLayer(id, () => {
         const gear = new Set<string>();
         for (const [pool, entries] of Object.entries(zonePools(zoneId)) as [
             EncounterPoolId,
-            { id: number }[]
+            EncounterEntry[]
         ][]) {
-            if (pool === "walk" || !entries.some(e => e.id === speciesId)) continue;
+            const entry = entries.find(e => e.id === speciesId);
+            if (entry == null) continue;
+            // Almia: a Pokémon behind an obstacle needs a box Pokémon's Field Ability.
+            if (entry.obstacle != null) {
+                const { ability, power } = entry.obstacle;
+                gear.add(`a box Pokémon with ${FIELD_ABILITY_NAMES[ability]} ×${power}`);
+                continue;
+            }
+            if (pool === "walk") continue;
             gear.add(
                 pool === "headbutt" && !main.mechanicOn("headbutt")
                     ? "Headbutt (unlocked in Johto)"
@@ -623,7 +632,11 @@ const layer = createLayer(id, () => {
         const available = new Set(
             availableZoneSpecies(zone.id, main.keyItems.value, main.zoneExtras.value)
         );
-        const withoutExtras = new Set(availableZoneSpecies(zone.id, main.keyItems.value));
+        const withoutExtras = new Set(
+            availableZoneSpecies(zone.id, main.keyItems.value, {
+                fieldPowers: main.fieldPowers.value
+            })
+        );
         const caughtHere = all.filter(s => dex.entry(s).caught).length;
         const ownedHere = all.filter(s => main.owns(s)).length;
         const hiddenIds = all.filter(
@@ -724,6 +737,23 @@ const layer = createLayer(id, () => {
         );
     }
 
+    /** Almia: the box's strongest Field Abilities, which clear obstacles for hidden Pokémon. */
+    function renderFieldPowers() {
+        const powers = main.fieldPowers.value;
+        const known = (Object.keys(FIELD_ABILITY_NAMES) as FieldAbility[]).filter(
+            ability => (powers[ability] ?? 0) > 0
+        );
+        return (
+            <div class="pk-small pk-muted">
+                Field Abilities in your box:{" "}
+                {known.length > 0
+                    ? known.map(a => `${FIELD_ABILITY_NAMES[a]} ×${powers[a]}`).join(" · ")
+                    : "none yet"}
+                . Pokémon behind obstacles come out once one is strong enough.
+            </div>
+        );
+    }
+
     function renderZoneControls() {
         return (
             <Panel>
@@ -792,6 +822,7 @@ const layer = createLayer(id, () => {
                         </div>
                     </>
                 ) : null}
+                {main.region.value === "almia" ? renderFieldPowers() : null}
                 {zoneSort.value === "efficient" ? (
                     <p class="pk-small pk-muted">
                         Estimated for your current party, bonuses and fishing gear. XP is per party
@@ -847,14 +878,24 @@ const layer = createLayer(id, () => {
                 special.keyItem != null &&
                 main.badges.value >= special.badgesRequired &&
                 !main.keyItems.value[special.keyItem];
+            const fieldNeed =
+                special.kind === "legendary" &&
+                special.fieldNeed != null &&
+                main.badges.value >= special.badgesRequired &&
+                (special.postGame !== true || main.champion.value) &&
+                !meetsFieldNeed(special.fieldNeed, main.fieldPowers.value)
+                    ? special.fieldNeed
+                    : null;
             action = (
                 <span class="pk-small pk-muted">
                     🔒{" "}
-                    {missingItem && special.kind === "legendary"
-                        ? `Needs the ${KEY_ITEMS[special.keyItem!].name}`
-                        : special.postGame === true
-                          ? `After the ${main.regionDef.value.finaleName}`
-                          : `${special.badgesRequired} ${main.regionDef.value.trialNoun}`}
+                    {fieldNeed != null
+                        ? `Needs ${FIELD_ABILITY_NAMES[fieldNeed.ability]} ×${fieldNeed.power} (a box Pokémon's Field Ability)`
+                        : missingItem && special.kind === "legendary"
+                          ? `Needs the ${KEY_ITEMS[special.keyItem!].name}`
+                          : special.postGame === true
+                            ? `After the ${main.regionDef.value.finaleName}`
+                            : `${special.badgesRequired} ${main.regionDef.value.trialNoun}`}
                 </span>
             );
         } else if (claimed || owned) {

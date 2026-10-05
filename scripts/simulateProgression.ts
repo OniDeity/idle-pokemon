@@ -38,6 +38,7 @@ import type { BallId, KeyItemId } from "../src/game/pokemon/items";
 import { AUTO_BALL_ORDER, BALLS, STONES } from "../src/game/pokemon/items";
 import type { RegionDefinition } from "../src/game/pokemon/regions";
 import { levelCap, REGIONS, strengthMultiplier, withStrength } from "../src/game/pokemon/regions";
+import { fieldPowers } from "../src/game/pokemon/almia";
 import { MECHANICS } from "../src/game/pokemon/mechanics";
 import { SPECIAL_ENCOUNTERS } from "../src/game/pokemon/specials";
 import { levelForXp, maxHp, xpForLevel, xpYield } from "../src/game/pokemon/stats";
@@ -151,6 +152,8 @@ function runJourney(region: RegionDefinition, starter: number) {
         return doublesUnlocked;
     };
     const cap = () => levelCap(region, badges, cleared);
+    // Almia's obstacles open up with the box's Field Abilities.
+    const extras = () => ({ snagged, fieldPowers: fieldPowers(owned.keys()) });
     /** Poké Assist's damage bonus against this wild Pokémon (box Pokémon outside the party). */
     const assist = (target: { species: ReturnType<typeof getSpecies> }, party: Owned[]) => {
         const def = MECHANICS.pokeAssist;
@@ -300,7 +303,7 @@ function runJourney(region: RegionDefinition, starter: number) {
         let xpPerSec = 0;
         const samples = 30;
         for (let i = 0; i < samples; i++) {
-            const e = rollEncounter(zoneId, keyItems, rng, 0, { snagged });
+            const e = rollEncounter(zoneId, keyItems, rng, 0, extras());
             if (!e) return 0;
             const target = { species: getSpecies(e.speciesId), level: e.level };
             const t =
@@ -309,7 +312,9 @@ function runJourney(region: RegionDefinition, starter: number) {
                     wildDps(members, target, bonuses.damage * assist(target, party), doubles());
             xpPerSec += xpYield(target) / t;
         }
-        const uncaught = availableZoneSpecies(zoneId, keyItems).filter(id => !owned.has(id)).length;
+        const uncaught = availableZoneSpecies(zoneId, keyItems, extras()).filter(
+            id => !owned.has(id)
+        ).length;
         return (xpPerSec / samples) * (1 + 0.3 * uncaught);
     }
 
@@ -378,7 +383,7 @@ function runJourney(region: RegionDefinition, starter: number) {
         step++;
 
         const bonuses = computeBonuses(bonusInputs());
-        const e = rollEncounter(zone, keyItems, rng, hof.roddysRod ?? 0, { snagged });
+        const e = rollEncounter(zone, keyItems, rng, hof.roddysRod ?? 0, extras());
         if (!e) break;
         const target = { species: getSpecies(e.speciesId), level: e.level };
         time +=
