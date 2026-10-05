@@ -714,7 +714,7 @@ function renderControls() {
                     ))}
                 </div>
             ) : null}
-            {main.balls.value.masterBall > 0 ? (
+            {main.balls.value.masterBall > 0 && !styler ? (
                 <label class="pk-small pk-check">
                     <input
                         type="checkbox"
