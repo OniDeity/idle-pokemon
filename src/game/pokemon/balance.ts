@@ -26,6 +26,10 @@ export const SHINY_DAMAGE_BONUS = 1.2;
 export const DEX_DAMAGE_BONUS_PER_SPECIES = 0.003;
 /** Each variant form in the Pokédex (Pinkan, regional, female, patterns...) adds +1% shiny odds. */
 export const SHINY_BONUS_PER_VARIANT = 0.01;
+/** The Capture Styler (Pokémon Ranger regions): catches like an Ultra Ball, with no ball used. */
+export const STYLER_POWER = 2;
+/** Poké Assist (Fiore's mechanic): wild-battle damage when a box Pokémon has a type advantage. */
+export const POKE_ASSIST_BONUS = 1.25;
 /** Max stock of each ball type; also where auto-restock tops up to. */
 export const BALL_RESTOCK_TARGET = 20;
 

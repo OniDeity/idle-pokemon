@@ -7,6 +7,9 @@ import {
     BALL_RESTOCK_TARGET,
     BASE_SHINY_CHANCE,
     ballCatchChance,
+    catchChance,
+    POKE_ASSIST_BONUS,
+    STYLER_POWER,
     battleXp,
     battlePartner,
     bestMatchup,
@@ -35,10 +38,11 @@ import {
     RANK_NAMES,
     winChance
 } from "game/pokemon/contests";
-import type { Evolution, StoneId } from "game/pokemon/data";
+import type { Evolution, PokemonType, Species, StoneId } from "game/pokemon/data";
 import {
     ALTERNATE_EVOLUTIONS,
     arceusForm,
+    typeEffectiveness,
     femaleForm,
     getSpecies,
     isShadow,
@@ -892,6 +896,28 @@ export const main = createLayer("main", layer => {
         battle.value = { kind: "search", remaining: total, total };
     }
 
+    /** Types of the Pokémon in the box but not the party, for Poké Assist. */
+    const assistTypes = computed(() => {
+        const types = new Set<PokemonType>();
+        for (const key of Object.keys(box.value)) {
+            if (!partyIds.value.includes(Number(key))) {
+                getSpecies(Number(key)).types.forEach(type => types.add(type));
+            }
+        }
+        return [...types];
+    });
+
+    /**
+     * Poké Assist (Fiore's mechanic): a box Pokémon whose type is super effective against a wild
+     * Pokémon lends a hand, for +25% damage.
+     */
+    function pokeAssist(target: Species): number {
+        if (!mechanicOn("pokeAssist")) return 1;
+        return assistTypes.value.some(type => typeEffectiveness(type, target.types) > 1)
+            ? POKE_ASSIST_BONUS
+            : 1;
+    }
+
     /** Who fights a wild Pokémon: the best matchup, plus a partner in double battles. */
     function wildFighters(target: BattlerStats): { active: number; partner: number } {
         const party = partyBattlers.value;
@@ -1007,15 +1033,20 @@ export const main = createLayer("main", layer => {
         if (battlesWon.value % LUCKY_DRAW_BATTLES === 0) drawLuckyNumber();
 
         if (shouldTryCatch(wild)) {
-            const ball = chooseBall(wild, wild.shiny);
-            if (ball == null) {
+            // Pokémon Ranger regions capture with the Capture Styler: no Poké Balls.
+            const styler = regionDef.value.styler === true;
+            const ball = styler ? null : chooseBall(wild, wild.shiny);
+            if (ball == null && !styler) {
                 if (!warnedNoBalls) {
                     warnedNoBalls = true;
                     addLog({ kind: "fail", text: "Out of Poké Balls! Buy more at the Poké Mart." });
                 }
             } else {
-                useBall(ball);
-                const chance = ballCatchChance(ball, ballContext(wild), bonuses.value.catch);
+                if (ball != null) useBall(ball);
+                const chance =
+                    ball != null
+                        ? ballCatchChance(ball, ballContext(wild), bonuses.value.catch)
+                        : catchChance(species.captureRate, STYLER_POWER, bonuses.value.catch);
                 if (Math.random() < chance) {
                     const isNew = receivePokemon(wild.speciesId, wild.level, wild.shiny);
                     if (ball === "friendBall") befriend(wild.speciesId);
@@ -1034,7 +1065,9 @@ export const main = createLayer("main", layer => {
                     const text =
                         owner != null
                             ? `Snagged ${owner}'s ${wild.shiny ? "shiny " : ""}${species.name}!`
-                            : `Caught ${wild.shiny ? "a shiny " : ""}${species.name}!`;
+                            : styler
+                              ? `Captured ${wild.shiny ? "a shiny " : ""}${species.name} with the Capture Styler!`
+                              : `Caught ${wild.shiny ? "a shiny " : ""}${species.name}!`;
                     addLog({
                         kind: wild.shiny ? "shiny" : "catch",
                         text: isNew ? text : `${text} (x${dex.timesCaught(wild.speciesId)})`,
@@ -1044,7 +1077,10 @@ export const main = createLayer("main", layer => {
                     showFlash(text, "catch");
                     checkContestWin(wild);
                 } else {
-                    const text = `${species.name} broke free from the ${BALLS[ball].name}!`;
+                    const text =
+                        ball != null
+                            ? `${species.name} broke free from the ${BALLS[ball].name}!`
+                            : `${species.name} broke out of the Capture Styler's loops!`;
                     addLog({ kind: "fail", text, speciesId: wild.speciesId, shiny: wild.shiny });
                     showFlash("Oh no! It broke free!", "fail");
                 }
@@ -1441,7 +1477,12 @@ export const main = createLayer("main", layer => {
         const gym = trials.value[requested.badgeNumber - 1];
         if (gym == null || gym.id !== requested.id || badges.value !== gym.badgeNumber - 1) return;
         startTrainerBattle({
-            label: regionDef.value.id === "sevii" ? gym.title : `${gym.name}'s Gym battle`,
+            label:
+                regionDef.value.trialNoun === "missions"
+                    ? `Mission: ${gym.badge}`
+                    : regionDef.value.id === "sevii"
+                      ? gym.title
+                      : `${gym.name}'s Gym battle`,
             trainers: [gym],
             onWin() {
                 badges.value = gym.badgeNumber;
@@ -1455,7 +1496,9 @@ export const main = createLayer("main", layer => {
                 const text =
                     regionDef.value.trialNoun === "badges"
                         ? `You earned the ${gym.badge}!`
-                        : `Quest complete: ${gym.badge}!`;
+                        : regionDef.value.trialNoun === "missions"
+                          ? `Mission clear: ${gym.badge}!`
+                          : `Quest complete: ${gym.badge}!`;
                 addLog({ kind: "badge", text });
                 showFlash(text, "badge");
                 notify(`🏅 ${text}`, "success");
@@ -1505,6 +1548,16 @@ export const main = createLayer("main", layer => {
                 }
             ],
             onWin() {
+                // In a Pokémon Ranger region the battle was the capture: the Styler's loops hold.
+                if (regionDef.value.styler === true) {
+                    claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
+                    receivePokemon(special.speciesId, special.level, false);
+                    const text = `You captured ${species.name} with the Capture Styler!`;
+                    addLog({ kind: "catch", text, speciesId: special.speciesId });
+                    showFlash(text, "catch");
+                    notify(`🌟 ${text}`, "success");
+                    return;
+                }
                 const useMaster = useMasterBallOnLegendaries.value && balls.value.masterBall > 0;
                 const ball = useMaster
                     ? "masterBall"
@@ -1603,7 +1656,7 @@ export const main = createLayer("main", layer => {
                 const dps = wildDps(
                     partyBattlers.value,
                     target,
-                    bonuses.value.damage,
+                    bonuses.value.damage * pokeAssist(target.species),
                     mechanicOn("doubleBattles")
                 );
                 if (dps <= 0) {
@@ -1903,6 +1956,7 @@ export const main = createLayer("main", layer => {
         eggBattles,
         eggShinyMultiplier,
         pokeblockGain,
+        pokeAssist,
         contestSeconds,
         contestWinChance,
         fameBonus,
