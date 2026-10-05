@@ -1658,6 +1658,24 @@
     border-color: #facc15;
 }
 
+/* Not in the chosen region's Hall of Fame yet: worth extra Fame there. */
+.pk-partner-choice.fresh {
+    position: relative;
+}
+
+.pk-partner-choice.fresh::after {
+    content: "★";
+    position: absolute;
+    top: -2px;
+    right: 1px;
+    font-size: 11px;
+    color: #facc15;
+}
+
+span.pk-partner-choice {
+    cursor: default;
+}
+
 /* The Contest Hall's running contest. */
 .pk-contest-running {
     display: flex;

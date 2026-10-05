@@ -348,8 +348,27 @@ export const main = createLayer("main", layer => {
     const hasPokeRadar = computed(() => hasMilestone(dex.caughtCount.value, "Poké Radar"));
     /** Wild battles per Day Care Egg (the Destiny Knot halves it). */
     const eggBattles = computed(() =>
-        hasMilestone(dex.caughtCount.value, "Destiny Knot") ? EGG_BATTLES / 2 : EGG_BATTLES
+        Math.max(
+            5,
+            Math.round(
+                (hasMilestone(dex.caughtCount.value, "Destiny Knot")
+                    ? EGG_BATTLES / 2
+                    : EGG_BATTLES) *
+                    (1 - 0.1 * (hof.levels.value.flameBody ?? 0))
+            )
+        )
     );
+    /** The Masuda Method (Fame): Day Care Eggs are likelier to be shiny. */
+    const eggShinyMultiplier = computed(() => 1 + 0.5 * (hof.levels.value.masudaMethod ?? 0));
+    /** Contest upgrades (Fame): stronger Pokéblocks, shorter and easier contests. */
+    const pokeblockGain = computed(() => POKEBLOCK_GAIN + 5 * (hof.levels.value.pokeblockKit ?? 0));
+    function contestSeconds(rank: ContestRank): number {
+        return CONTEST_SECONDS[rank] * (1 - 0.1 * (hof.levels.value.contestStar ?? 0));
+    }
+    function contestWinChance(id: number, category: ContestCategory, rank: ContestRank) {
+        const bonus = 0.05 * (hof.levels.value.contestStar ?? 0);
+        return Math.min(1, winChance(contestScoreOf(id, category), rank) + bonus);
+    }
     /** Extra Fame this journey has earned (the Distortion World). */
     const fameBonus = computed(() =>
         SPECIAL_ENCOUNTERS.filter(
@@ -689,8 +708,9 @@ export const main = createLayer("main", layer => {
         // A shiny parent passes its colors on 1 time in 64, as in Gold and Silver.
         const shiny =
             box.value[id]?.shiny === true
-                ? Math.random() < 1 / 64
-                : Math.random() < BASE_SHINY_CHANCE * bonuses.value.shiny;
+                ? Math.random() < eggShinyMultiplier.value / 64
+                : Math.random() <
+                  BASE_SHINY_CHANCE * bonuses.value.shiny * eggShinyMultiplier.value;
         const isNew = receivePokemon(babyId, 5, shiny);
         const name = getSpecies(babyId).name;
         const text = `The Day Care man found an Egg! It hatched into ${shiny ? "a shiny " : ""}${name}!`;
@@ -1321,7 +1341,7 @@ export const main = createLayer("main", layer => {
             ...entry,
             condition: {
                 ...entry.condition,
-                [category]: Math.min(MAX_CONDITION, current + POKEBLOCK_GAIN)
+                [category]: Math.min(MAX_CONDITION, current + pokeblockGain.value)
             }
         });
     }
@@ -1339,7 +1359,7 @@ export const main = createLayer("main", layer => {
         const rank = contestRankFor(id, category);
         if (!mechanicOn("contests") || box.value[id] == null || rank == null) return;
         if (contest.value.speciesId !== 0) return;
-        contest.value = { speciesId: id, category, rank, remaining: CONTEST_SECONDS[rank] };
+        contest.value = { speciesId: id, category, rank, remaining: contestSeconds(rank) };
         addLog({
             kind: "info",
             text: `${getSpecies(id).name} enters the ${CATEGORY_NAMES[category]} Contest (${RANK_NAMES[rank]})!`,
@@ -1353,7 +1373,7 @@ export const main = createLayer("main", layer => {
         if (box.value[speciesId] == null) return;
         const name = getSpecies(speciesId).name;
         const label = `${CATEGORY_NAMES[category]} Contest (${RANK_NAMES[rank]})`;
-        if (Math.random() >= winChance(contestScoreOf(speciesId, category), rank)) {
+        if (Math.random() >= contestWinChance(speciesId, category, rank)) {
             addLog({ kind: "info", text: `${name} didn't win the ${label}.`, speciesId });
             return;
         }
@@ -1881,6 +1901,10 @@ export const main = createLayer("main", layer => {
         radarChain,
         breakRadarChain,
         eggBattles,
+        eggShinyMultiplier,
+        pokeblockGain,
+        contestSeconds,
+        contestWinChance,
         fameBonus,
         honeyTrees,
         honeyTreeOpen,

@@ -5,6 +5,29 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.7.1 Halls of Fame</summary>
+                <ul>
+                    <li class="feature">
+                        Each region keeps its own Hall of Fame: a Pokémon enshrined in Kanto is
+                        still a new face (+5 Fame) when it clears Johto or Sinnoh
+                    </li>
+                    <li class="feature">
+                        Choosing a region for a new journey suggests a team: the strongest Pokémon
+                        it offers that aren't in its Hall of Fame yet. Partners new to that
+                        region's Hall are starred and listed first
+                    </li>
+                    <li class="feature">
+                        Fame upgrades for the Day Care (Flame Body: faster Eggs; Masuda Method:
+                        shinier Eggs) and Contests (Pokéblock Kit: stronger Pokéblocks; Contest
+                        Star: quicker contests and better odds), offered once each is unlocked
+                    </li>
+                    <li class="fix">
+                        Sinnoh's trainers are 4% stronger, keeping its first clear near 11 hours
+                        with the extra Fame
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.7 Sinnoh</summary>
                 <ul>
                     <li class="feature">
