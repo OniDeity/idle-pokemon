@@ -130,7 +130,8 @@ const layer = createLayer(id, () => {
                 z => z.pokeSpot === true && (z.mechanic == null || main.mechanicOn(z.mechanic))
             );
             const tabs: TabOption[] = [
-                { id: "balls", label: "Poké Balls" },
+                // Ranger regions capture with the Capture Styler, so there are no balls to sell.
+                { id: "balls", label: "Poké Balls", show: main.regionDef.value.styler !== true },
                 { id: "training", label: "Training" },
                 { id: "items", label: "Evolution items" },
                 { id: "snacks", label: "Poké Snacks", show: snacks }

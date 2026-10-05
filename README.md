@@ -22,7 +22,9 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   Elite Four and Wallace, Dive, Feebas, the fossils, Regis, Lati@s and the weather trio, plus
   34 anime-only places from the Oldale Ruins to LaRousse City),
   Orre's two GameCube journeys, and Sinnoh from Diamond/Pearl/Platinum (Platinum's Gyms, Elite
-  Four and Cynthia, Honey Trees, Pal Park and the Distortion World). Each first clear is tuned for about a day of play.
+  Four and Cynthia, Honey Trees, Pal Park and the Distortion World), and Fiore from Pokémon
+  Ranger (no Poké Balls: the Capture Styler, and missions against the Go-Rock Squad instead of
+  Gyms). Each first clear is tuned for about a day of play.
 - **Johto's Gen 2 extras**: morning, day and night Pokémon all in the grass together, the
   Pokégear radio's swarms (a one-time fee adds each to its place) and Lucky Number Show, the
   Bug-Catching Contest (a one-time entry fee adds its bugs to the National Park), Kurt's seven
@@ -33,7 +35,8 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   Battles (a partner backs up the active Pokémon), Pokémon Contests (Pokéblocks, ribbons, Cosplay
   Pikachu) and Bring a Partner (start a journey with a Hall of Fame Pokémon); and Sinnoh's
   Underground (dig walls for stones, fossils and Arceus's Plates) and its evolutions of older
-  Pokémon (Magnezone, Togekiss...).
+  Pokémon (Magnezone, Togekiss...); and Fiore's Poké Assist (box Pokémon whose type is super
+  effective against a wild Pokémon lend a hand).
 - **Sinnoh's extras**: Honey Trees (with the Pokétch automation), the Poké Radar (a Pokédex
   reward: chain grass Pokémon for better shiny odds), Pal Park (regions cleared after Sinnoh
   migrate there), and the Distortion World's Cyrus after the League for extra Fame.
@@ -66,8 +69,8 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   admins and Citadark Isle, plus the Poké Spots, whose snack-loving wild Pokémon come to every
   region once unlocked.
 - **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands, then Johto,
-  then Hoenn, then Orre (Colosseum), then Orre (XD), then Sinnoh; Johto, Hoenn, both Orre
-  journeys and Sinnoh also
+  then Hoenn, then Orre (Colosseum), then Orre (XD), then Sinnoh, then Fiore; Johto, Hoenn,
+  both Orre journeys, Sinnoh and Fiore also
   need every species the regions before them offer in your Pokédex. A region you've already
   journeyed to stays open when a new one slots in before it.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);

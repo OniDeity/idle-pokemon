@@ -18,7 +18,8 @@ export type MechanicId =
     | "partner"
     | "contests"
     | "underground"
-    | "sinnohEvolutions";
+    | "sinnohEvolutions"
+    | "pokeAssist";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -135,6 +136,15 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 0,
         description:
             "Older Pokémon evolve into the evolutions found in Sinnoh (Magnezone, Togekiss, Electivire, Weavile...), and Day Care Eggs hatch Sinnoh's babies (Munchlax, Happiny, Bonsly...), in every region."
+    },
+    pokeAssist: {
+        id: "pokeAssist",
+        name: "Poké Assist",
+        region: "fiore",
+        unlockAt: "Ringtown's Ranger Base, after your first mission",
+        trialsRequired: 1,
+        description:
+            "In wild battles, a Pokémon in your box (not your party) whose type is super effective against the wild Pokémon lends a hand: +25% damage, in every region."
     }
 };
 

@@ -15,6 +15,8 @@ import {
     effortMultiplier,
     HEART_BATTLES,
     fameGain,
+    POKE_ASSIST_BONUS,
+    STYLER_POWER,
     HOF_UPGRADE_LIST,
     MART_UPGRADE_LIST,
     memberDps,
@@ -25,7 +27,13 @@ import {
     upgradeCost,
     wildDps
 } from "../src/game/pokemon/balance";
-import { getSpecies, hallOfFameId, isShadow, shadowOf } from "../src/game/pokemon/data";
+import {
+    getSpecies,
+    hallOfFameId,
+    isShadow,
+    shadowOf,
+    typeEffectiveness
+} from "../src/game/pokemon/data";
 import type { BallId, KeyItemId } from "../src/game/pokemon/items";
 import { AUTO_BALL_ORDER, BALLS, STONES } from "../src/game/pokemon/items";
 import type { RegionDefinition } from "../src/game/pokemon/regions";
@@ -113,6 +121,8 @@ let totalTime = 0;
 let doublesUnlocked = false;
 /** Sinnoh's evolutions of older Pokémon, once a Sinnoh journey has begun. */
 let sinnohEvolutions = false;
+/** Fiore's Poké Assist, once reached: box Pokémon super effective against a wild one help out. */
+let pokeAssistUnlocked = false;
 
 interface Owned {
     id: number;
@@ -141,6 +151,18 @@ function runJourney(region: RegionDefinition, starter: number) {
         return doublesUnlocked;
     };
     const cap = () => levelCap(region, badges, cleared);
+    /** Poké Assist's damage bonus against this wild Pokémon (box Pokémon outside the party). */
+    const assist = (target: { species: ReturnType<typeof getSpecies> }, party: Owned[]) => {
+        const def = MECHANICS.pokeAssist;
+        if (region.id === def.region && badges >= def.trialsRequired) pokeAssistUnlocked = true;
+        if (!pokeAssistUnlocked) return 1;
+        const helps = [...owned.values()].some(
+            o =>
+                !party.includes(o) &&
+                getSpecies(o.id).types.some(t => typeEffectiveness(t, target.species.types) > 1)
+        );
+        return helps ? POKE_ASSIST_BONUS : 1;
+    };
 
     function catchSpecies(id: number, level: number) {
         dex.set(id, (dex.get(id) ?? 0) + 1);
@@ -283,7 +305,8 @@ function runJourney(region: RegionDefinition, starter: number) {
             const target = { species: getSpecies(e.speciesId), level: e.level };
             const t =
                 bonuses.searchTime +
-                maxHp(target) / wildDps(members, target, bonuses.damage, doubles());
+                maxHp(target) /
+                    wildDps(members, target, bonuses.damage * assist(target, party), doubles());
             xpPerSec += xpYield(target) / t;
         }
         const uncaught = availableZoneSpecies(zoneId, keyItems).filter(id => !owned.has(id)).length;
@@ -360,7 +383,13 @@ function runJourney(region: RegionDefinition, starter: number) {
         const target = { species: getSpecies(e.speciesId), level: e.level };
         time +=
             bonuses.searchTime +
-            maxHp(target) / wildDps(party.map(battler), target, bonuses.damage, doubles());
+            maxHp(target) /
+                wildDps(
+                    party.map(battler),
+                    target,
+                    bonuses.damage * assist(target, party),
+                    doubles()
+                );
         money += moneyYield(e.level) * bonuses.money * MF;
 
         const gained = battleXp(target) * bonuses.xp * XPF;
@@ -388,7 +417,12 @@ function runJourney(region: RegionDefinition, starter: number) {
             evolve(o);
         }
 
-        if (!owned.has(e.speciesId) && catchableIn(zone, e.speciesId)) {
+        if (!owned.has(e.speciesId) && catchableIn(zone, e.speciesId) && region.styler) {
+            // Ranger regions capture with the Capture Styler: no balls to buy.
+            if (rng() < catchChance(target.species.captureRate, STYLER_POWER, bonuses.catch)) {
+                catchSpecies(e.speciesId, e.level);
+            }
+        } else if (!owned.has(e.speciesId) && catchableIn(zone, e.speciesId)) {
             let ball = AUTO_BALL_ORDER.find(b => (balls[b] ?? 0) > 0);
             if (ball == null) {
                 ball = AUTO_BALL_ORDER.find(
