@@ -139,11 +139,30 @@ interface FormData {
     baseExp: number;
 }
 
+/** Pokémon Ranger's Field Abilities, used on Almia's obstacles. */
+export type FieldAbility =
+    | "cut"
+    | "crush"
+    | "tackle"
+    | "burn"
+    | "soak"
+    | "electrify"
+    | "recharge"
+    | "psyPower";
+
+/** An obstacle that needs a Pokémon with this Field Ability at this power (or more). */
+export interface FieldNeed {
+    ability: FieldAbility;
+    power: number;
+}
+
 export interface EncounterEntry {
     id: number;
     weight: number;
     minLevel: number;
     maxLevel: number;
+    /** Behind an obstacle: only appears once a box Pokémon has the Field Ability for it. */
+    obstacle?: FieldNeed;
     /** HeartGold/SoulSilver tables that change with the time of day: the weight at each time. */
     byTime?: Record<TimeOfDay, number>;
 }

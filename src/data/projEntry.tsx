@@ -1,3 +1,4 @@
+import { fieldPowers as boxFieldPowers, meetsFieldNeed } from "game/pokemon/almia";
 import type { Layer } from "game/layers";
 import { createLayer } from "game/layers";
 import { persistent } from "game/persistence";
@@ -301,6 +302,9 @@ export const main = createLayer("main", layer => {
     const radarChain = persistent<RadarChain>({ zoneId: "", speciesId: 0, count: 0 }, false);
 
     /** What this journey has added to its places' pools: swarms and the contest. */
+    /** The box's strongest Field Ability powers, for Almia's obstacles. */
+    const fieldPowers = computed(() => boxFieldPowers(Object.keys(box.value).map(Number)));
+
     const zoneExtras = computed<ZoneExtras>(() => ({
         swarms: swarmsJoined.value,
         bugContest: contestEntered.value,
@@ -315,7 +319,8 @@ export const main = createLayer("main", layer => {
             radarChain.value.speciesId !== 0
                 ? radarChain.value
                 : undefined,
-        palPark: hof.palParkRegions.value
+        palPark: hof.palParkRegions.value,
+        fieldPowers: fieldPowers.value
     }));
 
     // Transient state: rebuilt on load.
@@ -1763,6 +1768,7 @@ export const main = createLayer("main", layer => {
         if (special.postGame === true && !champion.value) return false;
         if (special.kind === "legendary") {
             if (special.keyItem != null && !keyItems.value[special.keyItem]) return false;
+            if (!meetsFieldNeed(special.fieldNeed, fieldPowers.value)) return false;
         }
         return true;
     }
@@ -1957,6 +1963,7 @@ export const main = createLayer("main", layer => {
         eggShinyMultiplier,
         pokeblockGain,
         pokeAssist,
+        fieldPowers,
         contestSeconds,
         contestWinChance,
         fameBonus,

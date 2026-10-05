@@ -11,6 +11,7 @@ import { JOHTO_GYMS, johtoFinale } from "./johto";
 import { ORANGE_TRIALS, orangeFinale } from "./orange";
 import { SEVII_TRIALS, seviiFinale } from "./sevii";
 import { SINNOH_GYMS, sinnohFinale } from "./sinnoh";
+import { ALMIA_MISSIONS, almiaFinale } from "./almia";
 import { FIORE_MISSIONS, fioreFinale } from "./fiore";
 import type { GymDefinition, TrainerDefinition } from "./trainers";
 import { championFor, ELITE_FOUR, GYMS } from "./trainers";
@@ -236,6 +237,28 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         levelCaps: [16, 22, 26, 31, 35, 40, 44, 49, 58, 100],
         fame: 26,
         requires: "sinnoh",
+        requiresCompletePokedex: true,
+        newestSpecies: 493,
+        styler: true
+    },
+    almia: {
+        id: "almia",
+        name: "Almia",
+        blurb: "Pokémon Ranger: Shadows of Almia: the Capture Styler again, Field Abilities that clear obstacles, and Team Dim Sun's Shadow Crystal.",
+        color: "#7C3AED",
+        starters: [396, 417, 446],
+        startLevel: 5,
+        startingKeyItems: [],
+        shopTier: 0,
+        trials: ALMIA_MISSIONS,
+        trialNoun: "missions",
+        finaleName: "Altru Tower",
+        finaleBlurb:
+            "Operation Brighton: the Sinis Trio at the Ranger Union and up Altru Tower, then Blake Hall's Dusknoir and Darkrai back-to-back (your party is healed between battles).",
+        finale: () => almiaFinale(),
+        levelCaps: [16, 22, 26, 31, 35, 40, 44, 49, 58, 100],
+        fame: 27,
+        requires: "fiore",
         requiresCompletePokedex: true,
         newestSpecies: 493,
         styler: true
