@@ -105,7 +105,8 @@ function dexCaught(): number {
 }
 let fame = 0;
 const hof: Partial<Record<HofUpgradeId, number>> = {};
-const enshrined = new Set<number>();
+/** Hall of Fame entries, per region: `${region}:${id}` (each region keeps its own). */
+const enshrined = new Set<string>();
 const clears: Partial<Record<RegionId, number>> = {};
 let totalTime = 0;
 /** Hoenn's double battles, once reached: a partner attacks beside the active Pokémon. */
@@ -334,12 +335,15 @@ function runJourney(region: RegionDefinition, starter: number) {
                         regionFame: region.fame,
                         dexCaught: dexCaught(),
                         shinyCaught: 0,
-                        newSpecies: new Set(team.map(hallOfFameId).filter(id => !enshrined.has(id)))
-                            .size,
+                        newSpecies: new Set(
+                            team
+                                .map(hallOfFameId)
+                                .filter(id => !enshrined.has(`${region.id}:${id}`))
+                        ).size,
                         firstClear: (clears[region.id] ?? 0) === 0,
                         rematch: strength
                     });
-                    team.forEach(id => enshrined.add(hallOfFameId(id)));
+                    team.forEach(id => enshrined.add(`${region.id}:${hallOfFameId(id)}`));
                     clears[region.id] = (clears[region.id] ?? 0) + 1;
                     fame += gain;
                     console.log(`  +${gain} Fame`);
@@ -420,7 +424,10 @@ function runJourney(region: RegionDefinition, starter: number) {
 
 function spendFame() {
     for (;;) {
-        const options = HOF_UPGRADE_LIST.filter(u => (hof[u.id] ?? 0) < u.maxLevel)
+        // The Day Care and Contest upgrades don't change battles, which is all this plays.
+        const options = HOF_UPGRADE_LIST.filter(
+            u => u.mechanic == null && (hof[u.id] ?? 0) < u.maxLevel
+        )
             .map(u => ({ u, cost: upgradeCost(u, hof[u.id] ?? 0) }))
             .sort((a, b) => a.cost - b.cost);
         const best = options[0];

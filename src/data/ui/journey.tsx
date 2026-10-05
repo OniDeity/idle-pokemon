@@ -7,16 +7,22 @@ import hof from "data/layers/hof";
 import type { BallMode, BattleState, CatchMode, LogEntry } from "data/projEntry";
 import { main } from "data/projEntry";
 import player from "game/player";
-import { AUTOMATIONS, ballCatchChance } from "game/pokemon/balance";
+import {
+    AUTOMATIONS,
+    ballCatchChance,
+    FAME_PER_NEW_SPECIES,
+    speciesPower
+} from "game/pokemon/balance";
 import { getSpecies, isShadow } from "game/pokemon/data";
 import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
 import { ZONES_BY_ID } from "game/pokemon/zones";
-import { POKEDEX_SIZE } from "game/pokemon/pokedex";
+import { POKEDEX_SIZE, speciesObtainableIn } from "game/pokemon/pokedex";
 import type { BallId } from "game/pokemon/items";
 import { APRICORN_BALLS, BALLS } from "game/pokemon/items";
 import { maxHp, xpForLevel } from "game/pokemon/stats";
 import type { RegionDefinition } from "game/pokemon/regions";
-import { REGION_LIST, startersFor } from "game/pokemon/regions";
+import { REGION_LIST, REGIONS, startersFor } from "game/pokemon/regions";
+import type { RegionId } from "game/pokemon/zones";
 import { formatTime } from "util/bignum";
 import {
     BadgeIcon,
@@ -159,6 +165,53 @@ function lockedReason(region: RegionDefinition): string {
         : "";
 }
 
+/** Fully evolved, non-legendary species each region offers, strongest first (worked out once). */
+const regionRoster = new Map<RegionId, number[]>();
+function rosterOf(region: RegionId): number[] {
+    let roster = regionRoster.get(region);
+    if (roster == null) {
+        const newest = REGIONS[region].newestSpecies ?? 386;
+        const offered = speciesObtainableIn([region]);
+        roster = [...offered]
+            .map(id => getSpecies(id))
+            .filter(
+                s =>
+                    !s.legendary && !s.evolutions.some(e => offered.has(e.into) && e.into <= newest)
+            )
+            .sort((a, b) => speciesPower(b) - speciesPower(a))
+            .map(s => s.id);
+        regionRoster.set(region, roster);
+    }
+    return roster;
+}
+
+/**
+ * A suggested team for the chosen region: the strongest Pokémon it offers that aren't in its
+ * Hall of Fame yet, each worth extra Fame if they clear the finale with you.
+ */
+function renderSuggestedTeam(region: RegionDefinition) {
+    const team = rosterOf(region.id)
+        .filter(id => !hof.isEnshrined(id, region.id))
+        .slice(0, 6);
+    if (team.length === 0) return null;
+    return (
+        <div class="pk-partner-picker">
+            <p class="pk-small">
+                <b>Suggested team</b>: the strongest Pokémon {region.name} offers that aren't in its
+                Hall of Fame yet (+{FAME_PER_NEW_SPECIES} Fame each when they clear the{" "}
+                {region.finaleName} with you).
+            </p>
+            <div class="pk-partner-choices">
+                {team.map(id => (
+                    <span class="pk-partner-choice" title={getSpecies(id).name}>
+                        <Sprite id={id} size={40} />
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function renderStarterSelect() {
     const again = hof.timesEntered.value > 0;
     const region = main.regionDef.value;
@@ -207,8 +260,9 @@ function renderStarterSelect() {
                 ))}
             </div>
             {again && hof.mechanicUnlocked("partner") && main.partnerChoices.value.length > 0
-                ? renderPartnerPicker()
+                ? renderPartnerPicker(region)
                 : null}
+            {again ? renderSuggestedTeam(region) : null}
             {region.allStarters === true ? (
                 <p class="pk-small pk-muted">
                     Both {region.starters.map(id => getSpecies(id).name).join(" and ")} join you;
@@ -226,12 +280,18 @@ function renderStarterSelect() {
 }
 
 /** Bring a Partner: one Hall of Fame Pokémon to start the journey beside the starter. */
-function renderPartnerPicker() {
+function renderPartnerPicker(region: RegionDefinition) {
     const chosen = main.journeyPartner.value;
+    // Partners new to this region's Hall of Fame first: they're worth extra Fame here.
+    const fresh = (id: number) => !hof.isEnshrined(id, region.id);
+    const choices = [...main.partnerChoices.value].sort(
+        (a, b) => Number(fresh(b.id)) - Number(fresh(a.id))
+    );
     return (
         <div class="pk-partner-picker">
             <p class="pk-small">
-                <b>Bring a partner</b> from your Hall of Fame (joins at the starters' level):
+                <b>Bring a partner</b> from your Hall of Fame (joins at the starters' level; ★ ones
+                aren't in {region.name}'s Hall of Fame yet):
             </p>
             <div class="pk-partner-choices">
                 <button
@@ -241,11 +301,17 @@ function renderPartnerPicker() {
                 >
                     —
                 </button>
-                {main.partnerChoices.value.map(p => (
+                {choices.map(p => (
                     <button
-                        class={["pk-partner-choice", chosen === p.id ? "selected" : ""]}
+                        class={[
+                            "pk-partner-choice",
+                            chosen === p.id ? "selected" : "",
+                            fresh(p.id) ? "fresh" : ""
+                        ]}
                         onClick={() => (main.journeyPartner.value = p.id)}
-                        title={`${getSpecies(p.id).name}${p.shiny ? " ✨" : ""}`}
+                        title={`${getSpecies(p.id).name}${p.shiny ? " ✨" : ""}${
+                            fresh(p.id) ? ` · new to ${region.name}'s Hall of Fame` : ""
+                        }`}
                     >
                         <Sprite id={p.id} shiny={p.shiny} size={40} />
                     </button>

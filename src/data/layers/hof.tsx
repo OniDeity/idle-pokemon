@@ -1,7 +1,7 @@
 /**
  * The Hall of Fame: the prestige layer. After clearing a region's finale, the player enshrines
  * their team and starts a new journey in any unlocked region, trading the run for Fame.
- * Teams with Pokémon never enshrined before earn the most. The Pokédex is kept.
+ * Teams with Pokémon not yet in that region's Hall of Fame earn the most. The Pokédex is kept.
  */
 import type { ContestCategory, ContestRank } from "game/pokemon/contests";
 import { main } from "data/projEntry";
@@ -170,14 +170,18 @@ const layer = createLayer(id, () => {
         return progress == null || progress.caught >= progress.needed;
     }
 
-    function isEnshrined(speciesId: number) {
+    /**
+     * Whether a Pokémon is already in a region's Hall of Fame (this journey's region by default).
+     * Each region keeps its own: a Kanto Champion is still a new face in Johto. It's read from the
+     * Champions entries of finished journeys, which have always recorded their region.
+     */
+    function isEnshrined(speciesId: number, region: RegionId = main.region.value) {
         const key = hallOfFameId(speciesId);
-        return (
-            enshrined.value[key] === true ||
-            // Entries from finished journeys count too (older saves didn't track this set).
-            entries.value.some(
-                e => e.run <= timesEntered.value && e.team.some(p => hallOfFameId(p.id) === key)
-            )
+        return entries.value.some(
+            e =>
+                e.run <= timesEntered.value &&
+                (e.region ?? "kanto") === region &&
+                e.team.some(p => hallOfFameId(p.id) === key)
         );
     }
 
@@ -188,7 +192,10 @@ const layer = createLayer(id, () => {
         return entry?.team.map(p => p.id) ?? main.partyIds.value;
     });
 
-    /** Team members never enshrined before (a Gyarados and a Gyarados ♀ count once). */
+    /**
+     * Team members not yet in this region's Hall of Fame (a Gyarados and a Gyarados ♀ count
+     * once).
+     */
     const newSpecies = computed((): number[] =>
         clearingTeam.value.filter(
             (id, i, team) =>
@@ -307,7 +314,7 @@ const layer = createLayer(id, () => {
                         <div class="pk-small">
                             {region.name} clear: {region.fame} · Pokédex:{" "}
                             {Math.floor(dex.caughtCount.value / 5)} · Shinies:{" "}
-                            {dex.shinyCount.value * 2} · New to the Hall of Fame:{" "}
+                            {dex.shinyCount.value * 2} · New to {region.name}'s Hall of Fame:{" "}
                             {newSpecies.value.length} × {FAME_PER_NEW_SPECIES}
                             {clearCount(region.id) === 0 ? " · First clear ×1.5" : ""}
                             {main.fameBonus.value > 1
@@ -330,8 +337,8 @@ const layer = createLayer(id, () => {
                             </div>
                         ) : (
                             <div class="pk-small pk-muted">
-                                Every Pokémon on this team has been enshrined before. Clear a region
-                                with new faces for more Fame.
+                                Every Pokémon on this team is already in {region.name}'s Hall of
+                                Fame. Clear with new faces for more Fame.
                             </div>
                         )}
                     </div>
@@ -469,7 +476,9 @@ const layer = createLayer(id, () => {
 
                     {page === "upgrades" ? (
                         <Panel>
-                            {HOF_UPGRADE_LIST.map(upgrade => {
+                            {HOF_UPGRADE_LIST.filter(
+                                u => u.mechanic == null || mechanicUnlocked(u.mechanic)
+                            ).map(upgrade => {
                                 const current = level(upgrade.id);
                                 const cost = upgradeCost(upgrade, current);
                                 const maxed = current >= upgrade.maxLevel;
