@@ -1,11 +1,14 @@
 /**
  * Regenerates the static Pokémon data the game ships with:
- *   - src/data/pokemon/species.json     Species #1-386 (stats, types, catch rate, evolutions)
+ *   - src/data/pokemon/species.json     Species #1-493 (stats, types, catch rate, evolutions)
  *   - src/data/pokemon/encounters.json  Wild encounter pools: Red/Blue for Kanto, FireRed/LeafGreen for Sevii,
- *                                      HeartGold/SoulSilver for Johto, Ruby/Sapphire/Emerald for Hoenn
+ *                                      HeartGold/SoulSilver for Johto, Ruby/Sapphire/Emerald for Hoenn,
+ *                                      Diamond/Pearl/Platinum for Sinnoh
+ *   - src/data/pokemon/sinnohExtras.json Sinnoh's Poké Radar, swarm, dual-slot and Honey Tree tables
  *   - src/data/pokemon/typeChart.json   Non-neutral type matchups
  *   - src/data/pokemon/forms.json       Official alternate forms of #1-251 (regional forms, Pikachu
- *                                       caps, partner Pokémon, Unown letters, Spiky-eared Pichu)
+ *                                       caps, partner Pokémon, Unown letters, Spiky-eared Pichu) and
+ *                                       Gen 4's (cloaks, seas, Rotom, Giratina, Shaymin, Arceus)
  *
  * Source: the PokeAPI CSV dump on GitHub (https://github.com/PokeAPI/pokeapi/tree/master/data/v2/csv).
  * Reading the CSVs directly means one request per table instead of hundreds of REST calls.
@@ -16,14 +19,18 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const CSV_BASE = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv";
-/** Species data covers Gens 1-3; Gen 3 Pokémon join the Pokédex as regions bring them. */
-const MAX_SPECIES = 386;
-/** Encounter tables before Hoenn, and official forms, stay Gen 1-2; Hoenn's go to #386. */
+/** Species data covers Gens 1-4; later Pokémon join the Pokédex as regions bring them. */
+const MAX_SPECIES = 493;
+/** Encounter tables before Hoenn stay Gen 1-2; Hoenn's go to #386, Sinnoh's to #493. */
 const MAX_DEX = 251;
+const MAX_HOENN = 386;
+/** Official forms of Gen 4 species, numbered after the earlier ones so their ids never move. */
+const GEN4_FIRST = 387;
 const RED_BLUE_VERSION_IDS = new Set(["1", "2"]);
 const FRLG_VERSION_IDS = new Set(["10", "11"]);
 const HGSS_VERSION_IDS = new Set(["15", "16"]);
 const RSE_VERSION_IDS = new Set(["7", "8", "9"]);
+const DPPT_VERSION_IDS = new Set(["12", "13", "14"]);
 const ENGLISH = "9";
 
 /**
@@ -370,6 +377,197 @@ const HOENN_ZONE_AREAS: Record<string, [string, string][]> = {
 };
 
 /**
+ * Sinnoh zones from Diamond, Pearl and Platinum. Towns with only water join a nearby route, and
+ * multi-floor dungeons are merged.
+ */
+const SINNOH_ZONE_AREAS: Record<string, [string, string][]> = {
+    route201: [["sinnoh-route-201", ""]],
+    lakeVerity: [
+        ["lake-verity", "before-galactic-intervention"],
+        ["lake-verity", "after-galactic-intervention"],
+        ["twinleaf-town", ""]
+    ],
+    route202: [["sinnoh-route-202", ""]],
+    route203: [["sinnoh-route-203", ""]],
+    oreburghGate: [
+        ["oreburgh-gate", "1f"],
+        ["oreburgh-gate", "b1f"]
+    ],
+    oreburghMine: [
+        ["oreburgh-mine", "1f"],
+        ["oreburgh-mine", "b1f"]
+    ],
+    route204: [
+        ["sinnoh-route-204", "south-towards-jubilife-city"],
+        ["sinnoh-route-204", "north-towards-floaroma-town"]
+    ],
+    ravagedPath: [["ravaged-path", ""]],
+    valleyWindworks: [["valley-windworks", ""]],
+    route205: [
+        ["sinnoh-route-205", "south-towards-floaroma-town"],
+        ["sinnoh-route-205", "east-towards-eterna-city"],
+        ["eterna-city", ""]
+    ],
+    eternaForest: [["eterna-forest", ""]],
+    route211West: [
+        ["sinnoh-route-211", "west-towards-eterna-city"],
+        ["mt-coronet", "1f-route-211"]
+    ],
+    oldChateau: [
+        "entrance",
+        "dining-room",
+        "2f",
+        "2f-private-room",
+        "2f-leftmost-room",
+        "2f-left-room",
+        "2f-middle-room",
+        "2f-right-room",
+        "2f-rightmost-room"
+    ].map(a => ["old-chateau", a] as [string, string]),
+    route206: [["sinnoh-route-206", ""]],
+    waywardCave: [
+        ["wayward-cave", "1f"],
+        ["wayward-cave", "b1f"]
+    ],
+    route207: [["sinnoh-route-207", ""]],
+    mtCoronet: [["mt-coronet", "1f-route-207"]],
+    route208: [["sinnoh-route-208", ""]],
+    route209: [["sinnoh-route-209", ""]],
+    lostTower: ["1f", "2f", "3f", "4f", "5f"].map(a => ["lost-tower", a] as [string, string]),
+    solaceonRuins: [
+        "1f",
+        "2f",
+        "b1f-a",
+        "b1f-b",
+        "b1f-c",
+        "b2f-a",
+        "b2f-b",
+        "b2f-c",
+        "b3f-a",
+        "b3f-b",
+        "b3f-c",
+        "b3f-d",
+        "b3f-e",
+        "b4f-a",
+        "b4f-b",
+        "b4f-c",
+        "b4f-d",
+        "b5f"
+    ].map(a => ["solaceon-ruins", a] as [string, string]),
+    route210South: [["sinnoh-route-210", "south-towards-solaceon-town"]],
+    route215: [["sinnoh-route-215", ""]],
+    route214: [["sinnoh-route-214", ""]],
+    maniacTunnel: [
+        ["ruin-maniac-cave", "0-9-different-unown-caught"],
+        ["ruin-maniac-cave", "10-25-different-unown-caught"],
+        ["maniac-tunnel", "26-plus-different-unown-caught"]
+    ],
+    valorLakefront: [["valor-lakefront", ""]],
+    route213: [
+        ["sinnoh-route-213", ""],
+        ["pastoria-city", ""]
+    ],
+    route212: [
+        ["sinnoh-route-212", "north-towards-hearthome-city"],
+        ["sinnoh-route-212", "east-towards-pastoria-city"]
+    ],
+    greatMarsh: ["1", "2", "3", "4", "5", "6"].map(
+        n => ["great-marsh", `area-${n}`] as [string, string]
+    ),
+    route210West: [
+        ["sinnoh-route-210", "west-towards-celestic-town"],
+        ["celestic-town", ""]
+    ],
+    route211East: [["sinnoh-route-211", "east-towards-celestic-town"]],
+    fuegoIronworks: [["fuego-ironworks", ""]],
+    route218: [
+        ["sinnoh-route-218", ""],
+        ["canalave-city", ""]
+    ],
+    ironIsland: ["", "1f", "b1f-left", "b1f-right", "b2f-left", "b2f-right", "b3f"].map(
+        a => ["iron-island", a] as [string, string]
+    ),
+    seaRoutes219to221: [
+        ["sinnoh-route-219", ""],
+        ["sinnoh-sea-route-220", ""],
+        ["sinnoh-route-221", ""]
+    ],
+    lakeValor: [["lake-valor", ""]],
+    route216: [
+        ["sinnoh-route-216", ""],
+        ["mt-coronet", "1f-route-216"]
+    ],
+    route217: [["sinnoh-route-217", ""]],
+    acuityLakefront: [["acuity-lakefront", ""]],
+    lakeAcuity: [["lake-acuity", ""]],
+    mtCoronetPeak: [
+        "2f",
+        "3f",
+        "4f",
+        "4f-small-room",
+        "5f",
+        "6f",
+        "1f-from-exterior",
+        "exterior-snowfall",
+        "exterior-blizzard",
+        "b1f"
+    ].map(a => ["mt-coronet", a] as [string, string]),
+    route222: [
+        ["sinnoh-route-222", ""],
+        ["sunyshore-city", ""]
+    ],
+    route223: [
+        ["sinnoh-sea-route-223", ""],
+        ["sinnoh-pokemon-league", ""]
+    ],
+    sinnohVictoryRoad: ["1f", "2f", "b1f"].map(a => ["sinnoh-victory-road", a] as [string, string]),
+    trophyGarden: [["trophy-garden", ""]],
+    victoryRoadBack: ["inside", "inside-b1f", "inside-exit"].map(
+        a => ["sinnoh-victory-road", a] as [string, string]
+    ),
+    route224: [["sinnoh-route-224", ""]],
+    route225: [["sinnoh-route-225", ""]],
+    route226: [["sinnoh-sea-route-226", ""]],
+    route227: [["sinnoh-route-227", ""]],
+    starkMountain: [
+        ["stark-mountain", ""],
+        ["stark-mountain", "entrance"],
+        ["stark-mountain", "inside"]
+    ],
+    route228: [["sinnoh-route-228", ""]],
+    route229: [
+        ["sinnoh-route-229", ""],
+        ["resort-area", ""]
+    ],
+    route230: [["sinnoh-sea-route-230", ""]],
+    snowpointTemple: ["1f", "b1f", "b2f", "b3f", "b4f", "b5f"].map(
+        a => ["snowpoint-temple", a] as [string, string]
+    ),
+    turnbackCave: [
+        "before-pillar-1",
+        "pillar-1",
+        "between-pillars-1-and-2",
+        "pillar-2",
+        "between-pillars-2-and-3",
+        "pillar-3",
+        "after-pillar-3"
+    ].map(a => ["turnback-cave", a] as [string, string]),
+    sendoffSpring: [["sendoff-spring", ""]]
+};
+
+/**
+ * Diamond/Pearl/Platinum tables that only apply under a condition the game turns into its own
+ * feature: the Poké Radar's patches, swarms, and a Game Boy Advance game in the DS's second slot
+ * (Pal Park's regions). Everything else with a condition is left in the plain tables.
+ */
+function sinnohExtra(conditions: string[]): string | null {
+    if (conditions.includes("radar-on")) return "radar";
+    if (conditions.includes("swarm-yes")) return "swarm";
+    const slot2 = conditions.find(c => c.startsWith("slot2-") && c !== "slot2-none");
+    return slot2 != null ? `dual-${slot2.slice(6)}` : null;
+}
+
+/**
  * HeartGold/SoulSilver encounters that only happen under conditions the game doesn't have
  * (radio shows playing Hoenn or Sinnoh sounds, swarms, the Bug-Catching Contest, Safari Zone
  * objects placed for a while). Swarms and the contest come back as their own features.
@@ -403,7 +601,32 @@ const STONE_BY_ITEM_ID: Record<string, string> = {
     "83": "thunderStone",
     "84": "waterStone",
     "85": "leafStone",
-    "80": "sunStone"
+    "80": "sunStone",
+    "107": "shinyStone",
+    "108": "duskStone",
+    "109": "dawnStone",
+    "885": "iceStone"
+};
+
+/** Items held while leveling up to evolve (at night or by day, which the game ignores). */
+const LEVEL_ITEM_BY_ITEM_ID: Record<string, string> = {
+    "110": "ovalStone",
+    "303": "razorClaw",
+    "304": "razorFang"
+};
+
+/**
+ * Evolutions that need a move become level evolutions at the level the Pokémon learns it in
+ * Diamond/Pearl/Platinum (Mimic, Double Hit, Rollout, AncientPower).
+ */
+const MOVE_EVOLUTION_LEVELS: Record<number, number> = {
+    122: 18, // Mime Jr. → Mr. Mime
+    185: 17, // Bonsly → Sudowoodo
+    424: 32, // Aipom → Ambipom
+    463: 33, // Lickitung → Lickilicky
+    465: 40, // Tangela → Tangrowth
+    469: 33, // Yanma → Yanmega
+    473: 34 // Piloswine → Mamoswine
 };
 
 /** Items a Pokémon must hold to evolve by trade. */
@@ -414,7 +637,12 @@ const HELD_ITEM_BY_ITEM_ID: Record<string, string> = {
     "229": "upGrade",
     "203": "deepSeaTooth",
     "204": "deepSeaScale",
-    "580": "prismScale"
+    "580": "prismScale",
+    "298": "protector",
+    "299": "electirizer",
+    "300": "magmarizer",
+    "301": "dubiousDisc",
+    "302": "reaperCloth"
 };
 
 const GROWTH_RATES: Record<string, string> = {
@@ -451,6 +679,8 @@ interface Evolution {
     friendship?: boolean;
     /** For trade evolutions: an item it must hold, used up alongside the Link Cable. */
     heldItem?: string;
+    /** Only Pokémon of this gender evolve this way (where the species has a female form). */
+    gender?: "female" | "male";
 }
 
 async function main() {
@@ -528,16 +758,35 @@ async function main() {
         const from = Number(preEvolutionOf.get(r.evolved_species_id));
         if (into > MAX_SPECIES || !from || from > MAX_SPECIES) continue;
         // The game uses later generations' easier methods where they replaced one: Feebas's
-        // Beauty became trading while holding a Prism Scale (Black/White onward).
-        if (r.minimum_beauty !== "") continue;
-        // Later generations add alternate rows (regional forms, new items); the first is the original.
+        // Beauty became trading while holding a Prism Scale (Black/White onward), and evolving at
+        // a special place (Magnezone, Probopass, Leafeon, Glaceon) became using a stone.
+        if (r.minimum_beauty !== "" || r.location_id !== "") continue;
+        // Other alternate rows (regional forms, cloaks and seas, new items) come later; the first
+        // is the original.
         const key = `${from}->${into}`;
         if (seenEvolutions.has(key)) continue;
         seenEvolutions.add(key);
+        // Gender-locked evolutions (Combee into Vespiquen) only matter for species with a female
+        // form; for the others, evolving keeps the original, so both branches stay open.
+        const gender =
+            r.gender_id === "1"
+                ? ({ gender: "female" } as const)
+                : r.gender_id === "2"
+                  ? ({ gender: "male" } as const)
+                  : {};
 
         let evolution: Evolution;
-        if (r.evolution_trigger_id === "1" && r.minimum_level !== "") {
-            evolution = { into, method: "level", level: Number(r.minimum_level) };
+        if (r.evolution_trigger_id === "1" && r.known_move_id !== "") {
+            // Learning a move becomes reaching the level it's learned at.
+            evolution = { into, method: "level", level: MOVE_EVOLUTION_LEVELS[into], ...gender };
+        } else if (r.evolution_trigger_id === "1" && r.party_species_id !== "") {
+            // Mantyke evolves with a Remoraid in the party; here it simply grows up.
+            evolution = { into, method: "level", level: 20, ...gender };
+        } else if (r.evolution_trigger_id === "1" && LEVEL_ITEM_BY_ITEM_ID[r.held_item_id]) {
+            // Leveling up holding an item (Razor Claw, Razor Fang, Oval Stone) uses it up.
+            evolution = { into, method: "stone", stone: LEVEL_ITEM_BY_ITEM_ID[r.held_item_id] };
+        } else if (r.evolution_trigger_id === "1" && r.minimum_level !== "") {
+            evolution = { into, method: "level", level: Number(r.minimum_level), ...gender };
         } else if (r.evolution_trigger_id === "1" && r.minimum_happiness !== "") {
             // Friendship evolutions become level evolutions (babies grow up fast, others at 30),
             // or happen early with a Soothe Bell.
@@ -548,7 +797,12 @@ async function main() {
             evolution =
                 heldItem != null ? { into, method: "trade", heldItem } : { into, method: "trade" };
         } else if (r.evolution_trigger_id === "3" && STONE_BY_ITEM_ID[r.trigger_item_id]) {
-            evolution = { into, method: "stone", stone: STONE_BY_ITEM_ID[r.trigger_item_id] };
+            evolution = {
+                into,
+                method: "stone",
+                stone: STONE_BY_ITEM_ID[r.trigger_item_id],
+                ...gender
+            };
         } else {
             continue;
         }
@@ -599,18 +853,21 @@ async function main() {
         ...ZONE_AREAS,
         ...SEVII_ZONE_AREAS,
         ...JOHTO_ZONE_AREAS,
-        ...HOENN_ZONE_AREAS
+        ...HOENN_ZONE_AREAS,
+        ...SINNOH_ZONE_AREAS
     };
     for (const [zoneId, areas] of Object.entries(allZones)) {
         zoneVersions.set(
             zoneId,
-            zoneId in HOENN_ZONE_AREAS
-                ? RSE_VERSION_IDS
-                : zoneId in JOHTO_ZONE_AREAS
-                  ? HGSS_VERSION_IDS
-                  : zoneId in SEVII_ZONE_AREAS
-                    ? FRLG_VERSION_IDS
-                    : RED_BLUE_VERSION_IDS
+            zoneId in SINNOH_ZONE_AREAS
+                ? DPPT_VERSION_IDS
+                : zoneId in HOENN_ZONE_AREAS
+                  ? RSE_VERSION_IDS
+                  : zoneId in JOHTO_ZONE_AREAS
+                    ? HGSS_VERSION_IDS
+                    : zoneId in SEVII_ZONE_AREAS
+                      ? FRLG_VERSION_IDS
+                      : RED_BLUE_VERSION_IDS
         );
         for (const [location, area] of areas) {
             const id = areaKey.get(`${locationId.get(location)}/${area}`);
@@ -641,27 +898,46 @@ async function main() {
         maxLevel: number;
         byTime: Record<(typeof TIMES)[number], number>;
     };
+    // Pools by zone. Sinnoh's conditional tables (Poké Radar, swarms, dual-slot) and Honey
+    // Trees collect under their own keys ("radar/route201", "honey/a") for sinnohExtras.json.
     const pools: Record<string, Record<string, Map<number, Acc>>> = {};
     const timedPools = new Set<string>();
     for (const r of encounterRows) {
         const slot = slots.get(r.encounter_slot_id);
-        const pool = POOL_BY_METHOD[methodName.get(slot?.encounter_method_id ?? "") ?? ""];
+        const method = methodName.get(slot?.encounter_method_id ?? "") ?? "";
+        const honey = method === "honey-tree" && DPPT_VERSION_IDS.has(r.version_id);
+        const pool = honey ? "walk" : POOL_BY_METHOD[method];
         const headbuttZone = headbuttZoneByArea.get(r.location_area_id);
         const borrowed =
             pool === "headbutt" && headbuttZone != null && HGSS_VERSION_IDS.has(r.version_id);
         const zoneId = borrowed ? headbuttZone : zoneByArea.get(r.location_area_id);
-        if (zoneId == null || (!borrowed && !zoneVersions.get(zoneId)?.has(r.version_id))) {
+        const conditions = conditionsOf.get(r.id) ?? [];
+        // Every tree shares its group's table, wherever it grows.
+        let key = zoneId;
+        if (honey) {
+            const group = conditions.find(c => c.startsWith("honey-tree-group-"));
+            key = group != null ? `honey/${group.slice(-1)}` : undefined;
+        } else if (zoneId == null || (!borrowed && !zoneVersions.get(zoneId)?.has(r.version_id))) {
             continue;
         }
         const id = Number(r.pokemon_id);
-        const maxDex = zoneId in HOENN_ZONE_AREAS ? MAX_SPECIES : MAX_DEX;
-        if (zoneId == null || slot == null || pool == null || id > maxDex) continue;
-        const conditions = conditionsOf.get(r.id) ?? [];
-        if (conditions.some(excludedCondition)) continue;
+        const sinnoh = honey || (zoneId != null && zoneId in SINNOH_ZONE_AREAS);
+        const maxDex = sinnoh
+            ? MAX_SPECIES
+            : zoneId != null && zoneId in HOENN_ZONE_AREAS
+              ? MAX_HOENN
+              : MAX_DEX;
+        if (key == null || slot == null || pool == null || id > maxDex) continue;
+        if (sinnoh && !honey) {
+            const extra = sinnohExtra(conditions);
+            if (extra != null) key = `${extra}/${zoneId}`;
+        } else if (conditions.some(excludedCondition)) {
+            continue;
+        }
         const times = TIMES.filter(t => conditions.includes(`time-${t}`));
-        if (times.length > 0) timedPools.add(`${zoneId}/${pool}`);
+        if (times.length > 0) timedPools.add(`${key}/${pool}`);
 
-        const zonePools = (pools[zoneId] ??= {});
+        const zonePools = (pools[key] ??= {});
         const entries = (zonePools[pool] ??= new Map());
         const acc = entries.get(id) ?? {
             weight: 0,
@@ -677,30 +953,49 @@ async function main() {
         entries.set(id, acc);
     }
 
+    const poolsOf = (key: string) =>
+        Object.fromEntries(
+            Object.entries(pools[key] ?? {}).map(([pool, entries]) => [
+                pool,
+                [...entries.entries()]
+                    .sort((a, b) => b[1].weight - a[1].weight)
+                    .map(([id, acc]) => {
+                        const timed = timedPools.has(`${key}/${pool}`);
+                        const { morning, day, night } = acc.byTime;
+                        const varies = morning !== day || day !== night;
+                        return {
+                            id,
+                            // A timed table counts each slot once per time of day.
+                            weight: timed ? (morning + day + night) / 3 : acc.weight,
+                            minLevel: acc.minLevel,
+                            maxLevel: acc.maxLevel,
+                            ...(timed && varies ? { byTime: { morning, day, night } } : {})
+                        };
+                    })
+            ])
+        );
+
+    const sinnohExtras = {
+        radar: extrasFor("radar"),
+        swarm: extrasFor("swarm"),
+        dualSlot: Object.fromEntries(
+            ["ruby", "sapphire", "emerald", "firered", "leafgreen"].map(game => [
+                game,
+                extrasFor(`dual-${game}`)
+            ])
+        ),
+        honey: Object.fromEntries(["a", "b", "c"].map(g => [g, poolsOf(`honey/${g}`).walk ?? []]))
+    };
+    function extrasFor(extra: string) {
+        return Object.fromEntries(
+            Object.keys(SINNOH_ZONE_AREAS)
+                .map(zoneId => [zoneId, poolsOf(`${extra}/${zoneId}`)] as const)
+                .filter(([, zonePools]) => Object.keys(zonePools).length > 0)
+        );
+    }
+
     const encounters = Object.fromEntries(
-        Object.keys(allZones).map(zoneId => [
-            zoneId,
-            Object.fromEntries(
-                Object.entries(pools[zoneId] ?? {}).map(([pool, entries]) => [
-                    pool,
-                    [...entries.entries()]
-                        .sort((a, b) => b[1].weight - a[1].weight)
-                        .map(([id, acc]) => {
-                            const timed = timedPools.has(`${zoneId}/${pool}`);
-                            const { morning, day, night } = acc.byTime;
-                            const varies = morning !== day || day !== night;
-                            return {
-                                id,
-                                // A timed table counts each slot once per time of day.
-                                weight: timed ? (morning + day + night) / 3 : acc.weight,
-                                minLevel: acc.minLevel,
-                                maxLevel: acc.maxLevel,
-                                ...(timed && varies ? { byTime: { morning, day, night } } : {})
-                            };
-                        })
-                ])
-            )
-        ])
+        Object.keys(allZones).map(zoneId => [zoneId, poolsOf(zoneId)])
     );
 
     // Borrowed Kanto Headbutt trees take their zone's grass levels.
@@ -738,36 +1033,56 @@ async function main() {
         [/^unown-/, "johto"],
         [/-spiky-eared$/, "johto"]
     ];
-    const forms = formRows
+    const formCandidates = formRows
         .filter(r => r.form_identifier !== "" && r.is_battle_only === "0" && r.is_mega === "0")
         .filter(r => !/gmax|totem/.test(r.identifier))
-        .map(r => ({ r, species: speciesOfPokemon.get(r.pokemon_id) ?? 0 }))
-        .filter(({ species }) => species > 0 && species <= MAX_DEX)
-        .map(({ r, species }, i) => {
-            const pokemonId = Number(r.pokemon_id);
-            const names = englishFormName.get(r.identifier);
-            // Forms that are their own Pokémon (regional forms, caps) keep PokeAPI's id; forms that
-            // only change looks (Unown letters) get ids from 4000.
-            const ownPokemon = pokemonId > 10000;
-            const baseName = displayName.get(String(species)) ?? r.identifier;
-            return {
-                id: ownPokemon ? pokemonId : 4000 + i,
-                speciesId: species,
-                identifier: r.identifier,
-                name:
-                    names?.pokemon_name || `${baseName} (${names?.form_name ?? r.form_identifier})`,
-                region: REGION_OF_FORM.find(([pattern]) => pattern.test(r.identifier))?.[1] ?? null,
-                // Unown A is the default Unown sprite; the repo has no front "201-a".
-                sprite: ownPokemon
-                    ? String(pokemonId)
-                    : r.form_identifier === "a"
-                      ? String(species)
-                      : `${species}-${r.form_identifier}`,
-                types: typesById.get(r.pokemon_id) ?? typesById.get(String(species)) ?? ["normal"],
-                baseStats: statsById.get(r.pokemon_id) ?? statsById.get(String(species)),
-                baseExp: baseExp.get(r.pokemon_id) || baseExp.get(String(species)) || 50
-            };
-        });
+        .map(r => ({ r, species: speciesOfPokemon.get(r.pokemon_id) ?? 0 }));
+    const formData = (r: Row, species: number, lookId: number) => {
+        const pokemonId = Number(r.pokemon_id);
+        const names = englishFormName.get(r.identifier);
+        // Forms that are their own Pokémon (regional forms, caps) keep PokeAPI's id; forms that
+        // only change looks (Unown letters) get ids from 4000, Gen 4's from 4200.
+        const ownPokemon = pokemonId > 10000;
+        const baseName = displayName.get(String(species)) ?? r.identifier;
+        return {
+            id: ownPokemon ? pokemonId : lookId,
+            speciesId: species,
+            identifier: r.identifier,
+            name: names?.pokemon_name || `${baseName} (${names?.form_name ?? r.form_identifier})`,
+            region:
+                species >= GEN4_FIRST
+                    ? "sinnoh"
+                    : (REGION_OF_FORM.find(([pattern]) => pattern.test(r.identifier))?.[1] ?? null),
+            // Unown A is the default Unown sprite; the repo has no front "201-a".
+            sprite: ownPokemon
+                ? String(pokemonId)
+                : r.form_identifier === "a"
+                  ? String(species)
+                  : `${species}-${r.form_identifier}`,
+            // Arceus takes its Plate's type.
+            types:
+                species === 493
+                    ? [r.form_identifier]
+                    : (typesById.get(r.pokemon_id) ?? typesById.get(String(species)) ?? ["normal"]),
+            baseStats: statsById.get(r.pokemon_id) ?? statsById.get(String(species)),
+            baseExp: baseExp.get(r.pokemon_id) || baseExp.get(String(species)) || 50
+        };
+    };
+    const forms = [
+        ...formCandidates
+            .filter(({ species }) => species > 0 && species <= MAX_DEX)
+            .map(({ r, species }, i) => formData(r, species, 4000 + i)),
+        // Gen 4's: Burmy's and Wormadam's cloaks, the East Sea's Shellos and Gastrodon, Rotom's
+        // appliances, Giratina's Origin Forme, Shaymin's Sky Forme and Arceus's types (the ones
+        // its Plates give in Gen 4). Default forms are the species itself; forms added by later
+        // games (Mothim's cloaks, Dialga's and Palkia's Origin Formes) wait for them.
+        ...formCandidates
+            .filter(({ species }) => species >= GEN4_FIRST && species <= MAX_SPECIES)
+            .filter(({ r, species }) => !(r.is_default === "1" && Number(r.pokemon_id) === species))
+            .filter(({ r }) => Number(r.introduced_in_version_group_id) <= 10)
+            .filter(({ r }) => r.identifier !== "arceus-unknown")
+            .map(({ r, species }, i) => formData(r, species, 4200 + i))
+    ];
 
     const dataDir = path.resolve(import.meta.dirname, "../src/data/pokemon");
     await mkdir(dataDir, { recursive: true });
@@ -775,6 +1090,10 @@ async function main() {
     await writeFile(
         path.join(dataDir, "encounters.json"),
         JSON.stringify(encounters, null, 1) + "\n"
+    );
+    await writeFile(
+        path.join(dataDir, "sinnohExtras.json"),
+        JSON.stringify(sinnohExtras, null, 1) + "\n"
     );
     await writeFile(path.join(dataDir, "forms.json"), JSON.stringify(forms, null, 1) + "\n");
     await writeFile(

@@ -1,7 +1,7 @@
 # Idle Pokémon: project memory
 
 An idle Pokémon game on Profectus 0.7 (Vue 3 TSX). Journeys through regions (Kanto → Orange
-Islands → Sevii Islands → Johto → Hoenn → Orre (Colosseum) → Orre (XD)), Gyms/trials and a
+Islands → Sevii Islands → Johto → Hoenn → Orre (Colosseum) → Orre (XD) → Sinnoh), Gyms/trials and a
 finale per region, a Hall of Fame prestige layer (Fame upgrades, automation), and a Pokédex kept
 across journeys.
 
@@ -15,8 +15,10 @@ across journeys.
   release without waiting to be asked: PR `dev` → `main`, merge when green, confirm
   https://onideity.github.io/idle-pokemon/ serves the new bundle.
 - Never put model identifiers in commits, PRs or code.
-- Don't scrape or work around protections on other sites (Bulbapedia is Cloudflare-blocked; the
-  Pokémon Fandom wiki's API and Serebii pages are fine). Sprites are our own copies/recolors.
+- References: Bulbapedia and Serebii first (the owner's choice), with PokeAPI for data. Don't
+  scrape or work around protections: Bulbapedia is Cloudflare-blocked from the sandbox, so use
+  Serebii (e.g. serebii.net/platinum/*.shtml) and the Pokémon Fandom wiki's API there. Sprites
+  are our own copies/recolors (`scripts/generateSpheres.py` draws the Underground's Spheres).
 
 ## Checks (what CI runs)
 
@@ -34,10 +36,11 @@ across journeys.
   (encounters, `ZoneExtras`), `regions.ts`, `trainers.ts`, `specials.ts` (gifts/trades/legendaries/
   bosses), `balance.ts`, `items.ts`, `mechanics.ts` (generation mechanics), `pokedex.ts`, and region
   files `kantoAnime.ts`, `orange.ts`, `sevii.ts`, `johto.ts`, `johtoAnime.ts`, `hoenn.ts`,
-  `hoennAnime.ts`, `colosseum.ts`, `xd.ts`.
+  `hoennAnime.ts`, `colosseum.ts`, `xd.ts`, `sinnoh.ts` (+ `underground.ts`).
 - `src/data/projEntry.tsx`: main layer state and game loop. Layers in `src/data/layers/`
   (party, map, mart, dex, hof); `src/data/automation.ts`; UI kit in `src/data/ui/components.tsx`.
-- Data: `scripts/fetchPokemonData.ts` (PokeAPI CSV → `src/data/pokemon/*.json`), sprite
+- Data: `scripts/fetchPokemonData.ts` (PokeAPI CSV → `src/data/pokemon/*.json`, plus
+  `sinnohExtras.json` for Sinnoh's radar/swarm/dual-slot/Honey Tree tables), sprite
   generators `scripts/generate*.py`, `scripts/fetchSprites.ts`.
 - Tests: `tests/pokemon/engine.test.ts`.
 
@@ -90,6 +93,26 @@ across journeys.
 - The simulator purifies Shadow Pokémon (party only, like the game); scoring a member at the
   level cap instead of its level was tried and is wrong: wild XP is tiny next to a level's worth.
 
+- Sinnoh (`sinnoh.ts`, v2.7): DPPt encounters (species to #493 in Sinnoh zones only), Platinum's
+  Gyms/E4/Cynthia; East Sea Shellos via `eastSea()`; Honey Trees (journey state in
+  `main.honeyTrees`, Munchlax trees from the Trainer ID); Pal Park (`palPark` zone, filled by
+  `hof.palPark`: regions cleared after a Sinnoh clear; they also add their GBA games' dual-slot
+  Pokémon via `ZoneExtras.palPark`); the Distortion World is a post-game `boss` special with
+  `fameBonus` (×1.25) and `keyItem` (Griseous Orb). Mechanics: `underground` (walls every
+  `UNDERGROUND_BATTLES`; fossils, stones, Plates in `hof.plates` → Arceus forms) and
+  `sinnohEvolutions`. The Pokétch automation slathers/shakes trees and digs.
+- Later generations' evolutions of older species (Electivire) and babies (Munchlax) are gated
+  by `main.generationOpen()`/`evolutionsOf()`: only in regions whose `newestSpecies` covers them,
+  or once the `sinnohEvolutions` mechanic is unlocked. Without this, Johto's pacing swung from
+  16.6 h to 7.5-20 h. The Pokédex requirement likewise ignores them (`newestSpecies`).
+- Gen 4 forms in `forms.json` are appended with looks-only ids from 4200 (Burmy/Shellos/Arceus);
+  never renumber the earlier ones. Gender-locked evolutions (`Evolution.gender`) only split species
+  with a female form (Combee ♀ → Vespiquen); others keep both branches.
+- Poké Radar (a Pokédex milestone at 250): chains build automatically, so the shiny multiplier
+  is capped at ×6 (`radarShinyMultiplier`), not the games' ×41.
+- `vite preview` answers missing files with index.html, and the service worker caches that for
+  sprites: after adding sprites, clear the browser's `sprites` cache when checking locally.
+
 ## Done (v2.2 "Johto")
 
 - Johto: 50 HG/SS places, Gyms, Elite Four and Lance (unlocks after Sevii plus a complete Pokédex
@@ -108,7 +131,12 @@ across journeys.
 - Hoenn's anime (v2.6, `hoennAnime.ts`): 34 places from Fandom's "Anime locations" ∩ "Hoenn
   locations" categories (Bulbapedia is blocked), Meta Groudon (3383, Forina, post-League), Hoenn
   Cap Pikachu (Littleroot gift). Alto Mare's Latios/Latias stay in Johto's anime places.
-- Next: Orre is done and Hoenn is complete; Sinnoh (Gen 4) would be the next main-series region.
+- Next: the three Pokémon Ranger games as separate regions after Sinnoh (Fiore, Almia, Oblivia),
+  with Bulbapedia/Serebii as references. Ideas offered: Capture Styler/Poké Assist, Field Move
+  gates, Ranger Signs.
+- Later: Pokémon Conquest with Gen 5 (Unova); Mystery Dungeon after Gen 7 (the owner plans other
+  games and romhacks as a "multiverse"). Not wanted: Pokéwalker, Pokéathlon. Not done yet:
+  Sinnoh's swarms (PokeAPI's tables are in `sinnohExtras.json`), Sinnoh anime places.
 - Future generation mechanics go in `mechanics.ts` with their regions: double battles (Hoenn),
   Mega Evolution (Kalos), etc.
 - Ideas offered but not picked up yet:

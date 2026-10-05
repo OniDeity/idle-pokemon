@@ -31,6 +31,14 @@ export type StoneId =
     | "waterStone"
     | "leafStone"
     | "sunStone"
+    | "shinyStone"
+    | "duskStone"
+    | "dawnStone"
+    | "iceStone"
+    /** Held while leveling up (used up): Happiny, Sneasel, Gligar. */
+    | "ovalStone"
+    | "razorClaw"
+    | "razorFang"
     /** Used up by one trade evolution. */
     | "linkCable"
     /** Used up by one friendship evolution, at any level. */
@@ -42,7 +50,12 @@ export type StoneId =
     | "upGrade"
     | "deepSeaTooth"
     | "deepSeaScale"
-    | "prismScale";
+    | "prismScale"
+    | "protector"
+    | "electirizer"
+    | "magmarizer"
+    | "dubiousDisc"
+    | "reaperCloth";
 
 export type GrowthRate = "slow" | "medium" | "fast" | "mediumSlow" | "erratic" | "fluctuating";
 
@@ -55,6 +68,11 @@ export interface Evolution {
     friendship?: boolean;
     /** For trade evolutions: an item it must hold, used up alongside the Link Cable. */
     heldItem?: StoneId;
+    /**
+     * Only one gender evolves this way (Combee ♀ into Vespiquen). It matters only for species
+     * with a female form; for the rest both branches are open, as evolving keeps the original.
+     */
+    gender?: "female" | "male";
 }
 
 export interface Species {
@@ -142,7 +160,7 @@ export type EncounterPoolId =
 
 export type TimeOfDay = "morning" | "day" | "night";
 
-/** The regular National Pokédex species, #1-251, in order. */
+/** The regular National Pokédex species, #1-493, in order. */
 export const SPECIES = speciesJson as Species[];
 export const DEX_SIZE = SPECIES.length;
 
@@ -405,6 +423,14 @@ export const WILD_VARIANTS: Record<number, { chance: number; variants: [number, 
         ]
     },
     194: { chance: 0.05, variants: [[7010, 1]] },
+    // Burmy's cloak is made of whatever was around it: leaves, sand or trash.
+    412: {
+        chance: 2 / 3,
+        variants: [
+            [4200, 1],
+            [4201, 1]
+        ]
+    },
     241: {
         chance: 0.12,
         variants: [
@@ -445,18 +471,27 @@ const OFFICIAL_FORMS: (Species & { identifier: string })[] = (formsJson as FormD
     };
 });
 
-const FEMALE_FORMS: Species[] = SPECIES.filter(s => s.genderDifferences && s.genderRate > 0).map(
-    s => ({
-        ...s,
-        id: FEMALE_OFFSET + s.id,
-        name: `${s.name} ♀`,
-        baseSpecies: s.id,
-        variant: "female",
-        spriteKey: `female/${s.id}`,
-        genderDifferences: false,
-        evolutions: []
-    })
+/** Species that have a female form, so their gender-locked evolutions go by form. */
+const HAS_FEMALE_FORM = new Set(
+    SPECIES.filter(s => s.genderDifferences && s.genderRate > 0).map(s => s.id)
 );
+/** Every species' evolutions as the data has them, before splitting by gender. */
+const DATA_EVOLUTIONS = new Map(SPECIES.map(s => [s.id, s.evolutions]));
+// The regular (male) form doesn't take a female-only evolution when a female form exists.
+for (const s of SPECIES) {
+    if (HAS_FEMALE_FORM.has(s.id)) s.evolutions = s.evolutions.filter(e => e.gender !== "female");
+}
+
+const FEMALE_FORMS: Species[] = SPECIES.filter(s => HAS_FEMALE_FORM.has(s.id)).map(s => ({
+    ...s,
+    id: FEMALE_OFFSET + s.id,
+    name: `${s.name} ♀`,
+    baseSpecies: s.id,
+    variant: "female",
+    spriteKey: `female/${s.id}`,
+    genderDifferences: false,
+    evolutions: []
+}));
 
 /** Every alternate form, whether or not it's placed in a region yet. */
 /** Offset added to a species id for its Shadow form (Orre's Cipher closes their hearts). */
@@ -502,7 +537,11 @@ for (const form of VARIANT_SPECIES) {
     if (FIXED_FORMS.includes(form.variant)) {
         continue;
     }
-    const baseEvolutions = SPECIES[form.baseSpecies! - 1].evolutions;
+    // Female forms keep the female-only evolutions their regular form gives up.
+    const baseEvolutions =
+        form.variant === "female"
+            ? (DATA_EVOLUTIONS.get(form.baseSpecies!) ?? []).filter(e => e.gender !== "male")
+            : SPECIES[form.baseSpecies! - 1].evolutions;
     form.evolutions = baseEvolutions.map(evolution => {
         let into: number | undefined;
         if (form.variant === "pattern") {
@@ -521,6 +560,27 @@ for (const form of VARIANT_SPECIES) {
         }
         return into != null ? { ...evolution, into } : evolution;
     });
+}
+
+// Gen 4's cloaked and East Sea forms evolve into the matching form: a Sandy Burmy into a Sandy
+// Wormadam (or a Mothim), an East Shellos into an East Gastrodon.
+const formId = (identifier: string) => OFFICIAL_FORMS.find(f => f.identifier === identifier)!.id;
+for (const [from, into] of [
+    ["burmy-sandy", "wormadam-sandy"],
+    ["burmy-trash", "wormadam-trash"],
+    ["shellos-east", "gastrodon-east"]
+]) {
+    const form = SPECIES_BY_ID.get(formId(from))!;
+    form.evolutions = SPECIES[form.baseSpecies! - 1].evolutions.map(evolution =>
+        evolution.into === SPECIES_BY_ID.get(formId(into))!.baseSpecies
+            ? { ...evolution, into: formId(into) }
+            : evolution
+    );
+}
+
+/** The Arceus form a Plate of this type turns Arceus into. */
+export function arceusForm(type: PokemonType): number {
+    return formId(`arceus-${type}`);
 }
 
 export function isVariant(id: number): boolean {

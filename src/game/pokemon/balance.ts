@@ -168,6 +168,43 @@ export const DEX_MILESTONES: DexMilestone[] = [
         name: "Silver Wing",
         description: "+20% damage and experience.",
         sprite: itemSprite("silver-wing")
+    },
+    {
+        caught: 250,
+        name: "Poké Radar",
+        description:
+            "Chain grass encounters in any region: the Pokémon it locks on to turns up half the time, and is likelier to be shiny the longer the chain (up to ×6 at 40). In Sinnoh its patches bring radar-only Pokémon too.",
+        sprite: itemSprite("poke-radar")
+    },
+    {
+        caught: 300,
+        name: "Destiny Knot",
+        description: "The Day Care finds Eggs twice as fast.",
+        sprite: itemSprite("destiny-knot")
+    },
+    {
+        caught: 350,
+        name: "Luck Incense",
+        description: "+25% Pokédollars from battles.",
+        sprite: itemSprite("luck-incense")
+    },
+    {
+        caught: 400,
+        name: "Expert Belt",
+        description: "+20% damage.",
+        sprite: itemSprite("expert-belt")
+    },
+    {
+        caught: 450,
+        name: "Azure Flute",
+        description: "+25% Fame from every Hall of Fame entry.",
+        sprite: itemSprite("azure-flute")
+    },
+    {
+        caught: 480,
+        name: "Life Orb",
+        description: "+20% damage and experience.",
+        sprite: itemSprite("life-orb")
     }
 ];
 
@@ -369,6 +406,8 @@ export function computeBonuses(input: BonusInputs): Bonuses {
         (milestone("Scope Lens") ? 1.1 : 1) *
         (milestone("Oak's Letter") ? 1.2 : 1) *
         (milestone("Silver Wing") ? 1.2 : 1) *
+        (milestone("Expert Belt") ? 1.2 : 1) *
+        (milestone("Life Orb") ? 1.2 : 1) *
         (1 + 0.1 * lvl(hof.power));
     const hp = (1 + 0.05 * lvl(mart.iron)) * (1 + 0.1 * lvl(hof.power));
     const xp =
@@ -378,12 +417,14 @@ export function computeBonuses(input: BonusInputs): Bonuses {
         (milestone("Lucky Egg") ? 1.25 : 1) *
         (milestone("Silph Scope") ? 1.2 : 1) *
         (milestone("Silver Wing") ? 1.2 : 1) *
+        (milestone("Life Orb") ? 1.2 : 1) *
         (1 + 0.1 * lvl(hof.wisdom));
     const money =
         (1 + 0.1 * lvl(mart.payDay)) *
         (milestone("Amulet Coin") ? 1.25 : 1) *
         (milestone("Nugget Stash") ? 1.25 : 1) *
         (milestone("Silph Scope") ? 1.2 : 1) *
+        (milestone("Luck Incense") ? 1.25 : 1) *
         (1 + 0.1 * lvl(hof.fortune));
     const catchBonus = (milestone("Oak's Letter") ? 1.1 : 1) * (1 + 0.1 * lvl(hof.catcher));
     const shiny =
@@ -698,6 +739,8 @@ export interface FameInputs {
     firstClear: boolean;
     /** Rematch strength of the region's trainers; tougher rematches pay more. */
     rematch?: number;
+    /** Extra Fame earned this journey (the Distortion World's ×1.25). */
+    bonus?: number;
 }
 
 /** Fame for enshrining a team. New faces in the Hall of Fame are worth the most. */
@@ -710,7 +753,9 @@ export function fameGain(input: FameInputs): number {
     const multiplier =
         (input.firstClear ? 1.5 : 1) *
         (input.rematch ?? 1) *
-        (hasMilestone(input.dexCaught, "Rainbow Wing") ? 1.25 : 1);
+        (input.bonus ?? 1) *
+        (hasMilestone(input.dexCaught, "Rainbow Wing") ? 1.25 : 1) *
+        (hasMilestone(input.dexCaught, "Azure Flute") ? 1.25 : 1);
     return Math.max(1, Math.floor(base * multiplier));
 }
 
@@ -722,7 +767,8 @@ export type AutomationId =
     | "autoEvolve"
     | "autoParty"
     | "autoTravel"
-    | "autoChallenge";
+    | "autoChallenge"
+    | "autoPoketch";
 
 export interface AutomationDefinition {
     id: AutomationId;
@@ -780,6 +826,14 @@ export const AUTOMATIONS: AutomationDefinition[] = [
             "Challenges the next Gym, quest or finale as soon as the forecast says you'll win.",
         cost: 15,
         sprite: itemSprite("gold-teeth")
+    },
+    {
+        id: "autoPoketch",
+        name: "Pokétch",
+        description:
+            "Sinnoh's wrist watch: slathers Honey on every open Honey Tree and shakes the ones with a Pokémon waiting, and digs the Underground's walls as they appear (once the Underground is unlocked).",
+        cost: 15,
+        sprite: itemSprite("explorer-kit")
     }
 ];
 

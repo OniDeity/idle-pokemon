@@ -16,7 +16,9 @@ export type MechanicId =
     | "pokeSpots"
     | "doubleBattles"
     | "partner"
-    | "contests";
+    | "contests"
+    | "underground"
+    | "sinnohEvolutions";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -115,6 +117,24 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 3,
         description:
             "A Contest Hall in every region: raise Cool, Beauty, Cute, Smart and Tough with Pokéblocks, win ribbons up to Master Rank, and earn a Cosplay Pikachu for each category."
+    },
+    underground: {
+        id: "underground",
+        name: "The Underground",
+        region: "sinnoh",
+        unlockAt: "the Underground Man's Explorer Kit in Eterna City, past the Coal Badge",
+        trialsRequired: 1,
+        description:
+            "Dig the Underground in every region: wild battles uncover walls full of Spheres, evolution stones, fossils to revive, Arceus's Plates and the Odd Keystone."
+    },
+    sinnohEvolutions: {
+        id: "sinnohEvolutions",
+        name: "Sinnoh's evolutions",
+        region: "sinnoh",
+        unlockAt: "the start of a Sinnoh journey",
+        trialsRequired: 0,
+        description:
+            "Older Pokémon evolve into the evolutions found in Sinnoh (Magnezone, Togekiss, Electivire, Weavile...), and Day Care Eggs hatch Sinnoh's babies (Munchlax, Happiny, Bonsly...), in every region."
     }
 };
 

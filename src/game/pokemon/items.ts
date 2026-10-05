@@ -258,6 +258,90 @@ export const STONES: Record<StoneId, StoneDefinition> = {
         price: 3000,
         badgesRequired: 5,
         sprite: itemSprite("prism-scale")
+    },
+    shinyStone: {
+        id: "shinyStone",
+        name: "Shiny Stone",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("shiny-stone")
+    },
+    duskStone: {
+        id: "duskStone",
+        name: "Dusk Stone",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("dusk-stone")
+    },
+    dawnStone: {
+        id: "dawnStone",
+        name: "Dawn Stone",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("dawn-stone")
+    },
+    iceStone: {
+        id: "iceStone",
+        name: "Ice Stone",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("ice-stone")
+    },
+    ovalStone: {
+        id: "ovalStone",
+        name: "Oval Stone",
+        price: 2000,
+        badgesRequired: 3,
+        sprite: itemSprite("oval-stone")
+    },
+    razorClaw: {
+        id: "razorClaw",
+        name: "Razor Claw",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("razor-claw")
+    },
+    razorFang: {
+        id: "razorFang",
+        name: "Razor Fang",
+        price: 3000,
+        badgesRequired: 5,
+        sprite: itemSprite("razor-fang")
+    },
+    protector: {
+        id: "protector",
+        name: "Protector",
+        price: 3000,
+        badgesRequired: 6,
+        sprite: itemSprite("protector")
+    },
+    electirizer: {
+        id: "electirizer",
+        name: "Electirizer",
+        price: 3000,
+        badgesRequired: 6,
+        sprite: itemSprite("electirizer")
+    },
+    magmarizer: {
+        id: "magmarizer",
+        name: "Magmarizer",
+        price: 3000,
+        badgesRequired: 6,
+        sprite: itemSprite("magmarizer")
+    },
+    dubiousDisc: {
+        id: "dubiousDisc",
+        name: "Dubious Disc",
+        price: 3000,
+        badgesRequired: 6,
+        sprite: itemSprite("dubious-disc")
+    },
+    reaperCloth: {
+        id: "reaperCloth",
+        name: "Reaper Cloth",
+        price: 3000,
+        badgesRequired: 6,
+        sprite: itemSprite("reaper-cloth")
     }
 };
 
@@ -272,7 +356,19 @@ export const STONE_DESCRIPTIONS: Partial<Record<StoneId, string>> = {
     upGrade: "Held while trading: Porygon becomes Porygon2.",
     deepSeaTooth: "Held while trading: Clamperl becomes Huntail.",
     deepSeaScale: "Held while trading: Clamperl becomes Gorebyss.",
-    prismScale: "Held while trading: Feebas becomes Milotic."
+    prismScale: "Held while trading: Feebas becomes Milotic.",
+    shinyStone: "Evolves Roselia into Roserade and Togetic into Togekiss.",
+    duskStone: "Evolves Murkrow into Honchkrow and Misdreavus into Mismagius.",
+    dawnStone: "Evolves Kirlia into Gallade and Snorunt into Froslass.",
+    iceStone: "Evolves Eevee into Glaceon (it once took the Ice Rock on Route 217).",
+    ovalStone: "Held while leveling up: Happiny becomes Chansey.",
+    razorClaw: "Held while leveling up: Sneasel becomes Weavile.",
+    razorFang: "Held while leveling up: Gligar becomes Gliscor.",
+    protector: "Held while trading: Rhydon becomes Rhyperior.",
+    electirizer: "Held while trading: Electabuzz becomes Electivire.",
+    magmarizer: "Held while trading: Magmar becomes Magmortar.",
+    dubiousDisc: "Held while trading: Porygon2 becomes Porygon-Z.",
+    reaperCloth: "Held while trading: Dusclops becomes Dusknoir."
 };
 
 export type KeyItemId =
@@ -287,7 +383,9 @@ export type KeyItemId =
     | "dive"
     | "squirtBottle"
     | "radioCard"
-    | "snagMachine";
+    | "snagMachine"
+    | "oddKeystone"
+    | "griseousOrb";
 
 export interface KeyItemDefinition {
     id: KeyItemId;
@@ -370,5 +468,19 @@ export const KEY_ITEMS: Record<KeyItemId, KeyItemDefinition> = {
         description:
             "Team Snagem's arm-mounted device: throw a Poké Ball at a trainer's Shadow Pokémon to snag it.",
         sprite: itemSprite("machine-part")
+    },
+    oddKeystone: {
+        id: "oddKeystone",
+        name: "Odd Keystone",
+        description:
+            "Dug up in the Underground. Set into the Hallowed Tower on Route 209, it calls Spiritomb.",
+        sprite: itemSprite("odd-keystone")
+    },
+    griseousOrb: {
+        id: "griseousOrb",
+        name: "Griseous Orb",
+        description:
+            "Found at the bottom of the Distortion World. Giratina holding it keeps its Origin Forme.",
+        sprite: itemSprite("griseous-orb")
     }
 };

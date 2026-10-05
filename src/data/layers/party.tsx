@@ -1,7 +1,7 @@
 /**
  * Party & PC Box: choose your six, reorder them, and evolve Pokémon with stones or trades.
  */
-import { EGG_BATTLES, main } from "data/projEntry";
+import { main } from "data/projEntry";
 import { HEART_BATTLES } from "game/pokemon/balance";
 import { DAY_CARE_PLACE } from "game/pokemon/mechanics";
 import {
@@ -98,9 +98,9 @@ const layer = createLayer(id, () => {
 
     /** Evolutions whose result the player doesn't own yet. */
     function pendingEvolutions(speciesId: number): Evolution[] {
-        return getSpecies(speciesId).evolutions.filter(
-            e => !main.owns(main.evolutionTarget(speciesId, e.into))
-        );
+        return main
+            .evolutionsOf(speciesId)
+            .filter(e => !main.owns(main.evolutionTarget(speciesId, e.into)));
     }
 
     /** Can evolve right now: level reached (it evolves on its next level-up in the party), a
@@ -253,13 +253,19 @@ const layer = createLayer(id, () => {
     };
 
     function renderEvolutions(speciesId: number) {
-        const species = getSpecies(speciesId);
-        if (species.evolutions.length === 0) {
-            return <div class="pk-small pk-muted">Does not evolve.</div>;
+        const evolutions = main.evolutionsOf(speciesId);
+        if (evolutions.length === 0) {
+            return (
+                <div class="pk-small pk-muted">
+                    {getSpecies(speciesId).evolutions.length > 0
+                        ? "Its evolution is from Sinnoh: start a Sinnoh journey to unlock it."
+                        : "Does not evolve."}
+                </div>
+            );
         }
         return (
             <div class="pk-evolutions">
-                {species.evolutions.map(evo => {
+                {evolutions.map(evo => {
                     const into = getSpecies(main.evolutionTarget(speciesId, evo.into));
                     const done = main.owns(into.id);
                     let action;
@@ -684,9 +690,9 @@ const layer = createLayer(id, () => {
             <Panel>
                 <p class="pk-small pk-muted">
                     Leave a Pokémon from your box and the Day Care couple finds an Egg every{" "}
-                    {EGG_BATTLES} wild battles you win. Eggs hatch into the first stage of its
-                    family, babies included (Pikachu → Pichu, Electabuzz → Elekid). A shiny parent
-                    passes its colors on 1 time in 64.
+                    {main.eggBattles.value} wild battles you win. Eggs hatch into the first stage of
+                    its family, babies included (Pikachu → Pichu, Electabuzz → Elekid). A shiny
+                    parent passes its colors on 1 time in 64.
                 </p>
                 {id !== 0 ? (
                     <div class="pk-daycare-current">
@@ -705,12 +711,17 @@ const layer = createLayer(id, () => {
                                 </div>
                             ) : (
                                 <div>
-                                    Next Egg in {EGG_BATTLES - main.dayCareProgress.value} battles
+                                    Next Egg in{" "}
+                                    {Math.max(
+                                        0,
+                                        main.eggBattles.value - main.dayCareProgress.value
+                                    )}{" "}
+                                    battles
                                 </div>
                             )}
                             <Bar
                                 value={main.dayCareProgress.value}
-                                max={EGG_BATTLES}
+                                max={main.eggBattles.value}
                                 kind="progress"
                             />
                         </div>
