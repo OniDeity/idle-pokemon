@@ -15,6 +15,7 @@ import {
     memberMultiplier,
     effortMultiplier,
     HEART_BATTLES,
+    hasMilestone,
     moneyYield,
     stepTrainerBattle,
     trainerTeam,
@@ -34,9 +35,10 @@ import {
     RANK_NAMES,
     winChance
 } from "game/pokemon/contests";
-import type { StoneId } from "game/pokemon/data";
+import type { Evolution, StoneId } from "game/pokemon/data";
 import {
     ALTERNATE_EVOLUTIONS,
+    arceusForm,
     femaleForm,
     getSpecies,
     isShadow,
@@ -50,7 +52,7 @@ import type { MechanicDefinition, MechanicId } from "game/pokemon/mechanics";
 import { isReleased } from "game/pokemon/pokedex";
 import { MECHANIC_LIST, MECHANICS } from "game/pokemon/mechanics";
 import type { SpecialEncounter } from "game/pokemon/specials";
-import { LEGENDARY_TIME_LIMIT } from "game/pokemon/specials";
+import { LEGENDARY_TIME_LIMIT, SPECIAL_ENCOUNTERS } from "game/pokemon/specials";
 import type { BattlerStats } from "game/pokemon/stats";
 import { levelForXp, maxHp, xpForLevel } from "game/pokemon/stats";
 import {
@@ -62,7 +64,31 @@ import {
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
 import type { EncounterKind, RegionId, ZoneExtras } from "game/pokemon/zones";
-import { catchableIn, rollEncounter, zonePools, zonesIn, ZONES_BY_ID } from "game/pokemon/zones";
+import {
+    catchableIn,
+    MAX_RADAR_CHAIN,
+    radarShinyMultiplier,
+    rollEncounter,
+    zonePools,
+    zonesIn,
+    ZONES_BY_ID
+} from "game/pokemon/zones";
+import type { HoneyTree } from "game/pokemon/sinnoh";
+import {
+    HONEY_BATTLES,
+    HONEY_PRICE,
+    HONEY_TREES,
+    munchlaxTrees,
+    rollHoneyTree
+} from "game/pokemon/sinnoh";
+import type { UndergroundItem } from "game/pokemon/underground";
+import {
+    digWall,
+    FOSSIL_LEVEL,
+    MAX_WALLS,
+    PLATE_TYPES,
+    UNDERGROUND_BATTLES
+} from "game/pokemon/underground";
 import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
 import { computed, ref } from "vue";
 import { useToast } from "vue-toastification";
@@ -90,6 +116,12 @@ export type BoxEntry = {
     /** Contest conditions raised with Pokéblocks (Cool, Beauty, Cute, Smart, Tough). */
     condition?: Partial<Record<ContestCategory, number>>;
 };
+
+/** A slathered Honey Tree: the Pokémon coming to it, and the battle count when it arrives. */
+export type HoneyTreeState = { speciesId: number; level: number; readyAt: number };
+
+/** The Poké Radar's chain: where, on which species, and how long. */
+export type RadarChain = { zoneId: string; speciesId: number; count: number };
 
 /** A contest under way: who's competing, where, and the seconds left. */
 export type ContestEntry = {
@@ -216,7 +248,19 @@ export const main = createLayer("main", layer => {
             upGrade: 0,
             deepSeaTooth: 0,
             deepSeaScale: 0,
-            prismScale: 0
+            prismScale: 0,
+            shinyStone: 0,
+            duskStone: 0,
+            dawnStone: 0,
+            iceStone: 0,
+            ovalStone: 0,
+            razorClaw: 0,
+            razorFang: 0,
+            protector: 0,
+            electirizer: 0,
+            magmarizer: 0,
+            dubiousDisc: 0,
+            reaperCloth: 0
         },
         false
     );
@@ -244,6 +288,13 @@ export const main = createLayer("main", layer => {
     const lastLuckyNumber = persistent<number>(-1);
     /** Eggs the Day Care has found this journey. */
     const eggsHatched = persistent<number>(0);
+    /** Sinnoh's Honey Trees slathered this journey, by tree. */
+    const honeyTrees = persistent<Record<string, HoneyTreeState>>({}, false);
+    /** Fresh Underground walls waiting to be dug, and battles toward the next one. */
+    const undergroundWalls = persistent<number>(0);
+    const undergroundProgress = persistent<number>(0);
+    /** The Poké Radar's chain (a Pokédex reward). */
+    const radarChain = persistent<RadarChain>({ zoneId: "", speciesId: 0, count: 0 }, false);
 
     /** What this journey has added to its places' pools: swarms and the contest. */
     const zoneExtras = computed<ZoneExtras>(() => ({
@@ -251,7 +302,16 @@ export const main = createLayer("main", layer => {
         bugContest: contestEntered.value,
         snagged: snaggedShadows.value,
         // Outside Orre, Cipher Peons roam once the Snag Machine is unlocked.
-        cipherPeons: ZONES_BY_ID[zoneId.value]?.trainerBattles !== true && mechanicOn("snagMachine")
+        cipherPeons:
+            ZONES_BY_ID[zoneId.value]?.trainerBattles !== true && mechanicOn("snagMachine"),
+        pokeRadar: hasPokeRadar.value,
+        radarChain:
+            hasPokeRadar.value &&
+            radarChain.value.zoneId === zoneId.value &&
+            radarChain.value.speciesId !== 0
+                ? radarChain.value
+                : undefined,
+        palPark: hof.palParkRegions.value
     }));
 
     // Transient state: rebuilt on load.
@@ -284,6 +344,18 @@ export const main = createLayer("main", layer => {
             })
     );
     const regionDef = computed(() => REGIONS[region.value] ?? REGIONS.kanto);
+    /** The Poké Radar, a Pokédex reward from Professor Oak. */
+    const hasPokeRadar = computed(() => hasMilestone(dex.caughtCount.value, "Poké Radar"));
+    /** Wild battles per Day Care Egg (the Destiny Knot halves it). */
+    const eggBattles = computed(() =>
+        hasMilestone(dex.caughtCount.value, "Destiny Knot") ? EGG_BATTLES / 2 : EGG_BATTLES
+    );
+    /** Extra Fame this journey has earned (the Distortion World). */
+    const fameBonus = computed(() =>
+        SPECIAL_ENCOUNTERS.filter(
+            s => s.kind === "boss" && s.fameBonus != null && claimedSpecials.value[s.id]
+        ).reduce((product, s) => product * (s.kind === "boss" ? (s.fameBonus ?? 1) : 1), 1)
+    );
     const cap = computed(() => levelCap(regionDef.value, badges.value, champion.value));
     /** Badge-equivalent progress used to decide what the Poké Mart stocks. */
     const martTier = computed(() => badges.value + regionDef.value.shopTier);
@@ -330,6 +402,21 @@ export const main = createLayer("main", layer => {
 
     function owns(id: number) {
         return box.value[id] != null;
+    }
+
+    /**
+     * Whether a species from a later generation can be had on this journey: always in its own
+     * generation's regions, and everywhere once that generation's mechanic is unlocked (Gen 4's
+     * evolutions of older Pokémon, Electabuzz into Electivire, and its babies from Eggs).
+     */
+    function generationOpen(id: number): boolean {
+        const species = getSpecies(id).baseSpecies ?? id;
+        return species <= (regionDef.value.newestSpecies ?? 386) || mechanicOn("sinnohEvolutions");
+    }
+
+    /** A species' evolutions that can happen on this journey. */
+    function evolutionsOf(id: number): Evolution[] {
+        return getSpecies(id).evolutions.filter(e => generationOpen(e.into));
     }
 
     // ------------------------------------------------------------------
@@ -435,9 +522,7 @@ export const main = createLayer("main", layer => {
     }
 
     function evolveWithStone(fromId: number, stone: StoneId) {
-        const evolution = getSpecies(fromId).evolutions.find(
-            e => e.method === "stone" && e.stone === stone
-        );
+        const evolution = evolutionsOf(fromId).find(e => e.method === "stone" && e.stone === stone);
         if (evolution == null || (stones.value[stone] ?? 0) <= 0) return;
         const into = evolutionTarget(fromId, evolution.into);
         if (owns(into) || !owns(fromId) || inTrainerBattle.value) return;
@@ -450,7 +535,7 @@ export const main = createLayer("main", layer => {
      * Pokémon that's already at the level (caught above it, or stuck at the level cap).
      */
     function evolveByLevel(fromId: number, evolvesInto: number) {
-        const evolution = getSpecies(fromId).evolutions.find(
+        const evolution = evolutionsOf(fromId).find(
             e => e.method === "level" && e.into === evolvesInto
         );
         const level = box.value[fromId]?.level ?? 0;
@@ -467,7 +552,7 @@ export const main = createLayer("main", layer => {
 
     /** Trade evolutions use up a Link Cable, plus the held item some of them need. */
     function evolveByTrade(fromId: number) {
-        const evolution = getSpecies(fromId).evolutions.find(e => e.method === "trade");
+        const evolution = evolutionsOf(fromId).find(e => e.method === "trade");
         if (evolution == null || (stones.value.linkCable ?? 0) <= 0) return;
         const held = evolution.heldItem;
         if (held != null && (stones.value[held] ?? 0) <= 0) return;
@@ -597,7 +682,7 @@ export const main = createLayer("main", layer => {
             return;
         }
         dayCareProgress.value++;
-        if (dayCareProgress.value < EGG_BATTLES) return;
+        if (dayCareProgress.value < eggBattles.value) return;
         dayCareProgress.value = 0;
         eggsHatched.value++;
         const babyId = eggSpeciesOf(id);
@@ -626,7 +711,7 @@ export const main = createLayer("main", layer => {
     }
 
     function evolveWithSootheBell(fromId: number, evolvesInto: number) {
-        const evolution = getSpecies(fromId).evolutions.find(
+        const evolution = evolutionsOf(fromId).find(
             e => e.friendship === true && e.into === evolvesInto
         );
         const friend = box.value[fromId]?.friend === true;
@@ -663,7 +748,7 @@ export const main = createLayer("main", layer => {
             }
             // Checked every battle, not only on level-ups: a Pokémon caught above its
             // evolution level, or waiting at the level cap, still evolves.
-            for (const evolution of species.evolutions) {
+            for (const evolution of evolutionsOf(id)) {
                 if (evolution.method === "level" && level >= (evolution.level ?? Infinity)) {
                     const into = evolutionTarget(id, evolution.into);
                     if (!owns(into)) evolve(id, into, "");
@@ -754,7 +839,11 @@ export const main = createLayer("main", layer => {
      */
     function familyRoot(id: number): number {
         let root = getSpecies(id).baseSpecies ?? id;
-        while (PRE_EVOLUTION[root] != null && isReleased(PRE_EVOLUTION[root]!)) {
+        while (
+            PRE_EVOLUTION[root] != null &&
+            isReleased(PRE_EVOLUTION[root]!) &&
+            generationOpen(PRE_EVOLUTION[root]!)
+        ) {
             root = PRE_EVOLUTION[root]!;
         }
         return root;
@@ -822,21 +911,58 @@ export const main = createLayer("main", layer => {
             startSearch();
             return;
         }
-        const shiny = Math.random() < BASE_SHINY_CHANCE * bonuses.value.shiny;
-        const target = { species: getSpecies(rolled.speciesId), level: rolled.level };
+        startWildBattle(rolled.speciesId, rolled.level, rolled.kind);
+    }
+
+    /** The species a Poké Radar chain goes by: forms (female, cloaks) count as their species. */
+    function chainSpecies(id: number): number {
+        return getSpecies(id).baseSpecies ?? id;
+    }
+
+    /** Sends out a wild Pokémon: rolls whether it's shiny and picks who fights it. */
+    function startWildBattle(speciesId: number, level: number, kind: EncounterKind) {
+        const chain = zoneExtras.value.radarChain;
+        const chained =
+            kind === "walk" && chain != null && chainSpecies(speciesId) === chain.speciesId;
+        const shinyOdds =
+            BASE_SHINY_CHANCE *
+            bonuses.value.shiny *
+            (chained ? radarShinyMultiplier(chain.count) : 1);
+        const shiny = Math.random() < shinyOdds;
+        const target = { species: getSpecies(speciesId), level };
         const hp = maxHp(target);
-        dex.markSeen(rolled.speciesId);
+        dex.markSeen(speciesId);
         battle.value = {
             kind: "wild",
-            wild: { ...rolled, shiny, hp, maxHp: hp },
+            wild: { speciesId, level, kind, shiny, hp, maxHp: hp },
             ...wildFighters(target)
         };
         if (shiny) {
             const text = `A shiny ${target.species.name} appeared!`;
-            addLog({ kind: "shiny", text, speciesId: rolled.speciesId, shiny: true });
+            addLog({ kind: "shiny", text, speciesId, shiny: true });
             showFlash(text, "shiny");
             notify(`✨ ${text}`, "success");
         }
+    }
+
+    /**
+     * The Poké Radar locks on to the first grass Pokémon met in a place, and each one of that
+     * species beaten there adds to the chain. Travelling elsewhere starts a new one.
+     */
+    function extendRadarChain(wild: WildPokemon) {
+        if (!hasPokeRadar.value || wild.kind !== "walk") return;
+        const species = chainSpecies(wild.speciesId);
+        const chain = radarChain.value;
+        if (chain.zoneId !== zoneId.value || chain.speciesId === 0) {
+            radarChain.value = { zoneId: zoneId.value, speciesId: species, count: 1 };
+        } else if (chain.speciesId === species) {
+            radarChain.value = { ...chain, count: Math.min(MAX_RADAR_CHAIN, chain.count + 1) };
+        }
+    }
+
+    /** Breaks the chain: the Poké Radar locks on to the next grass Pokémon instead. */
+    function breakRadarChain() {
+        radarChain.value = { zoneId: "", speciesId: 0, count: 0 };
     }
 
     function shouldTryCatch(wild: WildPokemon) {
@@ -855,6 +981,8 @@ export const main = createLayer("main", layer => {
         money.value += moneyYield(wild.level) * bonuses.value.money;
         gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp);
         tendDayCare();
+        tendUnderground();
+        extendRadarChain(wild);
         openHearts();
         if (battlesWon.value % LUCKY_DRAW_BATTLES === 0) drawLuckyNumber();
 
@@ -1047,6 +1175,126 @@ export const main = createLayer("main", layer => {
         const text = `${getSpecies(base).name}'s heart is purified! It's a normal Pokémon again.`;
         addLog({ kind: "evolve", text, speciesId: base });
         showFlash(text, "catch");
+    }
+
+    // ------------------------------------------------------------------
+    // Sinnoh: Honey Trees and the Underground
+    // ------------------------------------------------------------------
+
+    /** Whether a Honey Tree can be visited on this journey. */
+    function honeyTreeOpen(tree: HoneyTree): boolean {
+        return (
+            region.value === "sinnoh" &&
+            badges.value >= tree.badgesRequired &&
+            (tree.zoneId == null || zoneUnlocked(tree.zoneId))
+        );
+    }
+
+    /** A Pokémon has come to the tree and is waiting to be shaken down. */
+    function honeyTreeReady(treeId: string): boolean {
+        const state = honeyTrees.value[treeId];
+        return state != null && battlesWon.value >= state.readyAt;
+    }
+
+    /** Slathers Honey on a tree; the Pokémon that will come is decided now, as in the games. */
+    function slatherHoney(treeId: string) {
+        const tree = HONEY_TREES.find(t => t.id === treeId);
+        if (tree == null || !honeyTreeOpen(tree) || honeyTrees.value[treeId] != null) return;
+        if (!spend(HONEY_PRICE)) return;
+        const munchlax = munchlaxTrees(ensureTrainerId()).includes(treeId);
+        const visitor = rollHoneyTree(munchlax);
+        honeyTrees.value = {
+            ...honeyTrees.value,
+            [treeId]: { ...visitor, readyAt: battlesWon.value + HONEY_BATTLES }
+        };
+    }
+
+    /** Shakes a tree with a Pokémon on it: a wild battle with it starts right away. */
+    function shakeHoneyTree(treeId: string) {
+        if (!honeyTreeReady(treeId) || inTrainerBattle.value) return;
+        const { speciesId, level } = honeyTrees.value[treeId];
+        const rest = { ...honeyTrees.value };
+        delete rest[treeId];
+        honeyTrees.value = rest;
+        const tree = HONEY_TREES.find(t => t.id === treeId);
+        addLog({
+            kind: "info",
+            text: `A wild ${getSpecies(speciesId).name} jumped out of the Honey Tree at ${tree?.name}!`,
+            speciesId
+        });
+        startWildBattle(speciesId, level, "honey");
+    }
+
+    /** Each wild battle won brings a fresh Underground wall closer, once the Underground is open. */
+    function tendUnderground() {
+        if (!mechanicOn("underground") || undergroundWalls.value >= MAX_WALLS) return;
+        undergroundProgress.value++;
+        if (undergroundProgress.value < UNDERGROUND_BATTLES) return;
+        undergroundProgress.value = 0;
+        undergroundWalls.value++;
+    }
+
+    /** Whether the Underground's post-game treasures (most fossils) can turn up. */
+    const undergroundPostGame = computed(
+        () => hof.clearCount("sinnoh") > 0 || (region.value === "sinnoh" && champion.value)
+    );
+
+    /** Digs one Underground wall and takes what's in it. */
+    function digUnderground(): UndergroundItem[] {
+        if (!mechanicOn("underground") || undergroundWalls.value <= 0) return [];
+        undergroundWalls.value--;
+        const found = digWall(ensureTrainerId(), undergroundPostGame.value);
+        let earned = 0;
+        for (const item of found) {
+            if (item.stone != null) {
+                stones.value = {
+                    ...stones.value,
+                    [item.stone]: (stones.value[item.stone] ?? 0) + 1
+                };
+            } else if (item.fossil != null) {
+                const level = Math.min(cap.value, FOSSIL_LEVEL);
+                const isNew = receivePokemon(item.fossil, level, false);
+                const name = getSpecies(item.fossil).name;
+                addLog({
+                    kind: "catch",
+                    text: `The ${item.name} was revived into ${name}!${isNew ? "" : ` (x${dex.timesCaught(item.fossil)})`}`,
+                    speciesId: item.fossil
+                });
+            } else if (item.plate != null) {
+                hof.collectPlate(item.plate);
+            } else if (item.keystone === true) {
+                grantKeyItem("oddKeystone");
+            } else {
+                earned += item.value ?? 0;
+            }
+        }
+        money.value += earned;
+        const names = found.map(item => item.name);
+        const list =
+            names.length > 1
+                ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`
+                : names[0];
+        addLog({
+            kind: "info",
+            text: `⛏️ Dug up ${list}${earned > 0 ? ` (sold for ₽${earned.toLocaleString("en-US")})` : ""}!`
+        });
+        return found;
+    }
+
+    /** With Arceus in the box, every Plate found turns it into that type's Arceus too. */
+    function grantArceusForms() {
+        const arceus = box.value[493];
+        if (arceus == null) return;
+        for (const type of PLATE_TYPES) {
+            const form = arceusForm(type);
+            if (!hof.plates.value[type] || owns(form)) continue;
+            receivePokemon(form, arceus.level, arceus.shiny, false);
+            addLog({
+                kind: "evolve",
+                text: `Holding the ${type[0].toUpperCase()}${type.slice(1)} Plate, Arceus becomes ${getSpecies(form).name}!`,
+                speciesId: form
+            });
+        }
     }
 
     // ------------------------------------------------------------------
@@ -1399,6 +1647,7 @@ export const main = createLayer("main", layer => {
                 .forEach(grantKeyItem);
         }
         checkMechanics();
+        if (box.value[493] != null) grantArceusForms();
         if (starter.value === 0 || partyIds.value.length === 0) return;
         runTime.value += diff;
         advanceContest(diff);
@@ -1479,10 +1728,11 @@ export const main = createLayer("main", layer => {
     /** A one-off battle against a famous Trainer (Red on Mt. Silver), with a prize. */
     function challengeBoss(special: Extract<SpecialEncounter, { kind: "boss" }>) {
         startTrainerBattle({
-            label: `${special.trainer.name} on ${special.place}`,
+            label: `${special.trainer.name} ${special.fameBonus != null ? "in" : "on"} ${special.place}`,
             trainers: [withStrength(special.trainer, rematch.value)],
             onWin() {
                 claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
+                if (special.keyItem != null) grantKeyItem(special.keyItem);
                 const prizes: string[] = [];
                 for (const [ball, n] of Object.entries(special.prizeBalls ?? {}) as [
                     BallId,
@@ -1492,8 +1742,12 @@ export const main = createLayer("main", layer => {
                     prizes.push(`${n} ${BALLS[ball].name}${n === 1 ? "" : "s"}`);
                 }
                 money.value += special.trainer.prizeMoney;
-                const text = `You defeated ${special.trainer.name} at ${special.place}!${
+                const text = `You defeated ${special.trainer.name} ${special.fameBonus != null ? "in" : "at"} ${special.place}!${
                     prizes.length > 0 ? ` You receive ${prizes.join(" and ")}.` : ""
+                }${
+                    special.fameBonus != null
+                        ? ` This journey's Hall of Fame entry is worth ×${special.fameBonus} Fame.`
+                        : ""
                 }`;
                 addLog({ kind: "badge", text });
                 notify(`🏆 ${text}`, "success");
@@ -1623,6 +1877,20 @@ export const main = createLayer("main", layer => {
         eggValue,
         bestDayCareParent,
         mechanicOn,
+        hasPokeRadar,
+        radarChain,
+        breakRadarChain,
+        eggBattles,
+        fameBonus,
+        honeyTrees,
+        honeyTreeOpen,
+        honeyTreeReady,
+        slatherHoney,
+        shakeHoneyTree,
+        undergroundWalls,
+        undergroundProgress,
+        undergroundPostGame,
+        digUnderground,
         snaggedShadows,
         pokeSnacks,
         buyPokeSnacks,
@@ -1641,6 +1909,8 @@ export const main = createLayer("main", layer => {
         inTrainerBattle,
         nav,
         owns,
+        generationOpen,
+        evolutionsOf,
         evolutionTarget,
         battlerFor,
         receivePokemon,

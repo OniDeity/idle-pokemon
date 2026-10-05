@@ -999,6 +999,29 @@
     opacity: 0.35;
 }
 
+.pk-underground-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin: 6px 0 1px;
+}
+
+.pk-underground-item {
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid transparent;
+    line-height: 0;
+}
+
+.pk-underground-item.found {
+    border-color: var(--pk-good);
+    background: rgba(74, 222, 128, 0.12);
+}
+
+.pk-underground-item.unavailable {
+    opacity: 0.35;
+}
+
 .pk-special {
     display: flex;
     align-items: center;

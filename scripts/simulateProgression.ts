@@ -110,6 +110,8 @@ const clears: Partial<Record<RegionId, number>> = {};
 let totalTime = 0;
 /** Hoenn's double battles, once reached: a partner attacks beside the active Pokémon. */
 let doublesUnlocked = false;
+/** Sinnoh's evolutions of older Pokémon, once a Sinnoh journey has begun. */
+let sinnohEvolutions = false;
 
 interface Owned {
     id: number;
@@ -204,9 +206,13 @@ function runJourney(region: RegionDefinition, starter: number) {
         return [...owned.values()].sort((a, b) => score(b) - score(a)).slice(0, 6);
     }
 
+    if (region.id === MECHANICS.sinnohEvolutions.region) sinnohEvolutions = true;
     function evolve(o: Owned) {
         for (const evo of getSpecies(o.id).evolutions) {
             if (owned.has(evo.into)) continue;
+            // Later generations' evolutions wait for their region (or its mechanic).
+            const into = getSpecies(evo.into).baseSpecies ?? evo.into;
+            if (into > (region.newestSpecies ?? 386) && !sinnohEvolutions) continue;
             let ok = evo.method === "level" && o.level >= (evo.level ?? 101);
             // Stones, Link Cables and Soothe Bells are each used up by one evolution; buy one
             // when it's cheap relative to savings, like the auto-evolve automation.

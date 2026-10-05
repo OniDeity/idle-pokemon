@@ -8,7 +8,9 @@ import { DEX_SIZE, getSpecies, PRE_EVOLUTION, SPECIES } from "./data";
 import { MECHANIC_LIST, MECHANICS } from "./mechanics";
 import type { RegionDefinition } from "./regions";
 import { REGION_LIST } from "./regions";
+import { HONEY_SPECIES } from "./sinnoh";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "./specials";
+import { FOSSIL_SPECIES } from "./underground";
 import type { RegionId } from "./zones";
 import { catchableIn, occasionalSpecies, zonePools, zonesIn } from "./zones";
 
@@ -28,6 +30,14 @@ function keyItemsIn(regions: RegionId[]): Set<string> {
     );
     return items;
 }
+
+/**
+ * Pokémon a region's own features bring, besides wild places and specials: Sinnoh's Honey Trees
+ * and the fossils its Underground digs up.
+ */
+const FEATURE_SPECIES: Partial<Record<RegionId, number[]>> = {
+    sinnoh: [...HONEY_SPECIES, ...FOSSIL_SPECIES]
+};
 
 /** The regular species obtainable in these regions. */
 export function speciesObtainableIn(regions: RegionId[]): Set<number> {
@@ -57,6 +67,7 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
         SPECIAL_ENCOUNTERS.filter(s => s.region === region).forEach(s =>
             specialSpecies(s).forEach(add)
         );
+        FEATURE_SPECIES[region]?.forEach(add);
         const def = REGION_LIST.find(r => r.id === region);
         [...(def?.starters ?? []), ...(def?.partnerStarters ?? [])].forEach(add);
         // Shadow Pokémon snagged from Orre's admins (purified into their species).
@@ -64,12 +75,18 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
             [...def.trials, ...def.finale(def.starters[0])].forEach(t => t.snag?.forEach(add));
         }
     }
+    // Evolutions from later generations (Electabuzz into Electivire) wait for their own.
+    const newest = Math.max(
+        ...regions.map(r => REGION_LIST.find(def => def.id === r)?.newestSpecies ?? 386)
+    );
     let changed = true;
     while (changed) {
         changed = false;
         for (const species of SPECIES) {
             const pre = PRE_EVOLUTION[species.id];
-            if (!found.has(species.id) && pre != null && found.has(pre)) {
+            if (species.id > newest || pre == null) continue;
+            // A form's evolution counts through its species (Combee ♀ into Vespiquen).
+            if (!found.has(species.id) && found.has(getSpecies(pre).baseSpecies ?? pre)) {
                 found.add(species.id);
                 changed = true;
             }
@@ -80,8 +97,8 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
 
 /**
  * The Pokédex as far as the game's regions go: #1-251, plus each later species once a region
- * offers it (Orre's Hoenn Pokémon; the rest of Gen 3 arrives with Hoenn). Species data exists for
- * all of #1-386, but a species outside this set never appears.
+ * offers it (Orre's Hoenn Pokémon; the rest of Gen 3 arrives with Hoenn, Gen 4 with Sinnoh).
+ * Species data exists for all of #1-493, but a species outside this set never appears.
  */
 export const POKEDEX_IDS: number[] = (() => {
     const ids = new Set<number>(SPECIES.filter(s => s.id <= 251).map(s => s.id));

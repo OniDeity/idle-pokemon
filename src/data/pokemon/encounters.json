@@ -15145,5 +15145,6535 @@
                 "maxLevel": 50
             }
         ]
+    },
+    "route201": {
+        "walk": [
+            {
+                "id": 396,
+                "weight": 140,
+                "minLevel": 2,
+                "maxLevel": 3,
+                "byTime": {
+                    "morning": 150,
+                    "day": 150,
+                    "night": 120
+                }
+            },
+            {
+                "id": 399,
+                "weight": 153.33333333333334,
+                "minLevel": 2,
+                "maxLevel": 3,
+                "byTime": {
+                    "morning": 140,
+                    "day": 150,
+                    "night": 170
+                }
+            },
+            {
+                "id": 401,
+                "weight": 6.666666666666667,
+                "minLevel": 3,
+                "maxLevel": 3,
+                "byTime": {
+                    "morning": 10,
+                    "day": 0,
+                    "night": 10
+                }
+            }
+        ]
+    },
+    "lakeVerity": {
+        "walk": [
+            {
+                "id": 396,
+                "weight": 283.3333333333333,
+                "minLevel": 2,
+                "maxLevel": 4,
+                "byTime": {
+                    "morning": 300,
+                    "day": 300,
+                    "night": 250
+                }
+            },
+            {
+                "id": 399,
+                "weight": 316.6666666666667,
+                "minLevel": 2,
+                "maxLevel": 4,
+                "byTime": {
+                    "morning": 300,
+                    "day": 300,
+                    "night": 350
+                }
+            }
+        ],
+        "surf": [
+            {
+                "id": 54,
+                "weight": 810,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 90,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 900,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 495,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 395,
+                "minLevel": 10,
+                "maxLevel": 35
+            },
+            {
+                "id": 119,
+                "weight": 10,
+                "minLevel": 25,
+                "maxLevel": 35
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 495,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 405,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "route202": {
+        "walk": [
+            {
+                "id": 396,
+                "weight": 76.66666666666667,
+                "minLevel": 2,
+                "maxLevel": 4,
+                "byTime": {
+                    "morning": 80,
+                    "day": 100,
+                    "night": 50
+                }
+            },
+            {
+                "id": 399,
+                "weight": 106.66666666666667,
+                "minLevel": 2,
+                "maxLevel": 4,
+                "byTime": {
+                    "morning": 100,
+                    "day": 110,
+                    "night": 110
+                }
+            },
+            {
+                "id": 403,
+                "weight": 90,
+                "minLevel": 3,
+                "maxLevel": 4
+            },
+            {
+                "id": 401,
+                "weight": 26.666666666666668,
+                "minLevel": 3,
+                "maxLevel": 4,
+                "byTime": {
+                    "morning": 30,
+                    "day": 0,
+                    "night": 50
+                }
+            }
+        ]
+    },
+    "route203": {
+        "walk": [
+            {
+                "id": 396,
+                "weight": 101.66666666666667,
+                "minLevel": 4,
+                "maxLevel": 7,
+                "byTime": {
+                    "morning": 105,
+                    "day": 125,
+                    "night": 75
+                }
+            },
+            {
+                "id": 403,
+                "weight": 75,
+                "minLevel": 4,
+                "maxLevel": 5
+            },
+            {
+                "id": 401,
+                "weight": 20,
+                "minLevel": 4,
+                "maxLevel": 5,
+                "byTime": {
+                    "morning": 30,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 399,
+                "weight": 48.333333333333336,
+                "minLevel": 4,
+                "maxLevel": 7,
+                "byTime": {
+                    "morning": 45,
+                    "day": 55,
+                    "night": 45
+                }
+            },
+            {
+                "id": 63,
+                "weight": 45,
+                "minLevel": 4,
+                "maxLevel": 5
+            },
+            {
+                "id": 41,
+                "weight": 10,
+                "minLevel": 4,
+                "maxLevel": 5,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            }
+        ],
+        "surf": [
+            {
+                "id": 54,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "oreburghGate": {
+        "walk": [
+            {
+                "id": 41,
+                "weight": 255,
+                "minLevel": 5,
+                "maxLevel": 10
+            },
+            {
+                "id": 74,
+                "weight": 210,
+                "minLevel": 4,
+                "maxLevel": 9
+            },
+            {
+                "id": 54,
+                "weight": 130,
+                "minLevel": 5,
+                "maxLevel": 10
+            },
+            {
+                "id": 42,
+                "weight": 5,
+                "minLevel": 10,
+                "maxLevel": 10
+            }
+        ],
+        "surf": [
+            {
+                "id": 41,
+                "weight": 150,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 54,
+                "weight": 120,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 42,
+                "weight": 15,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 15,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "oreburghMine": {
+        "walk": [
+            {
+                "id": 74,
+                "weight": 410,
+                "minLevel": 4,
+                "maxLevel": 10
+            },
+            {
+                "id": 41,
+                "weight": 130,
+                "minLevel": 5,
+                "maxLevel": 8
+            },
+            {
+                "id": 95,
+                "weight": 60,
+                "minLevel": 6,
+                "maxLevel": 9
+            }
+        ]
+    },
+    "route204": {
+        "walk": [
+            {
+                "id": 396,
+                "weight": 163.33333333333334,
+                "minLevel": 4,
+                "maxLevel": 11,
+                "byTime": {
+                    "morning": 150,
+                    "day": 190,
+                    "night": 150
+                }
+            },
+            {
+                "id": 406,
+                "weight": 123.33333333333333,
+                "minLevel": 3,
+                "maxLevel": 10,
+                "byTime": {
+                    "morning": 130,
+                    "day": 150,
+                    "night": 90
+                }
+            },
+            {
+                "id": 399,
+                "weight": 150,
+                "minLevel": 4,
+                "maxLevel": 11
+            },
+            {
+                "id": 401,
+                "weight": 40,
+                "minLevel": 3,
+                "maxLevel": 9,
+                "byTime": {
+                    "morning": 60,
+                    "day": 0,
+                    "night": 60
+                }
+            },
+            {
+                "id": 403,
+                "weight": 90,
+                "minLevel": 4,
+                "maxLevel": 10
+            },
+            {
+                "id": 41,
+                "weight": 20,
+                "minLevel": 3,
+                "maxLevel": 8,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 60
+                }
+            },
+            {
+                "id": 265,
+                "weight": 13.333333333333334,
+                "minLevel": 4,
+                "maxLevel": 9,
+                "byTime": {
+                    "morning": 20,
+                    "day": 20,
+                    "night": 0
+                }
+            }
+        ],
+        "surf": [
+            {
+                "id": 54,
+                "weight": 540,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 600,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 330,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 270,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 330,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "ravagedPath": {
+        "walk": [
+            {
+                "id": 41,
+                "weight": 221,
+                "minLevel": 3,
+                "maxLevel": 6
+            },
+            {
+                "id": 74,
+                "weight": 40,
+                "minLevel": 5,
+                "maxLevel": 5
+            },
+            {
+                "id": 54,
+                "weight": 39,
+                "minLevel": 4,
+                "maxLevel": 6
+            }
+        ],
+        "surf": [
+            {
+                "id": 41,
+                "weight": 150,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 54,
+                "weight": 120,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 42,
+                "weight": 15,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 15,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "valleyWindworks": {
+        "walk": [
+            {
+                "id": 422,
+                "weight": 105,
+                "minLevel": 7,
+                "maxLevel": 12
+            },
+            {
+                "id": 418,
+                "weight": 95,
+                "minLevel": 7,
+                "maxLevel": 11
+            },
+            {
+                "id": 417,
+                "weight": 60,
+                "minLevel": 7,
+                "maxLevel": 11
+            },
+            {
+                "id": 399,
+                "weight": 20,
+                "minLevel": 8,
+                "maxLevel": 8
+            },
+            {
+                "id": 403,
+                "weight": 20,
+                "minLevel": 10,
+                "maxLevel": 10
+            }
+        ],
+        "surf": [
+            {
+                "id": 72,
+                "weight": 150,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 278,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 422,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 73,
+                "weight": 11,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 279,
+                "weight": 10,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 423,
+                "weight": 9,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 456,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 457,
+                "weight": 135,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 130,
+                "weight": 120,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 90,
+                "weight": 45,
+                "minLevel": 20,
+                "maxLevel": 50
+            }
+        ]
+    },
+    "route205": {
+        "surf": [
+            {
+                "id": 54,
+                "weight": 540,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 72,
+                "weight": 150,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 55,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 278,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 422,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 73,
+                "weight": 11,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 279,
+                "weight": 10,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 423,
+                "weight": 9,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 900,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 495,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 270,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 456,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 450,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 457,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 90,
+                "weight": 45,
+                "minLevel": 20,
+                "maxLevel": 50
+            }
+        ],
+        "walk": [
+            {
+                "id": 422,
+                "weight": 175,
+                "minLevel": 8,
+                "maxLevel": 12
+            },
+            {
+                "id": 418,
+                "weight": 155,
+                "minLevel": 8,
+                "maxLevel": 12
+            },
+            {
+                "id": 399,
+                "weight": 150,
+                "minLevel": 9,
+                "maxLevel": 14
+            },
+            {
+                "id": 417,
+                "weight": 50,
+                "minLevel": 9,
+                "maxLevel": 11
+            },
+            {
+                "id": 406,
+                "weight": 31.333333333333332,
+                "minLevel": 12,
+                "maxLevel": 14,
+                "byTime": {
+                    "morning": 28,
+                    "day": 38,
+                    "night": 28
+                }
+            },
+            {
+                "id": 265,
+                "weight": 6.666666666666667,
+                "minLevel": 13,
+                "maxLevel": 13,
+                "byTime": {
+                    "morning": 10,
+                    "day": 10,
+                    "night": 0
+                }
+            },
+            {
+                "id": 401,
+                "weight": 6.666666666666667,
+                "minLevel": 12,
+                "maxLevel": 13,
+                "byTime": {
+                    "morning": 10,
+                    "day": 0,
+                    "night": 10
+                }
+            },
+            {
+                "id": 163,
+                "weight": 3.3333333333333335,
+                "minLevel": 12,
+                "maxLevel": 12,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 10
+                }
+            },
+            {
+                "id": 266,
+                "weight": 10,
+                "minLevel": 14,
+                "maxLevel": 14
+            },
+            {
+                "id": 268,
+                "weight": 10,
+                "minLevel": 14,
+                "maxLevel": 14
+            },
+            {
+                "id": 267,
+                "weight": 1,
+                "minLevel": 15,
+                "maxLevel": 15
+            },
+            {
+                "id": 269,
+                "weight": 1,
+                "minLevel": 15,
+                "maxLevel": 15
+            }
+        ]
+    },
+    "eternaForest": {
+        "walk": [
+            {
+                "id": 406,
+                "weight": 84.66666666666667,
+                "minLevel": 10,
+                "maxLevel": 12,
+                "byTime": {
+                    "morning": 88,
+                    "day": 98,
+                    "night": 68
+                }
+            },
+            {
+                "id": 265,
+                "weight": 60,
+                "minLevel": 10,
+                "maxLevel": 11,
+                "byTime": {
+                    "morning": 70,
+                    "day": 70,
+                    "night": 40
+                }
+            },
+            {
+                "id": 427,
+                "weight": 62,
+                "minLevel": 10,
+                "maxLevel": 13
+            },
+            {
+                "id": 266,
+                "weight": 25,
+                "minLevel": 10,
+                "maxLevel": 12
+            },
+            {
+                "id": 268,
+                "weight": 25,
+                "minLevel": 10,
+                "maxLevel": 12
+            },
+            {
+                "id": 198,
+                "weight": 6.666666666666667,
+                "minLevel": 10,
+                "maxLevel": 11,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 200,
+                "weight": 6.666666666666667,
+                "minLevel": 10,
+                "maxLevel": 11,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 401,
+                "weight": 6.666666666666667,
+                "minLevel": 10,
+                "maxLevel": 12,
+                "byTime": {
+                    "morning": 10,
+                    "day": 0,
+                    "night": 10
+                }
+            },
+            {
+                "id": 163,
+                "weight": 3.3333333333333335,
+                "minLevel": 12,
+                "maxLevel": 12,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 10
+                }
+            },
+            {
+                "id": 399,
+                "weight": 10,
+                "minLevel": 12,
+                "maxLevel": 12
+            },
+            {
+                "id": 92,
+                "weight": 4,
+                "minLevel": 13,
+                "maxLevel": 13
+            },
+            {
+                "id": 267,
+                "weight": 3,
+                "minLevel": 12,
+                "maxLevel": 14
+            },
+            {
+                "id": 269,
+                "weight": 3,
+                "minLevel": 12,
+                "maxLevel": 14
+            }
+        ]
+    },
+    "route211West": {
+        "walk": [
+            {
+                "id": 307,
+                "weight": 163.33333333333334,
+                "minLevel": 12,
+                "maxLevel": 16,
+                "byTime": {
+                    "morning": 180,
+                    "day": 180,
+                    "night": 130
+                }
+            },
+            {
+                "id": 74,
+                "weight": 96.66666666666667,
+                "minLevel": 12,
+                "maxLevel": 15,
+                "byTime": {
+                    "morning": 80,
+                    "day": 110,
+                    "night": 100
+                }
+            },
+            {
+                "id": 399,
+                "weight": 83.33333333333333,
+                "minLevel": 12,
+                "maxLevel": 14,
+                "byTime": {
+                    "morning": 90,
+                    "day": 90,
+                    "night": 70
+                }
+            },
+            {
+                "id": 41,
+                "weight": 51.666666666666664,
+                "minLevel": 12,
+                "maxLevel": 15,
+                "byTime": {
+                    "morning": 25,
+                    "day": 45,
+                    "night": 85
+                }
+            },
+            {
+                "id": 173,
+                "weight": 30,
+                "minLevel": 12,
+                "maxLevel": 13,
+                "byTime": {
+                    "morning": 60,
+                    "day": 10,
+                    "night": 20
+                }
+            },
+            {
+                "id": 433,
+                "weight": 65,
+                "minLevel": 13,
+                "maxLevel": 16
+            },
+            {
+                "id": 66,
+                "weight": 45,
+                "minLevel": 13,
+                "maxLevel": 16
+            },
+            {
+                "id": 163,
+                "weight": 10,
+                "minLevel": 14,
+                "maxLevel": 15,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 436,
+                "weight": 30,
+                "minLevel": 14,
+                "maxLevel": 16
+            },
+            {
+                "id": 77,
+                "weight": 20,
+                "minLevel": 13,
+                "maxLevel": 13
+            },
+            {
+                "id": 299,
+                "weight": 5,
+                "minLevel": 14,
+                "maxLevel": 14
+            }
+        ]
+    },
+    "oldChateau": {
+        "walk": [
+            {
+                "id": 92,
+                "weight": 2700,
+                "minLevel": 12,
+                "maxLevel": 17
+            }
+        ]
+    },
+    "route206": {
+        "walk": [
+            {
+                "id": 77,
+                "weight": 93.33333333333333,
+                "minLevel": 14,
+                "maxLevel": 17,
+                "byTime": {
+                    "morning": 90,
+                    "day": 120,
+                    "night": 70
+                }
+            },
+            {
+                "id": 74,
+                "weight": 75,
+                "minLevel": 14,
+                "maxLevel": 18
+            },
+            {
+                "id": 402,
+                "weight": 33.333333333333336,
+                "minLevel": 14,
+                "maxLevel": 18,
+                "byTime": {
+                    "morning": 30,
+                    "day": 20,
+                    "night": 50
+                }
+            },
+            {
+                "id": 41,
+                "weight": 10,
+                "minLevel": 15,
+                "maxLevel": 17,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 207,
+                "weight": 16.666666666666668,
+                "minLevel": 16,
+                "maxLevel": 18,
+                "byTime": {
+                    "morning": 20,
+                    "day": 20,
+                    "night": 10
+                }
+            },
+            {
+                "id": 434,
+                "weight": 25,
+                "minLevel": 14,
+                "maxLevel": 16
+            },
+            {
+                "id": 401,
+                "weight": 6.666666666666667,
+                "minLevel": 14,
+                "maxLevel": 14,
+                "byTime": {
+                    "morning": 20,
+                    "day": 0,
+                    "night": 0
+                }
+            },
+            {
+                "id": 436,
+                "weight": 20,
+                "minLevel": 15,
+                "maxLevel": 15
+            },
+            {
+                "id": 66,
+                "weight": 20,
+                "minLevel": 17,
+                "maxLevel": 19
+            }
+        ]
+    },
+    "waywardCave": {
+        "walk": [
+            {
+                "id": 436,
+                "weight": 220,
+                "minLevel": 14,
+                "maxLevel": 20
+            },
+            {
+                "id": 41,
+                "weight": 185,
+                "minLevel": 14,
+                "maxLevel": 19
+            },
+            {
+                "id": 74,
+                "weight": 115,
+                "minLevel": 15,
+                "maxLevel": 20
+            },
+            {
+                "id": 443,
+                "weight": 50,
+                "minLevel": 15,
+                "maxLevel": 20
+            },
+            {
+                "id": 95,
+                "weight": 30,
+                "minLevel": 18,
+                "maxLevel": 20
+            }
+        ]
+    },
+    "route207": {
+        "walk": [
+            {
+                "id": 66,
+                "weight": 108.33333333333333,
+                "minLevel": 5,
+                "maxLevel": 8,
+                "byTime": {
+                    "morning": 105,
+                    "day": 135,
+                    "night": 85
+                }
+            },
+            {
+                "id": 74,
+                "weight": 140,
+                "minLevel": 5,
+                "maxLevel": 7
+            },
+            {
+                "id": 401,
+                "weight": 20,
+                "minLevel": 5,
+                "maxLevel": 6,
+                "byTime": {
+                    "morning": 30,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 77,
+                "weight": 21.666666666666668,
+                "minLevel": 5,
+                "maxLevel": 7,
+                "byTime": {
+                    "morning": 25,
+                    "day": 25,
+                    "night": 15
+                }
+            },
+            {
+                "id": 41,
+                "weight": 10,
+                "minLevel": 5,
+                "maxLevel": 6,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            }
+        ]
+    },
+    "mtCoronet": {
+        "walk": [
+            {
+                "id": 74,
+                "weight": 76.66666666666667,
+                "minLevel": 14,
+                "maxLevel": 19,
+                "byTime": {
+                    "morning": 60,
+                    "day": 90,
+                    "night": 80
+                }
+            },
+            {
+                "id": 41,
+                "weight": 41.666666666666664,
+                "minLevel": 14,
+                "maxLevel": 19,
+                "byTime": {
+                    "morning": 25,
+                    "day": 45,
+                    "night": 55
+                }
+            },
+            {
+                "id": 66,
+                "weight": 60,
+                "minLevel": 15,
+                "maxLevel": 20
+            },
+            {
+                "id": 173,
+                "weight": 23.333333333333332,
+                "minLevel": 14,
+                "maxLevel": 14,
+                "byTime": {
+                    "morning": 50,
+                    "day": 10,
+                    "night": 10
+                }
+            },
+            {
+                "id": 307,
+                "weight": 36.666666666666664,
+                "minLevel": 15,
+                "maxLevel": 20,
+                "byTime": {
+                    "morning": 40,
+                    "day": 40,
+                    "night": 30
+                }
+            },
+            {
+                "id": 433,
+                "weight": 30,
+                "minLevel": 15,
+                "maxLevel": 19
+            },
+            {
+                "id": 436,
+                "weight": 20,
+                "minLevel": 18,
+                "maxLevel": 18
+            },
+            {
+                "id": 35,
+                "weight": 6.666666666666667,
+                "minLevel": 17,
+                "maxLevel": 17,
+                "byTime": {
+                    "morning": 10,
+                    "day": 0,
+                    "night": 10
+                }
+            },
+            {
+                "id": 299,
+                "weight": 5,
+                "minLevel": 18,
+                "maxLevel": 18
+            }
+        ],
+        "surf": [
+            {
+                "id": 41,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 42,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "route208": {
+        "walk": [
+            {
+                "id": 54,
+                "weight": 60,
+                "minLevel": 16,
+                "maxLevel": 18
+            },
+            {
+                "id": 399,
+                "weight": 60,
+                "minLevel": 16,
+                "maxLevel": 18
+            },
+            {
+                "id": 307,
+                "weight": 33.333333333333336,
+                "minLevel": 16,
+                "maxLevel": 17,
+                "byTime": {
+                    "morning": 40,
+                    "day": 40,
+                    "night": 20
+                }
+            },
+            {
+                "id": 66,
+                "weight": 33.333333333333336,
+                "minLevel": 16,
+                "maxLevel": 17,
+                "byTime": {
+                    "morning": 40,
+                    "day": 40,
+                    "night": 20
+                }
+            },
+            {
+                "id": 41,
+                "weight": 16.666666666666668,
+                "minLevel": 16,
+                "maxLevel": 19,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 50
+                }
+            },
+            {
+                "id": 400,
+                "weight": 40,
+                "minLevel": 17,
+                "maxLevel": 20
+            },
+            {
+                "id": 406,
+                "weight": 26.666666666666668,
+                "minLevel": 18,
+                "maxLevel": 19,
+                "byTime": {
+                    "morning": 30,
+                    "day": 30,
+                    "night": 20
+                }
+            },
+            {
+                "id": 280,
+                "weight": 15,
+                "minLevel": 17,
+                "maxLevel": 18
+            },
+            {
+                "id": 315,
+                "weight": 15,
+                "minLevel": 19,
+                "maxLevel": 20
+            }
+        ],
+        "surf": [
+            {
+                "id": 54,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 90,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 45,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 90,
+                "minLevel": 20,
+                "maxLevel": 50
+            },
+            {
+                "id": 119,
+                "weight": 45,
+                "minLevel": 30,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "route209": {
+        "walk": [
+            {
+                "id": 400,
+                "weight": 106.66666666666667,
+                "minLevel": 16,
+                "maxLevel": 19,
+                "byTime": {
+                    "morning": 100,
+                    "day": 120,
+                    "night": 100
+                }
+            },
+            {
+                "id": 397,
+                "weight": 53.333333333333336,
+                "minLevel": 16,
+                "maxLevel": 19,
+                "byTime": {
+                    "morning": 50,
+                    "day": 70,
+                    "night": 40
+                }
+            },
+            {
+                "id": 396,
+                "weight": 40,
+                "minLevel": 16,
+                "maxLevel": 16
+            },
+            {
+                "id": 41,
+                "weight": 10,
+                "minLevel": 16,
+                "maxLevel": 19,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 280,
+                "weight": 16.666666666666668,
+                "minLevel": 17,
+                "maxLevel": 19,
+                "byTime": {
+                    "morning": 20,
+                    "day": 20,
+                    "night": 10
+                }
+            },
+            {
+                "id": 439,
+                "weight": 11.666666666666666,
+                "minLevel": 16,
+                "maxLevel": 16,
+                "byTime": {
+                    "morning": 25,
+                    "day": 5,
+                    "night": 5
+                }
+            },
+            {
+                "id": 438,
+                "weight": 11.666666666666666,
+                "minLevel": 16,
+                "maxLevel": 16,
+                "byTime": {
+                    "morning": 25,
+                    "day": 5,
+                    "night": 5
+                }
+            },
+            {
+                "id": 315,
+                "weight": 25,
+                "minLevel": 19,
+                "maxLevel": 20
+            },
+            {
+                "id": 92,
+                "weight": 6.666666666666667,
+                "minLevel": 16,
+                "maxLevel": 16,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 113,
+                "weight": 15,
+                "minLevel": 16,
+                "maxLevel": 19
+            },
+            {
+                "id": 355,
+                "weight": 3.3333333333333335,
+                "minLevel": 17,
+                "maxLevel": 17,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 10
+                }
+            }
+        ],
+        "surf": [
+            {
+                "id": 54,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "lostTower": {
+        "walk": [
+            {
+                "id": 92,
+                "weight": 742.3333333333334,
+                "minLevel": 16,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 809,
+                    "day": 809,
+                    "night": 609
+                }
+            },
+            {
+                "id": 41,
+                "weight": 609.6666666666666,
+                "minLevel": 16,
+                "maxLevel": 21,
+                "byTime": {
+                    "morning": 643,
+                    "day": 643,
+                    "night": 543
+                }
+            },
+            {
+                "id": 198,
+                "weight": 33.333333333333336,
+                "minLevel": 17,
+                "maxLevel": 21,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 100
+                }
+            },
+            {
+                "id": 200,
+                "weight": 33.333333333333336,
+                "minLevel": 17,
+                "maxLevel": 21,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 100
+                }
+            },
+            {
+                "id": 355,
+                "weight": 33.333333333333336,
+                "minLevel": 17,
+                "maxLevel": 21,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 100
+                }
+            },
+            {
+                "id": 42,
+                "weight": 48,
+                "minLevel": 19,
+                "maxLevel": 23
+            }
+        ]
+    },
+    "solaceonRuins": {
+        "walk": [
+            {
+                "id": 201,
+                "weight": 5400,
+                "minLevel": 14,
+                "maxLevel": 30
+            }
+        ]
+    },
+    "route210South": {
+        "walk": [
+            {
+                "id": 77,
+                "weight": 98.33333333333333,
+                "minLevel": 18,
+                "maxLevel": 21,
+                "byTime": {
+                    "morning": 85,
+                    "day": 135,
+                    "night": 75
+                }
+            },
+            {
+                "id": 74,
+                "weight": 80,
+                "minLevel": 18,
+                "maxLevel": 19
+            },
+            {
+                "id": 402,
+                "weight": 33.333333333333336,
+                "minLevel": 18,
+                "maxLevel": 19,
+                "byTime": {
+                    "morning": 20,
+                    "day": 20,
+                    "night": 60
+                }
+            },
+            {
+                "id": 439,
+                "weight": 11.666666666666666,
+                "minLevel": 18,
+                "maxLevel": 20,
+                "byTime": {
+                    "morning": 25,
+                    "day": 5,
+                    "night": 5
+                }
+            },
+            {
+                "id": 438,
+                "weight": 11.666666666666666,
+                "minLevel": 18,
+                "maxLevel": 20,
+                "byTime": {
+                    "morning": 25,
+                    "day": 5,
+                    "night": 5
+                }
+            },
+            {
+                "id": 397,
+                "weight": 20,
+                "minLevel": 19,
+                "maxLevel": 19
+            },
+            {
+                "id": 113,
+                "weight": 15,
+                "minLevel": 18,
+                "maxLevel": 21
+            },
+            {
+                "id": 123,
+                "weight": 8.333333333333334,
+                "minLevel": 19,
+                "maxLevel": 21,
+                "byTime": {
+                    "morning": 15,
+                    "day": 5,
+                    "night": 5
+                }
+            },
+            {
+                "id": 315,
+                "weight": 15,
+                "minLevel": 20,
+                "maxLevel": 21
+            },
+            {
+                "id": 164,
+                "weight": 3.3333333333333335,
+                "minLevel": 21,
+                "maxLevel": 21,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 10
+                }
+            },
+            {
+                "id": 163,
+                "weight": 3.3333333333333335,
+                "minLevel": 20,
+                "maxLevel": 20,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 10
+                }
+            }
+        ]
+    },
+    "route215": {
+        "walk": [
+            {
+                "id": 77,
+                "weight": 60,
+                "minLevel": 21,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 60,
+                    "day": 80,
+                    "night": 40
+                }
+            },
+            {
+                "id": 74,
+                "weight": 56.666666666666664,
+                "minLevel": 20,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 70,
+                    "day": 50,
+                    "night": 50
+                }
+            },
+            {
+                "id": 402,
+                "weight": 33.333333333333336,
+                "minLevel": 20,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 20,
+                    "day": 20,
+                    "night": 60
+                }
+            },
+            {
+                "id": 397,
+                "weight": 30,
+                "minLevel": 19,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 30,
+                    "day": 40,
+                    "night": 20
+                }
+            },
+            {
+                "id": 183,
+                "weight": 31.666666666666668,
+                "minLevel": 20,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 25,
+                    "day": 25,
+                    "night": 45
+                }
+            },
+            {
+                "id": 64,
+                "weight": 40,
+                "minLevel": 20,
+                "maxLevel": 22
+            },
+            {
+                "id": 63,
+                "weight": 30,
+                "minLevel": 19,
+                "maxLevel": 20
+            },
+            {
+                "id": 123,
+                "weight": 8.333333333333334,
+                "minLevel": 20,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 15,
+                    "day": 5,
+                    "night": 5
+                }
+            },
+            {
+                "id": 108,
+                "weight": 10,
+                "minLevel": 20,
+                "maxLevel": 20
+            }
+        ]
+    },
+    "route214": {
+        "walk": [
+            {
+                "id": 75,
+                "weight": 55,
+                "minLevel": 22,
+                "maxLevel": 24,
+                "byTime": {
+                    "morning": 65,
+                    "day": 65,
+                    "night": 35
+                }
+            },
+            {
+                "id": 77,
+                "weight": 63.333333333333336,
+                "minLevel": 23,
+                "maxLevel": 24,
+                "byTime": {
+                    "morning": 70,
+                    "day": 70,
+                    "night": 50
+                }
+            },
+            {
+                "id": 74,
+                "weight": 60,
+                "minLevel": 21,
+                "maxLevel": 22
+            },
+            {
+                "id": 402,
+                "weight": 23.333333333333332,
+                "minLevel": 23,
+                "maxLevel": 24,
+                "byTime": {
+                    "morning": 10,
+                    "day": 10,
+                    "night": 50
+                }
+            },
+            {
+                "id": 111,
+                "weight": 26.666666666666668,
+                "minLevel": 21,
+                "maxLevel": 24,
+                "byTime": {
+                    "morning": 30,
+                    "day": 30,
+                    "night": 20
+                }
+            },
+            {
+                "id": 228,
+                "weight": 18.333333333333332,
+                "minLevel": 22,
+                "maxLevel": 24,
+                "byTime": {
+                    "morning": 15,
+                    "day": 15,
+                    "night": 25
+                }
+            },
+            {
+                "id": 203,
+                "weight": 20,
+                "minLevel": 24,
+                "maxLevel": 24
+            },
+            {
+                "id": 434,
+                "weight": 15,
+                "minLevel": 23,
+                "maxLevel": 24
+            },
+            {
+                "id": 185,
+                "weight": 15,
+                "minLevel": 23,
+                "maxLevel": 24
+            },
+            {
+                "id": 41,
+                "weight": 3.3333333333333335,
+                "minLevel": 22,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 10
+                }
+            }
+        ],
+        "surf": [
+            {
+                "id": 54,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "maniacTunnel": {
+        "walk": [
+            {
+                "id": 74,
+                "weight": 795,
+                "minLevel": 21,
+                "maxLevel": 25
+            },
+            {
+                "id": 449,
+                "weight": 105,
+                "minLevel": 22,
+                "maxLevel": 26
+            }
+        ]
+    },
+    "valorLakefront": {
+        "walk": [
+            {
+                "id": 397,
+                "weight": 48.333333333333336,
+                "minLevel": 21,
+                "maxLevel": 28,
+                "byTime": {
+                    "morning": 55,
+                    "day": 65,
+                    "night": 25
+                }
+            },
+            {
+                "id": 203,
+                "weight": 85,
+                "minLevel": 21,
+                "maxLevel": 28
+            },
+            {
+                "id": 402,
+                "weight": 30,
+                "minLevel": 21,
+                "maxLevel": 27,
+                "byTime": {
+                    "morning": 20,
+                    "day": 10,
+                    "night": 60
+                }
+            },
+            {
+                "id": 400,
+                "weight": 60,
+                "minLevel": 21,
+                "maxLevel": 27
+            },
+            {
+                "id": 75,
+                "weight": 23.333333333333332,
+                "minLevel": 21,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 30,
+                    "day": 30,
+                    "night": 10
+                }
+            },
+            {
+                "id": 74,
+                "weight": 40,
+                "minLevel": 20,
+                "maxLevel": 20
+            },
+            {
+                "id": 228,
+                "weight": 13.333333333333334,
+                "minLevel": 27,
+                "maxLevel": 28,
+                "byTime": {
+                    "morning": 10,
+                    "day": 10,
+                    "night": 20
+                }
+            }
+        ]
+    },
+    "route213": {
+        "surf": [
+            {
+                "id": 72,
+                "weight": 360,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 278,
+                "weight": 154,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 422,
+                "weight": 34,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 73,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 279,
+                "weight": 20,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 423,
+                "weight": 2,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 600,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 330,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 223,
+                "weight": 270,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 300,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 224,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 319,
+                "weight": 30,
+                "minLevel": 40,
+                "maxLevel": 55
+            }
+        ],
+        "walk": [
+            {
+                "id": 422,
+                "weight": 125,
+                "minLevel": 20,
+                "maxLevel": 26,
+                "byTime": {
+                    "morning": 115,
+                    "day": 115,
+                    "night": 145
+                }
+            },
+            {
+                "id": 418,
+                "weight": 88.33333333333333,
+                "minLevel": 20,
+                "maxLevel": 25,
+                "byTime": {
+                    "morning": 85,
+                    "day": 85,
+                    "night": 95
+                }
+            },
+            {
+                "id": 278,
+                "weight": 53.333333333333336,
+                "minLevel": 20,
+                "maxLevel": 26,
+                "byTime": {
+                    "morning": 60,
+                    "day": 60,
+                    "night": 40
+                }
+            },
+            {
+                "id": 441,
+                "weight": 13.333333333333334,
+                "minLevel": 23,
+                "maxLevel": 25,
+                "byTime": {
+                    "morning": 20,
+                    "day": 20,
+                    "night": 0
+                }
+            },
+            {
+                "id": 419,
+                "weight": 20,
+                "minLevel": 22,
+                "maxLevel": 22
+            }
+        ]
+    },
+    "route212": {
+        "walk": [
+            {
+                "id": 402,
+                "weight": 73.33333333333333,
+                "minLevel": 17,
+                "maxLevel": 19,
+                "byTime": {
+                    "morning": 60,
+                    "day": 40,
+                    "night": 120
+                }
+            },
+            {
+                "id": 315,
+                "weight": 108.33333333333333,
+                "minLevel": 16,
+                "maxLevel": 24,
+                "byTime": {
+                    "morning": 115,
+                    "day": 115,
+                    "night": 95
+                }
+            },
+            {
+                "id": 397,
+                "weight": 46.666666666666664,
+                "minLevel": 17,
+                "maxLevel": 23,
+                "byTime": {
+                    "morning": 50,
+                    "day": 70,
+                    "night": 20
+                }
+            },
+            {
+                "id": 400,
+                "weight": 63.333333333333336,
+                "minLevel": 18,
+                "maxLevel": 20,
+                "byTime": {
+                    "morning": 70,
+                    "day": 70,
+                    "night": 50
+                }
+            },
+            {
+                "id": 406,
+                "weight": 60,
+                "minLevel": 16,
+                "maxLevel": 16
+            },
+            {
+                "id": 194,
+                "weight": 60,
+                "minLevel": 18,
+                "maxLevel": 18
+            },
+            {
+                "id": 183,
+                "weight": 31.666666666666668,
+                "minLevel": 21,
+                "maxLevel": 23,
+                "byTime": {
+                    "morning": 25,
+                    "day": 25,
+                    "night": 45
+                }
+            },
+            {
+                "id": 422,
+                "weight": 45,
+                "minLevel": 23,
+                "maxLevel": 26
+            },
+            {
+                "id": 396,
+                "weight": 40,
+                "minLevel": 16,
+                "maxLevel": 16
+            },
+            {
+                "id": 195,
+                "weight": 30,
+                "minLevel": 24,
+                "maxLevel": 26
+            },
+            {
+                "id": 281,
+                "weight": 13.333333333333334,
+                "minLevel": 22,
+                "maxLevel": 24,
+                "byTime": {
+                    "morning": 20,
+                    "day": 10,
+                    "night": 10
+                }
+            },
+            {
+                "id": 418,
+                "weight": 15,
+                "minLevel": 23,
+                "maxLevel": 25
+            },
+            {
+                "id": 280,
+                "weight": 3.3333333333333335,
+                "minLevel": 22,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 0,
+                    "day": 10,
+                    "night": 0
+                }
+            },
+            {
+                "id": 453,
+                "weight": 10,
+                "minLevel": 24,
+                "maxLevel": 25
+            }
+        ],
+        "surf": [
+            {
+                "id": 54,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 194,
+                "weight": 180,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 422,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 55,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 72,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 195,
+                "weight": 20,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 423,
+                "weight": 9,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 73,
+                "weight": 1,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 600,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 330,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 90,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 223,
+                "weight": 45,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 330,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 90,
+                "minLevel": 20,
+                "maxLevel": 50
+            },
+            {
+                "id": 224,
+                "weight": 45,
+                "minLevel": 30,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "greatMarsh": {
+        "walk": [
+            {
+                "id": 194,
+                "weight": 620,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 400,
+                "weight": 506.6666666666667,
+                "minLevel": 21,
+                "maxLevel": 28,
+                "byTime": {
+                    "morning": 520,
+                    "day": 520,
+                    "night": 480
+                }
+            },
+            {
+                "id": 195,
+                "weight": 420,
+                "minLevel": 21,
+                "maxLevel": 30
+            },
+            {
+                "id": 183,
+                "weight": 300,
+                "minLevel": 21,
+                "maxLevel": 26
+            },
+            {
+                "id": 193,
+                "weight": 243.33333333333334,
+                "minLevel": 22,
+                "maxLevel": 31,
+                "byTime": {
+                    "morning": 250,
+                    "day": 250,
+                    "night": 230
+                }
+            },
+            {
+                "id": 163,
+                "weight": 86.66666666666667,
+                "minLevel": 20,
+                "maxLevel": 27,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 260
+                }
+            },
+            {
+                "id": 406,
+                "weight": 80,
+                "minLevel": 20,
+                "maxLevel": 24,
+                "byTime": {
+                    "morning": 120,
+                    "day": 120,
+                    "night": 0
+                }
+            },
+            {
+                "id": 396,
+                "weight": 80,
+                "minLevel": 22,
+                "maxLevel": 26,
+                "byTime": {
+                    "morning": 120,
+                    "day": 120,
+                    "night": 0
+                }
+            },
+            {
+                "id": 451,
+                "weight": 180,
+                "minLevel": 22,
+                "maxLevel": 30
+            },
+            {
+                "id": 453,
+                "weight": 180,
+                "minLevel": 22,
+                "maxLevel": 30
+            },
+            {
+                "id": 455,
+                "weight": 180,
+                "minLevel": 22,
+                "maxLevel": 30
+            },
+            {
+                "id": 46,
+                "weight": 180,
+                "minLevel": 22,
+                "maxLevel": 30
+            },
+            {
+                "id": 102,
+                "weight": 180,
+                "minLevel": 22,
+                "maxLevel": 30
+            },
+            {
+                "id": 115,
+                "weight": 180,
+                "minLevel": 22,
+                "maxLevel": 30
+            },
+            {
+                "id": 285,
+                "weight": 180,
+                "minLevel": 22,
+                "maxLevel": 30
+            },
+            {
+                "id": 316,
+                "weight": 180,
+                "minLevel": 22,
+                "maxLevel": 30
+            },
+            {
+                "id": 452,
+                "weight": 180,
+                "minLevel": 22,
+                "maxLevel": 30
+            },
+            {
+                "id": 454,
+                "weight": 180,
+                "minLevel": 22,
+                "maxLevel": 30
+            },
+            {
+                "id": 114,
+                "weight": 123.33333333333333,
+                "minLevel": 27,
+                "maxLevel": 31,
+                "byTime": {
+                    "morning": 130,
+                    "day": 130,
+                    "night": 110
+                }
+            },
+            {
+                "id": 399,
+                "weight": 140,
+                "minLevel": 22,
+                "maxLevel": 26
+            },
+            {
+                "id": 298,
+                "weight": 140,
+                "minLevel": 20,
+                "maxLevel": 26
+            },
+            {
+                "id": 357,
+                "weight": 86.66666666666667,
+                "minLevel": 27,
+                "maxLevel": 30,
+                "byTime": {
+                    "morning": 100,
+                    "day": 100,
+                    "night": 60
+                }
+            },
+            {
+                "id": 55,
+                "weight": 120,
+                "minLevel": 22,
+                "maxLevel": 26
+            },
+            {
+                "id": 315,
+                "weight": 120,
+                "minLevel": 22,
+                "maxLevel": 26
+            },
+            {
+                "id": 397,
+                "weight": 120,
+                "minLevel": 22,
+                "maxLevel": 26
+            },
+            {
+                "id": 164,
+                "weight": 33.333333333333336,
+                "minLevel": 26,
+                "maxLevel": 30,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 100
+                }
+            },
+            {
+                "id": 54,
+                "weight": 80,
+                "minLevel": 20,
+                "maxLevel": 26
+            },
+            {
+                "id": 352,
+                "weight": 60,
+                "minLevel": 27,
+                "maxLevel": 30
+            }
+        ],
+        "surf": [
+            {
+                "id": 194,
+                "weight": 1140,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 183,
+                "weight": 300,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 195,
+                "weight": 110,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 54,
+                "weight": 50,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 1600,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 880,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 670,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 130,
+                "weight": 50,
+                "minLevel": 15,
+                "maxLevel": 30
+            }
+        ],
+        "superRod": [
+            {
+                "id": 318,
+                "weight": 720,
+                "minLevel": 15,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 490,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 130,
+                "weight": 390,
+                "minLevel": 30,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "route210West": {
+        "walk": [
+            {
+                "id": 307,
+                "weight": 70,
+                "minLevel": 24,
+                "maxLevel": 29,
+                "byTime": {
+                    "morning": 80,
+                    "day": 80,
+                    "night": 50
+                }
+            },
+            {
+                "id": 66,
+                "weight": 48.333333333333336,
+                "minLevel": 25,
+                "maxLevel": 29,
+                "byTime": {
+                    "morning": 55,
+                    "day": 55,
+                    "night": 35
+                }
+            },
+            {
+                "id": 400,
+                "weight": 60,
+                "minLevel": 24,
+                "maxLevel": 28
+            },
+            {
+                "id": 54,
+                "weight": 40,
+                "minLevel": 25,
+                "maxLevel": 25
+            },
+            {
+                "id": 163,
+                "weight": 10,
+                "minLevel": 24,
+                "maxLevel": 27,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 164,
+                "weight": 10,
+                "minLevel": 25,
+                "maxLevel": 27,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 67,
+                "weight": 30,
+                "minLevel": 26,
+                "maxLevel": 30
+            },
+            {
+                "id": 333,
+                "weight": 23.333333333333332,
+                "minLevel": 27,
+                "maxLevel": 27,
+                "byTime": {
+                    "morning": 20,
+                    "day": 30,
+                    "night": 20
+                }
+            },
+            {
+                "id": 123,
+                "weight": 8.333333333333334,
+                "minLevel": 27,
+                "maxLevel": 29,
+                "byTime": {
+                    "morning": 15,
+                    "day": 5,
+                    "night": 5
+                }
+            }
+        ],
+        "surf": [
+            {
+                "id": 54,
+                "weight": 540,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 600,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 330,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 220,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 45,
+                "minLevel": 15,
+                "maxLevel": 35
+            },
+            {
+                "id": 340,
+                "weight": 5,
+                "minLevel": 25,
+                "maxLevel": 35
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 285,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 165,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 341,
+                "weight": 120,
+                "minLevel": 30,
+                "maxLevel": 40
+            },
+            {
+                "id": 342,
+                "weight": 25,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 5,
+                "minLevel": 40,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "route211East": {
+        "walk": [
+            {
+                "id": 307,
+                "weight": 103.33333333333333,
+                "minLevel": 27,
+                "maxLevel": 29,
+                "byTime": {
+                    "morning": 110,
+                    "day": 110,
+                    "night": 90
+                }
+            },
+            {
+                "id": 67,
+                "weight": 48.333333333333336,
+                "minLevel": 27,
+                "maxLevel": 30,
+                "byTime": {
+                    "morning": 55,
+                    "day": 55,
+                    "night": 35
+                }
+            },
+            {
+                "id": 75,
+                "weight": 60,
+                "minLevel": 27,
+                "maxLevel": 28
+            },
+            {
+                "id": 77,
+                "weight": 23.333333333333332,
+                "minLevel": 26,
+                "maxLevel": 28,
+                "byTime": {
+                    "morning": 30,
+                    "day": 30,
+                    "night": 10
+                }
+            },
+            {
+                "id": 433,
+                "weight": 35,
+                "minLevel": 27,
+                "maxLevel": 30
+            },
+            {
+                "id": 41,
+                "weight": 10,
+                "minLevel": 26,
+                "maxLevel": 28,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 164,
+                "weight": 10,
+                "minLevel": 28,
+                "maxLevel": 29,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 436,
+                "weight": 10,
+                "minLevel": 29,
+                "maxLevel": 29
+            }
+        ]
+    },
+    "fuegoIronworks": {
+        "walk": [
+            {
+                "id": 419,
+                "weight": 75,
+                "minLevel": 29,
+                "maxLevel": 31
+            },
+            {
+                "id": 423,
+                "weight": 48.333333333333336,
+                "minLevel": 29,
+                "maxLevel": 31,
+                "byTime": {
+                    "morning": 45,
+                    "day": 45,
+                    "night": 55
+                }
+            },
+            {
+                "id": 422,
+                "weight": 40,
+                "minLevel": 28,
+                "maxLevel": 28
+            },
+            {
+                "id": 126,
+                "weight": 26.666666666666668,
+                "minLevel": 28,
+                "maxLevel": 29,
+                "byTime": {
+                    "morning": 30,
+                    "day": 30,
+                    "night": 20
+                }
+            },
+            {
+                "id": 81,
+                "weight": 30,
+                "minLevel": 28,
+                "maxLevel": 30
+            },
+            {
+                "id": 403,
+                "weight": 20,
+                "minLevel": 28,
+                "maxLevel": 28
+            },
+            {
+                "id": 278,
+                "weight": 20,
+                "minLevel": 29,
+                "maxLevel": 29
+            },
+            {
+                "id": 404,
+                "weight": 20,
+                "minLevel": 29,
+                "maxLevel": 29
+            },
+            {
+                "id": 417,
+                "weight": 20,
+                "minLevel": 29,
+                "maxLevel": 29
+            }
+        ],
+        "surf": [
+            {
+                "id": 72,
+                "weight": 180,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 278,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 422,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 73,
+                "weight": 19,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 279,
+                "weight": 10,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 423,
+                "weight": 1,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 456,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 457,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 130,
+                "weight": 120,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 90,
+                "weight": 45,
+                "minLevel": 20,
+                "maxLevel": 50
+            }
+        ]
+    },
+    "route218": {
+        "surf": [
+            {
+                "id": 72,
+                "weight": 360,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 278,
+                "weight": 120,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 422,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 73,
+                "weight": 38,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 279,
+                "weight": 20,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 423,
+                "weight": 2,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 600,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 330,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 456,
+                "weight": 270,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 285,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 457,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 120,
+                "weight": 45,
+                "minLevel": 20,
+                "maxLevel": 50
+            }
+        ],
+        "walk": [
+            {
+                "id": 419,
+                "weight": 103.33333333333333,
+                "minLevel": 28,
+                "maxLevel": 31,
+                "byTime": {
+                    "morning": 100,
+                    "day": 100,
+                    "night": 110
+                }
+            },
+            {
+                "id": 423,
+                "weight": 68.33333333333333,
+                "minLevel": 28,
+                "maxLevel": 30,
+                "byTime": {
+                    "morning": 65,
+                    "day": 65,
+                    "night": 75
+                }
+            },
+            {
+                "id": 422,
+                "weight": 40,
+                "minLevel": 28,
+                "maxLevel": 28
+            },
+            {
+                "id": 122,
+                "weight": 40,
+                "minLevel": 29,
+                "maxLevel": 31
+            },
+            {
+                "id": 441,
+                "weight": 13.333333333333334,
+                "minLevel": 28,
+                "maxLevel": 30,
+                "byTime": {
+                    "morning": 20,
+                    "day": 20,
+                    "night": 0
+                }
+            },
+            {
+                "id": 278,
+                "weight": 20,
+                "minLevel": 29,
+                "maxLevel": 29
+            },
+            {
+                "id": 431,
+                "weight": 15,
+                "minLevel": 29,
+                "maxLevel": 30
+            }
+        ]
+    },
+    "ironIsland": {
+        "surf": [
+            {
+                "id": 72,
+                "weight": 150,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 278,
+                "weight": 120,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 279,
+                "weight": 19,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 73,
+                "weight": 11,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 456,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 457,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 130,
+                "weight": 120,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 211,
+                "weight": 45,
+                "minLevel": 20,
+                "maxLevel": 50
+            }
+        ],
+        "walk": [
+            {
+                "id": 75,
+                "weight": 925,
+                "minLevel": 29,
+                "maxLevel": 34
+            },
+            {
+                "id": 42,
+                "weight": 330,
+                "minLevel": 30,
+                "maxLevel": 33
+            },
+            {
+                "id": 95,
+                "weight": 310,
+                "minLevel": 31,
+                "maxLevel": 33
+            },
+            {
+                "id": 74,
+                "weight": 115,
+                "minLevel": 29,
+                "maxLevel": 32
+            },
+            {
+                "id": 208,
+                "weight": 90,
+                "minLevel": 32,
+                "maxLevel": 35
+            },
+            {
+                "id": 41,
+                "weight": 30,
+                "minLevel": 30,
+                "maxLevel": 30
+            }
+        ]
+    },
+    "seaRoutes219to221": {
+        "surf": [
+            {
+                "id": 72,
+                "weight": 540,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 278,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 73,
+                "weight": 57,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 279,
+                "weight": 33,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 900,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 495,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 456,
+                "weight": 390,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 457,
+                "weight": 15,
+                "minLevel": 25,
+                "maxLevel": 35
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 390,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 457,
+                "weight": 345,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 170,
+                "weight": 95,
+                "minLevel": 15,
+                "maxLevel": 50
+            },
+            {
+                "id": 366,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 171,
+                "weight": 10,
+                "minLevel": 20,
+                "maxLevel": 45
+            }
+        ],
+        "walk": [
+            {
+                "id": 419,
+                "weight": 78.33333333333333,
+                "minLevel": 28,
+                "maxLevel": 31,
+                "byTime": {
+                    "morning": 75,
+                    "day": 75,
+                    "night": 85
+                }
+            },
+            {
+                "id": 315,
+                "weight": 41.666666666666664,
+                "minLevel": 28,
+                "maxLevel": 30,
+                "byTime": {
+                    "morning": 45,
+                    "day": 45,
+                    "night": 35
+                }
+            },
+            {
+                "id": 423,
+                "weight": 40,
+                "minLevel": 28,
+                "maxLevel": 30
+            },
+            {
+                "id": 185,
+                "weight": 40,
+                "minLevel": 29,
+                "maxLevel": 31
+            },
+            {
+                "id": 203,
+                "weight": 25,
+                "minLevel": 28,
+                "maxLevel": 30
+            },
+            {
+                "id": 434,
+                "weight": 20,
+                "minLevel": 28,
+                "maxLevel": 28
+            },
+            {
+                "id": 422,
+                "weight": 20,
+                "minLevel": 28,
+                "maxLevel": 28
+            },
+            {
+                "id": 278,
+                "weight": 20,
+                "minLevel": 29,
+                "maxLevel": 29
+            },
+            {
+                "id": 435,
+                "weight": 15,
+                "minLevel": 29,
+                "maxLevel": 30
+            }
+        ]
+    },
+    "lakeValor": {
+        "walk": [
+            {
+                "id": 400,
+                "weight": 125,
+                "minLevel": 34,
+                "maxLevel": 41
+            },
+            {
+                "id": 397,
+                "weight": 71.66666666666667,
+                "minLevel": 34,
+                "maxLevel": 40,
+                "byTime": {
+                    "morning": 85,
+                    "day": 85,
+                    "night": 45
+                }
+            },
+            {
+                "id": 54,
+                "weight": 55,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 164,
+                "weight": 13.333333333333334,
+                "minLevel": 34,
+                "maxLevel": 36,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 40
+                }
+            },
+            {
+                "id": 433,
+                "weight": 20,
+                "minLevel": 35,
+                "maxLevel": 36
+            },
+            {
+                "id": 55,
+                "weight": 15,
+                "minLevel": 40,
+                "maxLevel": 41
+            }
+        ],
+        "surf": [
+            {
+                "id": 54,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 130,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 119,
+                "weight": 5,
+                "minLevel": 25,
+                "maxLevel": 35
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "route216": {
+        "walk": [
+            {
+                "id": 307,
+                "weight": 116.66666666666667,
+                "minLevel": 31,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 130,
+                    "day": 130,
+                    "night": 90
+                }
+            },
+            {
+                "id": 459,
+                "weight": 86.66666666666667,
+                "minLevel": 32,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 90,
+                    "day": 90,
+                    "night": 80
+                }
+            },
+            {
+                "id": 75,
+                "weight": 88.33333333333333,
+                "minLevel": 31,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 85,
+                    "day": 95,
+                    "night": 85
+                }
+            },
+            {
+                "id": 67,
+                "weight": 63.333333333333336,
+                "minLevel": 31,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 70,
+                    "day": 70,
+                    "night": 50
+                }
+            },
+            {
+                "id": 215,
+                "weight": 85,
+                "minLevel": 32,
+                "maxLevel": 35
+            },
+            {
+                "id": 42,
+                "weight": 48.333333333333336,
+                "minLevel": 31,
+                "maxLevel": 34,
+                "byTime": {
+                    "morning": 45,
+                    "day": 45,
+                    "night": 55
+                }
+            },
+            {
+                "id": 35,
+                "weight": 36.666666666666664,
+                "minLevel": 30,
+                "maxLevel": 32,
+                "byTime": {
+                    "morning": 40,
+                    "day": 30,
+                    "night": 40
+                }
+            },
+            {
+                "id": 433,
+                "weight": 30,
+                "minLevel": 30,
+                "maxLevel": 34
+            },
+            {
+                "id": 41,
+                "weight": 10,
+                "minLevel": 32,
+                "maxLevel": 33,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 164,
+                "weight": 6.666666666666667,
+                "minLevel": 33,
+                "maxLevel": 33,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 436,
+                "weight": 20,
+                "minLevel": 33,
+                "maxLevel": 33
+            },
+            {
+                "id": 361,
+                "weight": 3.3333333333333335,
+                "minLevel": 33,
+                "maxLevel": 33,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 10
+                }
+            },
+            {
+                "id": 299,
+                "weight": 5,
+                "minLevel": 33,
+                "maxLevel": 33
+            }
+        ]
+    },
+    "route217": {
+        "walk": [
+            {
+                "id": 459,
+                "weight": 86.66666666666667,
+                "minLevel": 32,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 90,
+                    "day": 90,
+                    "night": 80
+                }
+            },
+            {
+                "id": 215,
+                "weight": 71.66666666666667,
+                "minLevel": 33,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 75,
+                    "day": 75,
+                    "night": 65
+                }
+            },
+            {
+                "id": 67,
+                "weight": 33.333333333333336,
+                "minLevel": 35,
+                "maxLevel": 36,
+                "byTime": {
+                    "morning": 40,
+                    "day": 40,
+                    "night": 20
+                }
+            },
+            {
+                "id": 307,
+                "weight": 13.333333333333334,
+                "minLevel": 35,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 20,
+                    "day": 20,
+                    "night": 0
+                }
+            },
+            {
+                "id": 308,
+                "weight": 40,
+                "minLevel": 35,
+                "maxLevel": 36
+            },
+            {
+                "id": 220,
+                "weight": 35,
+                "minLevel": 32,
+                "maxLevel": 34
+            },
+            {
+                "id": 41,
+                "weight": 6.666666666666667,
+                "minLevel": 35,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 164,
+                "weight": 6.666666666666667,
+                "minLevel": 35,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 361,
+                "weight": 6.666666666666667,
+                "minLevel": 33,
+                "maxLevel": 33,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            }
+        ]
+    },
+    "acuityLakefront": {
+        "walk": [
+            {
+                "id": 459,
+                "weight": 86.66666666666667,
+                "minLevel": 32,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 90,
+                    "day": 90,
+                    "night": 80
+                }
+            },
+            {
+                "id": 215,
+                "weight": 71.66666666666667,
+                "minLevel": 33,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 75,
+                    "day": 75,
+                    "night": 65
+                }
+            },
+            {
+                "id": 67,
+                "weight": 33.333333333333336,
+                "minLevel": 35,
+                "maxLevel": 36,
+                "byTime": {
+                    "morning": 40,
+                    "day": 40,
+                    "night": 20
+                }
+            },
+            {
+                "id": 307,
+                "weight": 13.333333333333334,
+                "minLevel": 35,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 20,
+                    "day": 20,
+                    "night": 0
+                }
+            },
+            {
+                "id": 308,
+                "weight": 40,
+                "minLevel": 35,
+                "maxLevel": 36
+            },
+            {
+                "id": 220,
+                "weight": 35,
+                "minLevel": 32,
+                "maxLevel": 34
+            },
+            {
+                "id": 41,
+                "weight": 6.666666666666667,
+                "minLevel": 35,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 164,
+                "weight": 6.666666666666667,
+                "minLevel": 35,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 361,
+                "weight": 6.666666666666667,
+                "minLevel": 32,
+                "maxLevel": 33,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            }
+        ]
+    },
+    "lakeAcuity": {
+        "walk": [
+            {
+                "id": 400,
+                "weight": 88.33333333333333,
+                "minLevel": 34,
+                "maxLevel": 40,
+                "byTime": {
+                    "morning": 95,
+                    "day": 95,
+                    "night": 75
+                }
+            },
+            {
+                "id": 54,
+                "weight": 58.333333333333336,
+                "minLevel": 34,
+                "maxLevel": 38,
+                "byTime": {
+                    "morning": 65,
+                    "day": 65,
+                    "night": 45
+                }
+            },
+            {
+                "id": 459,
+                "weight": 38.333333333333336,
+                "minLevel": 38,
+                "maxLevel": 41,
+                "byTime": {
+                    "morning": 45,
+                    "day": 45,
+                    "night": 25
+                }
+            },
+            {
+                "id": 215,
+                "weight": 60,
+                "minLevel": 35,
+                "maxLevel": 41
+            },
+            {
+                "id": 164,
+                "weight": 13.333333333333334,
+                "minLevel": 34,
+                "maxLevel": 36,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 40
+                }
+            },
+            {
+                "id": 433,
+                "weight": 20,
+                "minLevel": 34,
+                "maxLevel": 36
+            },
+            {
+                "id": 361,
+                "weight": 6.666666666666667,
+                "minLevel": 39,
+                "maxLevel": 40,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 55,
+                "weight": 15,
+                "minLevel": 39,
+                "maxLevel": 40
+            }
+        ],
+        "surf": [
+            {
+                "id": 54,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 55,
+                "weight": 30,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 130,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 119,
+                "weight": 5,
+                "minLevel": 25,
+                "maxLevel": 35
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "mtCoronetPeak": {
+        "walk": [
+            {
+                "id": 75,
+                "weight": 566.6666666666666,
+                "minLevel": 31,
+                "maxLevel": 40,
+                "byTime": {
+                    "morning": 540,
+                    "day": 620,
+                    "night": 540
+                }
+            },
+            {
+                "id": 308,
+                "weight": 357.6666666666667,
+                "minLevel": 37,
+                "maxLevel": 41,
+                "byTime": {
+                    "morning": 401,
+                    "day": 401,
+                    "night": 271
+                }
+            },
+            {
+                "id": 437,
+                "weight": 430,
+                "minLevel": 37,
+                "maxLevel": 42
+            },
+            {
+                "id": 35,
+                "weight": 313.3333333333333,
+                "minLevel": 30,
+                "maxLevel": 42,
+                "byTime": {
+                    "morning": 340,
+                    "day": 260,
+                    "night": 340
+                }
+            },
+            {
+                "id": 67,
+                "weight": 326.6666666666667,
+                "minLevel": 31,
+                "maxLevel": 41,
+                "byTime": {
+                    "morning": 340,
+                    "day": 340,
+                    "night": 300
+                }
+            },
+            {
+                "id": 42,
+                "weight": 265.6666666666667,
+                "minLevel": 31,
+                "maxLevel": 41,
+                "byTime": {
+                    "morning": 219,
+                    "day": 219,
+                    "night": 359
+                }
+            },
+            {
+                "id": 433,
+                "weight": 234,
+                "minLevel": 30,
+                "maxLevel": 40
+            },
+            {
+                "id": 460,
+                "weight": 133.33333333333334,
+                "minLevel": 38,
+                "maxLevel": 40,
+                "byTime": {
+                    "morning": 140,
+                    "day": 140,
+                    "night": 120
+                }
+            },
+            {
+                "id": 459,
+                "weight": 120,
+                "minLevel": 36,
+                "maxLevel": 38
+            },
+            {
+                "id": 307,
+                "weight": 66.66666666666667,
+                "minLevel": 31,
+                "maxLevel": 35,
+                "byTime": {
+                    "morning": 70,
+                    "day": 70,
+                    "night": 60
+                }
+            },
+            {
+                "id": 358,
+                "weight": 66,
+                "minLevel": 39,
+                "maxLevel": 42
+            },
+            {
+                "id": 164,
+                "weight": 20,
+                "minLevel": 39,
+                "maxLevel": 39,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 60
+                }
+            },
+            {
+                "id": 299,
+                "weight": 50,
+                "minLevel": 33,
+                "maxLevel": 38
+            },
+            {
+                "id": 436,
+                "weight": 40,
+                "minLevel": 33,
+                "maxLevel": 36
+            },
+            {
+                "id": 359,
+                "weight": 10,
+                "minLevel": 38,
+                "maxLevel": 40
+            }
+        ],
+        "surf": [
+            {
+                "id": 41,
+                "weight": 540,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 42,
+                "weight": 60,
+                "minLevel": 20,
+                "maxLevel": 40
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 600,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 330,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 270,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 315,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 150,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 147,
+                "weight": 120,
+                "minLevel": 15,
+                "maxLevel": 25
+            },
+            {
+                "id": 148,
+                "weight": 15,
+                "minLevel": 15,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "route222": {
+        "surf": [
+            {
+                "id": 72,
+                "weight": 240,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 73,
+                "weight": 148,
+                "minLevel": 20,
+                "maxLevel": 50
+            },
+            {
+                "id": 278,
+                "weight": 120,
+                "minLevel": 20,
+                "maxLevel": 40
+            },
+            {
+                "id": 279,
+                "weight": 72,
+                "minLevel": 20,
+                "maxLevel": 50
+            },
+            {
+                "id": 458,
+                "weight": 20,
+                "minLevel": 30,
+                "maxLevel": 45
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 600,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 330,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 223,
+                "weight": 270,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 224,
+                "weight": 270,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 130,
+                "weight": 255,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 120,
+                "weight": 45,
+                "minLevel": 20,
+                "maxLevel": 50
+            },
+            {
+                "id": 319,
+                "weight": 30,
+                "minLevel": 40,
+                "maxLevel": 55
+            }
+        ],
+        "walk": [
+            {
+                "id": 419,
+                "weight": 83.33333333333333,
+                "minLevel": 38,
+                "maxLevel": 42,
+                "byTime": {
+                    "morning": 70,
+                    "day": 70,
+                    "night": 110
+                }
+            },
+            {
+                "id": 441,
+                "weight": 33.333333333333336,
+                "minLevel": 38,
+                "maxLevel": 41,
+                "byTime": {
+                    "morning": 50,
+                    "day": 50,
+                    "night": 0
+                }
+            },
+            {
+                "id": 423,
+                "weight": 46.666666666666664,
+                "minLevel": 40,
+                "maxLevel": 42,
+                "byTime": {
+                    "morning": 40,
+                    "day": 40,
+                    "night": 60
+                }
+            },
+            {
+                "id": 125,
+                "weight": 26.666666666666668,
+                "minLevel": 39,
+                "maxLevel": 41,
+                "byTime": {
+                    "morning": 30,
+                    "day": 30,
+                    "night": 20
+                }
+            },
+            {
+                "id": 278,
+                "weight": 30,
+                "minLevel": 38,
+                "maxLevel": 41
+            },
+            {
+                "id": 431,
+                "weight": 20,
+                "minLevel": 40,
+                "maxLevel": 40
+            },
+            {
+                "id": 122,
+                "weight": 15,
+                "minLevel": 41,
+                "maxLevel": 42
+            },
+            {
+                "id": 432,
+                "weight": 15,
+                "minLevel": 41,
+                "maxLevel": 42
+            },
+            {
+                "id": 81,
+                "weight": 10,
+                "minLevel": 39,
+                "maxLevel": 39
+            },
+            {
+                "id": 404,
+                "weight": 10,
+                "minLevel": 38,
+                "maxLevel": 40
+            },
+            {
+                "id": 279,
+                "weight": 5,
+                "minLevel": 40,
+                "maxLevel": 40
+            },
+            {
+                "id": 82,
+                "weight": 5,
+                "minLevel": 41,
+                "maxLevel": 41
+            }
+        ]
+    },
+    "route223": {
+        "surf": [
+            {
+                "id": 279,
+                "weight": 255,
+                "minLevel": 30,
+                "maxLevel": 50
+            },
+            {
+                "id": 73,
+                "weight": 255,
+                "minLevel": 30,
+                "maxLevel": 50
+            },
+            {
+                "id": 278,
+                "weight": 60,
+                "minLevel": 30,
+                "maxLevel": 40
+            },
+            {
+                "id": 458,
+                "weight": 30,
+                "minLevel": 30,
+                "maxLevel": 45
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 600,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 330,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 223,
+                "weight": 265,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 224,
+                "weight": 5,
+                "minLevel": 25,
+                "maxLevel": 35
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 240,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 224,
+                "weight": 180,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 320,
+                "weight": 120,
+                "minLevel": 30,
+                "maxLevel": 40
+            },
+            {
+                "id": 370,
+                "weight": 45,
+                "minLevel": 20,
+                "maxLevel": 30
+            },
+            {
+                "id": 321,
+                "weight": 15,
+                "minLevel": 35,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "sinnohVictoryRoad": {
+        "walk": [
+            {
+                "id": 75,
+                "weight": 130,
+                "minLevel": 40,
+                "maxLevel": 46,
+                "byTime": {
+                    "morning": 140,
+                    "day": 140,
+                    "night": 110
+                }
+            },
+            {
+                "id": 42,
+                "weight": 145,
+                "minLevel": 41,
+                "maxLevel": 47,
+                "byTime": {
+                    "morning": 135,
+                    "day": 135,
+                    "night": 165
+                }
+            },
+            {
+                "id": 208,
+                "weight": 110,
+                "minLevel": 42,
+                "maxLevel": 47
+            },
+            {
+                "id": 67,
+                "weight": 100,
+                "minLevel": 44,
+                "maxLevel": 46
+            },
+            {
+                "id": 308,
+                "weight": 90,
+                "minLevel": 44,
+                "maxLevel": 47
+            },
+            {
+                "id": 419,
+                "weight": 90,
+                "minLevel": 42,
+                "maxLevel": 45
+            },
+            {
+                "id": 95,
+                "weight": 75,
+                "minLevel": 41,
+                "maxLevel": 45
+            },
+            {
+                "id": 64,
+                "weight": 50,
+                "minLevel": 45,
+                "maxLevel": 47
+            },
+            {
+                "id": 82,
+                "weight": 30,
+                "minLevel": 41,
+                "maxLevel": 43
+            },
+            {
+                "id": 184,
+                "weight": 30,
+                "minLevel": 41,
+                "maxLevel": 43
+            },
+            {
+                "id": 111,
+                "weight": 20,
+                "minLevel": 41,
+                "maxLevel": 41
+            },
+            {
+                "id": 112,
+                "weight": 15,
+                "minLevel": 41,
+                "maxLevel": 43
+            },
+            {
+                "id": 444,
+                "weight": 15,
+                "minLevel": 41,
+                "maxLevel": 43
+            }
+        ],
+        "surf": [
+            {
+                "id": 42,
+                "weight": 210,
+                "minLevel": 30,
+                "maxLevel": 50
+            },
+            {
+                "id": 419,
+                "weight": 90,
+                "minLevel": 30,
+                "maxLevel": 50
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 300,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "trophyGarden": {
+        "walk": [
+            {
+                "id": 397,
+                "weight": 73.33333333333333,
+                "minLevel": 16,
+                "maxLevel": 24,
+                "byTime": {
+                    "morning": 60,
+                    "day": 110,
+                    "night": 50
+                }
+            },
+            {
+                "id": 315,
+                "weight": 90,
+                "minLevel": 16,
+                "maxLevel": 23
+            },
+            {
+                "id": 172,
+                "weight": 63.333333333333336,
+                "minLevel": 16,
+                "maxLevel": 22,
+                "byTime": {
+                    "morning": 90,
+                    "day": 50,
+                    "night": 50
+                }
+            },
+            {
+                "id": 402,
+                "weight": 43.333333333333336,
+                "minLevel": 16,
+                "maxLevel": 23,
+                "byTime": {
+                    "morning": 30,
+                    "day": 20,
+                    "night": 80
+                }
+            },
+            {
+                "id": 25,
+                "weight": 30,
+                "minLevel": 18,
+                "maxLevel": 24
+            },
+            {
+                "id": 133,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 438,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 440,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 52,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 173,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 35,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 174,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 311,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 39,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 351,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 312,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 439,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 183,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 113,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 298,
+                "weight": 30,
+                "minLevel": 16,
+                "maxLevel": 22
+            },
+            {
+                "id": 137,
+                "weight": 20,
+                "minLevel": 16,
+                "maxLevel": 18
+            },
+            {
+                "id": 132,
+                "weight": 10,
+                "minLevel": 22,
+                "maxLevel": 22
+            }
+        ]
+    },
+    "victoryRoadBack": {
+        "walk": [
+            {
+                "id": 75,
+                "weight": 145,
+                "minLevel": 47,
+                "maxLevel": 51,
+                "byTime": {
+                    "morning": 155,
+                    "day": 155,
+                    "night": 125
+                }
+            },
+            {
+                "id": 42,
+                "weight": 145,
+                "minLevel": 47,
+                "maxLevel": 52,
+                "byTime": {
+                    "morning": 135,
+                    "day": 135,
+                    "night": 165
+                }
+            },
+            {
+                "id": 419,
+                "weight": 160,
+                "minLevel": 47,
+                "maxLevel": 51
+            },
+            {
+                "id": 67,
+                "weight": 150,
+                "minLevel": 50,
+                "maxLevel": 52
+            },
+            {
+                "id": 308,
+                "weight": 90,
+                "minLevel": 50,
+                "maxLevel": 52
+            },
+            {
+                "id": 95,
+                "weight": 80,
+                "minLevel": 48,
+                "maxLevel": 50
+            },
+            {
+                "id": 208,
+                "weight": 70,
+                "minLevel": 50,
+                "maxLevel": 52
+            },
+            {
+                "id": 184,
+                "weight": 30,
+                "minLevel": 47,
+                "maxLevel": 49
+            },
+            {
+                "id": 87,
+                "weight": 15,
+                "minLevel": 48,
+                "maxLevel": 50
+            },
+            {
+                "id": 444,
+                "weight": 15,
+                "minLevel": 49,
+                "maxLevel": 50
+            }
+        ],
+        "surf": [
+            {
+                "id": 42,
+                "weight": 180,
+                "minLevel": 40,
+                "maxLevel": 55
+            },
+            {
+                "id": 419,
+                "weight": 60,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 131,
+                "weight": 30,
+                "minLevel": 35,
+                "maxLevel": 60
+            },
+            {
+                "id": 87,
+                "weight": 30,
+                "minLevel": 35,
+                "maxLevel": 55
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 300,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "route224": {
+        "walk": [
+            {
+                "id": 419,
+                "weight": 66.66666666666667,
+                "minLevel": 50,
+                "maxLevel": 54,
+                "byTime": {
+                    "morning": 60,
+                    "day": 60,
+                    "night": 80
+                }
+            },
+            {
+                "id": 441,
+                "weight": 26.666666666666668,
+                "minLevel": 52,
+                "maxLevel": 54,
+                "byTime": {
+                    "morning": 40,
+                    "day": 40,
+                    "night": 0
+                }
+            },
+            {
+                "id": 423,
+                "weight": 56.666666666666664,
+                "minLevel": 49,
+                "maxLevel": 53,
+                "byTime": {
+                    "morning": 50,
+                    "day": 50,
+                    "night": 70
+                }
+            },
+            {
+                "id": 315,
+                "weight": 60,
+                "minLevel": 50,
+                "maxLevel": 54
+            },
+            {
+                "id": 69,
+                "weight": 13.333333333333334,
+                "minLevel": 49,
+                "maxLevel": 49,
+                "byTime": {
+                    "morning": 20,
+                    "day": 20,
+                    "night": 0
+                }
+            },
+            {
+                "id": 43,
+                "weight": 6.666666666666667,
+                "minLevel": 49,
+                "maxLevel": 49,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 44,
+                "weight": 15,
+                "minLevel": 51,
+                "maxLevel": 53
+            },
+            {
+                "id": 70,
+                "weight": 15,
+                "minLevel": 51,
+                "maxLevel": 53
+            },
+            {
+                "id": 267,
+                "weight": 15,
+                "minLevel": 23,
+                "maxLevel": 52
+            },
+            {
+                "id": 279,
+                "weight": 10,
+                "minLevel": 51,
+                "maxLevel": 51
+            },
+            {
+                "id": 418,
+                "weight": 8,
+                "minLevel": 23,
+                "maxLevel": 23
+            },
+            {
+                "id": 269,
+                "weight": 5,
+                "minLevel": 52,
+                "maxLevel": 52
+            },
+            {
+                "id": 422,
+                "weight": 2,
+                "minLevel": 23,
+                "maxLevel": 23
+            }
+        ],
+        "surf": [
+            {
+                "id": 279,
+                "weight": 190,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 73,
+                "weight": 100,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 423,
+                "weight": 10,
+                "minLevel": 35,
+                "maxLevel": 55
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 223,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 224,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 130,
+                "weight": 120,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 370,
+                "weight": 45,
+                "minLevel": 20,
+                "maxLevel": 30
+            }
+        ]
+    },
+    "route225": {
+        "walk": [
+            {
+                "id": 22,
+                "weight": 90,
+                "minLevel": 48,
+                "maxLevel": 52,
+                "byTime": {
+                    "morning": 110,
+                    "day": 110,
+                    "night": 50
+                }
+            },
+            {
+                "id": 20,
+                "weight": 75,
+                "minLevel": 49,
+                "maxLevel": 52
+            },
+            {
+                "id": 354,
+                "weight": 20,
+                "minLevel": 48,
+                "maxLevel": 52,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 60
+                }
+            },
+            {
+                "id": 67,
+                "weight": 35,
+                "minLevel": 48,
+                "maxLevel": 51
+            },
+            {
+                "id": 315,
+                "weight": 20,
+                "minLevel": 51,
+                "maxLevel": 51
+            },
+            {
+                "id": 75,
+                "weight": 20,
+                "minLevel": 49,
+                "maxLevel": 49
+            },
+            {
+                "id": 21,
+                "weight": 15,
+                "minLevel": 20,
+                "maxLevel": 47
+            },
+            {
+                "id": 19,
+                "weight": 15,
+                "minLevel": 20,
+                "maxLevel": 47
+            },
+            {
+                "id": 435,
+                "weight": 10,
+                "minLevel": 51,
+                "maxLevel": 51
+            }
+        ],
+        "surf": [
+            {
+                "id": 55,
+                "weight": 230,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 61,
+                "weight": 60,
+                "minLevel": 40,
+                "maxLevel": 50
+            },
+            {
+                "id": 54,
+                "weight": 10,
+                "minLevel": 35,
+                "maxLevel": 45
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 60,
+                "weight": 90,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 45,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 61,
+                "weight": 90,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 45,
+                "minLevel": 30,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "route226": {
+        "walk": [
+            {
+                "id": 22,
+                "weight": 80,
+                "minLevel": 48,
+                "maxLevel": 53,
+                "byTime": {
+                    "morning": 100,
+                    "day": 100,
+                    "night": 40
+                }
+            },
+            {
+                "id": 20,
+                "weight": 75,
+                "minLevel": 49,
+                "maxLevel": 52
+            },
+            {
+                "id": 354,
+                "weight": 20,
+                "minLevel": 48,
+                "maxLevel": 53,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 60
+                }
+            },
+            {
+                "id": 67,
+                "weight": 45,
+                "minLevel": 48,
+                "maxLevel": 53
+            },
+            {
+                "id": 55,
+                "weight": 20,
+                "minLevel": 51,
+                "maxLevel": 53
+            },
+            {
+                "id": 75,
+                "weight": 20,
+                "minLevel": 49,
+                "maxLevel": 49
+            },
+            {
+                "id": 19,
+                "weight": 15,
+                "minLevel": 20,
+                "maxLevel": 47
+            },
+            {
+                "id": 278,
+                "weight": 15,
+                "minLevel": 47,
+                "maxLevel": 49
+            },
+            {
+                "id": 21,
+                "weight": 10,
+                "minLevel": 20,
+                "maxLevel": 22
+            }
+        ],
+        "surf": [
+            {
+                "id": 279,
+                "weight": 150,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 278,
+                "weight": 60,
+                "minLevel": 35,
+                "maxLevel": 45
+            },
+            {
+                "id": 86,
+                "weight": 30,
+                "minLevel": 35,
+                "maxLevel": 45
+            },
+            {
+                "id": 363,
+                "weight": 30,
+                "minLevel": 35,
+                "maxLevel": 45
+            },
+            {
+                "id": 73,
+                "weight": 20,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 87,
+                "weight": 5,
+                "minLevel": 40,
+                "maxLevel": 55
+            },
+            {
+                "id": 364,
+                "weight": 5,
+                "minLevel": 40,
+                "maxLevel": 55
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 116,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 117,
+                "weight": 135,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 130,
+                "weight": 120,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 369,
+                "weight": 45,
+                "minLevel": 20,
+                "maxLevel": 50
+            }
+        ]
+    },
+    "route227": {
+        "walk": [
+            {
+                "id": 22,
+                "weight": 50,
+                "minLevel": 51,
+                "maxLevel": 55,
+                "byTime": {
+                    "morning": 60,
+                    "day": 60,
+                    "night": 30
+                }
+            },
+            {
+                "id": 75,
+                "weight": 38.333333333333336,
+                "minLevel": 51,
+                "maxLevel": 56,
+                "byTime": {
+                    "morning": 45,
+                    "day": 45,
+                    "night": 25
+                }
+            },
+            {
+                "id": 323,
+                "weight": 60,
+                "minLevel": 53,
+                "maxLevel": 55
+            },
+            {
+                "id": 112,
+                "weight": 60,
+                "minLevel": 54,
+                "maxLevel": 55
+            },
+            {
+                "id": 42,
+                "weight": 10,
+                "minLevel": 51,
+                "maxLevel": 54,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 30
+                }
+            },
+            {
+                "id": 110,
+                "weight": 30,
+                "minLevel": 52,
+                "maxLevel": 55
+            },
+            {
+                "id": 354,
+                "weight": 6.666666666666667,
+                "minLevel": 54,
+                "maxLevel": 54,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 227,
+                "weight": 15,
+                "minLevel": 53,
+                "maxLevel": 56
+            },
+            {
+                "id": 322,
+                "weight": 15,
+                "minLevel": 22,
+                "maxLevel": 51
+            },
+            {
+                "id": 111,
+                "weight": 15,
+                "minLevel": 22,
+                "maxLevel": 52
+            }
+        ],
+        "surf": [
+            {
+                "id": 61,
+                "weight": 210,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 60,
+                "weight": 90,
+                "minLevel": 20,
+                "maxLevel": 45
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "starkMountain": {
+        "walk": [
+            {
+                "id": 219,
+                "weight": 180,
+                "minLevel": 53,
+                "maxLevel": 58
+            },
+            {
+                "id": 75,
+                "weight": 148.33333333333334,
+                "minLevel": 51,
+                "maxLevel": 57,
+                "byTime": {
+                    "morning": 155,
+                    "day": 155,
+                    "night": 135
+                }
+            },
+            {
+                "id": 42,
+                "weight": 80,
+                "minLevel": 51,
+                "maxLevel": 56,
+                "byTime": {
+                    "morning": 70,
+                    "day": 70,
+                    "night": 100
+                }
+            },
+            {
+                "id": 110,
+                "weight": 100,
+                "minLevel": 51,
+                "maxLevel": 58
+            },
+            {
+                "id": 112,
+                "weight": 90,
+                "minLevel": 54,
+                "maxLevel": 55
+            },
+            {
+                "id": 22,
+                "weight": 50,
+                "minLevel": 51,
+                "maxLevel": 55,
+                "byTime": {
+                    "morning": 60,
+                    "day": 60,
+                    "night": 30
+                }
+            },
+            {
+                "id": 323,
+                "weight": 80,
+                "minLevel": 53,
+                "maxLevel": 58
+            },
+            {
+                "id": 67,
+                "weight": 40,
+                "minLevel": 56,
+                "maxLevel": 58
+            },
+            {
+                "id": 218,
+                "weight": 30,
+                "minLevel": 25,
+                "maxLevel": 53
+            },
+            {
+                "id": 354,
+                "weight": 6.666666666666667,
+                "minLevel": 54,
+                "maxLevel": 54,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 20
+                }
+            },
+            {
+                "id": 111,
+                "weight": 20,
+                "minLevel": 22,
+                "maxLevel": 52
+            },
+            {
+                "id": 95,
+                "weight": 20,
+                "minLevel": 54,
+                "maxLevel": 56
+            },
+            {
+                "id": 74,
+                "weight": 20,
+                "minLevel": 25,
+                "maxLevel": 29
+            },
+            {
+                "id": 227,
+                "weight": 15,
+                "minLevel": 53,
+                "maxLevel": 56
+            },
+            {
+                "id": 322,
+                "weight": 15,
+                "minLevel": 22,
+                "maxLevel": 51
+            },
+            {
+                "id": 109,
+                "weight": 5,
+                "minLevel": 53,
+                "maxLevel": 53
+            }
+        ]
+    },
+    "route228": {
+        "walk": [
+            {
+                "id": 332,
+                "weight": 80,
+                "minLevel": 50,
+                "maxLevel": 53,
+                "byTime": {
+                    "morning": 60,
+                    "day": 60,
+                    "night": 120
+                }
+            },
+            {
+                "id": 51,
+                "weight": 90,
+                "minLevel": 50,
+                "maxLevel": 54
+            },
+            {
+                "id": 450,
+                "weight": 50,
+                "minLevel": 50,
+                "maxLevel": 54,
+                "byTime": {
+                    "morning": 60,
+                    "day": 60,
+                    "night": 30
+                }
+            },
+            {
+                "id": 112,
+                "weight": 50,
+                "minLevel": 50,
+                "maxLevel": 53,
+                "byTime": {
+                    "morning": 60,
+                    "day": 60,
+                    "night": 30
+                }
+            },
+            {
+                "id": 50,
+                "weight": 15,
+                "minLevel": 23,
+                "maxLevel": 49
+            },
+            {
+                "id": 331,
+                "weight": 15,
+                "minLevel": 23,
+                "maxLevel": 50
+            }
+        ],
+        "surf": [
+            {
+                "id": 61,
+                "weight": 210,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 60,
+                "weight": 90,
+                "minLevel": 20,
+                "maxLevel": 45
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 339,
+                "weight": 130,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 340,
+                "weight": 5,
+                "minLevel": 25,
+                "maxLevel": 35
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 340,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "route229": {
+        "walk": [
+            {
+                "id": 70,
+                "weight": 46.666666666666664,
+                "minLevel": 51,
+                "maxLevel": 52,
+                "byTime": {
+                    "morning": 40,
+                    "day": 60,
+                    "night": 40
+                }
+            },
+            {
+                "id": 44,
+                "weight": 46.666666666666664,
+                "minLevel": 51,
+                "maxLevel": 52,
+                "byTime": {
+                    "morning": 40,
+                    "day": 60,
+                    "night": 40
+                }
+            },
+            {
+                "id": 166,
+                "weight": 20,
+                "minLevel": 50,
+                "maxLevel": 52,
+                "byTime": {
+                    "morning": 60,
+                    "day": 0,
+                    "night": 0
+                }
+            },
+            {
+                "id": 168,
+                "weight": 20,
+                "minLevel": 50,
+                "maxLevel": 52,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 60
+                }
+            },
+            {
+                "id": 315,
+                "weight": 55,
+                "minLevel": 48,
+                "maxLevel": 50
+            },
+            {
+                "id": 314,
+                "weight": 25,
+                "minLevel": 49,
+                "maxLevel": 50
+            },
+            {
+                "id": 313,
+                "weight": 25,
+                "minLevel": 49,
+                "maxLevel": 50
+            },
+            {
+                "id": 16,
+                "weight": 11.666666666666666,
+                "minLevel": 47,
+                "maxLevel": 50,
+                "byTime": {
+                    "morning": 5,
+                    "day": 25,
+                    "night": 5
+                }
+            },
+            {
+                "id": 69,
+                "weight": 10,
+                "minLevel": 20,
+                "maxLevel": 22
+            },
+            {
+                "id": 43,
+                "weight": 10,
+                "minLevel": 20,
+                "maxLevel": 22
+            },
+            {
+                "id": 432,
+                "weight": 10,
+                "minLevel": 50,
+                "maxLevel": 50
+            },
+            {
+                "id": 123,
+                "weight": 5,
+                "minLevel": 52,
+                "maxLevel": 52
+            },
+            {
+                "id": 127,
+                "weight": 5,
+                "minLevel": 52,
+                "maxLevel": 52
+            },
+            {
+                "id": 267,
+                "weight": 5,
+                "minLevel": 48,
+                "maxLevel": 48
+            },
+            {
+                "id": 269,
+                "weight": 5,
+                "minLevel": 48,
+                "maxLevel": 48
+            }
+        ],
+        "surf": [
+            {
+                "id": 55,
+                "weight": 290,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 278,
+                "weight": 140,
+                "minLevel": 40,
+                "maxLevel": 55
+            },
+            {
+                "id": 283,
+                "weight": 95,
+                "minLevel": 35,
+                "maxLevel": 45
+            },
+            {
+                "id": 279,
+                "weight": 60,
+                "minLevel": 45,
+                "maxLevel": 55
+            },
+            {
+                "id": 54,
+                "weight": 10,
+                "minLevel": 35,
+                "maxLevel": 45
+            },
+            {
+                "id": 284,
+                "weight": 5,
+                "minLevel": 35,
+                "maxLevel": 55
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 600,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 465,
+                "minLevel": 10,
+                "maxLevel": 35
+            },
+            {
+                "id": 118,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 365,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 129,
+                "weight": 100,
+                "minLevel": 1,
+                "maxLevel": 100
+            }
+        ]
+    },
+    "route230": {
+        "walk": [
+            {
+                "id": 69,
+                "weight": 35.333333333333336,
+                "minLevel": 18,
+                "maxLevel": 47,
+                "byTime": {
+                    "morning": 42,
+                    "day": 42,
+                    "night": 22
+                }
+            },
+            {
+                "id": 419,
+                "weight": 51,
+                "minLevel": 48,
+                "maxLevel": 52
+            },
+            {
+                "id": 70,
+                "weight": 45,
+                "minLevel": 49,
+                "maxLevel": 50
+            },
+            {
+                "id": 44,
+                "weight": 45,
+                "minLevel": 49,
+                "maxLevel": 50
+            },
+            {
+                "id": 43,
+                "weight": 28.666666666666668,
+                "minLevel": 18,
+                "maxLevel": 47,
+                "byTime": {
+                    "morning": 22,
+                    "day": 22,
+                    "night": 42
+                }
+            },
+            {
+                "id": 279,
+                "weight": 30,
+                "minLevel": 48,
+                "maxLevel": 50
+            },
+            {
+                "id": 55,
+                "weight": 20,
+                "minLevel": 52,
+                "maxLevel": 52
+            },
+            {
+                "id": 267,
+                "weight": 10,
+                "minLevel": 51,
+                "maxLevel": 51
+            },
+            {
+                "id": 423,
+                "weight": 10,
+                "minLevel": 51,
+                "maxLevel": 51
+            },
+            {
+                "id": 269,
+                "weight": 10,
+                "minLevel": 51,
+                "maxLevel": 51
+            },
+            {
+                "id": 315,
+                "weight": 10,
+                "minLevel": 49,
+                "maxLevel": 49
+            },
+            {
+                "id": 278,
+                "weight": 5,
+                "minLevel": 48,
+                "maxLevel": 48
+            }
+        ],
+        "surf": [
+            {
+                "id": 279,
+                "weight": 150,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 364,
+                "weight": 65,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 86,
+                "weight": 30,
+                "minLevel": 35,
+                "maxLevel": 45
+            },
+            {
+                "id": 363,
+                "weight": 30,
+                "minLevel": 35,
+                "maxLevel": 45
+            },
+            {
+                "id": 73,
+                "weight": 20,
+                "minLevel": 35,
+                "maxLevel": 55
+            },
+            {
+                "id": 87,
+                "weight": 5,
+                "minLevel": 40,
+                "maxLevel": 55
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 223,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 120,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 320,
+                "weight": 120,
+                "minLevel": 30,
+                "maxLevel": 40
+            },
+            {
+                "id": 224,
+                "weight": 45,
+                "minLevel": 20,
+                "maxLevel": 55
+            },
+            {
+                "id": 321,
+                "weight": 15,
+                "minLevel": 35,
+                "maxLevel": 55
+            }
+        ]
+    },
+    "snowpointTemple": {
+        "walk": [
+            {
+                "id": 42,
+                "weight": 900,
+                "minLevel": 47,
+                "maxLevel": 56
+            },
+            {
+                "id": 215,
+                "weight": 480,
+                "minLevel": 49,
+                "maxLevel": 56
+            },
+            {
+                "id": 208,
+                "weight": 180,
+                "minLevel": 52,
+                "maxLevel": 56
+            },
+            {
+                "id": 75,
+                "weight": 120,
+                "minLevel": 52,
+                "maxLevel": 56
+            },
+            {
+                "id": 95,
+                "weight": 60,
+                "minLevel": 50,
+                "maxLevel": 53
+            },
+            {
+                "id": 124,
+                "weight": 50,
+                "minLevel": 47,
+                "maxLevel": 51
+            },
+            {
+                "id": 238,
+                "weight": 10,
+                "minLevel": 47,
+                "maxLevel": 49
+            }
+        ]
+    },
+    "turnbackCave": {
+        "walk": [
+            {
+                "id": 93,
+                "weight": 603.3333333333334,
+                "minLevel": 25,
+                "maxLevel": 66,
+                "byTime": {
+                    "morning": 620,
+                    "day": 620,
+                    "night": 570
+                }
+            },
+            {
+                "id": 42,
+                "weight": 595,
+                "minLevel": 17,
+                "maxLevel": 66
+            },
+            {
+                "id": 437,
+                "weight": 570,
+                "minLevel": 35,
+                "maxLevel": 66
+            },
+            {
+                "id": 436,
+                "weight": 130,
+                "minLevel": 15,
+                "maxLevel": 64
+            },
+            {
+                "id": 92,
+                "weight": 73.33333333333333,
+                "minLevel": 15,
+                "maxLevel": 17,
+                "byTime": {
+                    "morning": 80,
+                    "day": 80,
+                    "night": 60
+                }
+            },
+            {
+                "id": 356,
+                "weight": 44.333333333333336,
+                "minLevel": 16,
+                "maxLevel": 48,
+                "byTime": {
+                    "morning": 21,
+                    "day": 21,
+                    "night": 91
+                }
+            },
+            {
+                "id": 358,
+                "weight": 41,
+                "minLevel": 28,
+                "maxLevel": 47
+            },
+            {
+                "id": 433,
+                "weight": 29,
+                "minLevel": 16,
+                "maxLevel": 28
+            },
+            {
+                "id": 355,
+                "weight": 14,
+                "minLevel": 18,
+                "maxLevel": 28
+            }
+        ]
+    },
+    "sendoffSpring": {
+        "walk": [
+            {
+                "id": 400,
+                "weight": 120,
+                "minLevel": 37,
+                "maxLevel": 54
+            },
+            {
+                "id": 397,
+                "weight": 53.333333333333336,
+                "minLevel": 38,
+                "maxLevel": 54,
+                "byTime": {
+                    "morning": 70,
+                    "day": 70,
+                    "night": 20
+                }
+            },
+            {
+                "id": 75,
+                "weight": 31.666666666666668,
+                "minLevel": 37,
+                "maxLevel": 39,
+                "byTime": {
+                    "morning": 35,
+                    "day": 35,
+                    "night": 25
+                }
+            },
+            {
+                "id": 164,
+                "weight": 13.333333333333334,
+                "minLevel": 53,
+                "maxLevel": 54,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 40
+                }
+            },
+            {
+                "id": 55,
+                "weight": 40,
+                "minLevel": 53,
+                "maxLevel": 54
+            },
+            {
+                "id": 358,
+                "weight": 20,
+                "minLevel": 52,
+                "maxLevel": 54
+            },
+            {
+                "id": 356,
+                "weight": 8.333333333333334,
+                "minLevel": 39,
+                "maxLevel": 40,
+                "byTime": {
+                    "morning": 5,
+                    "day": 5,
+                    "night": 15
+                }
+            },
+            {
+                "id": 42,
+                "weight": 3.3333333333333335,
+                "minLevel": 38,
+                "maxLevel": 38,
+                "byTime": {
+                    "morning": 0,
+                    "day": 0,
+                    "night": 10
+                }
+            },
+            {
+                "id": 433,
+                "weight": 10,
+                "minLevel": 37,
+                "maxLevel": 39
+            }
+        ],
+        "surf": [
+            {
+                "id": 55,
+                "weight": 300,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ],
+        "oldRod": [
+            {
+                "id": 129,
+                "weight": 300,
+                "minLevel": 3,
+                "maxLevel": 15
+            }
+        ],
+        "goodRod": [
+            {
+                "id": 129,
+                "weight": 165,
+                "minLevel": 10,
+                "maxLevel": 25
+            },
+            {
+                "id": 118,
+                "weight": 135,
+                "minLevel": 10,
+                "maxLevel": 25
+            }
+        ],
+        "superRod": [
+            {
+                "id": 130,
+                "weight": 165,
+                "minLevel": 30,
+                "maxLevel": 55
+            },
+            {
+                "id": 119,
+                "weight": 135,
+                "minLevel": 20,
+                "maxLevel": 55
+            }
+        ]
     }
 }

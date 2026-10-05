@@ -10,6 +10,7 @@ import { HOENN_GYMS, hoennFinale } from "./hoenn";
 import { JOHTO_GYMS, johtoFinale } from "./johto";
 import { ORANGE_TRIALS, orangeFinale } from "./orange";
 import { SEVII_TRIALS, seviiFinale } from "./sevii";
+import { SINNOH_GYMS, sinnohFinale } from "./sinnoh";
 import type { GymDefinition, TrainerDefinition } from "./trainers";
 import { championFor, ELITE_FOUR, GYMS } from "./trainers";
 import type { RegionId } from "./zones";
@@ -43,6 +44,12 @@ export interface RegionDefinition {
     requiresCompletePokedex?: boolean;
     /** Every starter joins the party, not just the one picked (Colosseum's Espeon and Umbreon). */
     allStarters?: boolean;
+    /**
+     * The newest species of the region's generation (#386 unless set). Evolutions a later
+     * generation added to older Pokémon (Electivire, Togekiss) don't count toward the Pokédex
+     * of regions before it, even though they can be evolved there.
+     */
+    newestSpecies?: number;
 }
 
 export const REGIONS: Record<RegionId, RegionDefinition> = {
@@ -183,6 +190,27 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         fame: 22,
         requires: "orre",
         requiresCompletePokedex: true
+    },
+    sinnoh: {
+        id: "sinnoh",
+        name: "Sinnoh",
+        blurb: "Eight Gyms from Oreburgh to Sunyshore, Team Galactic at the Spear Pillar, Honey Trees and the Underground.",
+        color: "#4F6EB0",
+        starters: [387, 390, 393],
+        startLevel: 5,
+        startingKeyItems: [],
+        shopTier: 0,
+        trials: SINNOH_GYMS,
+        trialNoun: "badges",
+        finaleName: "Pokémon League",
+        finaleBlurb:
+            "Face Aaron, Bertha, Flint, Lucian and Champion Cynthia back-to-back (your party is healed between battles).",
+        finale: () => sinnohFinale(),
+        levelCaps: [17, 24, 28, 34, 38, 42, 45, 51, 62, 100],
+        fame: 24,
+        requires: "orreXd",
+        requiresCompletePokedex: true,
+        newestSpecies: 493
     }
 };
 

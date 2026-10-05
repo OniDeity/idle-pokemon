@@ -1,6 +1,7 @@
 import type { BallId, KeyItemId } from "./items";
 import { HOENN_SPECIALS } from "./hoenn";
 import { HOENN_ANIME_SPECIALS } from "./hoennAnime";
+import { SINNOH_SPECIALS } from "./sinnoh";
 import { JOHTO_SPECIALS } from "./johto";
 import { COLOSSEUM_SPECIALS } from "./colosseum";
 import { XD_SPECIALS } from "./xd";
@@ -75,6 +76,10 @@ export type SpecialEncounter =
           postGame?: boolean;
           trainer: TrainerDefinition;
           prizeBalls?: Partial<Record<BallId, number>>;
+          /** A key item handed over for winning (the Distortion World's Griseous Orb). */
+          keyItem?: KeyItemId;
+          /** Multiplies this journey's Hall of Fame Fame once won (the Distortion World). */
+          fameBonus?: number;
           text: string;
       };
 
@@ -406,7 +411,8 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
     ...HOENN_SPECIALS,
     ...HOENN_ANIME_SPECIALS,
     ...COLOSSEUM_SPECIALS,
-    ...XD_SPECIALS
+    ...XD_SPECIALS,
+    ...SINNOH_SPECIALS
 ];
 
 /** Seconds allowed to defeat a legendary before it flees. */
