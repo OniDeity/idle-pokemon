@@ -11,6 +11,7 @@ import { JOHTO_GYMS, johtoFinale } from "./johto";
 import { ORANGE_TRIALS, orangeFinale } from "./orange";
 import { SEVII_TRIALS, seviiFinale } from "./sevii";
 import { SINNOH_GYMS, sinnohFinale } from "./sinnoh";
+import { FIORE_MISSIONS, fioreFinale } from "./fiore";
 import type { GymDefinition, TrainerDefinition } from "./trainers";
 import { championFor, ELITE_FOUR, GYMS } from "./trainers";
 import type { RegionId } from "./zones";
@@ -50,6 +51,11 @@ export interface RegionDefinition {
      * of regions before it, even though they can be evolved there.
      */
     newestSpecies?: number;
+    /**
+     * A Pokémon Ranger region: wild Pokémon are captured with the Capture Styler, never with Poké
+     * Balls (none are used up).
+     */
+    styler?: boolean;
 }
 
 export const REGIONS: Record<RegionId, RegionDefinition> = {
@@ -211,6 +217,28 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         requires: "orreXd",
         requiresCompletePokedex: true,
         newestSpecies: 493
+    },
+    fiore: {
+        id: "fiore",
+        name: "Fiore",
+        blurb: "Pokémon Ranger: capture with the Capture Styler, no Poké Balls, and stop the Go-Rock Squad's Power Styler.",
+        color: "#16A34A",
+        starters: [311, 312],
+        startLevel: 5,
+        startingKeyItems: [],
+        shopTier: 0,
+        trials: FIORE_MISSIONS,
+        trialNoun: "missions",
+        finaleName: "Fiore Temple",
+        finaleBlurb:
+            "Infiltrate the Go-Rock Squad Base, then face the Go-Rock Quads, Billy and Gordor's Power Styler beasts back-to-back (your party is healed between battles).",
+        finale: () => fioreFinale(),
+        levelCaps: [16, 22, 26, 31, 35, 40, 44, 49, 58, 100],
+        fame: 26,
+        requires: "sinnoh",
+        requiresCompletePokedex: true,
+        newestSpecies: 493,
+        styler: true
     }
 };
 

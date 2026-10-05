@@ -83,6 +83,8 @@ import {
 import { digWall, diggable, FOSSIL_SPECIES, UNDERGROUND_ITEMS } from "game/pokemon/underground";
 import { DEX_MILESTONES, fameGain, HOF_UPGRADE_LIST } from "game/pokemon/balance";
 import { arceusForm } from "game/pokemon/data";
+import { FIORE_MISSIONS, FIORE_ZONES } from "game/pokemon/fiore";
+import { POKE_ASSIST_BONUS, STYLER_POWER } from "game/pokemon/balance";
 import { MAX_RADAR_CHAIN, RADAR_CHAIN_PULL, radarShinyMultiplier } from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
 
@@ -616,7 +618,8 @@ describe("generation mechanics", () => {
             "partner",
             "contests",
             "underground",
-            "sinnohEvolutions"
+            "sinnohEvolutions",
+            "pokeAssist"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
@@ -1286,6 +1289,56 @@ describe("Sinnoh", () => {
         };
         const ratio = fameGain({ ...fame, bonus: DISTORTION_FAME_BONUS }) / fameGain(fame);
         expect(ratio).toBeCloseTo(DISTORTION_FAME_BONUS, 1);
+    });
+});
+
+describe("Fiore", () => {
+    test("comes after Sinnoh, captures with the Capture Styler and calls its trials missions", () => {
+        const order = REGION_LIST.map(r => r.id);
+        expect(order.indexOf("fiore")).toBe(order.indexOf("sinnoh") + 1);
+        const fiore = REGIONS.fiore;
+        expect(fiore.requires).toBe("sinnoh");
+        expect(fiore.requiresCompletePokedex).toBe(true);
+        expect(fiore.styler).toBe(true);
+        expect(fiore.trialNoun).toBe("missions");
+        expect(fiore.starters).toEqual([311, 312]);
+        expect(fiore.trials.map(m => m.badge)).toEqual(FIORE_MISSIONS.map(m => m.badge));
+        expect(fiore.trials).toHaveLength(8);
+        expect(fiore.finale(311).map(t => t.name)).toEqual([
+            "Tiffany, Clyde & Garret",
+            "Billy",
+            "Gordor"
+        ]);
+        // Gordor's Power Styler holds the three legendary beasts.
+        expect(fiore.finale(311)[2].team.map(p => p.id)).toEqual([243, 245, 244]);
+        expect(MECHANICS.pokeAssist.region).toBe("fiore");
+    });
+
+    test("its wild Pokémon are from Pokémon Ranger's Browser, all released", () => {
+        const zones = zonesIn("fiore");
+        expect(zones.length).toBe(FIORE_ZONES.length);
+        for (const zone of zones) {
+            const species = allZoneSpecies(zone.id);
+            expect(species.length, zone.id).toBeGreaterThan(0);
+            species.forEach(id =>
+                expect(getSpecies(id).baseSpecies ?? id).toBeLessThanOrEqual(493)
+            );
+        }
+        const legends = SPECIAL_ENCOUNTERS.filter(
+            s => s.region === "fiore" && s.kind === "legendary"
+        );
+        expect(legends.map(s => s.speciesId)).toContain(244);
+        legends.forEach(
+            s => s.kind === "legendary" && expect(ZONES_BY_ID[s.zoneId]?.region, s.id).toBe("fiore")
+        );
+    });
+
+    test("the Capture Styler outdoes a Poké Ball, and Poké Assist helps against weak types", () => {
+        expect(STYLER_POWER).toBeGreaterThan(BALLS.pokeBall.catchMultiplier);
+        expect(catchChance(45, STYLER_POWER, 1)).toBeGreaterThan(
+            catchChance(45, BALLS.pokeBall.catchMultiplier, 1)
+        );
+        expect(POKE_ASSIST_BONUS).toBeGreaterThan(1);
     });
 });
 

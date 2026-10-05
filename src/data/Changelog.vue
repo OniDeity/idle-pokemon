@@ -5,6 +5,35 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.8 Fiore</summary>
+                <ul>
+                    <li class="feature">
+                        Fiore, from Pokémon Ranger, after Sinnoh and a complete Pokédex: 14 places
+                        from Lyra Forest to the Fiore Temple, with the wild Pokémon of the game's
+                        Browser. Start with Plusle or Minun
+                    </li>
+                    <li class="feature">
+                        No Poké Balls in Fiore: wild Pokémon are captured with the Capture Styler,
+                        and beaten legendaries are captured outright
+                    </li>
+                    <li class="feature">
+                        Eight missions against the Go-Rock Squad instead of Gyms, from escorting
+                        Professor Hastings to the Aquamole, then the Go-Rock Quads, Billy and
+                        Gordor's Power Styler beasts at the Fiore Temple
+                    </li>
+                    <li class="feature">
+                        Fiore's legends: Entei in the Jungle Relic, and after the Temple Raikou,
+                        Suicune, Kyogre, Groudon, Rayquaza, the Regis, Deoxys, Celebi and Mew, plus
+                        the Precious Egg's Manaphy
+                    </li>
+                    <li class="feature">
+                        New mechanic, Poké Assist (after Fiore's first mission, then everywhere): a
+                        box Pokémon whose type is super effective against a wild Pokémon lends a
+                        hand, for +25% damage
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.7.1 Halls of Fame</summary>
                 <ul>
                     <li class="feature">

@@ -10,8 +10,10 @@ import player from "game/player";
 import {
     AUTOMATIONS,
     ballCatchChance,
+    catchChance,
     FAME_PER_NEW_SPECIES,
-    speciesPower
+    speciesPower,
+    STYLER_POWER
 } from "game/pokemon/balance";
 import { getSpecies, isShadow } from "game/pokemon/data";
 import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
@@ -590,8 +592,12 @@ function renderControls() {
             (id): [BallMode, string] => [id, BALLS[id].name]
         )
     ];
+    const styler = main.regionDef.value.styler === true;
     let chance = null;
-    if (state.kind === "wild") {
+    if (state.kind === "wild" && styler) {
+        const species = getSpecies(state.wild.speciesId);
+        chance = catchChance(species.captureRate, STYLER_POWER, main.bonuses.value.catch);
+    } else if (state.kind === "wild") {
         const ball = main.ballMode.value === "smart" ? "pokeBall" : main.ballMode.value;
         chance = ballCatchChance(ball, main.ballContext(state.wild), main.bonuses.value.catch);
     }
@@ -626,55 +632,74 @@ function renderControls() {
                     </Button>
                 ))}
             </div>
-            <div class="pk-control-row">
-                <span class="pk-control-label">Ball</span>
-                {ballOptions.map(([mode, label]) => (
-                    <Button
-                        kind={main.ballMode.value === mode ? "primary" : "ghost"}
-                        title={
-                            mode === "smart"
-                                ? "Uses the cheapest ball with a good chance, else your best ball"
-                                : ""
-                        }
-                        onClick={() => (main.ballMode.value = mode)}
-                    >
-                        {label}
-                    </Button>
-                ))}
-            </div>
-            <div class="pk-ball-counts">
-                {(
-                    [
-                        "pokeBall",
-                        "greatBall",
-                        "ultraBall",
-                        "masterBall",
-                        ...APRICORN_BALLS
-                    ] as BallId[]
-                )
-                    .filter(id => (main.balls.value[id] ?? 0) > 0 || id === "pokeBall")
-                    .map(id => (
-                        <span
-                            class={["pk-ball-count", main.balls.value[id] === 0 ? "empty" : ""]}
-                            title={BALLS[id].name}
+            {styler ? (
+                <div class="pk-control-row">
+                    <span class="pk-control-label">Styler</span>
+                    <span class="pk-small pk-muted">
+                        Capture Styler: no Poké Balls needed
+                        {chance != null ? ` (${Math.round(chance * 100)}% capture)` : ""}
+                    </span>
+                </div>
+            ) : (
+                <>
+                    <div class="pk-control-row">
+                        <span class="pk-control-label">Ball</span>
+                        {ballOptions.map(([mode, label]) => (
+                            <Button
+                                kind={main.ballMode.value === mode ? "primary" : "ghost"}
+                                title={
+                                    mode === "smart"
+                                        ? "Uses the cheapest ball with a good chance, else your best ball"
+                                        : ""
+                                }
+                                onClick={() => (main.ballMode.value = mode)}
+                            >
+                                {label}
+                            </Button>
+                        ))}
+                    </div>
+                    <div class="pk-ball-counts">
+                        {(
+                            [
+                                "pokeBall",
+                                "greatBall",
+                                "ultraBall",
+                                "masterBall",
+                                ...APRICORN_BALLS
+                            ] as BallId[]
+                        )
+                            .filter(id => (main.balls.value[id] ?? 0) > 0 || id === "pokeBall")
+                            .map(id => (
+                                <span
+                                    class={[
+                                        "pk-ball-count",
+                                        main.balls.value[id] === 0 ? "empty" : ""
+                                    ]}
+                                    title={BALLS[id].name}
+                                >
+                                    <ItemIcon
+                                        src={BALLS[id].sprite}
+                                        size={24}
+                                        alt={BALLS[id].name}
+                                    />
+                                    {main.balls.value[id] ?? 0}
+                                </span>
+                            ))}
+                        <Button
+                            kind="small"
+                            onClick={() => {
+                                openTab("mart", "balls");
+                                openLayer("mart");
+                            }}
                         >
-                            <ItemIcon src={BALLS[id].sprite} size={24} alt={BALLS[id].name} />
-                            {main.balls.value[id] ?? 0}
-                        </span>
-                    ))}
-                <Button
-                    kind="small"
-                    onClick={() => {
-                        openTab("mart", "balls");
-                        openLayer("mart");
-                    }}
-                >
-                    Buy
-                </Button>
-                {chance != null && main.ballMode.value !== "smart" ? (
-                    <span class="pk-small pk-muted">{Math.round(chance * 100)}% catch</span>
-                ) : null}
-            </div>
+                            Buy
+                        </Button>
+                        {chance != null && main.ballMode.value !== "smart" ? (
+                            <span class="pk-small pk-muted">{Math.round(chance * 100)}% catch</span>
+                        ) : null}
+                    </div>
+                </>
+            )}
             {AUTOMATIONS.some(a => hof.automationsOwned.value[a.id]) ? (
                 <div class="pk-control-row">
                     <span class="pk-control-label">Auto</span>
@@ -689,7 +714,7 @@ function renderControls() {
                     ))}
                 </div>
             ) : null}
-            {main.balls.value.masterBall > 0 ? (
+            {main.balls.value.masterBall > 0 && !styler ? (
                 <label class="pk-small pk-check">
                     <input
                         type="checkbox"

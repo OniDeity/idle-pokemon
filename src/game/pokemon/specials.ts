@@ -2,6 +2,7 @@ import type { BallId, KeyItemId } from "./items";
 import { HOENN_SPECIALS } from "./hoenn";
 import { HOENN_ANIME_SPECIALS } from "./hoennAnime";
 import { SINNOH_SPECIALS } from "./sinnoh";
+import { FIORE_SPECIALS } from "./fiore";
 import { JOHTO_SPECIALS } from "./johto";
 import { COLOSSEUM_SPECIALS } from "./colosseum";
 import { XD_SPECIALS } from "./xd";
@@ -412,7 +413,8 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
     ...HOENN_ANIME_SPECIALS,
     ...COLOSSEUM_SPECIALS,
     ...XD_SPECIALS,
-    ...SINNOH_SPECIALS
+    ...SINNOH_SPECIALS,
+    ...FIORE_SPECIALS
 ];
 
 /** Seconds allowed to defeat a legendary before it flees. */

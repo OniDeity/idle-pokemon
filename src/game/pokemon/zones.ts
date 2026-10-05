@@ -19,6 +19,7 @@ import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
 import { HOENN_ZONES } from "./hoenn";
 import { HOENN_ANIME_ZONES } from "./hoennAnime";
 import { SINNOH_EXTRAS, SINNOH_ZONES } from "./sinnoh";
+import { FIORE_ZONES } from "./fiore";
 import { BUG_CONTEST_POOL, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
 import { SEVII_ZONES } from "./sevii";
 
@@ -30,7 +31,8 @@ export type RegionId =
     | "hoenn"
     | "orre"
     | "orreXd"
-    | "sinnoh";
+    | "sinnoh"
+    | "fiore";
 
 export type ZonePools = Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 
@@ -302,6 +304,7 @@ export const ZONES: ZoneDefinition[] = [
     ...COLOSSEUM_ZONES,
     ...XD_ZONES,
     ...SINNOH_ZONES,
+    ...FIORE_ZONES,
     ...CARRIED_POKE_SPOTS
 ];
 
