@@ -9,6 +9,7 @@ import type { BattlerStats } from "./stats";
 import { attacksPerSecond, damagePerHit, maxHp, TRAINER_IV, xpForLevel, xpYield } from "./stats";
 import type { TrainerDefinition } from "./trainers";
 import { getSpecies } from "./data";
+import type { MechanicId } from "./mechanics";
 import { activePools } from "./zones";
 
 /** Seconds spent looking for the next wild Pokémon. */
@@ -214,6 +215,8 @@ export function hasMilestone(dexCaught: number, name: string): boolean {
 
 export interface UpgradeDefinition {
     id: string;
+    /** Only offered once this generation mechanic is unlocked (the Day Care, Contests). */
+    mechanic?: MechanicId;
     name: string;
     description: string;
     baseCost: number;
@@ -357,6 +360,52 @@ export const HOF_UPGRADES = {
         maxLevel: 7,
         badgesRequired: 0,
         sprite: itemSprite("old-rod")
+    },
+    flameBody: {
+        id: "flameBody",
+        name: "Flame Body",
+        description:
+            "A warm Pokémon keeps the Day Care's Eggs cozy: -10% wild battles per Egg per level.",
+        baseCost: 3,
+        costGrowth: 2,
+        maxLevel: 5,
+        badgesRequired: 0,
+        mechanic: "breeding",
+        sprite: itemSprite("fire-stone")
+    },
+    masudaMethod: {
+        id: "masudaMethod",
+        name: "Masuda Method",
+        description:
+            "Eggs from far-off parents: Day Care Eggs are +50% likelier to be shiny per level (shiny parents too).",
+        baseCost: 4,
+        costGrowth: 2,
+        maxLevel: 6,
+        badgesRequired: 0,
+        mechanic: "breeding",
+        sprite: itemSprite("shiny-stone")
+    },
+    pokeblockKit: {
+        id: "pokeblockKit",
+        name: "Pokéblock Kit",
+        description: "Richer Berries: each Pokéblock raises a condition by +5 more per level.",
+        baseCost: 3,
+        costGrowth: 2,
+        maxLevel: 4,
+        badgesRequired: 0,
+        mechanic: "contests",
+        sprite: itemSprite("pokeblock-case")
+    },
+    contestStar: {
+        id: "contestStar",
+        name: "Contest Star",
+        description: "+5% chance to win each contest and -10% contest time per level.",
+        baseCost: 3,
+        costGrowth: 2,
+        maxLevel: 5,
+        badgesRequired: 0,
+        mechanic: "contests",
+        sprite: itemSprite("contest-pass")
     },
     headStart: {
         id: "headStart",

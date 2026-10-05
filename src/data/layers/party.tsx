@@ -7,13 +7,10 @@ import { DAY_CARE_PLACE } from "game/pokemon/mechanics";
 import {
     CATEGORY_NAMES,
     CONTEST_CATEGORIES,
-    CONTEST_SECONDS,
     MAX_CONDITION,
     POKEBLOCK_COLORS,
-    POKEBLOCK_GAIN,
     POKEBLOCK_PRICE,
-    RANK_NAMES,
-    winChance
+    RANK_NAMES
 } from "game/pokemon/contests";
 import { createLayer } from "game/layers";
 import { memberMultiplier, effortMultiplier } from "game/pokemon/balance";
@@ -618,9 +615,9 @@ const layer = createLayer(id, () => {
         return (
             <Panel>
                 <p class="pk-small pk-muted">
-                    Pokéblocks: ₽{POKEBLOCK_PRICE}, +{POKEBLOCK_GAIN} condition. Score = condition +
-                    type appeal (up to 30) + half the level. A category's first Master Rank win
-                    earns a Cosplay Pikachu.
+                    Pokéblocks: ₽{POKEBLOCK_PRICE}, +{main.pokeblockGain.value} condition. Score =
+                    condition + type appeal (up to 30) + half the level. A category's first Master
+                    Rank win earns a Cosplay Pikachu.
                 </p>
                 {running.speciesId !== 0 ? (
                     <div class="pk-contest-running pk-small">
@@ -630,8 +627,8 @@ const layer = createLayer(id, () => {
                             Contest, {RANK_NAMES[running.rank]}
                         </span>
                         <Bar
-                            value={CONTEST_SECONDS[running.rank] - running.remaining}
-                            max={CONTEST_SECONDS[running.rank]}
+                            value={main.contestSeconds(running.rank) - running.remaining}
+                            max={main.contestSeconds(running.rank)}
                             kind="progress"
                         />
                     </div>
@@ -653,7 +650,7 @@ const layer = createLayer(id, () => {
                                     Condition {condition}/{MAX_CONDITION} · score{" "}
                                     {Math.round(score)}
                                     {rank != null
-                                        ? ` · ${Math.round(winChance(score, rank) * 100)}% to win ${RANK_NAMES[rank]}`
+                                        ? ` · ${Math.round(main.contestWinChance(id, category, rank) * 100)}% to win ${RANK_NAMES[rank]}`
                                         : " · every rank won"}
                                 </span>
                             </div>
@@ -692,7 +689,11 @@ const layer = createLayer(id, () => {
                     Leave a Pokémon from your box and the Day Care couple finds an Egg every{" "}
                     {main.eggBattles.value} wild battles you win. Eggs hatch into the first stage of
                     its family, babies included (Pikachu → Pichu, Electabuzz → Elekid). A shiny
-                    parent passes its colors on 1 time in 64.
+                    parent passes its colors on{" "}
+                    {main.eggShinyMultiplier.value > 1
+                        ? `${main.eggShinyMultiplier.value} times in 64 (Masuda Method)`
+                        : "1 time in 64"}
+                    .
                 </p>
                 {id !== 0 ? (
                     <div class="pk-daycare-current">

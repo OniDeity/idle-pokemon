@@ -81,7 +81,7 @@ import {
     SINNOH_EXTRAS
 } from "game/pokemon/sinnoh";
 import { digWall, diggable, FOSSIL_SPECIES, UNDERGROUND_ITEMS } from "game/pokemon/underground";
-import { DEX_MILESTONES, fameGain } from "game/pokemon/balance";
+import { DEX_MILESTONES, fameGain, HOF_UPGRADE_LIST } from "game/pokemon/balance";
 import { arceusForm } from "game/pokemon/data";
 import { MAX_RADAR_CHAIN, RADAR_CHAIN_PULL, radarShinyMultiplier } from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
@@ -1286,5 +1286,18 @@ describe("Sinnoh", () => {
         };
         const ratio = fameGain({ ...fame, bonus: DISTORTION_FAME_BONUS }) / fameGain(fame);
         expect(ratio).toBeCloseTo(DISTORTION_FAME_BONUS, 1);
+    });
+});
+
+describe("Fame upgrades", () => {
+    test("the Day Care's and Contests' upgrades wait for their mechanics", () => {
+        const gated = HOF_UPGRADE_LIST.filter(u => u.mechanic != null);
+        expect(gated.map(u => [u.id, u.mechanic])).toEqual([
+            ["flameBody", "breeding"],
+            ["masudaMethod", "breeding"],
+            ["pokeblockKit", "contests"],
+            ["contestStar", "contests"]
+        ]);
+        gated.forEach(u => expect(MECHANICS[u.mechanic!]).toBeDefined());
     });
 });

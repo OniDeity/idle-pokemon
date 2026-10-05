@@ -108,6 +108,12 @@ across journeys.
 - Gen 4 forms in `forms.json` are appended with looks-only ids from 4200 (Burmy/Shellos/Arceus);
   never renumber the earlier ones. Gender-locked evolutions (`Evolution.gender`) only split species
   with a female form (Combee ♀ → Vespiquen); others keep both branches.
+- Hall of Fame is per region (v2.7.1): `hof.isEnshrined(id, region)` reads the Champions entries
+  (each records its region), so a Pokémon is a new face (+5 Fame) once in every region. The
+  starter screen suggests a team (strongest non-legendary final forms the region offers, not yet
+  in its Hall) and stars partners new there. The simulator keys enshrinement by region too.
+- Fame upgrades with a `mechanic` (Day Care: `flameBody`, `masudaMethod`; Contests:
+  `pokeblockKit`, `contestStar`) show once it's unlocked; the simulator never buys them.
 - Poké Radar (a Pokédex milestone at 250): chains build automatically, so the shiny multiplier
   is capped at ×6 (`radarShinyMultiplier`), not the games' ×41.
 - `vite preview` answers missing files with index.html, and the service worker caches that for

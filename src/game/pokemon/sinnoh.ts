@@ -408,11 +408,12 @@ export const SINNOH_ZONES: ZoneDefinition[] = [
 /**
  * Stat multipliers for Sinnoh's leaders, tuned with scripts/simulateProgression.ts: after
  * Orre (XD), Sinnoh's trainers carry seven regions' Renown, and a first clear takes about 11
- * hours with any starter. Candice and Volkner are the longest walls.
+ * hours with any starter (with each region's own Hall of Fame). Candice and Volkner are the
+ * longest walls.
  */
-const SINNOH_GYM_STRENGTHS = [1.52, 2.74, 3.27, 4.0, 3.0, 4.0, 3.3, 3.1];
-const SINNOH_ELITE_FOUR_STRENGTH = 2.7;
-const SINNOH_CHAMPION_STRENGTH = 2.86;
+const SINNOH_GYM_STRENGTHS = [1.58, 2.85, 3.4, 4.16, 3.12, 4.16, 3.43, 3.22];
+const SINNOH_ELITE_FOUR_STRENGTH = 2.81;
+const SINNOH_CHAMPION_STRENGTH = 2.97;
 
 function sinnohGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">
