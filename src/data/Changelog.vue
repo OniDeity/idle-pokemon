@@ -5,6 +5,55 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.7 Sinnoh</summary>
+                <ul>
+                    <li class="feature">
+                        Sinnoh, after Orre (XD) and a complete Pokédex: 58 places from Diamond,
+                        Pearl and Platinum, Platinum's Gyms from Roark to Volkner, the Elite Four and
+                        Champion Cynthia, and all 107 Gen 4 Pokémon (Pokédex now #1-493)
+                    </li>
+                    <li class="feature">
+                        Sinnoh's gifts, trades and legends: Cynthia's Togepi, Bebe's Eevee, Riley's
+                        Riolu, the Old Chateau's Rotom (and the Rotom Catalog's appliances), the
+                        lake trio, Dialga, Palkia, Giratina, Heatran, Regigigas, Cresselia, the
+                        roaming birds, Darkrai, Shaymin (and its Sky Forme), Arceus, Manaphy and
+                        Phione
+                    </li>
+                    <li class="feature">
+                        Honey Trees: slather Honey on Sinnoh's 21 trees and shake down what comes
+                        (Combee, Burmy in its three cloaks, Cherubi, Heracross; Munchlax on the four
+                        trees your Trainer ID picks). The new Pokétch automation (Fame) slathers and
+                        shakes them for you
+                    </li>
+                    <li class="feature">
+                        The Underground (a generation mechanic, unlocked past the Coal Badge): wild
+                        battles uncover walls to dig for Spheres, evolution stones, fossils, Arceus's
+                        Plates (each turns your Arceus into its type) and the Odd Keystone for
+                        Spiritomb, in every region
+                    </li>
+                    <li class="feature">
+                        Professor Oak's new rewards as the Pokédex grows: the Poké Radar at 250
+                        (chain a grass Pokémon for better shiny odds, and find Sinnoh's radar-only
+                        Pokémon), Destiny Knot, Luck Incense, Expert Belt, Azure Flute and Life Orb
+                    </li>
+                    <li class="feature">
+                        Pal Park: once Sinnoh is cleared, every region you clear sends its Pokémon
+                        there, and Kanto's and Hoenn's Game Boy Advance games add their dual-slot
+                        Pokémon to Sinnoh's grass
+                    </li>
+                    <li class="feature">
+                        The Distortion World after the League: beat Cyrus at its bottom for ×1.25
+                        Fame that journey and the Griseous Orb for Giratina's Origin Forme
+                    </li>
+                    <li class="feature">
+                        Gen 4's evolutions of older Pokémon (Magnezone, Togekiss, Electivire,
+                        Weavile...) and its babies from Eggs, with later generations' easier methods
+                        (stones instead of special places). They start with your first Sinnoh
+                        journey, then work in every region
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.6.2 Menu pages</summary>
                 <ul>
                     <li class="feature">

@@ -12,7 +12,7 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 
 ## How it plays
 
-- **Journeys through seven regions.** Kanto (plus 52 anime-exclusive locations from
+- **Journeys through eight regions.** Kanto (plus 52 anime-exclusive locations from
   [Bulbapedia's list](https://bulbapedia.bulbagarden.net/wiki/List_of_animated_series-exclusive_locations),
   from Porta Vista to the Tree of Beginning), the Orange Islands (29 islands, the Orange Crew
   and Drake's Winner's Cup), and the Sevii Islands from FireRed/LeafGreen (Team Rocket, the
@@ -20,8 +20,9 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   the Elite Four and Lance, with Headbutt trees and Rock Smash rocks, plus 58 anime-exclusive
   locations from Palm Hills to Mount Quena), Hoenn from Ruby/Sapphire/Emerald (Emerald's Gyms,
   Elite Four and Wallace, Dive, Feebas, the fossils, Regis, Lati@s and the weather trio, plus
-  34 anime-only places from the Oldale Ruins to LaRousse City), and
-  Orre's two GameCube journeys. Each first clear is tuned for about a day of play.
+  34 anime-only places from the Oldale Ruins to LaRousse City),
+  Orre's two GameCube journeys, and Sinnoh from Diamond/Pearl/Platinum (Platinum's Gyms, Elite
+  Four and Cynthia, Honey Trees, Pal Park and the Distortion World). Each first clear is tuned for about a day of play.
 - **Johto's Gen 2 extras**: morning, day and night Pokémon all in the grass together, the
   Pokégear radio's swarms (a one-time fee adds each to its place) and Lucky Number Show, the
   Bug-Catching Contest (a one-time entry fee adds its bugs to the National Park), Kurt's seven
@@ -30,7 +31,12 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   then works in every region from then on: breeding (Johto's Day Care), Kurt's Apricorn Balls
   and Headbutt trees; Orre's Snag Machine, Relic Stone and Poké Spots; and Hoenn's Double
   Battles (a partner backs up the active Pokémon), Pokémon Contests (Pokéblocks, ribbons, Cosplay
-  Pikachu) and Bring a Partner (start a journey with a Hall of Fame Pokémon).
+  Pikachu) and Bring a Partner (start a journey with a Hall of Fame Pokémon); and Sinnoh's
+  Underground (dig walls for stones, fossils and Arceus's Plates) and its evolutions of older
+  Pokémon (Magnezone, Togekiss...).
+- **Sinnoh's extras**: Honey Trees (with the Pokétch automation), the Poké Radar (a Pokédex
+  reward: chain grass Pokémon for better shiny odds), Pal Park (regions cleared after Sinnoh
+  migrate there), and the Distortion World's Cyrus after the League for extra Fame.
 - **Johto's legends and events**: Lugia, Ho-Oh, the legendary beasts, Celebi, the Spiky-eared
   Pichu and the Lake of Rage's Red Gyarados; the Odd Egg, Bill's Eevee and the other gifts and
   trades; and Red at the summit of Mt. Silver.
@@ -60,7 +66,8 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   admins and Citadark Isle, plus the Poké Spots, whose snack-loving wild Pokémon come to every
   region once unlocked.
 - **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands, then Johto,
-  then Hoenn, then Orre (Colosseum), then Orre (XD); Johto, Hoenn and both Orre journeys also
+  then Hoenn, then Orre (Colosseum), then Orre (XD), then Sinnoh; Johto, Hoenn, both Orre
+  journeys and Sinnoh also
   need every species the regions before them offer in your Pokédex. A region you've already
   journeyed to stays open when a new one slots in before it.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
