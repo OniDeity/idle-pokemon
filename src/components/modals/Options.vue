@@ -6,6 +6,7 @@
                 <div class="option-tabs">
                     <button :class="{selected: isTab('behaviour')}" @click="setTab('behaviour')">Behaviour</button>
                     <button :class="{selected: isTab('appearance')}" @click="setTab('appearance')">Appearance</button>
+                    <button :class="{selected: isTab('notifications')}" @click="setTab('notifications')">Notifications</button>
                 </div>
             </div>
         </template>
@@ -25,6 +26,9 @@
                 <Toggle :title="showTPSTitle" v-model="showTPS" />
                 <Toggle :title="alignModifierUnitsTitle" v-model="alignUnits" />
             </div>
+            <div v-if="isTab('notifications')">
+                <NotificationSettings />
+            </div>
         </template>
     </Modal>
 </template>
@@ -32,6 +36,7 @@
 <script setup lang="tsx">
 import projInfo from "data/projInfo.json";
 import rawThemes from "data/themes";
+import { NotificationSettings } from "data/notifications";
 import { ResetProgress } from "data/ui/reset";
 import player from "game/player";
 import settings, { settingFields } from "game/settings";

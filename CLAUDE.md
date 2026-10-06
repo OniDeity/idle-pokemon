@@ -116,6 +116,9 @@ across journeys.
   `pokeblockKit`, `contestStar`) show once it's unlocked; the simulator never buys them.
 - Poké Radar (a Pokédex milestone at 250): chains build automatically, so the shiny multiplier
   is capped at ×6 (`radarShinyMultiplier`), not the games' ×41.
+- Notifications go through `notify(text, kind, category)` in `src/data/notifications.tsx`;
+  its settings (`pkNotify*`, `pkBattleBanners`) live in the global settings and are edited on
+  the Settings modal's Notifications tab (`components/modals/Options.vue`).
 - `vite preview` answers missing files with index.html, and the service worker caches that for
   sprites: after adding sprites, clear the browser's `sprites` cache when checking locally.
 
