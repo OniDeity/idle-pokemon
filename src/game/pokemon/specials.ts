@@ -5,6 +5,7 @@ import { HOENN_ANIME_SPECIALS } from "./hoennAnime";
 import { SINNOH_SPECIALS } from "./sinnoh";
 import { ALMIA_SPECIALS } from "./almia";
 import { FIORE_SPECIALS } from "./fiore";
+import { OBLIVIA_SPECIALS } from "./oblivia";
 import { JOHTO_SPECIALS } from "./johto";
 import { COLOSSEUM_SPECIALS } from "./colosseum";
 import { XD_SPECIALS } from "./xd";
@@ -64,6 +65,8 @@ export type SpecialEncounter =
           keyItem?: KeyItemId;
           /** Behind an obstacle that needs a box Pokémon's Field Ability (Almia's Regis). */
           fieldNeed?: FieldNeed;
+          /** Oblivia: capturing it earns its Ranger Sign for good. */
+          rangerSign?: boolean;
           /** Stat multiplier, like a trainer's; legendaries are tough. */
           strength: number;
           text: string;
@@ -419,7 +422,8 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
     ...XD_SPECIALS,
     ...SINNOH_SPECIALS,
     ...FIORE_SPECIALS,
-    ...ALMIA_SPECIALS
+    ...ALMIA_SPECIALS,
+    ...OBLIVIA_SPECIALS
 ];
 
 /** Seconds allowed to defeat a legendary before it flees. */

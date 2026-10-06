@@ -597,7 +597,11 @@ const layer = createLayer(id, () => {
             // Almia: a Pokémon behind an obstacle needs a box Pokémon's Field Ability.
             if (entry.obstacle != null) {
                 const { ability, power } = entry.obstacle;
-                gear.add(`a box Pokémon with ${FIELD_ABILITY_NAMES[ability]} ×${power}`);
+                gear.add(
+                    ability === "roar"
+                        ? "a legendary beast's Ranger Sign (its Roar)"
+                        : `a box Pokémon with ${FIELD_ABILITY_NAMES[ability]} ×${power}`
+                );
                 continue;
             }
             if (pool === "walk") continue;
@@ -741,7 +745,8 @@ const layer = createLayer(id, () => {
     function renderFieldPowers() {
         const powers = main.fieldPowers.value;
         const known = (Object.keys(FIELD_ABILITY_NAMES) as FieldAbility[]).filter(
-            ability => (powers[ability] ?? 0) > 0
+            // Roar comes from a Ranger Sign, listed with the Signs.
+            ability => ability !== "roar" && (powers[ability] ?? 0) > 0
         );
         return (
             <div class="pk-small pk-muted">
@@ -750,6 +755,21 @@ const layer = createLayer(id, () => {
                     ? known.map(a => `${FIELD_ABILITY_NAMES[a]} ×${powers[a]}`).join(" · ")
                     : "none yet"}
                 . Pokémon behind obstacles come out once one is strong enough.
+            </div>
+        );
+    }
+
+    /** Oblivia's Ranger Signs: legendary Pokémon that come to help in every region. */
+    function renderRangerSigns() {
+        const signs = hof.rangerSignSpecies.value;
+        return (
+            <div class="pk-small pk-muted">
+                Ranger Signs:{" "}
+                {signs.length > 0
+                    ? signs.map(id => getSpecies(id).name).join(", ")
+                    : "none yet (capture Oblivia's story legendaries)"}
+                . Their types join Poké Assist; a legendary beast's Roar scares out Oblivia's hidden
+                Pokémon.
             </div>
         );
     }
@@ -822,7 +842,10 @@ const layer = createLayer(id, () => {
                         </div>
                     </>
                 ) : null}
-                {main.region.value === "almia" ? renderFieldPowers() : null}
+                {main.region.value === "almia" || main.region.value === "oblivia"
+                    ? renderFieldPowers()
+                    : null}
+                {main.mechanicOn("rangerSigns") ? renderRangerSigns() : null}
                 {zoneSort.value === "efficient" ? (
                     <p class="pk-small pk-muted">
                         Estimated for your current party, bonuses and fishing gear. XP is per party

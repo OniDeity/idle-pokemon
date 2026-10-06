@@ -148,7 +148,9 @@ export type FieldAbility =
     | "soak"
     | "electrify"
     | "recharge"
-    | "psyPower";
+    | "psyPower"
+    /** Not a Pokémon's ability: Oblivia's hidden Pokémon come out for a legendary beast's Roar. */
+    | "roar";
 
 /** An obstacle that needs a Pokémon with this Field Ability at this power (or more). */
 export interface FieldNeed {

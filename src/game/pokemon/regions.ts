@@ -13,6 +13,7 @@ import { SEVII_TRIALS, seviiFinale } from "./sevii";
 import { SINNOH_GYMS, sinnohFinale } from "./sinnoh";
 import { ALMIA_MISSIONS, almiaFinale } from "./almia";
 import { FIORE_MISSIONS, fioreFinale } from "./fiore";
+import { OBLIVIA_MISSIONS, obliviaFinale } from "./oblivia";
 import type { GymDefinition, TrainerDefinition } from "./trainers";
 import { championFor, ELITE_FOUR, GYMS } from "./trainers";
 import type { RegionId } from "./zones";
@@ -259,6 +260,28 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         levelCaps: [16, 22, 26, 31, 35, 40, 44, 49, 58, 100],
         fame: 27,
         requires: "fiore",
+        requiresCompletePokedex: true,
+        newestSpecies: 493,
+        styler: true
+    },
+    oblivia: {
+        id: "oblivia",
+        name: "Oblivia",
+        blurb: "Pokémon Ranger: Guardian Signs: the Capture Styler, the Pokémon Pinchers and the legendary birds, and Ranger Signs that call legendary Pokémon to your side.",
+        color: "#0EA5E9",
+        starters: [172],
+        startLevel: 5,
+        startingKeyItems: [],
+        shopTier: 0,
+        trials: OBLIVIA_MISSIONS,
+        trialNoun: "missions",
+        finaleName: "Sky Fortress",
+        finaleBlurb:
+            'Storm the Societea\'s Sky Fortress: Kasa, Hocus and Arley, then Ed "the Thinker" and Mewtwo, then Purple Eyes with the Golden Armor, back-to-back (your party is healed between battles).',
+        finale: () => obliviaFinale(),
+        levelCaps: [16, 22, 26, 31, 35, 40, 44, 49, 58, 100],
+        fame: 28,
+        requires: "almia",
         requiresCompletePokedex: true,
         newestSpecies: 493,
         styler: true

@@ -1,4 +1,5 @@
 import { fieldPowers as boxFieldPowers, meetsFieldNeed } from "game/pokemon/almia";
+import { ROAR_SIGNS } from "game/pokemon/oblivia";
 import type { Layer } from "game/layers";
 import { createLayer } from "game/layers";
 import { persistent } from "game/persistence";
@@ -303,7 +304,12 @@ export const main = createLayer("main", layer => {
 
     /** What this journey has added to its places' pools: swarms and the contest. */
     /** The box's strongest Field Ability powers, for Almia's obstacles. */
-    const fieldPowers = computed(() => boxFieldPowers(Object.keys(box.value).map(Number)));
+    const fieldPowers = computed(() => {
+        const powers = boxFieldPowers(Object.keys(box.value).map(Number));
+        // Oblivia's hidden Pokémon come out for a legendary beast's Roar (its Ranger Sign).
+        if (hof.rangerSignSpecies.value.some(id => ROAR_SIGNS.includes(id))) powers.roar = 1;
+        return powers;
+    });
 
     const zoneExtras = computed<ZoneExtras>(() => ({
         swarms: swarmsJoined.value,
@@ -904,6 +910,12 @@ export const main = createLayer("main", layer => {
     /** Types of the Pokémon in the box but not the party, for Poké Assist. */
     const assistTypes = computed(() => {
         const types = new Set<PokemonType>();
+        // Ranger Signs call their legendary Pokémon to help, wherever you are.
+        if (mechanicOn("rangerSigns")) {
+            hof.rangerSignSpecies.value.forEach(id =>
+                getSpecies(id).types.forEach(type => types.add(type))
+            );
+        }
         for (const key of Object.keys(box.value)) {
             if (!partyIds.value.includes(Number(key))) {
                 getSpecies(Number(key)).types.forEach(type => types.add(type));
@@ -1557,6 +1569,13 @@ export const main = createLayer("main", layer => {
                 if (regionDef.value.styler === true) {
                     claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
                     receivePokemon(special.speciesId, special.level, false);
+                    if (special.rangerSign === true) {
+                        hof.collectRangerSign(special.speciesId);
+                        addLog({
+                            kind: "info",
+                            text: `${species.name}'s Ranger Sign is yours: it will come to help in every region.`
+                        });
+                    }
                     const text = `You captured ${species.name} with the Capture Styler!`;
                     addLog({ kind: "catch", text, speciesId: special.speciesId });
                     showFlash(text, "catch");
