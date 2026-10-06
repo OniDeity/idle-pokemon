@@ -97,7 +97,8 @@ import {
 } from "game/pokemon/underground";
 import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
 import { computed, ref } from "vue";
-import { useToast } from "vue-toastification";
+import { notify } from "data/notifications";
+import settings from "game/settings";
 import dex from "./layers/dex";
 import hof from "./layers/hof";
 import league from "./layers/league";
@@ -178,12 +179,6 @@ export interface Flash {
     text: string;
     kind: LogKind;
     until: number;
-}
-
-let toast: ReturnType<typeof useToast> | null = null;
-export function notify(text: string, kind: "success" | "info" | "warning" | "error" = "info") {
-    toast ??= useToast();
-    toast[kind](text, { timeout: 4000 });
 }
 
 /** Iteration guard for offline catch-up: stop simulating after this many encounters per tick. */
@@ -341,6 +336,7 @@ export const main = createLayer("main", layer => {
         log.value = [{ ...entry, id: logId++ }, ...log.value].slice(0, LOG_LENGTH);
     }
     function showFlash(text: string, kind: LogKind) {
+        if (settings.pkBattleBanners === false) return;
         flash.value = { text, kind, until: Date.now() + 1600 };
     }
 
@@ -537,7 +533,7 @@ export const main = createLayer("main", layer => {
         const text = `${getSpecies(fromId).name} evolved into ${into.name}${how}!`;
         addLog({ kind: "evolve", text, speciesId: intoId, shiny: from.shiny });
         showFlash(text, "evolve");
-        notify(text, "success");
+        notify(text, "success", "evolutions");
     }
 
     /**
@@ -1004,7 +1000,7 @@ export const main = createLayer("main", layer => {
             const text = `A shiny ${target.species.name} appeared!`;
             addLog({ kind: "shiny", text, speciesId, shiny: true });
             showFlash(text, "shiny");
-            notify(`✨ ${text}`, "success");
+            notify(`✨ ${text}`, "success", "shinies");
         }
     }
 
@@ -1125,7 +1121,7 @@ export const main = createLayer("main", layer => {
         stones.value = { ...stones.value, sunStone: (stones.value.sunStone ?? 0) + 1 };
         const prize = `Your ${getSpecies(wild.speciesId).name} wins the Bug-Catching Contest! You receive a Sun Stone.`;
         addLog({ kind: "badge", text: prize, speciesId: wild.speciesId });
-        notify(`🏆 ${prize}`, "success");
+        notify(`🏆 ${prize}`, "success", "prizes");
     }
 
     /** Tunes the Pokégear radio to a place's swarm: its Pokémon join that place's pool. */
@@ -1187,7 +1183,7 @@ export const main = createLayer("main", layer => {
         if (digits === 5) add("balls", "masterBall", 1);
         const text = `Lucky Number Show: the number is ${lucky}. Your ID ${id} matches ${digits} digit${digits === 1 ? "" : "s"}: ${prizes[digits]}!`;
         addLog({ kind: digits > 0 ? "badge" : "info", text });
-        if (digits > 0) notify(`📻 ${text}`, "success");
+        if (digits > 0) notify(`📻 ${text}`, "success", "prizes");
     }
 
     /** Snags a beaten trainer's Shadow Pokémon (Orre's admins), once each per journey. */
@@ -1201,7 +1197,7 @@ export const main = createLayer("main", layer => {
             receivePokemon(id, level, false);
             const text = `Snagged ${trainer.name}'s ${getSpecies(id).name}!`;
             addLog({ kind: "catch", text, speciesId: id });
-            notify(`🟣 ${text}`, "success");
+            notify(`🟣 ${text}`, "success", "captures");
         }
     }
 
@@ -1518,7 +1514,7 @@ export const main = createLayer("main", layer => {
                           : `Quest complete: ${gym.badge}!`;
                 addLog({ kind: "badge", text });
                 showFlash(text, "badge");
-                notify(`🏅 ${text}`, "success");
+                notify(`🏅 ${text}`, "success", "trials");
             }
         });
     }
@@ -1540,7 +1536,7 @@ export const main = createLayer("main", layer => {
                     : `You defended your title at the ${regionDef.value.finaleName}!`;
                 addLog({ kind: "badge", text });
                 showFlash("Champion!", "badge");
-                notify(`🏆 ${text}`, "success");
+                notify(`🏆 ${text}`, "success", "trials");
             }
         });
     }
@@ -1579,7 +1575,7 @@ export const main = createLayer("main", layer => {
                     const text = `You captured ${species.name} with the Capture Styler!`;
                     addLog({ kind: "catch", text, speciesId: special.speciesId });
                     showFlash(text, "catch");
-                    notify(`🌟 ${text}`, "success");
+                    notify(`🌟 ${text}`, "success", "captures");
                     return;
                 }
                 const useMaster = useMasterBallOnLegendaries.value && balls.value.masterBall > 0;
@@ -1609,7 +1605,7 @@ export const main = createLayer("main", layer => {
                     const text = `You caught ${species.name}!`;
                     addLog({ kind: "catch", text, speciesId: special.speciesId });
                     showFlash(text, "catch");
-                    notify(`🌟 ${text}`, "success");
+                    notify(`🌟 ${text}`, "success", "captures");
                 } else {
                     const text = `${species.name} broke free and fled! Challenge it again.`;
                     addLog({ kind: "fail", text, speciesId: special.speciesId });
@@ -1631,7 +1627,7 @@ export const main = createLayer("main", layer => {
                     : `Your party was defeated by ${trainer.name}.`;
             addLog({ kind: "fail", text: `${reason} Train up and try again!` });
             showFlash(done === "timeout" ? "Out of time!" : "You blacked out!", "fail");
-            notify(reason, "warning");
+            notify(reason, "warning", "defeats");
             startSearch();
             return;
         }
@@ -1848,7 +1844,7 @@ export const main = createLayer("main", layer => {
                         : ""
                 }`;
                 addLog({ kind: "badge", text });
-                notify(`🏆 ${text}`, "success");
+                notify(`🏆 ${text}`, "success", "trials");
             }
         });
     }

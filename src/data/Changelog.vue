@@ -31,6 +31,12 @@
                         Oblivia's legends: Celebi, Heatran, Shaymin, Giratina, Dialga, Palkia and
                         Arceus, plus the Manaphy Egg
                     </li>
+                    <li class="feature">
+                        Notification settings (Settings → Notifications): turn each kind of pop-up
+                        on or off (evolutions, shinies, legendary captures, badges, prizes, lost
+                        battles), choose how long they stay, where they appear and how many stack,
+                        turn off the battle banners, and send a test notification
+                    </li>
                 </ul>
             </details>
             <details>
