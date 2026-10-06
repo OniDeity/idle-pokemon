@@ -85,6 +85,7 @@ import { DEX_MILESTONES, fameGain, HOF_UPGRADE_LIST } from "game/pokemon/balance
 import { arceusForm } from "game/pokemon/data";
 import { FIORE_MISSIONS, FIORE_ZONES } from "game/pokemon/fiore";
 import { ALMIA_MISSIONS, ALMIA_ZONES, fieldAbilityOf, fieldPowers } from "game/pokemon/almia";
+import { OBLIVIA_MISSIONS, OBLIVIA_ZONES, ROAR_SIGNS } from "game/pokemon/oblivia";
 import { POKE_ASSIST_BONUS, STYLER_POWER } from "game/pokemon/balance";
 import { MAX_RADAR_CHAIN, RADAR_CHAIN_PULL, radarShinyMultiplier } from "game/pokemon/zones";
 import { describe, expect, test } from "vitest";
@@ -620,7 +621,8 @@ describe("generation mechanics", () => {
             "contests",
             "underground",
             "sinnohEvolutions",
-            "pokeAssist"
+            "pokeAssist",
+            "rangerSigns"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
@@ -1148,12 +1150,13 @@ describe("Sinnoh", () => {
         expect(finale[4].team.map(p => p.id)).toEqual([442, 407, 468, 448, 350, 445]);
     });
 
-    test("every Sinnoh Pokémon (#387-493) can be had there, and in the wild only there or Almia", () => {
+    test("every Sinnoh Pokémon (#387-493) can be had there, and in the wild only there or the later Ranger regions", () => {
         const sinnoh = speciesObtainableIn(["sinnoh"]);
         for (let id = 387; id <= 493; id++) expect(sinnoh.has(id), String(id)).toBe(true);
         expect(POKEDEX_IDS.length).toBe(493);
-        // Almia (Shadows of Almia, after Sinnoh) has Gen 4 Pokémon in its Browser too.
-        for (const zone of ZONES.filter(z => z.region !== "sinnoh" && z.region !== "almia")) {
+        // Almia and Oblivia (the Ranger games after Sinnoh) have Gen 4 Pokémon in their Browsers.
+        const gen4 = ["sinnoh", "almia", "oblivia"];
+        for (const zone of ZONES.filter(z => !gen4.includes(z.region))) {
             for (const entries of Object.values(zonePools(zone.id))) {
                 entries?.forEach(e => expect(e.id > 386 && e.id <= 493, zone.id).toBe(false));
             }
@@ -1409,6 +1412,70 @@ describe("Almia", () => {
         );
         expect(regis).toHaveLength(3);
         regis.forEach(s => expect(s.kind === "legendary" && s.fieldNeed?.power).toBe(5));
+    });
+});
+
+describe("Oblivia", () => {
+    test("comes after Almia, with the Pokémon Pinchers' missions and the Sky Fortress", () => {
+        const order = REGION_LIST.map(r => r.id);
+        expect(order.indexOf("oblivia")).toBe(order.indexOf("almia") + 1);
+        const oblivia = REGIONS.oblivia;
+        expect(oblivia.requires).toBe("almia");
+        expect(oblivia.requiresCompletePokedex).toBe(true);
+        expect(oblivia.styler).toBe(true);
+        expect(oblivia.trials.map(m => m.badge)).toEqual(OBLIVIA_MISSIONS.map(m => m.badge));
+        expect(oblivia.trials).toHaveLength(8);
+        const finale = oblivia.finale(172);
+        expect(finale.map(t => t.name)).toEqual([
+            "Kasa",
+            "Hocus",
+            "Arley",
+            'Ed "the Thinker"',
+            "Purple Eyes"
+        ]);
+        expect(finale[3].team.map(p => p.id)).toEqual([150]);
+        expect(MECHANICS.rangerSigns.region).toBe("oblivia");
+    });
+
+    test("its wild Pokémon are from the Browser; its legends give Ranger Signs", () => {
+        expect(zonesIn("oblivia").length).toBe(OBLIVIA_ZONES.length);
+        for (const zone of zonesIn("oblivia")) {
+            const species = allZoneSpecies(zone.id);
+            expect(species.length, zone.id).toBeGreaterThan(0);
+            species.forEach(id =>
+                expect(getSpecies(id).baseSpecies ?? id).toBeLessThanOrEqual(493)
+            );
+        }
+        const legends = SPECIAL_ENCOUNTERS.filter(
+            s => s.region === "oblivia" && s.kind === "legendary"
+        );
+        legends.forEach(
+            s =>
+                s.kind === "legendary" &&
+                expect(ZONES_BY_ID[s.zoneId]?.region, s.id).toBe("oblivia")
+        );
+        const signs = legends.flatMap(s =>
+            s.kind === "legendary" && s.rangerSign === true ? [s.speciesId] : []
+        );
+        // The legendary beasts (for Roar), Latias and Latios, Ho-Oh, the birds and Lugia.
+        expect(signs).toEqual(
+            expect.arrayContaining([...ROAR_SIGNS, 380, 381, 250, 144, 145, 146, 249])
+        );
+    });
+
+    test("hidden Pokémon need a beast's Roar; obstacles use Guardian Signs' Field Abilities", () => {
+        // Turtwig hides in a bush on Hinder Cape until a legendary beast roars.
+        const turtwig = (extras: Parameters<typeof availableZoneSpecies>[2]) =>
+            availableZoneSpecies("hinderCape", {}, extras).includes(387);
+        expect(turtwig({})).toBe(false);
+        expect(turtwig({ fieldPowers: { roar: 1 } })).toBe(true);
+        // Sunflora hides as a sunflower that needs Flame (Burn) ×2.
+        const sunflora = (extras: Parameters<typeof availableZoneSpecies>[2]) =>
+            availableZoneSpecies("milondaRoad", {}, extras).includes(192);
+        expect(sunflora({ fieldPowers: { burn: 1 } })).toBe(false);
+        expect(sunflora({ fieldPowers: { burn: 2 } })).toBe(true);
+        // Guardian Signs' Slash is Cut: Pidgey isn't in Almia's Browser.
+        expect(fieldAbilityOf(16)).toEqual(["cut", 1]);
     });
 });
 

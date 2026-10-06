@@ -5,6 +5,41 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.10 Oblivia</summary>
+                <ul>
+                    <li class="feature">
+                        Oblivia, from Pokémon Ranger: Guardian Signs, after Almia and a complete
+                        Pokédex: 24 places from Dolce Island to the Sky Fortress, with the wild
+                        Pokémon of the game's Browser. Start with Pichu
+                    </li>
+                    <li class="feature">
+                        Eight missions against the Pokémon Pinchers, from Cocona Village's Celebi
+                        to Zapdos's nest, then the Sky Fortress: Kasa, Hocus, Arley, Ed "the
+                        Thinker" and Mewtwo, and Purple Eyes with the Golden Armor
+                    </li>
+                    <li class="feature">
+                        New mechanic, Ranger Signs (after the Wireless Tower, then everywhere):
+                        capturing Oblivia's story legendaries (the legendary beasts, Latias and
+                        Latios, Ho-Oh, the legendary birds, Lugia) earns their Sign for good. Their
+                        types join Poké Assist in every region
+                    </li>
+                    <li class="feature">
+                        Oblivia's hidden Pokémon only come out for a legendary beast's Roar, and
+                        its obstacles use Field Abilities like Almia's
+                    </li>
+                    <li class="feature">
+                        Oblivia's legends: Celebi, Heatran, Shaymin, Giratina, Dialga, Palkia and
+                        Arceus, plus the Manaphy Egg
+                    </li>
+                    <li class="feature">
+                        Notification settings (Settings → Notifications): turn each kind of pop-up
+                        on or off (evolutions, shinies, legendary captures, badges, prizes, lost
+                        battles), choose how long they stay, where they appear and how many stack,
+                        turn off the battle banners, and send a test notification
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.9 Almia</summary>
                 <ul>
                     <li class="feature">

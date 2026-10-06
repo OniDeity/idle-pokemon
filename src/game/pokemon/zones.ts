@@ -21,6 +21,7 @@ import { HOENN_ANIME_ZONES } from "./hoennAnime";
 import { SINNOH_EXTRAS, SINNOH_ZONES } from "./sinnoh";
 import { ALMIA_ZONES } from "./almia";
 import { FIORE_ZONES } from "./fiore";
+import { OBLIVIA_ZONES } from "./oblivia";
 import { BUG_CONTEST_POOL, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
 import { SEVII_ZONES } from "./sevii";
 
@@ -34,7 +35,8 @@ export type RegionId =
     | "orreXd"
     | "sinnoh"
     | "fiore"
-    | "almia";
+    | "almia"
+    | "oblivia";
 
 export type ZonePools = Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 
@@ -308,6 +310,7 @@ export const ZONES: ZoneDefinition[] = [
     ...SINNOH_ZONES,
     ...FIORE_ZONES,
     ...ALMIA_ZONES,
+    ...OBLIVIA_ZONES,
     ...CARRIED_POKE_SPOTS
 ];
 
