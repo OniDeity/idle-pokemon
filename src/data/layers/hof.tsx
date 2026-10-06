@@ -80,6 +80,13 @@ const layer = createLayer(id, () => {
     const mechanics = persistent<Partial<Record<MechanicId, boolean>>>({}, false);
     /** Arceus's Plates dug up in the Underground: kept for good, like the Pokédex. */
     const plates = persistent<Partial<Record<PokemonType, boolean>>>({}, false);
+    /** Oblivia's Ranger Signs, by species: kept for good, like the Plates. */
+    const rangerSigns = persistent<Record<string, boolean>>({}, false);
+    const rangerSignSpecies = computed(() =>
+        Object.keys(rangerSigns.value)
+            .filter(id => rangerSigns.value[id] === true)
+            .map(Number)
+    );
     /** Regions cleared after Sinnoh, whose Pokémon have migrated to Pal Park. */
     const palPark = persistent<Partial<Record<RegionId, boolean>>>({}, false);
     const palParkRegions = computed(() =>
@@ -90,6 +97,11 @@ const layer = createLayer(id, () => {
         {},
         false
     );
+
+    function collectRangerSign(speciesId: number) {
+        if (rangerSigns.value[speciesId] === true) return;
+        rangerSigns.value = { ...rangerSigns.value, [speciesId]: true };
+    }
 
     function collectPlate(type: PokemonType) {
         if (plates.value[type] === true) return;
@@ -440,6 +452,9 @@ const layer = createLayer(id, () => {
         mechanicUnlocked,
         plates,
         collectPlate,
+        rangerSigns,
+        rangerSignSpecies,
+        collectRangerSign,
         palPark,
         palParkRegions,
         ribbons,

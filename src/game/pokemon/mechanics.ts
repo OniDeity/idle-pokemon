@@ -19,7 +19,8 @@ export type MechanicId =
     | "contests"
     | "underground"
     | "sinnohEvolutions"
-    | "pokeAssist";
+    | "pokeAssist"
+    | "rangerSigns";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -145,6 +146,15 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 1,
         description:
             "In wild battles, a Pokémon in your box (not your party) whose type is super effective against the wild Pokémon lends a hand: +25% damage, in every region."
+    },
+    rangerSigns: {
+        id: "rangerSigns",
+        name: "Ranger Signs",
+        region: "oblivia",
+        unlockAt: "the Wireless Tower, after Raikou",
+        trialsRequired: 2,
+        description:
+            "Capturing Oblivia's story legendaries earns their Ranger Signs for good. In every region, their types join Poké Assist, and the legendary beasts' Roar scares out Oblivia's hidden Pokémon."
     }
 };
 

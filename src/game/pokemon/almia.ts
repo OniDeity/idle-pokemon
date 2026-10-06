@@ -15,6 +15,7 @@ import { enc, getSpecies, SPECIES } from "./data";
 import type { SpecialEncounter } from "./specials";
 import type { GymDefinition, TrainerDefinition } from "./trainers";
 import { timeLimit, trial } from "./trainers";
+import { OBLIVIA_FIELD } from "./oblivia";
 import type { ZoneDefinition } from "./zones";
 
 export const FIELD_ABILITY_NAMES: Record<FieldAbility, string> = {
@@ -25,7 +26,8 @@ export const FIELD_ABILITY_NAMES: Record<FieldAbility, string> = {
     soak: "Soak",
     electrify: "Electrify",
     recharge: "Recharge",
-    psyPower: "Psy Power"
+    psyPower: "Psy Power",
+    roar: "Roar"
 };
 
 /** The Browser's Field Abilities: [ability, power] by species. */
@@ -285,7 +287,7 @@ function evolutionStage(id: number): number {
 export function fieldAbilityOf(speciesId: number): [FieldAbility, number] {
     const species = getSpecies(speciesId);
     const base = species.baseSpecies ?? speciesId;
-    const listed = BROWSER_FIELD[base];
+    const listed = BROWSER_FIELD[base] ?? OBLIVIA_FIELD[base];
     if (listed != null) return listed;
     const ability = TYPE_FIELD[species.types[0]] ?? "tackle";
     const total = species.baseStats.reduce((sum, stat) => sum + stat, 0);
