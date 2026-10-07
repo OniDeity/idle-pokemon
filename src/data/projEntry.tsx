@@ -1000,7 +1000,10 @@ export const main = createLayer("main", layer => {
             const text = `A shiny ${target.species.name} appeared!`;
             addLog({ kind: "shiny", text, speciesId, shiny: true });
             showFlash(text, "shiny");
-            notify(`✨ ${text}`, "success", "shinies");
+            notify(`✨ ${text}`, "success", "shinies", {
+                key: `shiny:${speciesId}`,
+                many: count => `✨ Found ${count} shiny ${target.species.name}!`
+            });
         }
     }
 
