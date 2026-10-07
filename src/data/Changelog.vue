@@ -5,6 +5,23 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.10.1 Quieter returns</summary>
+                <ul>
+                    <li class="feature">
+                        Notifications stack: one that comes again while it's still on screen adds to
+                        its count ("✨ Found 128 shiny Golbat ♀!") instead of opening another
+                    </li>
+                    <li class="feature">
+                        Coming back from offline no longer brings minutes of pop-ups: what happened
+                        while you were away is summed up once the catch-up is done, biggest first
+                    </li>
+                    <li class="feature">
+                        New settings (Settings → Notifications): turn stacking off, and choose
+                        whether offline progress is summarized, shown as it happens or hidden
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.10 Oblivia</summary>
                 <ul>
                     <li class="feature">

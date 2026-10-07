@@ -118,7 +118,10 @@ across journeys.
   is capped at ×6 (`radarShinyMultiplier`), not the games' ×41.
 - Notifications go through `notify(text, kind, category)` in `src/data/notifications.tsx`;
   its settings (`pkNotify*`, `pkBattleBanners`) live in the global settings and are edited on
-  the Settings modal's Notifications tab (`components/modals/Options.vue`).
+  the Settings modal's Notifications tab (`components/modals/Options.vue`). Repeats stack by
+  text or by a `NotifyStack` key (shinies stack per species); while `player.offlineTime` is
+  positive, notifications are grouped and shown as a summary when the catch-up ends
+  (`pkNotifyStack`, `pkNotifyOffline`).
 - `vite preview` answers missing files with index.html, and the service worker caches that for
   sprites: after adding sprites, clear the browser's `sprites` cache when checking locally.
 
