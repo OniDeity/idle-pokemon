@@ -5,6 +5,7 @@
  */
 import type { AutomationId, MartUpgradeId, TravelMode } from "game/pokemon/balance";
 import {
+    benchTeam,
     MART_UPGRADE_LIST,
     zoneRates,
     memberDps,
@@ -16,6 +17,16 @@ import { getSpecies, hallOfFameId, isShadow } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
 import type { StoneId } from "game/pokemon/data";
 import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
+import type { ContestCategory, ContestRank } from "game/pokemon/contests";
+import {
+    CATEGORY_NAMES,
+    CONTEST_CATEGORIES,
+    contestScore,
+    MAX_CONDITION,
+    POKEBLOCK_PRICE,
+    RANK_NAMES,
+    winChance
+} from "game/pokemon/contests";
 import { BUG_CONTEST_FEE, JOHTO_SWARMS, SWARM_PRICE } from "game/pokemon/johto";
 import { HONEY_PRICE, HONEY_TREES } from "game/pokemon/sinnoh";
 import { maxHp } from "game/pokemon/stats";
@@ -35,6 +46,19 @@ import hof from "./layers/hof";
 import mart from "./layers/mart";
 import { main, POKE_SNACK_PRICE } from "./projEntry";
 import { ref } from "vue";
+
+/** What each automation last did or is waiting for, in a few words, for the Journey panel. */
+export const automationStatus = ref<Partial<Record<AutomationId, string>>>({});
+
+function report(id: AutomationId, text: string) {
+    if (automationStatus.value[id] !== text) {
+        automationStatus.value = { ...automationStatus.value, [id]: text };
+    }
+}
+
+function plural(count: number, noun: string) {
+    return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
 
 function enabled(id: AutomationId) {
     return hof.automationActive(id);
@@ -61,20 +85,30 @@ function autoShop() {
             continue;
         }
         const count = Math.min(target - have, Math.floor((main.money.value * 0.25) / def.price));
-        if (count > 0) main.buyBalls(ball, count);
+        if (count > 0) {
+            main.buyBalls(ball, count);
+            report("autoShop", `bought ${count} ${def.name}${count === 1 ? "" : "s"}`);
+        }
     }
     // Johto's extras: the Bug-Catching Contest and Pokégear swarms, when they're cheap for us.
     if (!main.contestEntered.value && main.money.value >= BUG_CONTEST_FEE * 4) {
         main.enterBugContest();
+        report("autoShop", "entered the Bug-Catching Contest");
     }
     for (const swarm of JOHTO_SWARMS) {
         if (main.money.value < SWARM_PRICE * 4) break;
-        if (main.swarmsJoined.value[swarm.zoneId] !== true) main.joinSwarm(swarm.zoneId);
+        if (main.swarmsJoined.value[swarm.zoneId] !== true) {
+            main.joinSwarm(swarm.zoneId);
+            report("autoShop", `joined the swarm at ${ZONES_BY_ID[swarm.zoneId]?.name}`);
+        }
     }
     // Poké Snacks for the Poké Spot we're at.
     if (ZONES_BY_ID[main.zoneId.value]?.pokeSpot === true && main.pokeSnacks.value < 20) {
         const count = Math.min(50, Math.floor((main.money.value * 0.25) / POKE_SNACK_PRICE));
-        if (count > 0) main.buyPokeSnacks(count);
+        if (count > 0) {
+            main.buyPokeSnacks(count);
+            report("autoShop", `bought ${plural(count, "Poké Snack")}`);
+        }
     }
     // Then the cheapest upgrade, if it costs under half of what we have.
     const options = MART_UPGRADE_LIST.filter(
@@ -90,6 +124,10 @@ function autoShop() {
         !main.challengeOn("frugal")
     ) {
         mart.buyUpgrade(options[0].u);
+        report(
+            "autoShop",
+            `bought ${options[0].u.name} (Lv. ${mart.levels.value[options[0].u.id as MartUpgradeId] ?? 0})`
+        );
     }
 }
 
@@ -108,6 +146,13 @@ function autoClaim() {
             continue;
         }
         main.claimSpecial(special);
+        if (main.claimedSpecials.value[special.id]) {
+            const name = getSpecies(special.speciesId).name;
+            report(
+                "autoClaim",
+                special.kind === "trade" ? `traded for ${name}` : `received ${name}`
+            );
+        }
     }
 }
 
@@ -123,6 +168,19 @@ function buyIfAffordable(id: StoneId): boolean {
 }
 
 function autoEvolve() {
+    const before = new Set(Object.keys(main.box.value));
+    evolveAll();
+    const added = Object.keys(main.box.value).filter(key => !before.has(key));
+    if (added.length > 0) {
+        const names = added.slice(0, 3).map(key => getSpecies(Number(key)).name);
+        report(
+            "autoEvolve",
+            `${names.join(", ")}${added.length > 3 ? ` and ${added.length - 3} more` : ""}`
+        );
+    }
+}
+
+function evolveAll() {
     for (const key of Object.keys(main.box.value)) {
         const id = Number(key);
         // Shadow Pokémon whose hearts have opened get purified at the Relic Stone.
@@ -161,18 +219,6 @@ function autoEvolve() {
     }
 }
 
-/**
- * What each automation last decided, in a few words, for the Journey panel. Travel Planner and
- * Team Strategist report here.
- */
-export const automationStatus = ref<Partial<Record<AutomationId, string>>>({});
-
-function report(id: AutomationId, text: string) {
-    if (automationStatus.value[id] !== text) {
-        automationStatus.value = { ...automationStatus.value, [id]: text };
-    }
-}
-
 /** Keeps the Pokémon that best counter the next trainer's team in the party. */
 function autoParty() {
     const trainers = main.nextTrainers.value;
@@ -207,10 +253,42 @@ function autoParty() {
                     : "no new face can win the finale yet: the strongest team"
             );
         }
+    } else if (hof.trainBench.value && !winsWith(best, trainers)) {
+        team = benchParty(
+            best,
+            scored.map(s => s.id)
+        );
+        const trainees = team.filter(id => !best.includes(id));
+        report(
+            "autoParty",
+            trainees.length > 0
+                ? `training ${trainees.map(id => getSpecies(id).name).join(", ")} until the best counters to ${trainers[0].name} can win`
+                : `the best counters to ${trainers[0].name}, training`
+        );
     } else {
         report("autoParty", `the best counters to ${trainers[0].name}`);
     }
     main.setParty(team);
+}
+
+/** Whether this team wins against every trainer, by the forecast. */
+function winsWith(team: number[], trainers: TrainerDefinition[]): boolean {
+    const { damage, hp } = main.bonuses.value;
+    const doubles = main.mechanicOn("doubleBattles");
+    const party = team.map(id => main.battlerFor(id));
+    return trainers.every(t => simulateTrainerBattle(party, t, damage, hp, doubles).won);
+}
+
+/** Training the bench (see benchTeam): new faces first when they're going to the finale. */
+function benchParty(best: number[], ranked: number[]): number[] {
+    const faces = hof.newFacesForFinale.value;
+    return benchTeam(best, ranked, {
+        cap: main.cap.value,
+        slots: hof.benchSlots.value,
+        level: id => main.box.value[id]?.level ?? 1,
+        first: id => faces && !hof.isEnshrined(id),
+        entry: hallOfFameId
+    });
 }
 
 /**
@@ -392,18 +470,49 @@ function autoTravel() {
 }
 
 function autoChallenge() {
-    const trainers = main.nextTrainers.value;
-    if (trainers.length === 0) return;
     const { damage, hp } = main.bonuses.value;
     const party = main.partyBattlers.value;
     const doubles = main.mechanicOn("doubleBattles");
-    if (!trainers.every(t => simulateTrainerBattle(party, t, damage, hp, doubles).won)) return;
-    const trial = main.nextTrial.value;
-    if (trial != null) {
-        main.challengeGym(trial);
-    } else {
-        main.challengeFinale();
+    const loser = (trainers: TrainerDefinition[]) =>
+        trainers.find(t => !simulateTrainerBattle(party, t, damage, hp, doubles).won);
+    const trainers = main.nextTrainers.value;
+    let waiting = "";
+    if (trainers.length > 0) {
+        const tough = loser(trainers);
+        if (tough == null) {
+            const trial = main.nextTrial.value;
+            report("autoChallenge", `challenged ${trainers[0].name}`);
+            if (trial != null) {
+                main.challengeGym(trial);
+            } else {
+                main.challengeFinale();
+            }
+            return;
+        }
+        waiting = `waiting until the forecast beats ${tough.name}`;
     }
+    // Legendary Pokémon already in the Pokédex and bosses beaten before (a first meeting is
+    // the player's own).
+    if (hof.autoLegends.value) {
+        for (const special of SPECIAL_ENCOUNTERS) {
+            if (special.kind !== "legendary" && special.kind !== "boss") continue;
+            if (main.claimedSpecials.value[special.id] || !main.specialAvailable(special)) continue;
+            const metBefore =
+                special.kind === "legendary"
+                    ? dex.entry(special.speciesId).caught
+                    : hof.bossesBeaten.value[special.id] === true;
+            if (!metBefore || loser(main.specialTrainers(special)) != null) continue;
+            report(
+                "autoChallenge",
+                special.kind === "legendary"
+                    ? `battled ${getSpecies(special.speciesId).name}`
+                    : `challenged ${special.trainer.name}`
+            );
+            main.claimSpecial(special);
+            return;
+        }
+    }
+    report("autoChallenge", waiting === "" ? "every challenge done" : waiting);
 }
 
 /**
@@ -423,21 +532,105 @@ function autoPoketch() {
         if (main.money.value < HONEY_PRICE * 10) break;
         if (main.honeyTrees.value[tree.id] == null) main.slatherHoney(tree.id);
     }
+    if (open.length > 0) {
+        const slathered = open.filter(tree => main.honeyTrees.value[tree.id] != null).length;
+        report("autoPoketch", `Honey on ${slathered} of ${plural(open.length, "Honey Tree")}`);
+    } else if (main.mechanicOn("underground")) {
+        report("autoPoketch", "digging the Underground's walls as they appear");
+    }
 }
 
 /** The C-Gear: visits a filled Hidden Grotto between wild battles. */
 function autoCGear() {
+    if (!main.mechanicOn("hiddenGrottoes")) return;
     if (main.grottoReady.value && main.battle.value.kind === "search") main.visitGrotto();
+    const left = main.grottoBattles.value - main.grottoProgress.value;
+    report(
+        "autoCGear",
+        left > 0 ? `the Hidden Grotto fills in ${plural(left, "wild battle")}` : "grotto ready"
+    );
+}
+
+/** A Pokémon's chance to win at a rank with this much condition (Contest Star included). */
+function contestChance(
+    id: number,
+    category: ContestCategory,
+    rank: ContestRank,
+    condition: number
+) {
+    const score = contestScore(id, main.box.value[id]?.level ?? 0, condition, category);
+    return Math.min(1, winChance(score, rank) + 0.05 * (main.fameLevels.value.contestStar ?? 0));
+}
+
+/**
+ * The next ribbon to go for: the Pokémon and category likeliest to win once fed to the full
+ * (a sure win first), then the one already closest, so Pokéblocks aren't spread thin.
+ */
+function bestContestEntry():
+    | { id: number; category: ContestCategory; rank: ContestRank }
+    | undefined {
+    let best: { id: number; category: ContestCategory; rank: ContestRank } | undefined;
+    let bestKey = [-1, -1];
+    for (const key of Object.keys(main.box.value)) {
+        const id = Number(key);
+        for (const category of CONTEST_CATEGORIES) {
+            const rank = main.contestRankFor(id, category);
+            if (rank == null) continue;
+            const potential = contestChance(id, category, rank, MAX_CONDITION);
+            const now = main.contestWinChance(id, category, rank);
+            if (potential > bestKey[0] || (potential === bestKey[0] && now > bestKey[1])) {
+                best = { id, category, rank };
+                bestKey = [potential, now];
+            }
+        }
+    }
+    return best;
+}
+
+/** Contests win at least this often before the Contest Pass stops feeding Pokéblocks. */
+const CONTEST_TARGET_CHANCE = 0.9;
+
+/** The Contest Pass: feeds Pokéblocks (with money to spare) and enters the next contest. */
+function autoContest() {
+    if (!main.mechanicOn("contests")) return;
+    const running = main.contest.value;
+    if (running.speciesId !== 0) {
+        report(
+            "autoContest",
+            `${getSpecies(running.speciesId).name} in the ${CATEGORY_NAMES[running.category]} Contest (${RANK_NAMES[running.rank]})`
+        );
+        return;
+    }
+    const entry = bestContestEntry();
+    if (entry == null) {
+        report("autoContest", "every Pokémon has won every ribbon");
+        return;
+    }
+    const { id, category, rank } = entry;
+    // Entering is free, so it always enters; Pokéblocks only while money is plentiful.
+    while (
+        main.contestWinChance(id, category, rank) < CONTEST_TARGET_CHANCE &&
+        main.conditionOf(id, category) < MAX_CONDITION &&
+        main.money.value >= POKEBLOCK_PRICE * 10
+    ) {
+        main.feedPokeblock(id, category);
+    }
+    main.enterContest(id, category);
 }
 
 /** Runs every owned, enabled automation once. */
 export function runAutomation() {
-    if (main.starter.value === 0) return;
+    if (main.starter.value === 0) {
+        // A new journey starts with a clean slate.
+        if (Object.keys(automationStatus.value).length > 0) automationStatus.value = {};
+        return;
+    }
     if (enabled("autoShop")) autoShop();
     if (enabled("autoClaim")) autoClaim();
     if (main.inTrainerBattle.value) return;
     if (enabled("autoPoketch")) autoPoketch();
     if (enabled("autoCGear")) autoCGear();
+    if (enabled("autoContest")) autoContest();
     if (enabled("autoEvolve")) autoEvolve();
     if (enabled("autoParty")) autoParty();
     if (enabled("autoTravel")) autoTravel();
