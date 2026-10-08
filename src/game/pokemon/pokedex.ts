@@ -9,6 +9,7 @@ import { MECHANIC_LIST, MECHANICS } from "./mechanics";
 import type { RegionDefinition } from "./regions";
 import { REGION_LIST } from "./regions";
 import { HONEY_SPECIES } from "./sinnoh";
+import { UNOVA_EXTRAS } from "./unova";
 import { SPECIAL_ENCOUNTERS, specialSpecies } from "./specials";
 import { FOSSIL_SPECIES } from "./underground";
 import type { RegionId } from "./zones";
@@ -36,8 +37,23 @@ function keyItemsIn(regions: RegionId[]): Set<string> {
  * and the fossils its Underground digs up.
  */
 const FEATURE_SPECIES: Partial<Record<RegionId, number[]>> = {
-    sinnoh: [...HONEY_SPECIES, ...FOSSIL_SPECIES]
+    sinnoh: [...HONEY_SPECIES, ...FOSSIL_SPECIES],
+    // Unova's phenomena (shaking grass, dust clouds, rippling water) and Black 2 and White 2's
+    // Hidden Grottoes.
+    unova: unovaFeatureSpecies("unova"),
+    unova2: [
+        ...unovaFeatureSpecies("unova2"),
+        ...Object.values(UNOVA_EXTRAS.grottoes).flatMap(entries => entries.map(e => e.id))
+    ]
 };
+
+function unovaFeatureSpecies(region: RegionId): number[] {
+    return zonesIn(region).flatMap(zone =>
+        Object.values(UNOVA_EXTRAS.phenomena[zone.id] ?? {}).flatMap(entries =>
+            (entries ?? []).map(e => e.id)
+        )
+    );
+}
 
 /** The regular species obtainable in these regions. */
 export function speciesObtainableIn(regions: RegionId[]): Set<number> {
@@ -97,8 +113,9 @@ export function speciesObtainableIn(regions: RegionId[]): Set<number> {
 
 /**
  * The Pokédex as far as the game's regions go: #1-251, plus each later species once a region
- * offers it (Orre's Hoenn Pokémon; the rest of Gen 3 arrives with Hoenn, Gen 4 with Sinnoh).
- * Species data exists for all of #1-493, but a species outside this set never appears.
+ * offers it (Orre's Hoenn Pokémon; the rest of Gen 3 arrives with Hoenn, Gen 4 with Sinnoh, Gen 5
+ * with Unova). Species data exists for all of #1-649, but a species outside this set never
+ * appears.
  */
 export const POKEDEX_IDS: number[] = (() => {
     const ids = new Set<number>(SPECIES.filter(s => s.id <= 251).map(s => s.id));

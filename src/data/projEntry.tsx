@@ -69,8 +69,18 @@ import {
     withStrength
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
+import { trialFor } from "game/pokemon/trainers";
+import {
+    criticalCaptureChance,
+    inSeason,
+    SEASON_BATTLES,
+    SEASON_NAMES,
+    seasonAt
+} from "game/pokemon/unova";
+import { GROTTO_BATTLES, grottoPool } from "game/pokemon/unova2";
 import type { EncounterKind, RegionId, ZoneExtras } from "game/pokemon/zones";
 import {
+    activePools,
     catchableIn,
     MAX_RADAR_CHAIN,
     radarShinyMultiplier,
@@ -296,6 +306,8 @@ export const main = createLayer("main", layer => {
     const undergroundProgress = persistent<number>(0);
     /** The Poké Radar's chain (a Pokédex reward). */
     const radarChain = persistent<RadarChain>({ zoneId: "", speciesId: 0, count: 0 }, false);
+    /** Wild battles toward the next Hidden Grotto (Black 2 and White 2's mechanic). */
+    const grottoProgress = persistent<number>(0);
 
     /** What this journey has added to its places' pools: swarms and the contest. */
     /** The box's strongest Field Ability powers, for Almia's obstacles. */
@@ -321,7 +333,10 @@ export const main = createLayer("main", layer => {
                 ? radarChain.value
                 : undefined,
         palPark: hof.palParkRegions.value,
-        fieldPowers: fieldPowers.value
+        fieldPowers: fieldPowers.value,
+        season: season.value,
+        phenomena: mechanicOn("phenomena"),
+        phenomenaBoost: 1 + 0.25 * (hof.levels.value.encounterPower ?? 0)
     }));
 
     // Transient state: rebuilt on load.
@@ -355,6 +370,15 @@ export const main = createLayer("main", layer => {
             })
     );
     const regionDef = computed(() => REGIONS[region.value] ?? REGIONS.kanto);
+    /** The season (Black and White's Seasons mechanic), turning every SEASON_BATTLES battles. */
+    const season = computed(() => (mechanicOn("seasons") ? seasonAt(battlesWon.value) : undefined));
+    /** Wild battles per Hidden Grotto (Grotto Power shortens it). */
+    const grottoBattles = computed(() =>
+        Math.max(10, Math.round(GROTTO_BATTLES * (1 - 0.1 * (hof.levels.value.grottoPower ?? 0))))
+    );
+    const grottoReady = computed(
+        () => mechanicOn("hiddenGrottoes") && grottoProgress.value >= grottoBattles.value
+    );
     /** The Poké Radar, a Pokédex reward from Professor Oak. */
     const hasPokeRadar = computed(() => hasMilestone(dex.caughtCount.value, "Poké Radar"));
     /** Wild battles per Day Care Egg (the Destiny Knot halves it). */
@@ -365,6 +389,7 @@ export const main = createLayer("main", layer => {
                 (hasMilestone(dex.caughtCount.value, "Destiny Knot")
                     ? EGG_BATTLES / 2
                     : EGG_BATTLES) *
+                    (hasMilestone(dex.caughtCount.value, "Oval Charm") ? 0.75 : 1) *
                     (1 - 0.1 * (hof.levels.value.flameBody ?? 0))
             )
         )
@@ -408,7 +433,7 @@ export const main = createLayer("main", layer => {
         strengthMultiplier(rematchClears.value, otherRegionsCleared.value)
     );
     const trials = computed((): GymDefinition[] =>
-        regionDef.value.trials.map(t => withStrength(t, rematch.value))
+        regionDef.value.trials.map(t => withStrength(trialFor(t, starter.value), rematch.value))
     );
     const finale = computed((): TrainerDefinition[] =>
         regionDef.value.finale(starter.value).map(t => withStrength(t, rematch.value))
@@ -441,7 +466,12 @@ export const main = createLayer("main", layer => {
      */
     function generationOpen(id: number): boolean {
         const species = getSpecies(id).baseSpecies ?? id;
-        return species <= (regionDef.value.newestSpecies ?? 386) || mechanicOn("sinnohEvolutions");
+        // Gen 5 added no evolutions or babies to older Pokémon, so its families are always open.
+        return (
+            species <= (regionDef.value.newestSpecies ?? 386) ||
+            species > 493 ||
+            mechanicOn("sinnohEvolutions")
+        );
     }
 
     /** A species' evolutions that can happen on this journey. */
@@ -1028,6 +1058,8 @@ export const main = createLayer("main", layer => {
     }
 
     function shouldTryCatch(wild: WildPokemon) {
+        // A grotto's Pokémon was visited on purpose: it's always caught.
+        if (wild.kind === "grotto") return true;
         if (catchMode.value === "off") return false;
         // Orre's trainers keep their own Pokémon; only Shadow Pokémon can be snagged.
         if (!catchableIn(zoneId.value, wild.speciesId)) return false;
@@ -1037,11 +1069,32 @@ export const main = createLayer("main", layer => {
         return entry == null || (wild.shiny && !entry.shiny);
     }
 
+    /** Season Power (Fame): in-season wild Pokémon give more experience and Pokédollars. */
+    function seasonBonus(speciesId: number): number {
+        const current = season.value;
+        const level = hof.levels.value.seasonPower ?? 0;
+        return current != null && level > 0 && inSeason(speciesId, current) ? 1 + 0.1 * level : 1;
+    }
+
     function defeatWild(wild: WildPokemon) {
         const species = getSpecies(wild.speciesId);
+        const before = season.value;
         battlesWon.value++;
-        money.value += moneyYield(wild.level) * bonuses.value.money;
-        gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp);
+        const boost = seasonBonus(wild.speciesId);
+        money.value += moneyYield(wild.level) * bonuses.value.money * boost;
+        gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp * boost);
+        if (season.value != null && season.value !== before) {
+            addLog({ kind: "info", text: `🍂 ${SEASON_NAMES[season.value]} has come.` });
+        }
+        if (mechanicOn("hiddenGrottoes") && grottoProgress.value < grottoBattles.value) {
+            grottoProgress.value++;
+            if (grottoProgress.value === grottoBattles.value) {
+                addLog({
+                    kind: "info",
+                    text: "A Hidden Grotto has filled. Something is waiting inside!"
+                });
+            }
+        }
         tendDayCare();
         tendUnderground();
         extendRadarChain(wild);
@@ -1060,10 +1113,14 @@ export const main = createLayer("main", layer => {
             } else {
                 if (ball != null) useBall(ball);
                 const chance =
-                    ball != null
-                        ? ballCatchChance(ball, ballContext(wild), bonuses.value.catch)
-                        : catchChance(species.captureRate, STYLER_POWER, bonuses.value.catch);
-                if (Math.random() < chance) {
+                    wild.kind === "grotto"
+                        ? 1
+                        : ball != null
+                          ? ballCatchChance(ball, ballContext(wild), bonuses.value.catch)
+                          : catchChance(species.captureRate, STYLER_POWER, bonuses.value.catch);
+                const critical = wild.kind !== "grotto" && criticalCapture(chance);
+                if (critical || Math.random() < chance) {
+                    if (critical) addLog({ kind: "info", text: "Critical capture!" });
                     const isNew = receivePokemon(wild.speciesId, wild.level, wild.shiny);
                     if (ball === "friendBall") befriend(wild.speciesId);
                     const shadow = isShadow(wild.speciesId);
@@ -1103,6 +1160,43 @@ export const main = createLayer("main", layer => {
             }
         }
         startSearch();
+    }
+
+    /**
+     * Critical captures (Black and White's mechanic): a roll, before the normal one, that makes
+     * the catch certain. Its chance grows with the Pokédex.
+     */
+    function criticalCapture(chance: number): boolean {
+        if (!mechanicOn("criticalCapture") || chance >= 1) return false;
+        const boost = 1 + 0.25 * (hof.levels.value.capturePower ?? 0);
+        return Math.random() < criticalCaptureChance(chance, dex.caughtCount.value, boost);
+    }
+
+    /**
+     * Visits the Hidden Grotto (Black 2 and White 2's mechanic): the Pokémon inside comes out for
+     * a wild battle, and will be caught for sure.
+     */
+    function visitGrotto() {
+        if (!grottoReady.value || inTrainerBattle.value) return;
+        const zone = ZONES_BY_ID[zoneId.value];
+        if (zone == null || zone.trainerBattles === true) return;
+        const entries = activePools(zoneId.value, keyItems.value, zoneExtras.value)
+            .filter(pool => pool.kind !== "phenomenon")
+            .flatMap(pool => pool.entries)
+            .filter(e => catchableIn(zoneId.value, e.id) && !isShadow(e.id));
+        const pool = grottoPool(zoneId.value, entries, id => !dex.entry(id).caught);
+        if (pool.length === 0) return;
+        grottoProgress.value = 0;
+        let roll = Math.random() * pool.reduce((sum, e) => sum + e.weight, 0);
+        const entry = pool.find(e => (roll -= e.weight) <= 0) ?? pool[pool.length - 1];
+        const level =
+            entry.minLevel + Math.floor(Math.random() * (entry.maxLevel - entry.minLevel + 1));
+        addLog({
+            kind: "info",
+            text: `In the Hidden Grotto, a ${getSpecies(entry.id).name} is waiting!`,
+            speciesId: entry.id
+        });
+        startWildBattle(entry.id, level, "grotto");
     }
 
     /** Pays the Bug-Catching Contest's entry fee: its bugs join the National Park's grass. */
@@ -1602,7 +1696,9 @@ export const main = createLayer("main", layer => {
                     }),
                     bonuses.value.catch
                 );
-                if (Math.random() < chance) {
+                const critical = criticalCapture(chance);
+                if (critical || Math.random() < chance) {
+                    if (critical) addLog({ kind: "info", text: "Critical capture!" });
                     claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
                     receivePokemon(special.speciesId, special.level, false);
                     const text = `You caught ${species.name}!`;
@@ -1741,6 +1837,14 @@ export const main = createLayer("main", layer => {
             regionDef.value.startingKeyItems
                 .filter(item => !keyItems.value[item])
                 .forEach(grantKeyItem);
+            // The Liberty Pass is a Pokédex reward, good for every Unova journey.
+            if (
+                region.value === "unova" &&
+                !keyItems.value.libertyPass &&
+                hasMilestone(dex.caughtCount.value, "Liberty Pass")
+            ) {
+                grantKeyItem("libertyPass");
+            }
         }
         checkMechanics();
         if (box.value[493] != null) grantArceusForms();
@@ -1784,6 +1888,12 @@ export const main = createLayer("main", layer => {
     function specialAvailable(special: SpecialEncounter) {
         if (special.region !== region.value || badges.value < special.badgesRequired) return false;
         if (special.postGame === true && !champion.value) return false;
+        if (
+            special.kind === "boss" &&
+            special.requiresCleared?.some(r => hof.clearCount(r) === 0)
+        ) {
+            return false;
+        }
         if (special.kind === "legendary") {
             if (special.keyItem != null && !keyItems.value[special.keyItem]) return false;
             if (!meetsFieldNeed(special.fieldNeed, fieldPowers.value)) return false;
@@ -1808,7 +1918,9 @@ export const main = createLayer("main", layer => {
         const speciesId =
             special.kind === "gift" && special.pool != null
                 ? special.pool[Math.floor(Math.random() * special.pool.length)]
-                : special.speciesId;
+                : special.kind === "gift" && special.byStarter != null
+                  ? (special.byStarter[starter.value] ?? special.speciesId)
+                  : special.speciesId;
         const shiny = special.kind === "gift" && Math.random() < (special.shinyChance ?? 0);
         receivePokemon(speciesId, special.level, shiny);
         const species = getSpecies(speciesId);
@@ -1990,6 +2102,11 @@ export const main = createLayer("main", layer => {
         honeyTreeReady,
         slatherHoney,
         shakeHoneyTree,
+        season,
+        grottoProgress,
+        grottoBattles,
+        grottoReady,
+        visitGrotto,
         undergroundWalls,
         undergroundProgress,
         undergroundPostGame,

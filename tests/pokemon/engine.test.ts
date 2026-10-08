@@ -104,8 +104,8 @@ function party(...members: [number, number][]): PartyBattler[] {
 }
 
 describe("data", () => {
-    test("has species #1-493 in order, with the Pokédex only as far as the regions go", () => {
-        expect(DEX_SIZE).toBe(493);
+    test("has species #1-649 in order, with the Pokédex only as far as the regions go", () => {
+        expect(DEX_SIZE).toBe(649);
         SPECIES.forEach((species, i) => expect(species.id).toBe(i + 1));
         // Every Pokédex species is one a region offers; nothing past #251 without a region for it.
         const offered = speciesObtainableIn(REGION_LIST.map(r => r.id));
@@ -246,7 +246,7 @@ describe("data", () => {
         const early = VARIANT_SPECIES.filter(
             v =>
                 v.nativeRegion != null &&
-                !["kanto", "johto", "hoenn", "sinnoh"].includes(v.nativeRegion) &&
+                !["kanto", "johto", "hoenn", "sinnoh", "unova"].includes(v.nativeRegion) &&
                 found.has(v.id)
         );
         expect(early.map(v => v.name)).toEqual([]);
@@ -622,7 +622,11 @@ describe("generation mechanics", () => {
             "underground",
             "sinnohEvolutions",
             "pokeAssist",
-            "rangerSigns"
+            "rangerSigns",
+            "seasons",
+            "phenomena",
+            "criticalCapture",
+            "hiddenGrottoes"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
@@ -700,7 +704,7 @@ describe("Hoenn", () => {
         // Wild pools reach past #251 in Hoenn (and Sinnoh) only; earlier regions keep their own
         // tables.
         for (const zone of ZONES.filter(
-            z => !["hoenn", "sinnoh"].includes(z.region) && z.encounters == null
+            z => !["hoenn", "sinnoh", "unova", "unova2"].includes(z.region) && z.encounters == null
         )) {
             for (const entries of Object.values(zonePools(zone.id))) {
                 entries?.forEach(e => expect(e.id > 251 && e.id <= 386, zone.id).toBe(false));
@@ -1153,9 +1157,10 @@ describe("Sinnoh", () => {
     test("every Sinnoh Pokémon (#387-493) can be had there, and in the wild only there or the later Ranger regions", () => {
         const sinnoh = speciesObtainableIn(["sinnoh"]);
         for (let id = 387; id <= 493; id++) expect(sinnoh.has(id), String(id)).toBe(true);
-        expect(POKEDEX_IDS.length).toBe(493);
-        // Almia and Oblivia (the Ranger games after Sinnoh) have Gen 4 Pokémon in their Browsers.
-        const gen4 = ["sinnoh", "almia", "oblivia"];
+        expect(POKEDEX_IDS.length).toBe(649);
+        // Almia and Oblivia (the Ranger games after Sinnoh) have Gen 4 Pokémon in their Browsers,
+        // and Unova's post-game has them too.
+        const gen4 = ["sinnoh", "almia", "oblivia", "unova", "unova2"];
         for (const zone of ZONES.filter(z => !gen4.includes(z.region))) {
             for (const entries of Object.values(zonePools(zone.id))) {
                 entries?.forEach(e => expect(e.id > 386 && e.id <= 493, zone.id).toBe(false));
@@ -1486,7 +1491,11 @@ describe("Fame upgrades", () => {
             ["flameBody", "breeding"],
             ["masudaMethod", "breeding"],
             ["pokeblockKit", "contests"],
-            ["contestStar", "contests"]
+            ["contestStar", "contests"],
+            ["encounterPower", "phenomena"],
+            ["capturePower", "criticalCapture"],
+            ["seasonPower", "seasons"],
+            ["grottoPower", "hiddenGrottoes"]
         ]);
         gated.forEach(u => expect(MECHANICS[u.mechanic!]).toBeDefined());
     });

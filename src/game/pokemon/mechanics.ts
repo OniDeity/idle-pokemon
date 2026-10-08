@@ -20,7 +20,11 @@ export type MechanicId =
     | "underground"
     | "sinnohEvolutions"
     | "pokeAssist"
-    | "rangerSigns";
+    | "rangerSigns"
+    | "seasons"
+    | "phenomena"
+    | "criticalCapture"
+    | "hiddenGrottoes";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -155,6 +159,42 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 2,
         description:
             "Capturing Oblivia's story legendaries earns their Ranger Signs for good. In every region, their types join Poké Assist, and the legendary beasts' Roar scares out Oblivia's hidden Pokémon."
+    },
+    seasons: {
+        id: "seasons",
+        name: "Seasons",
+        region: "unova",
+        unlockAt: "the start of a Unova journey",
+        trialsRequired: 0,
+        description:
+            "The seasons turn every 150 wild battles. In every region each season brings out its own types (spring Grass, Bug and Normal; summer Fire, Water and Electric; autumn Ground, Ghost and Dark; winter Ice, Steel and Psychic), and Deerling wander the grass in the season's coat."
+    },
+    phenomena: {
+        id: "phenomena",
+        name: "Phenomena",
+        region: "unova",
+        unlockAt: "Route 3's shaking grass, past the Trio Badge",
+        trialsRequired: 1,
+        description:
+            "Grass shakes and water ripples in every region: 8% of encounters bring out a rarer Pokémon from the place at the top of its levels, or an Audino full of experience. Unova also has dust clouds and flying shadows."
+    },
+    criticalCapture: {
+        id: "criticalCapture",
+        name: "Critical Captures",
+        region: "unova",
+        unlockAt: "Nacrene City, past the Basic Badge",
+        trialsRequired: 2,
+        description:
+            "Sometimes a ball shakes just once and the catch is certain, in every region. The bigger your Pokédex, the more often it happens."
+    },
+    hiddenGrottoes: {
+        id: "hiddenGrottoes",
+        name: "Hidden Grottoes",
+        region: "unova2",
+        unlockAt: "Floccesy Ranch's Hidden Grotto, past the Basic Badge",
+        trialsRequired: 1,
+        description:
+            "A Hidden Grotto fills every 80 wild battles, wherever you are: the Pokémon inside waits for you and is caught for sure. Outside Black 2 and White 2's grottoes, it's one of the place's Pokémon, a species your Pokédex is missing when there is one."
     }
 };
 
