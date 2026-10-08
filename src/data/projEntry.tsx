@@ -70,7 +70,13 @@ import {
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
 import { trialFor } from "game/pokemon/trainers";
-import { criticalCaptureChance, inSeason, SEASON_NAMES, seasonAt } from "game/pokemon/unova";
+import {
+    criticalCaptureChance,
+    inSeason,
+    SEASON_ICONS,
+    SEASON_NAMES,
+    seasonAt
+} from "game/pokemon/unova";
 import { GROTTO_BATTLES, grottoPool } from "game/pokemon/unova2";
 import type { ChallengeId } from "game/pokemon/challenges";
 import { CHALLENGE_MODE_STRENGTH, partyAllowed, partySize } from "game/pokemon/challenges";
@@ -1119,7 +1125,10 @@ export const main = createLayer("main", layer => {
         if (wild.kind === "phenomenon") medals.count("phenomena");
         gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp * boost);
         if (season.value != null && season.value !== before) {
-            addLog({ kind: "info", text: `🍂 ${SEASON_NAMES[season.value]} has come.` });
+            addLog({
+                kind: "info",
+                text: `${SEASON_ICONS[season.value]} ${SEASON_NAMES[season.value]} has come.`
+            });
             medals.count("seasonsTurned");
         }
         if (mechanicOn("hiddenGrottoes") && grottoProgress.value < grottoBattles.value) {
@@ -1140,21 +1149,22 @@ export const main = createLayer("main", layer => {
         if (shouldTryCatch(wild)) {
             // Pokémon Ranger regions capture with the Capture Styler: no Poké Balls.
             const styler = regionDef.value.styler === true;
+            // A grotto's Pokémon waits for you: it's caught for sure, even without a ball to spare.
+            const grotto = wild.kind === "grotto";
             const ball = styler ? null : chooseBall(wild, wild.shiny);
-            if (ball == null && !styler) {
+            if (ball == null && !styler && !grotto) {
                 if (!warnedNoBalls) {
                     warnedNoBalls = true;
                     addLog({ kind: "fail", text: "Out of Poké Balls! Buy more at the Poké Mart." });
                 }
             } else {
                 if (ball != null) useBall(ball);
-                const chance =
-                    wild.kind === "grotto"
-                        ? 1
-                        : ball != null
-                          ? ballCatchChance(ball, ballContext(wild), bonuses.value.catch)
-                          : catchChance(species.captureRate, STYLER_POWER, bonuses.value.catch);
-                const critical = wild.kind !== "grotto" && criticalCapture(chance);
+                const chance = grotto
+                    ? 1
+                    : ball != null
+                      ? ballCatchChance(ball, ballContext(wild), bonuses.value.catch)
+                      : catchChance(species.captureRate, STYLER_POWER, bonuses.value.catch);
+                const critical = !grotto && criticalCapture(chance);
                 if (critical || Math.random() < chance) {
                     if (critical) {
                         addLog({ kind: "info", text: "Critical capture!" });

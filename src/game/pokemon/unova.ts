@@ -312,6 +312,13 @@ export function seasonAt(battlesWon: number): Season {
     ];
 }
 
+export const SEASON_ICONS: Record<Season, string> = {
+    spring: "🌸",
+    summer: "☀️",
+    autumn: "🍂",
+    winter: "❄️"
+};
+
 export const SEASON_NAMES: Record<Season, string> = {
     spring: "Spring",
     summer: "Summer",

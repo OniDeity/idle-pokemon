@@ -33,7 +33,7 @@ const CHECK_INTERVAL = 1;
 const TIER_ICONS = ["🥉", "🥈", "🥇", "💎"];
 
 const id = "medals";
-const layer = createLayer(id, () => {
+const layer = createLayer(id, baseLayer => {
     const name = "Medals";
     const color = "#B45309";
 
@@ -90,12 +90,17 @@ const layer = createLayer(id, () => {
         for (const { medal, tier } of found) {
             next[medal.id] = Math.max(next[medal.id] ?? 0, tier);
             fame += tierFame(medal, tier);
-            const text = `${TIER_ICONS[medal.goals.length === 1 ? 2 : tier - 1]} ${tierName(medal, tier)} ${medal.name} medal! (+${tierFame(medal, tier)} Fame)`;
+            const text = `${tierName(medal, tier)} ${medal.name} medal! (+${tierFame(medal, tier)} Fame)`;
             main.addLog({ kind: "badge", text });
-            notify(text, "success", "medals", {
-                key: "medal",
-                many: n => `🏅 ${n} new medals!`
-            });
+            notify(
+                `${TIER_ICONS[medal.goals.length === 1 ? 2 : tier - 1]} ${text}`,
+                "success",
+                "medals",
+                {
+                    key: "medal",
+                    many: n => `🏅 ${n} new medals!`
+                }
+            );
         }
         earned.value = next;
         hof.fame.value += fame;
@@ -104,7 +109,7 @@ const layer = createLayer(id, () => {
     }
 
     let timer = 0;
-    layer.on("update", diff => {
+    baseLayer.on("update", diff => {
         if (main.starter.value !== 0 && main.partyIds.value.length > 0) count("playTime", diff);
         timer -= diff;
         if (timer > 0) return;

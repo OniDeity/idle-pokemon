@@ -42,6 +42,7 @@ import {
     criticalCaptureFactor,
     PHENOMENON_CHANCE,
     SEASON_BATTLES,
+    SEASON_ICONS,
     SEASON_NAMES,
     SEASON_TYPES
 } from "game/pokemon/unova";
@@ -364,10 +365,11 @@ const layer = createLayer(id, () => {
             <Panel>
                 {season != null ? (
                     <div class="pk-small">
-                        🍂 <b>{SEASON_NAMES[season]}</b> ({nextSeason} wild battles until it turns).
-                        In Unova the wild tables change with it, and Deerling and Sawsbuck wear its
-                        coat; elsewhere {SEASON_TYPES[season].join(", ")} Pokémon come out more, and
-                        Deerling wander the grass.
+                        {SEASON_ICONS[season]} <b>{SEASON_NAMES[season]}</b> ({nextSeason} wild
+                        battles until it turns). In Unova the wild tables change with it, and
+                        Deerling and Sawsbuck wear its coat; elsewhere{" "}
+                        {SEASON_TYPES[season].map(t => t[0].toUpperCase() + t.slice(1)).join(", ")}{" "}
+                        Pokémon come out more, and Deerling wander the grass.
                     </div>
                 ) : null}
                 {main.mechanicOn("phenomena") ? (

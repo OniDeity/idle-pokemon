@@ -1755,6 +1755,10 @@ span.pk-partner-choice {
     text-align: left;
 }
 
+.pk-challenge-keys label {
+    display: block;
+}
+
 .pk-medal {
     display: flex;
     gap: 10px;

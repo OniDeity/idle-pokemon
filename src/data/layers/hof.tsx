@@ -289,8 +289,13 @@ const layer = createLayer(id, () => {
             ...enshrined.value,
             ...Object.fromEntries(clearingTeam.value.map(id => [hallOfFameId(id), true]))
         };
-        // Once Sinnoh has been cleared, every other region cleared sends its Pokémon to Pal Park.
-        const migrates = region !== "sinnoh" && clearCount("sinnoh") > 0 && !palPark.value[region];
+        // Once Sinnoh has been cleared, every other region cleared sends its Pokémon to Pal Park
+        // (up to Gen 4's regions: Unova's go through the Poké Transfer instead).
+        const migrates =
+            region !== "sinnoh" &&
+            (REGIONS[region].newestSpecies ?? 386) <= 493 &&
+            clearCount("sinnoh") > 0 &&
+            !palPark.value[region];
         if (migrates) palPark.value = { ...palPark.value, [region]: true };
         clears.value = { ...clears.value, [region]: clearCount(region) + 1 };
         fame.value += gain;
