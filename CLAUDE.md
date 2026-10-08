@@ -135,9 +135,13 @@ journeys.
   `hof.eggsBred` counts Eggs by species for Breeder's Lineage. The Journey page's new upgrades
   wait for `JOURNEY_UPGRADE_ENTRIES` (4) Hall of Fame entries: bought from the start they made
   the sim's Johto 40% slower (Fame drawn from Champion's Might).
-  v2.12.1: Oblivia, Unova and Unova 2 have `*_TUNING` factors (1.05 / 1.03 / 1.01) on every
+  v2.12.1: Oblivia, Unova and Unova 2 have `*_TUNING` factors (now 1.04 / 1.04 / 1.01) on every
   trial and finale trainer, back to ~10-12 h first clears with the new upgrades. Late regions
   are very sensitive: SCALE ×1.05 on all three doubled some runs.
+  v2.12.3: Hoenn 1.03, Colosseum 1.13, XD 1.06 (were 8.1 / 6.0 / 8.7 h, now ~11) and Fiore
+  0.94 (the tougher mid-game pushed it to 12-29 h; one seed's weak team walls at Garret unless
+  it's ≤0.94); Oblivia and Unova moved to 1.04 each. Tune with SIM_SAVE after the region
+  before, then SIM_LOAD + SCALE_<region>.
 - Poké Radar (a Pokédex milestone at 250): chains build automatically, so the shiny multiplier
   is capped at ×6 (`radarShinyMultiplier`), not the games' ×41.
 - Notifications go through `notify(text, kind, category)` in `src/data/notifications.tsx`;

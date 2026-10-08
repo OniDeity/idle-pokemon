@@ -370,6 +370,11 @@ export const CARRIED_POKE_SPOTS: ZoneDefinition[] = (
  */
 const XD_ADMIN_STRENGTHS = [1.97, 2.62, 2.3, 2.41, 2.85];
 const CITADARK_STRENGTH = 3.17;
+/**
+ * v2.12.3's retune: the simulator's first clear had drifted to about 9 hours, so every trial and the
+ * finale are this much stronger (strengths above are the earlier tuning), back to about 11.
+ */
+const XD_TUNING = 1.06;
 
 function admin(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "keyItems">
@@ -377,7 +382,7 @@ function admin(
     return trial({
         keyItems: [],
         ...options,
-        statMultiplier: XD_ADMIN_STRENGTHS[options.badgeNumber - 1]
+        statMultiplier: XD_TUNING * XD_ADMIN_STRENGTHS[options.badgeNumber - 1]
     });
 }
 
@@ -507,6 +512,10 @@ function citadark(
 
 /** Citadark Isle's summit: XD001, Shadow Lugia, then Cipher's Grand Master Greevil. */
 export function xdFinale(): TrainerDefinition[] {
+    return xdFinaleUntuned().map(t => ({ ...t, statMultiplier: t.statMultiplier * XD_TUNING }));
+}
+
+function xdFinaleUntuned(): TrainerDefinition[] {
     return [
         citadark(
             "xd001",

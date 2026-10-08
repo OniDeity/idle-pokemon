@@ -408,6 +408,12 @@ export const FIORE_ZONES: ZoneDefinition[] = [
 const FIORE_MISSION_STRENGTHS = [2.0, 3.4, 4.0, 4.4, 4.2, 2.9, 3.6, 3.75];
 const FIORE_FINALE_STRENGTH = 3.335;
 const FIORE_GORDOR_STRENGTH = 3.45;
+/**
+ * v2.12.3's retune: with Hoenn and both Orre journeys tougher, the simulator's Fiore swung to
+ * 12-29 hours (one seed's weak team walled at Garret and the Temple), so its missions and finale
+ * are a little weaker; ×0.95-0.97 still walled that seed at 23-25 h.
+ */
+const FIORE_TUNING = 0.94;
 
 function mission(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "keyItems">
@@ -415,7 +421,7 @@ function mission(
     return trial({
         keyItems: [],
         ...options,
-        statMultiplier: FIORE_MISSION_STRENGTHS[options.badgeNumber - 1]
+        statMultiplier: FIORE_TUNING * FIORE_MISSION_STRENGTHS[options.badgeNumber - 1]
     });
 }
 
@@ -582,6 +588,13 @@ function boss(
 
 /** Hideout Infiltration and the Fiore Temple: the Go-Rock Quads, Billy, then Gordor's beasts. */
 export function fioreFinale(): TrainerDefinition[] {
+    return fioreFinaleUntuned().map(t => ({
+        ...t,
+        statMultiplier: t.statMultiplier * FIORE_TUNING
+    }));
+}
+
+function fioreFinaleUntuned(): TrainerDefinition[] {
     const quads = FIORE_FINALE_STRENGTH;
     return [
         boss(

@@ -397,7 +397,7 @@ const UNOVA_GHETSIS_STRENGTH = 3.5;
  * under 10 hours, so every trial and the finale are this much stronger (strengths above are the
  * earlier tuning). The sim is very sensitive here: ×1.05 doubled some runs.
  */
-const UNOVA_TUNING = 1.03;
+const UNOVA_TUNING = 1.04;
 
 function unovaGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">,

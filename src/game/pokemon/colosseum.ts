@@ -274,6 +274,11 @@ export const COLOSSEUM_ZONES: ZoneDefinition[] = [
  */
 const ADMIN_STRENGTHS = [3.0, 3.8, 4.02, 4.26];
 const REALGAM_STRENGTH = 3.0;
+/**
+ * v2.12.3's retune: the simulator's first clear had drifted to about 6 hours, so every trial and the
+ * finale are this much stronger (strengths above are the earlier tuning), back to about 11.
+ */
+const COLOSSEUM_TUNING = 1.13;
 
 function admin(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "keyItems"> & {
@@ -283,7 +288,7 @@ function admin(
     return trial({
         keyItems: [],
         ...options,
-        statMultiplier: ADMIN_STRENGTHS[options.badgeNumber - 1]
+        statMultiplier: COLOSSEUM_TUNING * ADMIN_STRENGTHS[options.badgeNumber - 1]
     });
 }
 
@@ -393,6 +398,13 @@ function realgam(
 
 /** Realgam Tower's Colosseum: Gonzap, then Nascour, then Cipher's head, Evice. */
 export function colosseumFinale(): TrainerDefinition[] {
+    return colosseumFinaleUntuned().map(t => ({
+        ...t,
+        statMultiplier: t.statMultiplier * COLOSSEUM_TUNING
+    }));
+}
+
+function colosseumFinaleUntuned(): TrainerDefinition[] {
     return [
         realgam(
             "gonzap",

@@ -924,7 +924,7 @@ const OBLIVIA_MEWTWO_STRENGTH = 3.332;
  * under 10 hours, so every trial and the finale are this much stronger (strengths above are the
  * earlier tuning). The sim is very sensitive here: ×1.05 doubled some runs.
  */
-const OBLIVIA_TUNING = 1.05;
+const OBLIVIA_TUNING = 1.04;
 
 function mission(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "keyItems">
