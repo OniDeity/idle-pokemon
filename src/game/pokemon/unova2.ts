@@ -394,6 +394,12 @@ export function grottoPool(
 const UNOVA2_GYM_STRENGTHS = [1.8, 3.0, 3.6, 4.6, 4.4, 4.5, 5.3, 5.4];
 const UNOVA2_ELITE_FOUR_STRENGTH = 4.41;
 const UNOVA2_CHAMPION_STRENGTH = 4.66;
+/**
+ * v2.12's retune: with the Fame upgrades' Mastery and Fan Club, the simulator's first clear fell
+ * under 10 hours, so every trial and the finale are this much stronger (strengths above are the
+ * earlier tuning). The sim is very sensitive here: ×1.05 doubled some runs.
+ */
+const UNOVA2_TUNING = 1.01;
 
 function unova2Gym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">,
@@ -401,7 +407,7 @@ function unova2Gym(
 ): GymDefinition {
     return trial({
         ...options,
-        statMultiplier: UNOVA2_GYM_STRENGTHS[options.badgeNumber - 1],
+        statMultiplier: UNOVA2_TUNING * UNOVA2_GYM_STRENGTHS[options.badgeNumber - 1],
         badgeIcon: `badges/${badgeIcon}.png`
     });
 }
@@ -598,6 +604,13 @@ function leagueMember(
 
 /** The Elite Four and Champion Iris, back to back (Black 2 and White 2's first round). */
 export function unova2Finale(): TrainerDefinition[] {
+    return unova2FinaleUntuned().map(t => ({
+        ...t,
+        statMultiplier: t.statMultiplier * UNOVA2_TUNING
+    }));
+}
+
+function unova2FinaleUntuned(): TrainerDefinition[] {
     const e4 = UNOVA2_ELITE_FOUR_STRENGTH;
     return [
         leagueMember(

@@ -5,6 +5,17 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.12.1 Late-game retune</summary>
+                <ul>
+                    <li class="balancing">
+                        Oblivia's missions and Sky Fortress (+5%), Unova (Black/White)'s Gyms and
+                        League (+3%) and Unova (Black 2/White 2)'s (+1%) are a little stronger:
+                        with v2.12's Fame upgrades their first clears had dropped to 7-9 hours, and
+                        they're back to about 10-12
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.12 Fan Club</summary>
                 <ul>
                     <li class="feature">
