@@ -5,6 +5,16 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.12.2 Travel Planner fix</summary>
+                <ul>
+                    <li class="fix">
+                        Choosing a Travel Planner mode no longer raises a "NaN value detected"
+                        warning, which also switched off autosave. If it happened to you, switch
+                        Autosave back on in the Settings
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.12.1 Late-game retune</summary>
                 <ul>
                     <li class="balancing">
