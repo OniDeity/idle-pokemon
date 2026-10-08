@@ -1783,3 +1783,10 @@ span.pk-partner-choice {
     flex: 1;
     min-width: 0;
 }
+
+.pk-automation-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 4px;
+}

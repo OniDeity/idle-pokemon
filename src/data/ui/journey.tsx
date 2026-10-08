@@ -39,6 +39,7 @@ import {
     TypeBadges
 } from "./components";
 import { openLayer, renderNav } from "./nav";
+import { automationStatus } from "data/automation";
 
 const CAVES = new Set([
     "mtMoon",
@@ -805,6 +806,14 @@ function renderControls() {
                     ))}
                 </div>
             ) : null}
+            {(["autoTravel", "autoParty"] as const)
+                .filter(id => hof.automationActive(id) && automationStatus.value[id] != null)
+                .map(id => (
+                    <div class="pk-small pk-muted">
+                        {id === "autoTravel" ? "🧭 Travel Planner" : "🧩 Team Strategist"}:{" "}
+                        {automationStatus.value[id]}
+                    </div>
+                ))}
             {main.balls.value.masterBall > 0 && !styler ? (
                 <label class="pk-small pk-check">
                     <input
