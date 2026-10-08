@@ -10,6 +10,7 @@ import { attacksPerSecond, damagePerHit, maxHp, TRAINER_IV, xpForLevel, xpYield 
 import type { TrainerDefinition } from "./trainers";
 import { getSpecies } from "./data";
 import type { MechanicId } from "./mechanics";
+import type { ZoneExtras } from "./zones";
 import { activePools } from "./zones";
 
 /** Seconds spent looking for the next wild Pokémon. */
@@ -944,6 +945,32 @@ export interface AutomationDefinition {
     sprite: string;
 }
 
+/** Where the Travel Planner takes you. */
+export type TravelMode = "balanced" | "catchAll" | "pokedex" | "train";
+
+export const TRAVEL_MODES: [TravelMode, string, string][] = [
+    [
+        "balanced",
+        "Balanced",
+        "The newest place with Pokémon you haven't caught this journey, unless they're far below your party; otherwise the toughest place your party handles."
+    ],
+    [
+        "catchAll",
+        "Catch 'em all",
+        "Wherever you meet Pokémon not in your box this journey fastest (forms too, Pokédex newcomers first), at any level your party can beat. Then Balanced."
+    ],
+    [
+        "pokedex",
+        "Pokédex",
+        "Only Pokémon and forms your Pokédex is missing, wherever you meet them fastest. Then Balanced."
+    ],
+    [
+        "train",
+        "Train",
+        "Wherever your party earns the most experience per minute (Effort past the level cap)."
+    ]
+];
+
 /** One-time Fame purchases that play parts of the game for you. Each can be toggled off. */
 export const AUTOMATIONS: AutomationDefinition[] = [
     {
@@ -973,7 +1000,7 @@ export const AUTOMATIONS: AutomationDefinition[] = [
         id: "autoParty",
         name: "Team Strategist",
         description:
-            "Keeps the six Pokémon that best counter your next opponent in your party. Can bring Pokémon new to the Hall of Fame to the finale instead.",
+            "Keeps the Pokémon that best counter your next opponent in your party. For the finale it can bring Pokémon new to this region's Hall of Fame instead, as many as you choose.",
         cost: 10,
         sprite: itemSprite("exp-share")
     },
@@ -981,7 +1008,7 @@ export const AUTOMATIONS: AutomationDefinition[] = [
         id: "autoTravel",
         name: "Travel Planner",
         description:
-            "Moves to the best zone: the newest area with Pokémon you haven't caught this journey, or the toughest one your team handles. Can re-catch your whole Pokédex instead.",
+            "Moves to the best place for what you're after: steady progress, every Pokémon not in your box, only Pokédex newcomers, or the most experience.",
         cost: 12,
         sprite: itemSprite("bicycle")
     },
@@ -1020,6 +1047,8 @@ export interface ZoneRates {
     /** Experience per minute for each party member (past the level cap it becomes Effort). */
     xpPerMinute: number;
     moneyPerMinute: number;
+    /** Average seconds per wild battle, searching included (Infinity where nothing appears). */
+    secondsPerBattle: number;
 }
 
 /**
@@ -1031,12 +1060,13 @@ export function zoneRates(
     zoneId: string,
     keyItems: Partial<Record<KeyItemId, boolean>>,
     party: PartyBattler[],
-    bonuses: Pick<Bonuses, "damage" | "xp" | "money" | "searchTime">
+    bonuses: Pick<Bonuses, "damage" | "xp" | "money" | "searchTime">,
+    extras: ZoneExtras = {}
 ): ZoneRates {
     let seconds = 0;
     let xp = 0;
     let money = 0;
-    const pools = activePools(zoneId, keyItems);
+    const pools = activePools(zoneId, keyItems, extras);
     const totalShare = pools.reduce((sum, pool) => sum + pool.share, 0);
     for (const pool of pools) {
         const totalWeight = pool.entries.reduce((sum, entry) => sum + entry.weight, 0);
@@ -1057,8 +1087,12 @@ export function zoneRates(
             }
         }
     }
-    if (seconds === 0) return { xpPerMinute: 0, moneyPerMinute: 0 };
-    return { xpPerMinute: (xp / seconds) * 60, moneyPerMinute: (money / seconds) * 60 };
+    if (seconds === 0) return { xpPerMinute: 0, moneyPerMinute: 0, secondsPerBattle: Infinity };
+    return {
+        xpPerMinute: (xp / seconds) * 60,
+        moneyPerMinute: (money / seconds) * 60,
+        secondsPerBattle: seconds
+    };
 }
 
 /** Wild battles a Shadow Pokémon must win in the party before its heart opens to purification. */

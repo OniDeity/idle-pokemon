@@ -11,12 +11,13 @@ import { openLayer } from "../ui/nav";
 import { createReset } from "features/reset";
 import { createLayer } from "game/layers";
 import { persistent } from "game/persistence";
-import type { AutomationId, HofUpgradeId } from "game/pokemon/balance";
+import type { AutomationId, HofUpgradeId, TravelMode } from "game/pokemon/balance";
 import {
     AUTOMATIONS,
     FAME_PER_NEW_SPECIES,
     fameGain,
     HOF_UPGRADE_LIST,
+    TRAVEL_MODES,
     upgradeCost
 } from "game/pokemon/balance";
 import type { UpgradeDefinition } from "game/pokemon/balance";
@@ -78,8 +79,28 @@ const layer = createLayer(id, () => {
     const luckyNumberDay = persistent<number>(-1);
     /** Team Strategist setting: bring Pokémon new to the Hall of Fame to the finale. */
     const newFacesForFinale = persistent<boolean>(false);
-    /** Travel Planner setting: re-catch Pokédex Pokémon missing from the box, at any level. */
+    /** How many new faces to bring (at most the party's size). */
+    const newFacesCount = persistent<number>(6);
+    /**
+     * Keep that many new faces in the party for the finale even when the forecast says they'd
+     * lose: they train until it says they'd win (the League Pass waits). Otherwise as many as
+     * can still win.
+     */
+    const newFacesTrain = persistent<boolean>(false);
+    /** Travel Planner setting: what it travels for. */
+    const travelMode = persistent<TravelMode>("balanced");
+    /**
+     * The Travel Planner's old "catch 'em all" switch (re-catch Pokédex Pokémon missing from the
+     * box), from before its modes: on means the Catch 'em all mode.
+     */
     const catchEmAll = persistent<boolean>(false);
+    const travelModeInEffect = computed(
+        (): TravelMode => (catchEmAll.value ? "catchAll" : travelMode.value)
+    );
+    function chooseTravelMode(mode: TravelMode) {
+        catchEmAll.value = false;
+        travelMode.value = mode;
+    }
     /** After each Egg, swap the Day Care's Pokémon for the one whose Egg is most useful. */
     const dayCareRotate = persistent<boolean>(false);
     /** Generation mechanics reached in their own region, now on everywhere. */
@@ -298,10 +319,19 @@ const layer = createLayer(id, () => {
             !palPark.value[region];
         if (migrates) palPark.value = { ...palPark.value, [region]: true };
         clears.value = { ...clears.value, [region]: clearCount(region) + 1 };
+        // How you catch is a preference, not journey progress: it carries over.
+        const catching = {
+            catchMode: main.catchMode.value,
+            ballMode: main.ballMode.value,
+            master: main.useMasterBallOnLegendaries.value
+        };
         fame.value += gain;
         timesEntered.value = run;
         reset.reset();
         main.resetTransient();
+        main.catchMode.value = catching.catchMode;
+        main.ballMode.value = catching.ballMode;
+        main.useMasterBallOnLegendaries.value = catching.master;
         main.addLog({
             kind: "badge",
             text: `Your team was enshrined in the Hall of Fame (+${gain} Fame). Choose where your next journey begins!`
@@ -407,6 +437,75 @@ const layer = createLayer(id, () => {
         );
     }
 
+    /** Team Strategist's Hall of Fame settings: how many new faces, and whether to train them. */
+    function renderNewFaces() {
+        const count = newFacesCount.value;
+        return (
+            <div class="pk-automation-settings">
+                <label class="pk-small pk-setting">
+                    <input
+                        type="checkbox"
+                        checked={newFacesForFinale.value}
+                        onChange={() => (newFacesForFinale.value = !newFacesForFinale.value)}
+                    />{" "}
+                    Hall of Fame battles: bring Pokémon new to this region's Hall (+
+                    {FAME_PER_NEW_SPECIES} Fame each)
+                </label>
+                {newFacesForFinale.value ? (
+                    <>
+                        <label class="pk-small pk-setting">
+                            New faces:{" "}
+                            <input
+                                type="range"
+                                min={1}
+                                max={6}
+                                step={1}
+                                value={count}
+                                onInput={(e: Event) =>
+                                    (newFacesCount.value = Number(
+                                        (e.target as HTMLInputElement).value
+                                    ))
+                                }
+                            />{" "}
+                            <b>{count === 6 ? "the whole team" : `${count}`}</b>
+                        </label>
+                        <label class="pk-small pk-setting">
+                            <input
+                                type="checkbox"
+                                checked={newFacesTrain.value}
+                                onChange={() => (newFacesTrain.value = !newFacesTrain.value)}
+                            />{" "}
+                            Even if they'd lose: keep them in and train them until the forecast says
+                            they'd win (the League Pass waits). Off: as many of them as can still
+                            win.
+                        </label>
+                    </>
+                ) : null}
+            </div>
+        );
+    }
+
+    /** The Travel Planner's modes. */
+    function renderTravelModes() {
+        const mode = travelModeInEffect.value;
+        return (
+            <div class="pk-automation-settings">
+                <div class="pk-filter-row">
+                    {TRAVEL_MODES.map(([id, label, title]) => (
+                        <Button
+                            kind={mode === id ? "primary" : "ghost"}
+                            title={title}
+                            onClick={() => chooseTravelMode(id)}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </div>
+                <div class="pk-small pk-muted">{TRAVEL_MODES.find(([id]) => id === mode)?.[2]}</div>
+            </div>
+        );
+    }
+
     function renderAutomation() {
         return (
             <Panel>
@@ -423,31 +522,8 @@ const layer = createLayer(id, () => {
                             <div class="pk-shop-info">
                                 <b>{def.name}</b>
                                 <div class="pk-small">{def.description}</div>
-                                {def.id === "autoParty" && owned ? (
-                                    <label class="pk-small pk-setting">
-                                        <input
-                                            type="checkbox"
-                                            checked={newFacesForFinale.value}
-                                            onChange={() =>
-                                                (newFacesForFinale.value = !newFacesForFinale.value)
-                                            }
-                                        />{" "}
-                                        Hall of Fame battles: bring as many Pokémon new to the Hall
-                                        as can still win (+{FAME_PER_NEW_SPECIES} Fame each)
-                                    </label>
-                                ) : null}
-                                {def.id === "autoTravel" && owned ? (
-                                    <label class="pk-small pk-setting">
-                                        <input
-                                            type="checkbox"
-                                            checked={catchEmAll.value}
-                                            onChange={() => (catchEmAll.value = !catchEmAll.value)}
-                                        />{" "}
-                                        Catch 'em all: go wherever you're likeliest to find Pokémon
-                                        from your Pokédex that aren't in your box this journey
-                                        (variants and forms too), at any level
-                                    </label>
-                                ) : null}
+                                {def.id === "autoParty" && owned ? renderNewFaces() : null}
+                                {def.id === "autoTravel" && owned ? renderTravelModes() : null}
                             </div>
                             {owned ? (
                                 <Button
@@ -487,6 +563,11 @@ const layer = createLayer(id, () => {
         automationsOwned,
         automationsOn,
         newFacesForFinale,
+        newFacesCount,
+        newFacesTrain,
+        travelMode,
+        travelModeInEffect,
+        chooseTravelMode,
         trainerId,
         luckyNumberDay,
         catchEmAll,
