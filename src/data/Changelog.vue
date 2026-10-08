@@ -5,6 +5,18 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.12.3 Mid-game retune</summary>
+                <ul>
+                    <li class="balancing">
+                        Hoenn's Gyms and League (+3%), Orre (Colosseum)'s admins and Realgam Tower
+                        (+13%) and Orre (XD)'s admins and Citadark Isle (+6%) are stronger: their
+                        first clears had drifted to 6-9 hours and are back to about 11. Fiore's
+                        missions and Temple are 6% weaker to keep it near 10, and Oblivia and Unova
+                        (Black/White) are now 4% stronger than before v2.12.1 (were 5% and 3%)
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.12.2 Travel Planner fix</summary>
                 <ul>
                     <li class="fix">

@@ -358,13 +358,18 @@ export const HOENN_ZONES: ZoneDefinition[] = [
 const HOENN_GYM_STRENGTHS = [2.03, 3.65, 4.36, 5.58, 4.57, 5.18, 3.35, 4.16];
 const HOENN_ELITE_FOUR_STRENGTH = 3.14;
 const HOENN_CHAMPION_STRENGTH = 3.33;
+/**
+ * v2.12.3's retune: the simulator's first clear had drifted to 9-10 hours, so every trial and the
+ * finale are this much stronger (strengths above are the earlier tuning), back to about 11.
+ */
+const HOENN_TUNING = 1.03;
 
 function hoennGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">
 ): GymDefinition {
     return trial({
         ...options,
-        statMultiplier: HOENN_GYM_STRENGTHS[options.badgeNumber - 1],
+        statMultiplier: HOENN_TUNING * HOENN_GYM_STRENGTHS[options.badgeNumber - 1],
         // PokeAPI numbers Hoenn's badges 17-24, after Kanto's and Johto's.
         badgeIcon: `badges/${options.badgeNumber + 16}.png`
     });
@@ -546,6 +551,13 @@ function leagueMember(
 
 /** The Hoenn Elite Four and Champion Wallace (Emerald's teams), back to back. */
 export function hoennFinale(): TrainerDefinition[] {
+    return hoennFinaleUntuned().map(t => ({
+        ...t,
+        statMultiplier: t.statMultiplier * HOENN_TUNING
+    }));
+}
+
+function hoennFinaleUntuned(): TrainerDefinition[] {
     const e4 = HOENN_ELITE_FOUR_STRENGTH;
     return [
         leagueMember(
