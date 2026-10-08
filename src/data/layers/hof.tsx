@@ -103,7 +103,7 @@ const layer = createLayer(id, () => {
     /** Boss specials ever beaten (for the League Pass), by special id. */
     const bossesBeaten = persistent<Record<string, boolean>>({}, false);
     /** Travel Planner setting: what it travels for. */
-    const travelMode = persistent<TravelMode>("balanced");
+    const travelMode = persistent<TravelMode>("balanced", false);
     /**
      * The Travel Planner's old "catch 'em all" switch (re-catch Pokédex Pokémon missing from the
      * box), from before its modes: on means the Catch 'em all mode.

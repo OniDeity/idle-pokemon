@@ -69,6 +69,9 @@ journeys.
   weekday-only. Swarms (₽3,000 each, Radio Card) and the Bug-Catching Contest (₽2,000) are
   one-time purchases per journey that add a third to that place's pool. The Lucky Number Show
   draws automatically every 100 wild battles (`LUCKY_DRAW_BATTLES`); nothing uses the real clock.
+- Profectus NaN-checks `persistent()` values unless the second argument is `false`, and reads any
+  string (or object) as NaN: the warning turns autosave off. Every non-number persistent passes
+  `false` (a test scans the layers; v2.11.1's `hof.travelMode` didn't).
 - UI panels collapse by title, remembered in localStorage (`pk-collapsed-panels`). Menus are split
   into pages with `renderTabs(menu, tabs)` / `currentTab(menu, tabs)` (components.tsx; the open
   page per menu is remembered in `pk-menu-tabs`; a tab with `show: false` is hidden). Panels that
