@@ -14,6 +14,8 @@ import { SINNOH_GYMS, sinnohFinale } from "./sinnoh";
 import { ALMIA_MISSIONS, almiaFinale } from "./almia";
 import { FIORE_MISSIONS, fioreFinale } from "./fiore";
 import { OBLIVIA_MISSIONS, obliviaFinale } from "./oblivia";
+import { UNOVA_GYMS, unovaFinale } from "./unova";
+import { UNOVA2_GYMS, unova2Finale } from "./unova2";
 import type { GymDefinition, TrainerDefinition } from "./trainers";
 import { championFor, ELITE_FOUR, GYMS } from "./trainers";
 import type { RegionId } from "./zones";
@@ -285,6 +287,48 @@ export const REGIONS: Record<RegionId, RegionDefinition> = {
         requiresCompletePokedex: true,
         newestSpecies: 493,
         styler: true
+    },
+    unova: {
+        id: "unova",
+        name: "Unova (Black/White)",
+        blurb: "Eight Gyms from Striaton to Opelucid, only new Pokémon until the League, and N's Team Plasma. The seasons turn as you go.",
+        color: "#334155",
+        starters: [495, 498, 501],
+        startLevel: 5,
+        startingKeyItems: [],
+        shopTier: 0,
+        trials: UNOVA_GYMS,
+        trialNoun: "badges",
+        finaleName: "Pokémon League",
+        finaleBlurb:
+            "Face Shauntal, Grimsley, Caitlin and Marshal, then N and Zekrom in N's Castle, then Ghetsis, back-to-back (your party is healed between battles).",
+        finale: () => unovaFinale(),
+        levelCaps: [16, 22, 26, 30, 34, 38, 42, 46, 56, 100],
+        fame: 30,
+        requires: "oblivia",
+        requiresCompletePokedex: true,
+        newestSpecies: 649
+    },
+    unova2: {
+        id: "unova2",
+        name: "Unova (Black 2/White 2)",
+        blurb: "Two years on: new Gyms from Aspertia to Humilau, a new Team Plasma, Hidden Grottoes, and the Pokémon World Tournament.",
+        color: "#0F766E",
+        starters: [495, 498, 501],
+        startLevel: 5,
+        startingKeyItems: [],
+        shopTier: 0,
+        trials: UNOVA2_GYMS,
+        trialNoun: "badges",
+        finaleName: "Pokémon League",
+        finaleBlurb:
+            "Face Shauntal, Grimsley, Caitlin, Marshal and Champion Iris back-to-back (your party is healed between battles).",
+        finale: () => unova2Finale(),
+        levelCaps: [15, 20, 26, 32, 35, 41, 50, 53, 61, 100],
+        fame: 32,
+        requires: "unova",
+        requiresCompletePokedex: true,
+        newestSpecies: 649
     }
 };
 

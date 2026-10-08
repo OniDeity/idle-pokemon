@@ -1,4 +1,4 @@
-import type { EncounterEntry, EncounterPoolId, FieldAbility } from "./data";
+import type { EncounterEntry, EncounterPoolId, FieldAbility, Season } from "./data";
 import {
     enc,
     ENCOUNTERS,
@@ -22,6 +22,18 @@ import { SINNOH_EXTRAS, SINNOH_ZONES } from "./sinnoh";
 import { ALMIA_ZONES } from "./almia";
 import { FIORE_ZONES } from "./fiore";
 import { OBLIVIA_ZONES } from "./oblivia";
+import {
+    AUDINO,
+    AUDINO_SHARE,
+    inSeason,
+    PHENOMENON_CHANCE,
+    SEASON_DEERLING_SHARE,
+    SEASON_TYPE_BOOST,
+    seasonForm,
+    UNOVA_EXTRAS,
+    UNOVA_ZONES
+} from "./unova";
+import { UNOVA2_ZONES } from "./unova2";
 import { BUG_CONTEST_POOL, JOHTO_SWARMS, JOHTO_ZONES } from "./johto";
 import { SEVII_ZONES } from "./sevii";
 
@@ -36,7 +48,9 @@ export type RegionId =
     | "sinnoh"
     | "fiore"
     | "almia"
-    | "oblivia";
+    | "oblivia"
+    | "unova"
+    | "unova2";
 
 export type ZonePools = Partial<Record<EncounterPoolId, EncounterEntry[]>>;
 
@@ -311,6 +325,8 @@ export const ZONES: ZoneDefinition[] = [
     ...FIORE_ZONES,
     ...ALMIA_ZONES,
     ...OBLIVIA_ZONES,
+    ...UNOVA_ZONES,
+    ...UNOVA2_ZONES,
     ...CARRIED_POKE_SPOTS
 ];
 
@@ -342,6 +358,12 @@ const POOL_SHARE = {
     dive: 0.15
 };
 
+/** Whether a place is in one of the Unova journeys (their tables have seasons and phenomena). */
+function inUnova(zoneId: string): boolean {
+    const region = ZONES_BY_ID[zoneId]?.region;
+    return region === "unova" || region === "unova2";
+}
+
 export type EncounterKind =
     | "walk"
     | "surf"
@@ -349,7 +371,9 @@ export type EncounterKind =
     | "headbutt"
     | "rockSmash"
     | "dive"
-    | "honey";
+    | "honey"
+    | "phenomenon"
+    | "grotto";
 
 export interface ActivePool {
     kind: EncounterKind;
@@ -420,6 +444,15 @@ export interface ZoneExtras {
      * obstacles only appear once one is strong enough.
      */
     fieldPowers?: Partial<Record<FieldAbility, number>>;
+    /**
+     * The season (Black and White's Seasons mechanic): Unova's tables change with it, and
+     * elsewhere it brings out its types and seasonal Deerling. Unset means average weights.
+     */
+    season?: Season;
+    /** Phenomena (Black and White's mechanic): shaking grass and rippling water, and how often. */
+    phenomena?: boolean;
+    /** Multiplies how often phenomena happen (Encounter Power). */
+    phenomenaBoost?: number;
 }
 
 /** Share of Sinnoh's grass the Poké Radar's patches bring (two slots of twelve, 10% each). */
@@ -462,6 +495,30 @@ function joinPool(existing: EncounterEntry[], added: EncounterEntry[], share: nu
 /** A zone's pools with the journey's swarms and contest added. */
 function poolsWith(zoneId: string, extras: ZoneExtras): ZonePools {
     const pools: ZonePools = { ...zonePools(zoneId) };
+    const season = extras.season;
+    if (season != null) {
+        for (const pool of Object.keys(pools) as EncounterPoolId[]) {
+            if (inUnova(zoneId)) {
+                // Unova's own tables change with the season (Twist Mountain's winter Cryogonal).
+                if (pools[pool]!.some(e => e.bySeason != null)) {
+                    pools[pool] = pools[pool]!.map(e =>
+                        e.bySeason != null ? { ...e, weight: e.bySeason[season] } : e
+                    ).filter(e => e.weight > 0);
+                }
+            } else if (pool === "walk" && ZONES_BY_ID[zoneId]?.trainerBattles !== true) {
+                // Elsewhere, the season's types come out more, and Deerling wander in.
+                const walk = pools.walk!.map(e =>
+                    inSeason(e.id, season) ? { ...e, weight: e.weight * SEASON_TYPE_BOOST } : e
+                );
+                const min = Math.min(...walk.map(e => e.minLevel));
+                const max = Math.max(...walk.map(e => e.maxLevel));
+                pools.walk =
+                    walk.length > 0
+                        ? joinPool(walk, [enc(585, min, max, 1)], SEASON_DEERLING_SHARE)
+                        : walk;
+            }
+        }
+    }
     for (const pool of Object.keys(pools) as EncounterPoolId[]) {
         if (pools[pool]!.some(e => e.obstacle != null)) {
             pools[pool] = pools[pool]!.filter(
@@ -529,6 +586,46 @@ function palParkPool(regions: RegionId[]): EncounterEntry[] {
     return pool;
 }
 
+/**
+ * The Pokémon a phenomenon can bring out here: Unova's own tables (shaking grass, dust clouds,
+ * flying shadows, and rippling water once you can surf or fish), or elsewhere the place's grass
+ * and water Pokémon, each as likely as the others, at the top of their levels (plus Audino in
+ * the grass).
+ */
+function phenomenonEntries(
+    zoneId: string,
+    pools: ZonePools,
+    keyItems: Partial<Record<KeyItemId, boolean>>
+): EncounterEntry[] {
+    const zone = ZONES_BY_ID[zoneId];
+    if (zone == null || zone.trainerBattles === true || zone.pokeSpot === true) return [];
+    const water = keyItems.surf === true || keyItems.superRod === true;
+    if (inUnova(zoneId)) {
+        const found = UNOVA_EXTRAS.phenomena[zoneId] ?? {};
+        // A bridge's flying shadows are already its only Pokémon.
+        const shadows = zone.encounters != null ? [] : (found.flyingShadow ?? []);
+        return [
+            ...(found.shakingGrass ?? []),
+            ...(found.dustCloud ?? []),
+            ...shadows,
+            ...(water ? (found.ripplingWater ?? []) : [])
+        ];
+    }
+    // Every Pokémon of the pool equally likely, at the top of its levels.
+    const flatten = (entries: EncounterEntry[]) =>
+        entries.map(e => ({ id: e.id, weight: 1, minLevel: e.maxLevel, maxLevel: e.maxLevel }));
+    const result: EncounterEntry[] = [];
+    const walk = pools.walk ?? [];
+    if (walk.length > 0) {
+        const max = Math.max(...walk.map(e => e.maxLevel));
+        const audino = (walk.length * AUDINO_SHARE) / (1 - AUDINO_SHARE);
+        result.push(...flatten(walk), { id: AUDINO, weight: audino, minLevel: max, maxLevel: max });
+    }
+    const surf = keyItems.surf === true ? (pools.surf ?? []) : [];
+    result.push(...flatten(surf));
+    return result;
+}
+
 export function activePools(
     zoneId: string,
     keyItems: Partial<Record<KeyItemId, boolean>>,
@@ -558,6 +655,14 @@ export function activePools(
         const entries = pools[kind];
         if (entries != null && entries.length > 0 && keyItems[POOL_KEY_ITEM[kind]] === true) {
             result.push({ kind, share: POOL_SHARE[kind], entries });
+        }
+    }
+    if (extras.phenomena === true && result.length > 0) {
+        const entries = phenomenonEntries(zoneId, pools, keyItems);
+        if (entries.length > 0) {
+            const chance = Math.min(0.5, PHENOMENON_CHANCE * (extras.phenomenaBoost ?? 1));
+            const total = result.reduce((sum, pool) => sum + pool.share, 0);
+            result.push({ kind: "phenomenon", share: (total * chance) / (1 - chance), entries });
         }
     }
     return result;
@@ -677,6 +782,8 @@ export function rollEncounter(
             rng
         ).id;
     }
+    // Deerling and Sawsbuck wear the season's coat.
+    speciesId = seasonForm(speciesId, extras.season);
     if (extras.cipherPeons === true && !isShadow(speciesId) && rng() < CIPHER_PEON_CHANCE) {
         speciesId = shadowOf(speciesId);
     }
@@ -699,7 +806,10 @@ export function encounterOdds(
     extras: ZoneExtras = {}
 ): Map<number, number> {
     const odds = new Map<number, number>();
-    const tally = (id: number, p: number) => odds.set(id, (odds.get(id) ?? 0) + p);
+    const tally = (id: number, p: number) => {
+        const shown = seasonForm(id, extras.season);
+        odds.set(shown, (odds.get(shown) ?? 0) + p);
+    };
     // Where Cipher Peons roam, a share of everything turns out to be its Shadow form.
     const add = (id: number, p: number) => {
         if (extras.cipherPeons === true && !isShadow(id)) {

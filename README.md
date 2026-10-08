@@ -12,7 +12,7 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 
 ## How it plays
 
-- **Journeys through eight regions.** Kanto (plus 52 anime-exclusive locations from
+- **Journeys through thirteen regions.** Kanto (plus 52 anime-exclusive locations from
   [Bulbapedia's list](https://bulbapedia.bulbagarden.net/wiki/List_of_animated_series-exclusive_locations),
   from Porta Vista to the Tree of Beginning), the Orange Islands (29 islands, the Orange Crew
   and Drake's Winner's Cup), and the Sevii Islands from FireRed/LeafGreen (Team Rocket, the
@@ -26,7 +26,10 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   Ranger (no Poké Balls: the Capture Styler, and missions against the Go-Rock Squad instead of
   Gyms), Almia from Shadows of Almia (Team Dim Sun, and Field Abilities that clear obstacles
   for hidden Pokémon), and Oblivia from Guardian Signs (the Pokémon Pinchers, the Sky Fortress
-  and Ranger Signs). Each first clear is tuned for about a day of play.
+  and Ranger Signs), and Unova twice: Black/White (only new Pokémon until the League, N and
+  Ghetsis, Alder after it) and Black 2/White 2 two years on (Champion Iris, Team Plasma's
+  Kyurem, Hidden Grottoes and the Pokémon World Tournament). Each first clear is tuned for
+  about a day of play.
 - **Johto's Gen 2 extras**: morning, day and night Pokémon all in the grass together, the
   Pokégear radio's swarms (a one-time fee adds each to its place) and Lucky Number Show, the
   Bug-Catching Contest (a one-time entry fee adds its bugs to the National Park), Kurt's seven
@@ -39,7 +42,15 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   Underground (dig walls for stones, fossils and Arceus's Plates) and its evolutions of older
   Pokémon (Magnezone, Togekiss...); and Fiore's Poké Assist (box Pokémon whose type is super
   effective against a wild Pokémon lend a hand) and Oblivia's Ranger Signs (captured story
-  legendaries help in every region).
+  legendaries help in every region); and Unova's Seasons (each season brings out its types,
+  and Deerling wear its coat), phenomena (shaking grass and rippling water, with Audino),
+  critical captures and Hidden Grottoes.
+- **Medals** (Black 2/White 2's Medal Rally, permanent): 56 achievements with Bronze to
+  Platinum tiers for battles, catches, Eggs, regions, records and more, each tier paying Fame;
+  Medal Rally ranks add to every Hall of Fame entry.
+- **Challenges** (Black 2/White 2's Key System): from the second journey, pick rules before
+  your starter (Challenge Mode, Trio, Specialist, Frugal, Grounded, Fresh Start, Time Trial),
+  each multiplying the journey's Fame and earning its own medal.
 - **Sinnoh's extras**: Honey Trees (with the Pokétch automation), the Poké Radar (a Pokédex
   reward: chain grass Pokémon for better shiny odds), Pal Park (regions cleared after Sinnoh
   migrate there), and the Distortion World's Cyrus after the League for extra Fame.
@@ -73,7 +84,8 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
   region once unlocked.
 - **Regions in order**: Kanto, then the Orange Islands, then the Sevii Islands, then Johto,
   then Hoenn, then Orre (Colosseum), then Orre (XD), then Sinnoh, then Fiore, then Almia, then
-  Oblivia; Johto, Hoenn, both Orre journeys, Sinnoh and the Ranger regions also
+  Oblivia, then Unova (Black/White), then Unova (Black 2/White 2); every region from Johto on
+  also
   need every species the regions before them offer in your Pokédex. A region you've already
   journeyed to stays open when a new one slots in before it.
 - **Pacing**: each region's first clear takes about a day of active play (10-13 hours);
@@ -105,7 +117,7 @@ the Elite Four, fill the Pokédex, then enter the Hall of Fame to start a faster
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/game/pokemon/`              | The game engine: species data, stat/XP/damage formulas, battles, regions (`regions.ts`, `kantoAnime.ts`, `orange.ts`, `sevii.ts`, `johto.ts`, `johtoAnime.ts`), zones, trainers, gifts/trades, balance constants. Pure TypeScript, no Vue. |
 | `src/data/projEntry.tsx`         | The main "Journey" layer: run state, the real-time battle loop, catching, XP and evolution.                                                                                                                   |
-| `src/data/layers/`               | Map, Party & Box, Poké Mart, League, Pokédex, Hall of Fame.                                                                                                                                                   |
+| `src/data/layers/`               | Map, Party & Box, Poké Mart, League, Pokédex, Hall of Fame, Medals.                                                                                                                                           |
 | `src/data/automation.ts`         | The Fame-bought automations.                                                                                                                                                                                  |
 | `src/data/ui/`                   | Shared components, the battle scene, and styles.                                                                                                                                                              |
 | `src/data/pokemon/*.json`        | Generated data (see below).                                                                                                                                                                                   |

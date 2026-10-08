@@ -69,8 +69,20 @@ import {
     withStrength
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
+import { trialFor } from "game/pokemon/trainers";
+import {
+    criticalCaptureChance,
+    inSeason,
+    SEASON_ICONS,
+    SEASON_NAMES,
+    seasonAt
+} from "game/pokemon/unova";
+import { GROTTO_BATTLES, grottoPool } from "game/pokemon/unova2";
+import type { ChallengeId } from "game/pokemon/challenges";
+import { CHALLENGE_MODE_STRENGTH, partyAllowed, partySize } from "game/pokemon/challenges";
 import type { EncounterKind, RegionId, ZoneExtras } from "game/pokemon/zones";
 import {
+    activePools,
     catchableIn,
     MAX_RADAR_CHAIN,
     radarShinyMultiplier,
@@ -104,6 +116,7 @@ import hof from "./layers/hof";
 import league from "./layers/league";
 import map from "./layers/map";
 import mart from "./layers/mart";
+import medals from "./layers/medals";
 import party from "./layers/party";
 import { runAutomation } from "./automation";
 import { renderJourney } from "./ui/journey";
@@ -296,6 +309,10 @@ export const main = createLayer("main", layer => {
     const undergroundProgress = persistent<number>(0);
     /** The Poké Radar's chain (a Pokédex reward). */
     const radarChain = persistent<RadarChain>({ zoneId: "", speciesId: 0, count: 0 }, false);
+    /** Wild battles toward the next Hidden Grotto (Black 2 and White 2's mechanic). */
+    const grottoProgress = persistent<number>(0);
+    /** The challenges this journey was started with (Black 2 and White 2's Key System). */
+    const challenges = persistent<ChallengeId[]>([], false);
 
     /** What this journey has added to its places' pools: swarms and the contest. */
     /** The box's strongest Field Ability powers, for Almia's obstacles. */
@@ -321,7 +338,10 @@ export const main = createLayer("main", layer => {
                 ? radarChain.value
                 : undefined,
         palPark: hof.palParkRegions.value,
-        fieldPowers: fieldPowers.value
+        fieldPowers: fieldPowers.value,
+        season: season.value,
+        phenomena: mechanicOn("phenomena"),
+        phenomenaBoost: 1 + 0.25 * (fameLevels.value.encounterPower ?? 0)
     }));
 
     // Transient state: rebuilt on load.
@@ -343,18 +363,47 @@ export const main = createLayer("main", layer => {
     // ------------------------------------------------------------------
     // Derived values
     // ------------------------------------------------------------------
+    function challengeOn(id: ChallengeId): boolean {
+        return challenges.value.includes(id);
+    }
+    /** Fame upgrades in effect: none on a Fresh Start journey. */
+    const fameLevels = computed(() => (challengeOn("freshStart") ? {} : hof.levels.value));
+    /** Trainers' strength: rematch or renown, and Challenge Mode's on top. */
+    const trainerStrength = computed(
+        () => rematch.value * (challengeOn("challengeMode") ? CHALLENGE_MODE_STRENGTH : 1)
+    );
+    /** The party's size: six, or three in the Trio challenge. */
+    const maxParty = computed(() => partySize(challenges.value));
+    /** Whether a Pokémon may join the party under this journey's challenges. */
+    function canJoinParty(id: number): boolean {
+        return partyAllowed(
+            getSpecies(id),
+            challenges.value,
+            starter.value !== 0 ? getSpecies(starter.value) : undefined
+        );
+    }
+
     const bonuses = computed(
         (): Bonuses =>
             computeBonuses({
                 dexCaught: dex.caughtCount.value,
                 shinyCaught: dex.shinyCount.value,
                 variantsCaught: dex.variantCaught.value,
-                mart: mart.levels.value,
-                hof: hof.levels.value,
+                mart: challengeOn("frugal") ? {} : mart.levels.value,
+                hof: fameLevels.value,
                 keyItems: keyItems.value
             })
     );
     const regionDef = computed(() => REGIONS[region.value] ?? REGIONS.kanto);
+    /** The season (Black and White's Seasons mechanic), turning every SEASON_BATTLES battles. */
+    const season = computed(() => (mechanicOn("seasons") ? seasonAt(battlesWon.value) : undefined));
+    /** Wild battles per Hidden Grotto (Grotto Power shortens it). */
+    const grottoBattles = computed(() =>
+        Math.max(10, Math.round(GROTTO_BATTLES * (1 - 0.1 * (fameLevels.value.grottoPower ?? 0))))
+    );
+    const grottoReady = computed(
+        () => mechanicOn("hiddenGrottoes") && grottoProgress.value >= grottoBattles.value
+    );
     /** The Poké Radar, a Pokédex reward from Professor Oak. */
     const hasPokeRadar = computed(() => hasMilestone(dex.caughtCount.value, "Poké Radar"));
     /** Wild battles per Day Care Egg (the Destiny Knot halves it). */
@@ -365,19 +414,20 @@ export const main = createLayer("main", layer => {
                 (hasMilestone(dex.caughtCount.value, "Destiny Knot")
                     ? EGG_BATTLES / 2
                     : EGG_BATTLES) *
-                    (1 - 0.1 * (hof.levels.value.flameBody ?? 0))
+                    (hasMilestone(dex.caughtCount.value, "Oval Charm") ? 0.75 : 1) *
+                    (1 - 0.1 * (fameLevels.value.flameBody ?? 0))
             )
         )
     );
     /** The Masuda Method (Fame): Day Care Eggs are likelier to be shiny. */
-    const eggShinyMultiplier = computed(() => 1 + 0.5 * (hof.levels.value.masudaMethod ?? 0));
+    const eggShinyMultiplier = computed(() => 1 + 0.5 * (fameLevels.value.masudaMethod ?? 0));
     /** Contest upgrades (Fame): stronger Pokéblocks, shorter and easier contests. */
-    const pokeblockGain = computed(() => POKEBLOCK_GAIN + 5 * (hof.levels.value.pokeblockKit ?? 0));
+    const pokeblockGain = computed(() => POKEBLOCK_GAIN + 5 * (fameLevels.value.pokeblockKit ?? 0));
     function contestSeconds(rank: ContestRank): number {
-        return CONTEST_SECONDS[rank] * (1 - 0.1 * (hof.levels.value.contestStar ?? 0));
+        return CONTEST_SECONDS[rank] * (1 - 0.1 * (fameLevels.value.contestStar ?? 0));
     }
     function contestWinChance(id: number, category: ContestCategory, rank: ContestRank) {
-        const bonus = 0.05 * (hof.levels.value.contestStar ?? 0);
+        const bonus = 0.05 * (fameLevels.value.contestStar ?? 0);
         return Math.min(1, winChance(contestScoreOf(id, category), rank) + bonus);
     }
     /** Extra Fame this journey has earned (the Distortion World). */
@@ -408,10 +458,12 @@ export const main = createLayer("main", layer => {
         strengthMultiplier(rematchClears.value, otherRegionsCleared.value)
     );
     const trials = computed((): GymDefinition[] =>
-        regionDef.value.trials.map(t => withStrength(t, rematch.value))
+        regionDef.value.trials.map(t =>
+            withStrength(trialFor(t, starter.value), trainerStrength.value)
+        )
     );
     const finale = computed((): TrainerDefinition[] =>
-        regionDef.value.finale(starter.value).map(t => withStrength(t, rematch.value))
+        regionDef.value.finale(starter.value).map(t => withStrength(t, trainerStrength.value))
     );
     const nextTrial = computed(() => trials.value[badges.value]);
     /** The trainers standing between the player and progress: the next trial, or the finale. */
@@ -441,7 +493,12 @@ export const main = createLayer("main", layer => {
      */
     function generationOpen(id: number): boolean {
         const species = getSpecies(id).baseSpecies ?? id;
-        return species <= (regionDef.value.newestSpecies ?? 386) || mechanicOn("sinnohEvolutions");
+        // Gen 5 added no evolutions or babies to older Pokémon, so its families are always open.
+        return (
+            species <= (regionDef.value.newestSpecies ?? 386) ||
+            species > 493 ||
+            mechanicOn("sinnohEvolutions")
+        );
     }
 
     /** A species' evolutions that can happen on this journey. */
@@ -469,7 +526,7 @@ export const main = createLayer("main", layer => {
                 shiny,
                 ...(isShadow(id) ? { heart: HEART_BATTLES } : {})
             });
-            if (partyIds.value.length < 6) {
+            if (partyIds.value.length < maxParty.value && canJoinParty(id)) {
                 partyIds.value = [...partyIds.value, id];
             }
         } else if (shiny && !existing.shiny) {
@@ -487,7 +544,10 @@ export const main = createLayer("main", layer => {
     }
 
     function addToParty(id: number) {
-        if (!owns(id) || partyIds.value.includes(id) || partyIds.value.length >= 6) return;
+        if (!owns(id) || partyIds.value.includes(id) || partyIds.value.length >= maxParty.value) {
+            return;
+        }
+        if (!canJoinParty(id)) return;
         if (inTrainerBattle.value) return;
         partyIds.value = [...partyIds.value, id];
     }
@@ -506,13 +566,16 @@ export const main = createLayer("main", layer => {
     }
     function setParty(ids: number[]) {
         if (inTrainerBattle.value) return;
-        const valid = [...new Set(ids)].filter(owns).slice(0, 6);
+        const valid = [...new Set(ids)]
+            .filter(id => owns(id) && canJoinParty(id))
+            .slice(0, maxParty.value);
         if (valid.length === 0) return;
         if (valid.join() === partyIds.value.join()) return;
         partyIds.value = valid;
     }
     function swapIntoParty(outId: number, inId: number) {
         if (inTrainerBattle.value || !owns(inId) || partyIds.value.includes(inId)) return;
+        if (!canJoinParty(inId)) return;
         partyIds.value = partyIds.value.map(p => (p === outId ? inId : p));
     }
 
@@ -530,6 +593,7 @@ export const main = createLayer("main", layer => {
         if (partyIds.value.includes(fromId)) {
             partyIds.value = partyIds.value.map(p => (p === fromId ? intoId : p));
         }
+        medals.count("evolutions");
         const text = `${getSpecies(fromId).name} evolved into ${into.name}${how}!`;
         addLog({ kind: "evolve", text, speciesId: intoId, shiny: from.shiny });
         showFlash(text, "evolve");
@@ -715,6 +779,7 @@ export const main = createLayer("main", layer => {
         if (dayCareProgress.value < eggBattles.value) return;
         dayCareProgress.value = 0;
         eggsHatched.value++;
+        medals.count("eggsHatched");
         const babyId = eggSpeciesOf(id);
         // A shiny parent passes its colors on 1 time in 64, as in Gold and Silver.
         const shiny =
@@ -963,7 +1028,7 @@ export const main = createLayer("main", layer => {
             zoneId.value,
             keyItems.value,
             Math.random,
-            hof.levels.value.roddysRod ?? 0,
+            fameLevels.value.roddysRod ?? 0,
             zoneExtras.value
         );
         if (rolled == null) {
@@ -997,6 +1062,7 @@ export const main = createLayer("main", layer => {
             ...wildFighters(target)
         };
         if (shiny) {
+            medals.count("shiniesFound");
             const text = `A shiny ${target.species.name} appeared!`;
             addLog({ kind: "shiny", text, speciesId, shiny: true });
             showFlash(text, "shiny");
@@ -1019,6 +1085,7 @@ export const main = createLayer("main", layer => {
             radarChain.value = { zoneId: zoneId.value, speciesId: species, count: 1 };
         } else if (chain.speciesId === species) {
             radarChain.value = { ...chain, count: Math.min(MAX_RADAR_CHAIN, chain.count + 1) };
+            medals.record("bestRadarChain", radarChain.value.count);
         }
     }
 
@@ -1028,6 +1095,8 @@ export const main = createLayer("main", layer => {
     }
 
     function shouldTryCatch(wild: WildPokemon) {
+        // A grotto's Pokémon was visited on purpose: it's always caught.
+        if (wild.kind === "grotto") return true;
         if (catchMode.value === "off") return false;
         // Orre's trainers keep their own Pokémon; only Shadow Pokémon can be snagged.
         if (!catchableIn(zoneId.value, wild.speciesId)) return false;
@@ -1037,11 +1106,40 @@ export const main = createLayer("main", layer => {
         return entry == null || (wild.shiny && !entry.shiny);
     }
 
+    /** Season Power (Fame): in-season wild Pokémon give more experience and Pokédollars. */
+    function seasonBonus(speciesId: number): number {
+        const current = season.value;
+        const level = fameLevels.value.seasonPower ?? 0;
+        return current != null && level > 0 && inSeason(speciesId, current) ? 1 + 0.1 * level : 1;
+    }
+
     function defeatWild(wild: WildPokemon) {
         const species = getSpecies(wild.speciesId);
+        const before = season.value;
         battlesWon.value++;
-        money.value += moneyYield(wild.level) * bonuses.value.money;
-        gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp);
+        const boost = seasonBonus(wild.speciesId);
+        const earned = moneyYield(wild.level) * bonuses.value.money * boost;
+        money.value += earned;
+        medals.count("wildBattles");
+        medals.count("moneyEarned", earned);
+        if (wild.kind === "phenomenon") medals.count("phenomena");
+        gainXp(battleXp({ species, level: wild.level }) * bonuses.value.xp * boost);
+        if (season.value != null && season.value !== before) {
+            addLog({
+                kind: "info",
+                text: `${SEASON_ICONS[season.value]} ${SEASON_NAMES[season.value]} has come.`
+            });
+            medals.count("seasonsTurned");
+        }
+        if (mechanicOn("hiddenGrottoes") && grottoProgress.value < grottoBattles.value) {
+            grottoProgress.value++;
+            if (grottoProgress.value === grottoBattles.value) {
+                addLog({
+                    kind: "info",
+                    text: "A Hidden Grotto has filled. Something is waiting inside!"
+                });
+            }
+        }
         tendDayCare();
         tendUnderground();
         extendRadarChain(wild);
@@ -1051,19 +1149,29 @@ export const main = createLayer("main", layer => {
         if (shouldTryCatch(wild)) {
             // Pokémon Ranger regions capture with the Capture Styler: no Poké Balls.
             const styler = regionDef.value.styler === true;
+            // A grotto's Pokémon waits for you: it's caught for sure, even without a ball to spare.
+            const grotto = wild.kind === "grotto";
             const ball = styler ? null : chooseBall(wild, wild.shiny);
-            if (ball == null && !styler) {
+            if (ball == null && !styler && !grotto) {
                 if (!warnedNoBalls) {
                     warnedNoBalls = true;
                     addLog({ kind: "fail", text: "Out of Poké Balls! Buy more at the Poké Mart." });
                 }
             } else {
                 if (ball != null) useBall(ball);
-                const chance =
-                    ball != null
-                        ? ballCatchChance(ball, ballContext(wild), bonuses.value.catch)
-                        : catchChance(species.captureRate, STYLER_POWER, bonuses.value.catch);
-                if (Math.random() < chance) {
+                const chance = grotto
+                    ? 1
+                    : ball != null
+                      ? ballCatchChance(ball, ballContext(wild), bonuses.value.catch)
+                      : catchChance(species.captureRate, STYLER_POWER, bonuses.value.catch);
+                const critical = !grotto && criticalCapture(chance);
+                if (critical || Math.random() < chance) {
+                    if (critical) {
+                        addLog({ kind: "info", text: "Critical capture!" });
+                        medals.count("criticalCaptures");
+                    }
+                    medals.count("catches");
+                    if (isShadow(wild.speciesId)) medals.count("shadowsSnagged");
                     const isNew = receivePokemon(wild.speciesId, wild.level, wild.shiny);
                     if (ball === "friendBall") befriend(wild.speciesId);
                     const shadow = isShadow(wild.speciesId);
@@ -1103,6 +1211,44 @@ export const main = createLayer("main", layer => {
             }
         }
         startSearch();
+    }
+
+    /**
+     * Critical captures (Black and White's mechanic): a roll, before the normal one, that makes
+     * the catch certain. Its chance grows with the Pokédex.
+     */
+    function criticalCapture(chance: number): boolean {
+        if (!mechanicOn("criticalCapture") || chance >= 1) return false;
+        const boost = 1 + 0.25 * (fameLevels.value.capturePower ?? 0);
+        return Math.random() < criticalCaptureChance(chance, dex.caughtCount.value, boost);
+    }
+
+    /**
+     * Visits the Hidden Grotto (Black 2 and White 2's mechanic): the Pokémon inside comes out for
+     * a wild battle, and will be caught for sure.
+     */
+    function visitGrotto() {
+        if (!grottoReady.value || inTrainerBattle.value) return;
+        const zone = ZONES_BY_ID[zoneId.value];
+        if (zone == null || zone.trainerBattles === true) return;
+        const entries = activePools(zoneId.value, keyItems.value, zoneExtras.value)
+            .filter(pool => pool.kind !== "phenomenon")
+            .flatMap(pool => pool.entries)
+            .filter(e => catchableIn(zoneId.value, e.id) && !isShadow(e.id));
+        const pool = grottoPool(zoneId.value, entries, id => !dex.entry(id).caught);
+        if (pool.length === 0) return;
+        grottoProgress.value = 0;
+        medals.count("grottoesVisited");
+        let roll = Math.random() * pool.reduce((sum, e) => sum + e.weight, 0);
+        const entry = pool.find(e => (roll -= e.weight) <= 0) ?? pool[pool.length - 1];
+        const level =
+            entry.minLevel + Math.floor(Math.random() * (entry.maxLevel - entry.minLevel + 1));
+        addLog({
+            kind: "info",
+            text: `In the Hidden Grotto, a ${getSpecies(entry.id).name} is waiting!`,
+            speciesId: entry.id
+        });
+        startWildBattle(entry.id, level, "grotto");
     }
 
     /** Pays the Bug-Catching Contest's entry fee: its bugs join the National Park's grass. */
@@ -1197,6 +1343,7 @@ export const main = createLayer("main", layer => {
             if (snaggedShadows.value[id] || owns(id)) continue;
             const level = trainer.team.find(p => p.id === speciesId)?.level ?? 5;
             snaggedShadows.value = { ...snaggedShadows.value, [id]: true };
+            medals.count("shadowsSnagged");
             receivePokemon(id, level, false);
             const text = `Snagged ${trainer.name}'s ${getSpecies(id).name}!`;
             addLog({ kind: "catch", text, speciesId: id });
@@ -1231,6 +1378,7 @@ export const main = createLayer("main", layer => {
         if (!canPurify(id) || inTrainerBattle.value) return;
         const entry = box.value[id]!;
         const base = getSpecies(id).baseSpecies!;
+        medals.count("shadowsPurified");
         const inParty = partyIds.value.includes(id);
         const rest = { ...box.value };
         delete rest[id];
@@ -1241,7 +1389,12 @@ export const main = createLayer("main", layer => {
         if (had != null && entry.level > had.level) {
             setBoxEntry(base, { ...box.value[base]!, level: entry.level, xp: entry.xp });
         }
-        if (inParty && !partyIds.value.includes(base) && partyIds.value.length < 6) {
+        if (
+            inParty &&
+            !partyIds.value.includes(base) &&
+            partyIds.value.length < maxParty.value &&
+            canJoinParty(base)
+        ) {
             partyIds.value = [...partyIds.value, base];
         }
         const text = `${getSpecies(base).name}'s heart is purified! It's a normal Pokémon again.`;
@@ -1285,6 +1438,7 @@ export const main = createLayer("main", layer => {
     function shakeHoneyTree(treeId: string) {
         if (!honeyTreeReady(treeId) || inTrainerBattle.value) return;
         const { speciesId, level } = honeyTrees.value[treeId];
+        medals.count("honeyShaken");
         const rest = { ...honeyTrees.value };
         delete rest[treeId];
         honeyTrees.value = rest;
@@ -1315,6 +1469,7 @@ export const main = createLayer("main", layer => {
     function digUnderground(): UndergroundItem[] {
         if (!mechanicOn("underground") || undergroundWalls.value <= 0) return [];
         undergroundWalls.value--;
+        medals.count("wallsDug");
         const found = digWall(ensureTrainerId(), undergroundPostGame.value);
         let earned = 0;
         for (const item of found) {
@@ -1324,6 +1479,7 @@ export const main = createLayer("main", layer => {
                     [item.stone]: (stones.value[item.stone] ?? 0) + 1
                 };
             } else if (item.fossil != null) {
+                medals.count("fossilsRevived");
                 const level = Math.min(cap.value, FOSSIL_LEVEL);
                 const isNew = receivePokemon(item.fossil, level, false);
                 const name = getSpecies(item.fossil).name;
@@ -1430,6 +1586,7 @@ export const main = createLayer("main", layer => {
             return;
         }
         money.value += CONTEST_PRIZE_MONEY[rank];
+        medals.count("contestsWon");
         const prizeWonBefore = Object.values(hof.ribbons.value).some(r => r[category] === "master");
         hof.ribbons.value = {
             ...hof.ribbons.value,
@@ -1502,6 +1659,7 @@ export const main = createLayer("main", layer => {
             trainers: [gym],
             onWin() {
                 badges.value = gym.badgeNumber;
+                medals.count("trialsWon");
                 gym.keyItems.forEach(grantKeyItem);
                 for (const [id, count] of Object.entries(gym.balls ?? {})) {
                     balls.value = {
@@ -1566,6 +1724,8 @@ export const main = createLayer("main", layer => {
             onWin() {
                 // In a Pokémon Ranger region the battle was the capture: the Styler's loops hold.
                 if (regionDef.value.styler === true) {
+                    medals.count("legendariesCaught");
+                    medals.count("catches");
                     claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
                     receivePokemon(special.speciesId, special.level, false);
                     if (special.rangerSign === true) {
@@ -1602,7 +1762,14 @@ export const main = createLayer("main", layer => {
                     }),
                     bonuses.value.catch
                 );
-                if (Math.random() < chance) {
+                const critical = criticalCapture(chance);
+                if (critical || Math.random() < chance) {
+                    if (critical) {
+                        addLog({ kind: "info", text: "Critical capture!" });
+                        medals.count("criticalCaptures");
+                    }
+                    medals.count("legendariesCaught");
+                    medals.count("catches");
                     claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
                     receivePokemon(special.speciesId, special.level, false);
                     const text = `You caught ${species.name}!`;
@@ -1634,9 +1801,11 @@ export const main = createLayer("main", layer => {
             startSearch();
             return;
         }
+        if (current.legendary == null) medals.count("trainersBeaten");
         if (trainer.prizeMoney > 0) {
             const prize = trainer.prizeMoney * bonuses.value.money;
             money.value += prize;
+            medals.count("moneyEarned", prize);
             addLog({ kind: "info", text: `Defeated ${trainer.name}! Got ₽${Math.floor(prize)}.` });
         }
         // XP for every Pokémon on the defeated team.
@@ -1741,6 +1910,14 @@ export const main = createLayer("main", layer => {
             regionDef.value.startingKeyItems
                 .filter(item => !keyItems.value[item])
                 .forEach(grantKeyItem);
+            // The Liberty Pass is a Pokédex reward, good for every Unova journey.
+            if (
+                region.value === "unova" &&
+                !keyItems.value.libertyPass &&
+                hasMilestone(dex.caughtCount.value, "Liberty Pass")
+            ) {
+                grantKeyItem("libertyPass");
+            }
         }
         checkMechanics();
         if (box.value[493] != null) grantArceusForms();
@@ -1784,6 +1961,12 @@ export const main = createLayer("main", layer => {
     function specialAvailable(special: SpecialEncounter) {
         if (special.region !== region.value || badges.value < special.badgesRequired) return false;
         if (special.postGame === true && !champion.value) return false;
+        if (
+            special.kind === "boss" &&
+            special.requiresCleared?.some(r => hof.clearCount(r) === 0)
+        ) {
+            return false;
+        }
         if (special.kind === "legendary") {
             if (special.keyItem != null && !keyItems.value[special.keyItem]) return false;
             if (!meetsFieldNeed(special.fieldNeed, fieldPowers.value)) return false;
@@ -1804,11 +1987,14 @@ export const main = createLayer("main", layer => {
         if (special.kind === "trade" && !owns(special.wants)) return;
         if (special.kind === "gift" && special.price != null && !spend(special.price)) return;
         claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
+        medals.count(special.kind === "trade" ? "tradesMade" : "giftsReceived");
         // The Odd Egg hatches into one of its babies, often shiny.
         const speciesId =
             special.kind === "gift" && special.pool != null
                 ? special.pool[Math.floor(Math.random() * special.pool.length)]
-                : special.speciesId;
+                : special.kind === "gift" && special.byStarter != null
+                  ? (special.byStarter[starter.value] ?? special.speciesId)
+                  : special.speciesId;
         const shiny = special.kind === "gift" && Math.random() < (special.shinyChance ?? 0);
         receivePokemon(speciesId, special.level, shiny);
         const species = getSpecies(speciesId);
@@ -1826,9 +2012,10 @@ export const main = createLayer("main", layer => {
     function challengeBoss(special: Extract<SpecialEncounter, { kind: "boss" }>) {
         startTrainerBattle({
             label: `${special.trainer.name} ${special.fameBonus != null ? "in" : "on"} ${special.place}`,
-            trainers: [withStrength(special.trainer, rematch.value)],
+            trainers: [withStrength(special.trainer, trainerStrength.value)],
             onWin() {
                 claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
+                medals.count("bossesBeaten");
                 if (special.keyItem != null) grantKeyItem(special.keyItem);
                 const prizes: string[] = [];
                 for (const [ball, n] of Object.entries(special.prizeBalls ?? {}) as [
@@ -1876,11 +2063,14 @@ export const main = createLayer("main", layer => {
         const def = regionDef.value;
         if (starter.value !== 0 || !startersFor(def, hof.clearCount(def.id)).includes(id)) return;
         starter.value = id;
+        // The Key System's challenges set on the Hall of Fame's starter screen, from the second
+        // journey on.
+        challenges.value = hof.timesEntered.value > 0 ? [...hof.challengeKeys.value] : [];
         zoneId.value = zonesIn(def.id)[0].id;
         def.startingKeyItems.forEach(
             item => (keyItems.value = { ...keyItems.value, [item]: true })
         );
-        const level = def.startLevel + 5 * (hof.levels.value.headStart ?? 0);
+        const level = def.startLevel + 5 * (fameLevels.value.headStart ?? 0);
         receivePokemon(id, level, false);
         // Colosseum's Espeon and Umbreon come as a pair.
         if (def.allStarters === true) {
@@ -1916,7 +2106,7 @@ export const main = createLayer("main", layer => {
         warnedNoSnacks = false;
     }
 
-    const nav: NavNode[] = [map.nav, party.nav, mart.nav, league.nav, dex.nav, hof.nav];
+    const nav: NavNode[] = [map.nav, party.nav, mart.nav, league.nav, dex.nav, hof.nav, medals.nav];
 
     return {
         name: "Journey",
@@ -1990,6 +2180,17 @@ export const main = createLayer("main", layer => {
         honeyTreeReady,
         slatherHoney,
         shakeHoneyTree,
+        challenges,
+        challengeOn,
+        canJoinParty,
+        maxParty,
+        trainerStrength,
+        fameLevels,
+        season,
+        grottoProgress,
+        grottoBattles,
+        grottoReady,
+        visitGrotto,
         undergroundWalls,
         undergroundProgress,
         undergroundPostGame,
@@ -2056,7 +2257,7 @@ export { openLayer } from "./ui/nav";
 export const getInitialLayers = (
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     player: Partial<Player>
-): Array<Layer> => [main, map, party, mart, league, dex, hof];
+): Array<Layer> => [main, map, party, mart, league, dex, hof, medals];
 
 /**
  * A computed ref whose value is true whenever the game is over.

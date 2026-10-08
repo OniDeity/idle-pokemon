@@ -88,6 +88,37 @@ import { ALMIA_MISSIONS, ALMIA_ZONES, fieldAbilityOf, fieldPowers } from "game/p
 import { OBLIVIA_MISSIONS, OBLIVIA_ZONES, ROAR_SIGNS } from "game/pokemon/oblivia";
 import { POKE_ASSIST_BONUS, STYLER_POWER } from "game/pokemon/balance";
 import { MAX_RADAR_CHAIN, RADAR_CHAIN_PULL, radarShinyMultiplier } from "game/pokemon/zones";
+import {
+    AUDINO,
+    criticalCaptureChance,
+    criticalCaptureFactor,
+    PHENOMENON_CHANCE,
+    seasonAt,
+    seasonForm,
+    UNOVA_EXTRAS,
+    UNOVA_GYMS,
+    UNOVA_ZONES
+} from "game/pokemon/unova";
+import { grottoPool, UNOVA2_GYMS, UNOVA2_ZONES } from "game/pokemon/unova2";
+import { trialFor } from "game/pokemon/trainers";
+import {
+    MEDALS,
+    medalRank,
+    newMedals,
+    rankFameMultiplier,
+    tierFame,
+    tierReached
+} from "game/pokemon/medals";
+import type { MedalContext } from "game/pokemon/medals";
+import {
+    CHALLENGE_LIST,
+    challengeFame,
+    challengesMet,
+    partyAllowed,
+    partySize,
+    TIME_TRIAL_SECONDS
+} from "game/pokemon/challenges";
+import { POKEDEX_SIZE } from "game/pokemon/pokedex";
 import { describe, expect, test } from "vitest";
 
 function mulberry(seed: number): () => number {
@@ -104,8 +135,8 @@ function party(...members: [number, number][]): PartyBattler[] {
 }
 
 describe("data", () => {
-    test("has species #1-493 in order, with the Pokédex only as far as the regions go", () => {
-        expect(DEX_SIZE).toBe(493);
+    test("has species #1-649 in order, with the Pokédex only as far as the regions go", () => {
+        expect(DEX_SIZE).toBe(649);
         SPECIES.forEach((species, i) => expect(species.id).toBe(i + 1));
         // Every Pokédex species is one a region offers; nothing past #251 without a region for it.
         const offered = speciesObtainableIn(REGION_LIST.map(r => r.id));
@@ -246,7 +277,7 @@ describe("data", () => {
         const early = VARIANT_SPECIES.filter(
             v =>
                 v.nativeRegion != null &&
-                !["kanto", "johto", "hoenn", "sinnoh"].includes(v.nativeRegion) &&
+                !["kanto", "johto", "hoenn", "sinnoh", "unova"].includes(v.nativeRegion) &&
                 found.has(v.id)
         );
         expect(early.map(v => v.name)).toEqual([]);
@@ -622,7 +653,11 @@ describe("generation mechanics", () => {
             "underground",
             "sinnohEvolutions",
             "pokeAssist",
-            "rangerSigns"
+            "rangerSigns",
+            "seasons",
+            "phenomena",
+            "criticalCapture",
+            "hiddenGrottoes"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
@@ -700,7 +735,7 @@ describe("Hoenn", () => {
         // Wild pools reach past #251 in Hoenn (and Sinnoh) only; earlier regions keep their own
         // tables.
         for (const zone of ZONES.filter(
-            z => !["hoenn", "sinnoh"].includes(z.region) && z.encounters == null
+            z => !["hoenn", "sinnoh", "unova", "unova2"].includes(z.region) && z.encounters == null
         )) {
             for (const entries of Object.values(zonePools(zone.id))) {
                 entries?.forEach(e => expect(e.id > 251 && e.id <= 386, zone.id).toBe(false));
@@ -1153,9 +1188,10 @@ describe("Sinnoh", () => {
     test("every Sinnoh Pokémon (#387-493) can be had there, and in the wild only there or the later Ranger regions", () => {
         const sinnoh = speciesObtainableIn(["sinnoh"]);
         for (let id = 387; id <= 493; id++) expect(sinnoh.has(id), String(id)).toBe(true);
-        expect(POKEDEX_IDS.length).toBe(493);
-        // Almia and Oblivia (the Ranger games after Sinnoh) have Gen 4 Pokémon in their Browsers.
-        const gen4 = ["sinnoh", "almia", "oblivia"];
+        expect(POKEDEX_IDS.length).toBe(649);
+        // Almia and Oblivia (the Ranger games after Sinnoh) have Gen 4 Pokémon in their Browsers,
+        // and Unova's post-game has them too.
+        const gen4 = ["sinnoh", "almia", "oblivia", "unova", "unova2"];
         for (const zone of ZONES.filter(z => !gen4.includes(z.region))) {
             for (const entries of Object.values(zonePools(zone.id))) {
                 entries?.forEach(e => expect(e.id > 386 && e.id <= 493, zone.id).toBe(false));
@@ -1486,8 +1522,310 @@ describe("Fame upgrades", () => {
             ["flameBody", "breeding"],
             ["masudaMethod", "breeding"],
             ["pokeblockKit", "contests"],
-            ["contestStar", "contests"]
+            ["contestStar", "contests"],
+            ["encounterPower", "phenomena"],
+            ["capturePower", "criticalCapture"],
+            ["seasonPower", "seasons"],
+            ["grottoPower", "hiddenGrottoes"]
         ]);
         gated.forEach(u => expect(MECHANICS[u.mechanic!]).toBeDefined());
+    });
+});
+
+describe("Unova", () => {
+    test("both Unova journeys follow Oblivia, with Gen 5's species", () => {
+        const order = REGION_LIST.map(r => r.id);
+        expect(order.slice(-3)).toEqual(["oblivia", "unova", "unova2"]);
+        expect(REGIONS.unova.requires).toBe("oblivia");
+        expect(REGIONS.unova2.requires).toBe("unova");
+        for (const region of [REGIONS.unova, REGIONS.unova2]) {
+            expect(region.requiresCompletePokedex).toBe(true);
+            expect(region.newestSpecies).toBe(649);
+            expect(region.trials).toHaveLength(8);
+            expect(region.levelCaps).toHaveLength(10);
+        }
+        expect(REGIONS.unova.trials).toBe(UNOVA_GYMS);
+        expect(REGIONS.unova2.trials).toBe(UNOVA2_GYMS);
+        // PokeAPI's Unova badges: Black and White's from 33, Black 2 and White 2's Toxic and Wave.
+        expect(UNOVA_GYMS.map(g => g.badgeIcon)).toEqual(
+            [33, 34, 36, 37, 38, 39, 40, 41].map(n => `badges/${n}.png`)
+        );
+        expect(UNOVA2_GYMS.map(g => g.badgeIcon)).toEqual(
+            [34, 35, 36, 37, 38, 39, 41, 42].map(n => `badges/${n}.png`)
+        );
+        // Every Gen 5 species can be had in one Unova or the other, and the Pokédex has them all.
+        const unova = speciesObtainableIn(["unova", "unova2"]);
+        for (let id = 494; id <= 649; id++) expect(unova.has(id), String(id)).toBe(true);
+        expect(POKEDEX_SIZE).toBe(649);
+        // Black and White's grass has only new Pokémon until the League (the Super Rod's older
+        // ones come at the end).
+        for (const zone of UNOVA_ZONES.filter(z => !z.postGame && z.id !== "relicCastle")) {
+            zonePools(zone.id).walk?.forEach(e =>
+                expect(e.id > 493, `${zone.id} ${e.id}`).toBe(true)
+            );
+        }
+        // Zone ids never collide between the two journeys.
+        const ids = [...UNOVA_ZONES, ...UNOVA2_ZONES].map(z => z.id);
+        expect(new Set(ids).size).toBe(ids.length);
+    });
+
+    test("Striaton's Leader is the brother who beats your starter", () => {
+        const striaton = UNOVA_GYMS[0];
+        expect(trialFor(striaton, 495).name).toBe("Chili");
+        expect(trialFor(striaton, 498).name).toBe("Cress");
+        expect(trialFor(striaton, 501).name).toBe("Cilan");
+        expect(trialFor(striaton, 495).team.map(p => p.id)).toEqual([506, 513]);
+        expect(trialFor(striaton, 0)).toBe(striaton);
+        // The Dreamyard's gift is the monkey that beats your starter, too.
+        const gift = SPECIAL_ENCOUNTERS.find(s => s.id === "dreamyardMonkey");
+        expect(gift?.kind === "gift" ? gift.byStarter : undefined).toEqual({
+            495: 515,
+            498: 511,
+            501: 513
+        });
+        expect(specialSpecies(gift!).sort()).toEqual([511, 513, 515]);
+    });
+
+    test("the League ends with N and Ghetsis, and Iris in Black 2 and White 2", () => {
+        expect(REGIONS.unova.finale(495).map(t => t.name)).toEqual([
+            "Shauntal",
+            "Grimsley",
+            "Caitlin",
+            "Marshal",
+            "N",
+            "Ghetsis"
+        ]);
+        expect(
+            REGIONS.unova2
+                .finale(495)
+                .map(t => t.name)
+                .slice(-1)
+        ).toEqual(["Iris"]);
+        expect(REGIONS.unova.finale(495)[4].team[0].id).toBe(644);
+    });
+
+    test("the seasons turn and change Unova's tables", () => {
+        expect([0, 149, 150, 300, 450, 600].map(seasonAt)).toEqual([
+            "spring",
+            "spring",
+            "summer",
+            "autumn",
+            "winter",
+            "spring"
+        ]);
+        // Twist Mountain fills with Cryogonal in winter.
+        const cryogonal = (season: "spring" | "winter") =>
+            encounterOdds("twistMountain", {}, 0, { season }).get(615) ?? 0;
+        expect(cryogonal("winter")).toBeGreaterThan(cryogonal("spring") * 3);
+        // Deerling wears the season's coat.
+        expect(seasonForm(585, "summer")).toBe(4301);
+        expect(seasonForm(585, "spring")).toBe(585);
+        expect(encounterOdds("unovaRoute6", {}, 0, { season: "winter" }).has(585)).toBe(false);
+        expect(encounterOdds("unovaRoute6", {}, 0, { season: "winter" }).get(4303)).toBeGreaterThan(
+            0
+        );
+        // Elsewhere, Deerling wander into the grass once the Seasons are on.
+        expect(encounterOdds("route1", {}).has(585)).toBe(false);
+        expect(encounterOdds("route1", {}, 0, { season: "autumn" }).get(4302)).toBeGreaterThan(0);
+    });
+
+    test("phenomena bring out rarer Pokémon, Audino and Unova's own tables", () => {
+        const plain = activePools("route1", {});
+        const shaking = activePools("route1", {}, { phenomena: true });
+        expect(shaking.map(p => p.kind)).toEqual([...plain.map(p => p.kind), "phenomenon"]);
+        const total = shaking.reduce((sum, p) => sum + p.share, 0);
+        expect(shaking[shaking.length - 1].share / total).toBeCloseTo(PHENOMENON_CHANCE);
+        expect(shaking[shaking.length - 1].entries.map(e => e.id)).toContain(AUDINO);
+        // In Unova, shaking grass has its own table: Audino on Route 1, the monkeys in Pinwheel.
+        expect(UNOVA_EXTRAS.phenomena.pinwheelForest.shakingGrass?.map(e => e.id)).toEqual(
+            expect.arrayContaining([511, 513, 515])
+        );
+        // Bridges have only flying shadows.
+        expect(allZoneSpecies("driftveilDrawbridge")).toEqual([580]);
+        // No phenomena in Orre's trainer battles.
+        const orre = ZONES.find(z => z.trainerBattles)!;
+        expect(
+            activePools(orre.id, {}, { phenomena: true }).some(p => p.kind === "phenomenon")
+        ).toBe(false);
+    });
+
+    test("critical captures grow with the Pokédex", () => {
+        expect([0, 31, 151, 301, 451, 601].map(criticalCaptureFactor)).toEqual([
+            0, 0.5, 1, 1.5, 2, 2.5
+        ]);
+        expect(criticalCaptureChance(0.6, 500)).toBeCloseTo(0.2);
+        expect(criticalCaptureChance(0.9, 649, 2)).toBe(0.75);
+    });
+
+    test("Hidden Grottoes have their tables, and elsewhere a missing species", () => {
+        expect(grottoPool("b2w2Route2", [], () => true)).toBe(UNOVA_EXTRAS.grottoes.b2w2Route2);
+        const entries = [
+            { id: 16, weight: 1, minLevel: 3, maxLevel: 5 },
+            { id: 19, weight: 1, minLevel: 3, maxLevel: 5 }
+        ];
+        expect(grottoPool("route1", entries, id => id === 19).map(e => e.id)).toEqual([19]);
+        expect(grottoPool("route1", entries, () => false)).toEqual(entries);
+    });
+
+    test("the World Tournament waits for the regions it brings Leaders from", () => {
+        const pwt = SPECIAL_ENCOUNTERS.filter(s => s.id.startsWith("pwt"));
+        expect(pwt.map(s => s.id)).toEqual([
+            "pwtUnovaLeaders",
+            "pwtKantoLeaders",
+            "pwtJohtoLeaders",
+            "pwtHoennLeaders",
+            "pwtSinnohLeaders",
+            "pwtBlackWhiteLeaders",
+            "pwtChampions"
+        ]);
+        for (const special of pwt) {
+            expect(special.kind).toBe("boss");
+            expect(special.region).toBe("unova2");
+            expect(special.postGame).toBe(true);
+        }
+        const champions = pwt[pwt.length - 1];
+        expect(champions.kind === "boss" ? champions.requiresCleared : []).toHaveLength(5);
+        expect(champions.kind === "boss" ? champions.fameBonus : 1).toBe(1.25);
+    });
+});
+
+describe("Pokédex rewards", () => {
+    test("go up to the full Pokédex, in order", () => {
+        const counts = DEX_MILESTONES.map(m => m.caught);
+        expect([...counts].sort((a, b) => a - b)).toEqual(counts);
+        expect(Math.max(...counts)).toBe(POKEDEX_SIZE);
+        expect(new Set(DEX_MILESTONES.map(m => m.name)).size).toBe(DEX_MILESTONES.length);
+        // The new ones raise their bonuses.
+        const before = computeBonuses({
+            dexCaught: 499,
+            shinyCaught: 0,
+            mart: {},
+            hof: {},
+            keyItems: {}
+        });
+        const after = computeBonuses({
+            dexCaught: 649,
+            shinyCaught: 0,
+            mart: {},
+            hof: {},
+            keyItems: {}
+        });
+        expect(after.damage / before.damage).toBeGreaterThan(1.4);
+        expect(
+            fameGain({
+                regionFame: 100,
+                dexCaught: 649,
+                shinyCaught: 0,
+                newSpecies: 0,
+                firstClear: false
+            })
+        ).toBeGreaterThan(
+            fameGain({
+                regionFame: 100,
+                dexCaught: 499,
+                shinyCaught: 0,
+                newSpecies: 0,
+                firstClear: false
+            })
+        );
+    });
+});
+
+describe("medals", () => {
+    const context = (overrides: Partial<MedalContext> = {}): MedalContext => ({
+        stats: {},
+        dexCaught: 0,
+        shinySpecies: 0,
+        variantsCaught: 0,
+        clears: {},
+        mechanicsUnlocked: 0,
+        platesFound: 0,
+        rangerSigns: 0,
+        ribbons: 0,
+        journeys: [],
+        ...overrides
+    });
+
+    test("every medal has a unique id, rising goals and a goal in its text", () => {
+        expect(new Set(MEDALS.map(m => m.id)).size).toBe(MEDALS.length);
+        for (const medal of MEDALS) {
+            const goals = medal.lowerIsBetter ? [...medal.goals].reverse() : medal.goals;
+            expect(
+                [...goals].sort((a, b) => a - b),
+                medal.id
+            ).toEqual(goals);
+            expect(medal.goals.length === 1 || medal.description.includes("{n}"), medal.id).toBe(
+                true
+            );
+        }
+        // One medal for each region and each challenge.
+        expect(MEDALS.filter(m => m.id.startsWith("clear_"))).toHaveLength(REGION_LIST.length);
+        expect(MEDALS.filter(m => m.id.startsWith("challenge_"))).toHaveLength(
+            CHALLENGE_LIST.length
+        );
+    });
+
+    test("tiers are earned once each, and pay Fame", () => {
+        const pokedex = MEDALS.find(m => m.id === "pokedex")!;
+        expect(tierReached(pokedex, 49)).toBe(0);
+        expect(tierReached(pokedex, 151)).toBe(2);
+        const found = newMedals(context({ dexCaught: 151 }), {});
+        expect(found.filter(f => f.medal.id === "pokedex").map(f => f.tier)).toEqual([1, 2]);
+        expect(
+            newMedals(context({ dexCaught: 151 }), { pokedex: 2 }).some(
+                f => f.medal.id === "pokedex"
+            )
+        ).toBe(false);
+        expect(tierFame(pokedex, 1)).toBeLessThan(tierFame(pokedex, 4));
+        // The fastest clear is a record where less is better.
+        const fastest = MEDALS.find(m => m.id === "fastestClear")!;
+        expect(tierReached(fastest, 2 * 3600)).toBe(3);
+        expect(tierReached(fastest, Infinity)).toBe(0);
+        // A region's first clear is a single Gold medal.
+        const kanto = MEDALS.find(m => m.id === "clear_kanto")!;
+        expect(newMedals(context({ clears: { kanto: 1 } }), {}).some(f => f.medal === kanto)).toBe(
+            true
+        );
+    });
+
+    test("Medal Rally ranks add Fame", () => {
+        expect(medalRank(0)).toBe("Newcomer");
+        expect(medalRank(150)).toBe("Legend");
+        expect(rankFameMultiplier(0)).toBe(1);
+        expect(rankFameMultiplier(10)).toBeCloseTo(1.05);
+        expect(rankFameMultiplier(1000)).toBeCloseTo(1.25);
+    });
+});
+
+describe("challenges", () => {
+    test("multiply Fame, the Time Trial only in time", () => {
+        expect(challengeFame([], 0)).toBe(1);
+        expect(challengeFame(["challengeMode", "trio"], 0)).toBeCloseTo(2.1);
+        expect(challengeFame(["timeTrial"], TIME_TRIAL_SECONDS)).toBe(1.5);
+        expect(challengeFame(["timeTrial"], TIME_TRIAL_SECONDS + 1)).toBe(1);
+        expect(challengesMet(["trio", "timeTrial"], TIME_TRIAL_SECONDS + 1)).toEqual(["trio"]);
+        expect(
+            fameGain({
+                regionFame: 100,
+                dexCaught: 0,
+                shinyCaught: 0,
+                newSpecies: 0,
+                firstClear: false,
+                challenge: 2
+            })
+        ).toBe(200);
+    });
+
+    test("limit the party", () => {
+        expect(partySize([])).toBe(6);
+        expect(partySize(["trio"])).toBe(3);
+        const bulbasaur = getSpecies(1);
+        // Specialist: sharing a type with the starter (Bulbasaur is Grass/Poison).
+        expect(partyAllowed(getSpecies(43), ["specialist"], bulbasaur)).toBe(true); // Oddish
+        expect(partyAllowed(getSpecies(4), ["specialist"], bulbasaur)).toBe(false); // Charmander
+        expect(partyAllowed(getSpecies(4), [], bulbasaur)).toBe(true);
+        // Grounded: no legendaries.
+        expect(partyAllowed(getSpecies(150), ["grounded"], bulbasaur)).toBe(false);
+        expect(partyAllowed(getSpecies(150), [], bulbasaur)).toBe(true);
     });
 });

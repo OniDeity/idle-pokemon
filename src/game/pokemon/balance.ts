@@ -210,6 +210,56 @@ export const DEX_MILESTONES: DexMilestone[] = [
         name: "Life Orb",
         description: "+20% damage and experience.",
         sprite: itemSprite("life-orb")
+    },
+    {
+        caught: 500,
+        name: "Liberty Pass",
+        description:
+            "Professor Juniper's ticket to Liberty Garden: every Unova (Black/White) journey can meet Victini there, past the Insect Badge.",
+        sprite: itemSprite("liberty-pass")
+    },
+    {
+        caught: 520,
+        name: "Oval Charm",
+        description: "The Day Care finds Eggs 25% faster.",
+        sprite: itemSprite("oval-charm")
+    },
+    {
+        caught: 540,
+        name: "Muscle Band",
+        description: "+20% damage.",
+        sprite: itemSprite("muscle-band")
+    },
+    {
+        caught: 560,
+        name: "Wise Glasses",
+        description: "+20% experience.",
+        sprite: itemSprite("wise-glasses")
+    },
+    {
+        caught: 580,
+        name: "Big Nugget",
+        description: "+25% Pokédollars from battles.",
+        sprite: itemSprite("big-nugget")
+    },
+    {
+        caught: 600,
+        name: "Pass Orb",
+        description: "+25% Fame from every Hall of Fame entry.",
+        sprite: itemSprite("pass-orb")
+    },
+    {
+        caught: 620,
+        name: "Dream Ball",
+        description: "+20% catch chance.",
+        sprite: itemSprite("dream-ball")
+    },
+    {
+        caught: 649,
+        name: "Comet Shard",
+        description:
+            "Every species, #1 to #649: +25% damage, experience and Fame from every Hall of Fame entry.",
+        sprite: itemSprite("comet-shard")
     }
 ];
 
@@ -411,6 +461,52 @@ export const HOF_UPGRADES = {
         mechanic: "contests",
         sprite: itemSprite("contest-pass")
     },
+    encounterPower: {
+        id: "encounterPower",
+        name: "Encounter Power",
+        description:
+            "A Pass Power: phenomena (shaking grass, rippling water) happen +25% more often per level.",
+        baseCost: 4,
+        costGrowth: 2,
+        maxLevel: 4,
+        badgesRequired: 0,
+        mechanic: "phenomena",
+        sprite: itemSprite("pretty-wing")
+    },
+    capturePower: {
+        id: "capturePower",
+        name: "Capture Power",
+        description: "A Pass Power: critical captures happen +25% more often per level.",
+        baseCost: 4,
+        costGrowth: 2,
+        maxLevel: 4,
+        badgesRequired: 0,
+        mechanic: "criticalCapture",
+        sprite: itemSprite("dream-ball")
+    },
+    seasonPower: {
+        id: "seasonPower",
+        name: "Season Power",
+        description:
+            "In-season wild Pokémon (the season's types) give +10% experience and Pokédollars per level.",
+        baseCost: 4,
+        costGrowth: 2,
+        maxLevel: 5,
+        badgesRequired: 0,
+        mechanic: "seasons",
+        sprite: itemSprite("gracidea")
+    },
+    grottoPower: {
+        id: "grottoPower",
+        name: "Grotto Power",
+        description: "Hidden Grottoes fill in 10% fewer wild battles per level.",
+        baseCost: 4,
+        costGrowth: 2,
+        maxLevel: 5,
+        badgesRequired: 0,
+        mechanic: "hiddenGrottoes",
+        sprite: itemSprite("dowsing-machine")
+    },
     headStart: {
         id: "headStart",
         name: "Head Start",
@@ -461,6 +557,8 @@ export function computeBonuses(input: BonusInputs): Bonuses {
         (milestone("Silver Wing") ? 1.2 : 1) *
         (milestone("Expert Belt") ? 1.2 : 1) *
         (milestone("Life Orb") ? 1.2 : 1) *
+        (milestone("Muscle Band") ? 1.2 : 1) *
+        (milestone("Comet Shard") ? 1.25 : 1) *
         (1 + 0.1 * lvl(hof.power));
     const hp = (1 + 0.05 * lvl(mart.iron)) * (1 + 0.1 * lvl(hof.power));
     const xp =
@@ -471,6 +569,8 @@ export function computeBonuses(input: BonusInputs): Bonuses {
         (milestone("Silph Scope") ? 1.2 : 1) *
         (milestone("Silver Wing") ? 1.2 : 1) *
         (milestone("Life Orb") ? 1.2 : 1) *
+        (milestone("Wise Glasses") ? 1.2 : 1) *
+        (milestone("Comet Shard") ? 1.25 : 1) *
         (1 + 0.1 * lvl(hof.wisdom));
     const money =
         (1 + 0.1 * lvl(mart.payDay)) *
@@ -478,8 +578,12 @@ export function computeBonuses(input: BonusInputs): Bonuses {
         (milestone("Nugget Stash") ? 1.25 : 1) *
         (milestone("Silph Scope") ? 1.2 : 1) *
         (milestone("Luck Incense") ? 1.25 : 1) *
+        (milestone("Big Nugget") ? 1.25 : 1) *
         (1 + 0.1 * lvl(hof.fortune));
-    const catchBonus = (milestone("Oak's Letter") ? 1.1 : 1) * (1 + 0.1 * lvl(hof.catcher));
+    const catchBonus =
+        (milestone("Oak's Letter") ? 1.1 : 1) *
+        (milestone("Dream Ball") ? 1.2 : 1) *
+        (1 + 0.1 * lvl(hof.catcher));
     const shiny =
         (milestone("Shiny Charm") ? 3 : 1) *
         (1 + 0.5 * lvl(hof.shinyHunter)) *
@@ -794,6 +898,10 @@ export interface FameInputs {
     rematch?: number;
     /** Extra Fame earned this journey (the Distortion World's ×1.25). */
     bonus?: number;
+    /** The journey's challenges' Fame multiplier. */
+    challenge?: number;
+    /** The Medal Rally rank's Fame multiplier. */
+    medals?: number;
 }
 
 /** Fame for enshrining a team. New faces in the Hall of Fame are worth the most. */
@@ -808,7 +916,11 @@ export function fameGain(input: FameInputs): number {
         (input.rematch ?? 1) *
         (input.bonus ?? 1) *
         (hasMilestone(input.dexCaught, "Rainbow Wing") ? 1.25 : 1) *
-        (hasMilestone(input.dexCaught, "Azure Flute") ? 1.25 : 1);
+        (hasMilestone(input.dexCaught, "Azure Flute") ? 1.25 : 1) *
+        (hasMilestone(input.dexCaught, "Pass Orb") ? 1.25 : 1) *
+        (hasMilestone(input.dexCaught, "Comet Shard") ? 1.25 : 1) *
+        (input.challenge ?? 1) *
+        (input.medals ?? 1);
     return Math.max(1, Math.floor(base * multiplier));
 }
 
@@ -821,7 +933,8 @@ export type AutomationId =
     | "autoParty"
     | "autoTravel"
     | "autoChallenge"
-    | "autoPoketch";
+    | "autoPoketch"
+    | "autoCGear";
 
 export interface AutomationDefinition {
     id: AutomationId;
@@ -887,6 +1000,14 @@ export const AUTOMATIONS: AutomationDefinition[] = [
             "Sinnoh's wrist watch: slathers Honey on every open Honey Tree and shakes the ones with a Pokémon waiting, and digs the Underground's walls as they appear (once the Underground is unlocked).",
         cost: 15,
         sprite: itemSprite("explorer-kit")
+    },
+    {
+        id: "autoCGear",
+        name: "C-Gear",
+        description:
+            "Unova's wireless gear: visits the Hidden Grotto as soon as it fills, between wild battles (once Hidden Grottoes are unlocked).",
+        cost: 15,
+        sprite: itemSprite("xtransceiver")
     }
 ];
 

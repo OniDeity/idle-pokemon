@@ -23,6 +23,7 @@ import type { BallId } from "game/pokemon/items";
 import { APRICORN_BALLS, BALLS } from "game/pokemon/items";
 import { maxHp, xpForLevel } from "game/pokemon/stats";
 import type { RegionDefinition } from "game/pokemon/regions";
+import { CHALLENGE_LIST, CHALLENGES } from "game/pokemon/challenges";
 import { REGION_LIST, REGIONS, startersFor } from "game/pokemon/regions";
 import type { RegionId } from "game/pokemon/zones";
 import { formatTime } from "util/bignum";
@@ -65,7 +66,31 @@ const CAVES = new Set([
     "mtSilver",
     "ruinsOfAlphChambers",
     "canyonEntrance",
-    "navelIsland"
+    "navelIsland",
+    // Unova's
+    "wellspringCave",
+    "relicCastle",
+    "relicCastleBasement",
+    "relicCastleDepths",
+    "chargestoneCave",
+    "mistraltonCave",
+    "twistMountain",
+    "challengersCave",
+    "unovaVictoryRoad",
+    "giantChasm",
+    "casteliaSewers",
+    "b2w2RelicCastle",
+    "relicPassage",
+    "b2w2ChargestoneCave",
+    "b2w2MistraltonCave",
+    "reversalMountain",
+    "seasideCave",
+    "b2w2GiantChasm",
+    "b2w2VictoryRoad",
+    "b2w2WellspringCave",
+    "b2w2TwistMountain",
+    "clayTunnel",
+    "undergroundRuins"
 ]);
 const FORESTS = new Set([
     "viridianForest",
@@ -78,7 +103,12 @@ const FORESTS = new Set([
     "valenciaIsland",
     "ilexForest",
     "nationalPark",
-    "johtoSafariZone"
+    "johtoSafariZone",
+    "pinwheelForest",
+    "lostlornForest",
+    "b2w2LostlornForest",
+    "b2w2PinwheelForest",
+    "natureSanctuary"
 ]);
 const BUILDINGS = new Set([
     "pokemonTower",
@@ -92,7 +122,18 @@ const BUILDINGS = new Set([
     "moroIsland",
     "tanobyRuins",
     "sproutTower",
-    "burnedTower"
+    "burnedTower",
+    "dreamyard",
+    "coldStorage",
+    "celestialTower",
+    "dragonspiralTower",
+    "p2Laboratory",
+    "virbankComplex",
+    "b2w2CelestialTower",
+    "strangeHouse",
+    "b2w2Dreamyard",
+    "b2w2DragonspiralTower",
+    "b2w2P2Laboratory"
 ]);
 const SEAS = new Set([
     "route19",
@@ -110,7 +151,11 @@ const SEAS = new Set([
     "lakeOfRage",
     "cherrygroveCity",
     "olivineCity",
-    "cianwoodCity"
+    "cianwoodCity",
+    "undellaBay",
+    "b2w2UndellaBay",
+    "b2w2Route21",
+    "b2w2Route17"
 ]);
 
 function terrain(state: BattleState): string {
@@ -146,6 +191,14 @@ function renderHud() {
             <div class="pk-hud-stat" title="Level cap">
                 Cap Lv. {main.cap.value}
             </div>
+            {main.challenges.value.length > 0 ? (
+                <div
+                    class="pk-hud-stat"
+                    title={`Challenges: ${main.challenges.value.map(c => CHALLENGES[c].name).join(", ")}`}
+                >
+                    🔑 {main.challenges.value.length}
+                </div>
+            ) : null}
             {hof.fame.value > 0 || hof.timesEntered.value > 0 ? (
                 <div class="pk-hud-stat" title="Fame">
                     ★ {hof.fame.value}
@@ -265,6 +318,7 @@ function renderStarterSelect() {
                 ? renderPartnerPicker(region)
                 : null}
             {again ? renderSuggestedTeam(region) : null}
+            {again ? renderChallengeKeys() : null}
             {region.allStarters === true ? (
                 <p class="pk-small pk-muted">
                     Both {region.starters.map(id => getSpecies(id).name).join(" and ")} join you;
@@ -277,6 +331,39 @@ function renderStarterSelect() {
                     make short work of them.
                 </p>
             ) : null}
+        </div>
+    );
+}
+
+/**
+ * The Key System (Black 2 and White 2's keys, as challenges): rules for the next journey, set
+ * before choosing a starter, each multiplying the journey's Fame.
+ */
+function renderChallengeKeys() {
+    const keys = hof.challengeKeys.value;
+    const fame = CHALLENGE_LIST.filter(c => keys.includes(c.id)).reduce(
+        (product, c) => product * c.fame,
+        1
+    );
+    return (
+        <div class="pk-partner-picker">
+            <p class="pk-small">
+                <b>Key System:</b> challenges for this journey, each worth more Fame when you enter
+                the Hall of Fame (and its own medal).
+                {keys.length > 0 ? ` Fame ×${fame.toFixed(2)}.` : ""}
+            </p>
+            <div class="pk-challenge-keys">
+                {CHALLENGE_LIST.map(c => (
+                    <label class="pk-small pk-setting" title={c.description}>
+                        <input
+                            type="checkbox"
+                            checked={keys.includes(c.id)}
+                            onChange={() => hof.toggleChallengeKey(c.id)}
+                        />{" "}
+                        <b>{c.name}</b> (×{c.fame}): {c.description}
+                    </label>
+                ))}
+            </div>
         </div>
     );
 }
@@ -378,7 +465,11 @@ function renderScene() {
                         ? "swam out of the seaweed"
                         : state.wild.kind === "honey"
                           ? "jumped out of the Honey Tree"
-                          : "appeared";
+                          : state.wild.kind === "phenomenon"
+                            ? "burst out of the phenomenon"
+                            : state.wild.kind === "grotto"
+                              ? "was waiting in the Hidden Grotto"
+                              : "appeared";
         const shadow = isShadow(state.wild.speciesId);
         const trainerBattle = ZONES_BY_ID[main.zoneId.value]?.trainerBattles === true;
         banner = shadow

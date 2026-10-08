@@ -7,6 +7,7 @@
  * Usage: npx tsx scripts/simulateProgression.ts [regions=kanto,kanto,orange,sevii] [seed=1]
  *   Each region may name a starter, e.g. "kanto:4,orange:25".
  */
+import { readFileSync, writeFileSync } from "node:fs";
 import type { BonusInputs, HofUpgradeId, PartyBattler } from "../src/game/pokemon/balance";
 import {
     battleXp,
@@ -43,13 +44,40 @@ import { MECHANICS } from "../src/game/pokemon/mechanics";
 import { SPECIAL_ENCOUNTERS } from "../src/game/pokemon/specials";
 import { levelForXp, maxHp, xpForLevel, xpYield } from "../src/game/pokemon/stats";
 import type { TrainerDefinition } from "../src/game/pokemon/trainers";
+import { trialFor } from "../src/game/pokemon/trainers";
+import { criticalCaptureChance, SEASON_BATTLES, seasonAt } from "../src/game/pokemon/unova";
+import type { MedalStat } from "../src/game/pokemon/medals";
+import { newMedals, rankFameMultiplier, tierFame } from "../src/game/pokemon/medals";
+import { MECHANIC_LIST } from "../src/game/pokemon/mechanics";
+import { DEX_SIZE } from "../src/game/pokemon/data";
+import { GROTTO_BATTLES, grottoPool } from "../src/game/pokemon/unova2";
 import type { RegionId } from "../src/game/pokemon/zones";
 import {
+    activePools,
     availableZoneSpecies,
     catchableIn,
     rollEncounter,
     zonesIn
 } from "../src/game/pokemon/zones";
+
+interface SavedCampaign {
+    dex: [number, number][];
+    fame: number;
+    hof: Partial<Record<HofUpgradeId, number>>;
+    enshrined: string[];
+    clears: Partial<Record<RegionId, number>>;
+    totalTime: number;
+    doublesUnlocked: boolean;
+    sinnohEvolutions: boolean;
+    pokeAssistUnlocked: boolean;
+    unovaMechanics: Record<string, boolean>;
+    seed: number;
+    journeys: number;
+    medalStats: Partial<Record<MedalStat, number>>;
+    medalsEarned: Partial<Record<string, number>>;
+    medalFame: number;
+    journeyTimes: number[];
+}
 
 const plan = (process.argv[2] ?? "kanto,kanto,orange,sevii").split(",").map(part => {
     const [region, starter] = part.split(":");
@@ -69,6 +97,8 @@ function rng() {
 //   XPF=0.5 MF=0.5     multiply experience / Pokédollars from wild battles
 //   KANTO_GYMS=1,1.2,… override Kanto Gym strengths; KANTO_E4=2.6 KANTO_CHAMP=3
 const XPF = Number(process.env.XPF ?? 1);
+//   MEDAL_FAME=0.5     multiply the Fame medals pay (0 leaves medals out)
+const MEDAL_FAME = Number(process.env.MEDAL_FAME ?? 1);
 const MF = Number(process.env.MF ?? 1);
 if (process.env.KANTO_GYMS != null) {
     process.env.KANTO_GYMS.split(",").forEach((v, i) => {
@@ -124,6 +154,44 @@ let doublesUnlocked = false;
 let sinnohEvolutions = false;
 /** Fiore's Poké Assist, once reached: box Pokémon super effective against a wild one help out. */
 let pokeAssistUnlocked = false;
+/** Medals: lifetime counts, tiers earned, the Fame they've paid and finished journeys' times. */
+const medalStats: Partial<Record<MedalStat, number>> = {};
+let medalsEarned: Partial<Record<string, number>> = {};
+let medalFame = 0;
+const journeyTimes: number[] = [];
+const countMedal = (stat: MedalStat, n = 1) => (medalStats[stat] = (medalStats[stat] ?? 0) + n);
+/** Earns every medal tier reached (the game checks every second; here, now and then). */
+function awardMedals() {
+    const found = newMedals(
+        {
+            stats: medalStats,
+            dexCaught: dexCaught(),
+            shinySpecies: 0,
+            variantsCaught: [...dex.keys()].filter(id => id > DEX_SIZE && id < 8000).length,
+            clears,
+            mechanicsUnlocked: MECHANIC_LIST.filter(m => (clears[m.region] ?? 0) > 0).length,
+            platesFound: 0,
+            rangerSigns: 0,
+            ribbons: 0,
+            journeys: journeyTimes.map(time => ({ time, challenges: [] }))
+        },
+        medalsEarned
+    );
+    for (const { medal, tier } of found) {
+        medalsEarned = { ...medalsEarned, [medal.id]: Math.max(medalsEarned[medal.id] ?? 0, tier) };
+        const gain = Math.round(tierFame(medal, tier) * MEDAL_FAME);
+        fame += gain;
+        medalFame += gain;
+    }
+}
+
+/** Unova's mechanics, once reached: the Seasons, phenomena, critical captures, Hidden Grottoes. */
+const unovaMechanics = {
+    seasons: false,
+    phenomena: false,
+    criticalCapture: false,
+    grottoes: false
+};
 
 interface Owned {
     id: number;
@@ -152,8 +220,23 @@ function runJourney(region: RegionDefinition, starter: number) {
         return doublesUnlocked;
     };
     const cap = () => levelCap(region, badges, cleared);
-    // Almia's obstacles open up with the box's Field Abilities.
-    const extras = () => ({ snagged, fieldPowers: fieldPowers(owned.keys()) });
+    let battles = 0;
+    const reached = (id: keyof typeof MECHANICS) =>
+        region.id === MECHANICS[id].region && badges >= MECHANICS[id].trialsRequired;
+    const unova = () => {
+        if (reached("seasons")) unovaMechanics.seasons = true;
+        if (reached("phenomena")) unovaMechanics.phenomena = true;
+        if (reached("criticalCapture")) unovaMechanics.criticalCapture = true;
+        if (reached("hiddenGrottoes")) unovaMechanics.grottoes = true;
+        return unovaMechanics;
+    };
+    // Almia's obstacles open up with the box's Field Abilities; Unova's seasons and phenomena.
+    const extras = () => ({
+        snagged,
+        fieldPowers: fieldPowers(owned.keys()),
+        season: unova().seasons ? seasonAt(battles) : undefined,
+        phenomena: unova().phenomena
+    });
     /** Poké Assist's damage bonus against this wild Pokémon (box Pokémon outside the party). */
     const assist = (target: { species: ReturnType<typeof getSpecies> }, party: Owned[]) => {
         const def = MECHANICS.pokeAssist;
@@ -168,6 +251,7 @@ function runJourney(region: RegionDefinition, starter: number) {
     };
 
     function catchSpecies(id: number, level: number) {
+        countMedal("catches");
         dex.set(id, (dex.get(id) ?? 0) + 1);
         if (owned.has(id)) return;
         const lvl = Math.min(level, cap());
@@ -220,9 +304,10 @@ function runJourney(region: RegionDefinition, starter: number) {
             ? 1 + Number(process.env.RENOWN) * Math.max(0, others - 1)
             : strengthMultiplier(rematchClears, others);
     const nextTrainers = (): TrainerDefinition[] =>
-        (badges < region.trials.length ? [region.trials[badges]] : region.finale(starter)).map(t =>
-            withStrength(t, strength)
-        );
+        (badges < region.trials.length
+            ? [trialFor(region.trials[badges], starter)]
+            : region.finale(starter)
+        ).map(t => withStrength(t, strength));
 
     function chooseParty(): Owned[] {
         const targets = nextTrainers().flatMap(trainerTeam);
@@ -238,7 +323,7 @@ function runJourney(region: RegionDefinition, starter: number) {
             if (owned.has(evo.into)) continue;
             // Later generations' evolutions wait for their region (or its mechanic).
             const into = getSpecies(evo.into).baseSpecies ?? evo.into;
-            if (into > (region.newestSpecies ?? 386) && !sinnohEvolutions) continue;
+            if (into > (region.newestSpecies ?? 386) && into <= 493 && !sinnohEvolutions) continue;
             let ok = evo.method === "level" && o.level >= (evo.level ?? 101);
             // Stones, Link Cables and Soothe Bells are each used up by one evolution; buy one
             // when it's cheap relative to savings, like the auto-evolve automation.
@@ -264,6 +349,7 @@ function runJourney(region: RegionDefinition, starter: number) {
             }
             if (ok) {
                 owned.set(evo.into, { ...o, id: evo.into });
+                countMedal("evolutions");
                 if (!dex.has(evo.into)) dex.set(evo.into, 1);
             }
         }
@@ -279,6 +365,7 @@ function runJourney(region: RegionDefinition, starter: number) {
                 money -= s.price;
             }
             claimed.add(s.id);
+            countMedal(s.kind === "trade" ? "tradesMade" : "giftsReceived");
             catchSpecies(s.speciesId, s.level);
         }
     }
@@ -337,6 +424,7 @@ function runJourney(region: RegionDefinition, starter: number) {
 
     while (!cleared && time < MAX_TIME) {
         if (step % 150 === 0) {
+            awardMedals();
             claimSpecials();
             shop();
             party = chooseParty();
@@ -348,6 +436,8 @@ function runJourney(region: RegionDefinition, starter: number) {
             const members = party.map(battler);
             if (trainers.every(t => simulateTrainerBattle(members, t, damage, hp, doubles()).won)) {
                 for (const t of trainers) money += t.prizeMoney;
+                countMedal("trainersBeaten", trainers.length);
+                if (badges < region.trials.length) countMedal("trialsWon");
                 snagFrom(trainers);
                 const summary = party.map(o => `${getSpecies(o.id).name} ${o.level}`).join(", ");
                 if (badges < region.trials.length) {
@@ -369,10 +459,20 @@ function runJourney(region: RegionDefinition, starter: number) {
                                 .filter(id => !enshrined.has(`${region.id}:${id}`))
                         ).size,
                         firstClear: (clears[region.id] ?? 0) === 0,
-                        rematch: strength
+                        rematch: strength,
+                        medals:
+                            MEDAL_FAME > 0
+                                ? rankFameMultiplier(
+                                      Object.values(medalsEarned).reduce(
+                                          (sum: number, n) => sum + (n ?? 0),
+                                          0
+                                      )
+                                  )
+                                : 1
                     });
                     team.forEach(id => enshrined.add(`${region.id}:${hallOfFameId(id)}`));
                     clears[region.id] = (clears[region.id] ?? 0) + 1;
+                    journeyTimes.push(time);
                     fame += gain;
                     console.log(`  +${gain} Fame`);
                 }
@@ -381,6 +481,21 @@ function runJourney(region: RegionDefinition, starter: number) {
             }
         }
         step++;
+
+        // A Hidden Grotto fills every GROTTO_BATTLES battles; its Pokémon is caught for sure.
+        battles++;
+        if (unova().grottoes && battles % GROTTO_BATTLES === 0) {
+            const entries = activePools(zone, keyItems, extras())
+                .filter(p => p.kind !== "phenomenon")
+                .flatMap(p => p.entries)
+                .filter(e => catchableIn(zone, e.id) && !isShadow(e.id));
+            const pool = grottoPool(zone, entries, id => !dex.has(id));
+            if (pool.length > 0) {
+                const e = pool[Math.floor(rng() * pool.length)];
+                catchSpecies(e.id, e.maxLevel);
+                countMedal("grottoesVisited");
+            }
+        }
 
         const bonuses = computeBonuses(bonusInputs());
         const e = rollEncounter(zone, keyItems, rng, hof.roddysRod ?? 0, extras());
@@ -396,6 +511,10 @@ function runJourney(region: RegionDefinition, starter: number) {
                     doubles()
                 );
         money += moneyYield(e.level) * bonuses.money * MF;
+        countMedal("wildBattles");
+        countMedal("moneyEarned", moneyYield(e.level) * bonuses.money * MF);
+        if (e.kind === "phenomenon") countMedal("phenomena");
+        if (unova().seasons && battles % SEASON_BATTLES === 0) countMedal("seasonsTurned");
 
         const gained = battleXp(target) * bonuses.xp * XPF;
         // Shadow Pokémon open their hearts in the party; Orre's Relic Stone purifies them (in
@@ -411,6 +530,7 @@ function runJourney(region: RegionDefinition, starter: number) {
                 const prev = owned.get(o.id);
                 if (prev == null || prev.level < o.level) owned.set(o.id, o);
                 dex.set(o.id, (dex.get(o.id) ?? 0) + 1);
+                countMedal("shadowsPurified");
             }
         }
         for (const o of party) {
@@ -424,7 +544,13 @@ function runJourney(region: RegionDefinition, starter: number) {
 
         if (!owned.has(e.speciesId) && catchableIn(zone, e.speciesId) && region.styler) {
             // Ranger regions capture with the Capture Styler: no balls to buy.
-            if (rng() < catchChance(target.species.captureRate, STYLER_POWER, bonuses.catch)) {
+            const chance = catchChance(target.species.captureRate, STYLER_POWER, bonuses.catch);
+            const critical = unova().criticalCapture
+                ? criticalCaptureChance(chance, dexCaught())
+                : 0;
+            const crit = critical > 0 && rng() < critical;
+            if (crit) countMedal("criticalCaptures");
+            if (crit || rng() < chance) {
                 catchSpecies(e.speciesId, e.level);
             }
         } else if (!owned.has(e.speciesId) && catchableIn(zone, e.speciesId)) {
@@ -449,7 +575,12 @@ function runJourney(region: RegionDefinition, starter: number) {
                     BALLS[ball].catchMultiplier,
                     bonuses.catch
                 );
-                if (rng() < chance) {
+                const critical = unova().criticalCapture
+                    ? criticalCaptureChance(chance, dexCaught())
+                    : 0;
+                const crit = critical > 0 && rng() < critical;
+                if (crit) countMedal("criticalCaptures");
+                if (crit || rng() < chance) {
                     catchSpecies(e.speciesId, e.level);
                     if (isShadow(e.speciesId)) snagged[e.speciesId] = true;
                 }
@@ -458,6 +589,8 @@ function runJourney(region: RegionDefinition, starter: number) {
     }
     if (!cleared) log("Timed out.");
     totalTime += time;
+    countMedal("playTime", time);
+    awardMedals();
     return time;
 }
 
@@ -476,14 +609,58 @@ function spendFame() {
     }
 }
 
+let journeyOffset = 0;
+//   SIM_LOAD=file      start from a campaign saved with SIM_SAVE=file (the permanent state after
+//                     its journeys), so later regions can be tuned without replaying earlier ones
+if (process.env.SIM_LOAD != null) {
+    const saved = JSON.parse(readFileSync(process.env.SIM_LOAD, "utf8")) as SavedCampaign;
+    saved.dex.forEach(([id, n]) => dex.set(id, n));
+    fame = saved.fame;
+    Object.assign(hof, saved.hof);
+    saved.enshrined.forEach(key => enshrined.add(key));
+    Object.assign(clears, saved.clears);
+    totalTime = saved.totalTime;
+    ({ doublesUnlocked, sinnohEvolutions, pokeAssistUnlocked } = saved);
+    Object.assign(unovaMechanics, saved.unovaMechanics);
+    seed = saved.seed;
+    journeyOffset = saved.journeys;
+    Object.assign(medalStats, saved.medalStats);
+    medalsEarned = saved.medalsEarned;
+    medalFame = saved.medalFame;
+    journeyTimes.push(...saved.journeyTimes);
+}
+
 const summary: string[] = [];
-plan.forEach(({ region: id, starter }, i) => {
+plan.forEach(({ region: id, starter }, index) => {
+    const i = index + journeyOffset;
     const region = REGIONS[id];
     const choice = starter ?? region.starters[i % region.starters.length];
     console.log(`Journey ${i + 1}: ${region.name} with ${getSpecies(choice).name}`);
     const time = runJourney(region, choice);
     summary.push(`#${i + 1} ${region.name}: ${(time / 3600).toFixed(1)}h`);
     spendFame();
-    console.log(`  Fame upgrades: ${JSON.stringify(hof)}`);
+    console.log(`  Fame upgrades: ${JSON.stringify(hof)} (medals have paid ${medalFame} Fame)`);
 });
 console.log(summary.join(" | "));
+
+if (process.env.SIM_SAVE != null) {
+    const saved: SavedCampaign = {
+        dex: [...dex.entries()],
+        fame,
+        hof,
+        enshrined: [...enshrined],
+        clears,
+        totalTime,
+        doublesUnlocked,
+        sinnohEvolutions,
+        pokeAssistUnlocked,
+        unovaMechanics,
+        seed,
+        journeys: journeyOffset + plan.length,
+        medalStats,
+        medalsEarned,
+        medalFame,
+        journeyTimes
+    };
+    writeFileSync(process.env.SIM_SAVE, JSON.stringify(saved));
+}

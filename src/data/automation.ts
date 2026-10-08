@@ -81,7 +81,11 @@ function autoShop() {
     )
         .map(u => ({ u, cost: upgradeCost(u, mart.levels.value[u.id as MartUpgradeId] ?? 0) }))
         .sort((a, b) => a.cost - b.cost);
-    if (options.length > 0 && options[0].cost * 2 <= main.money.value) {
+    if (
+        options.length > 0 &&
+        options[0].cost * 2 <= main.money.value &&
+        !main.challengeOn("frugal")
+    ) {
         mart.buyUpgrade(options[0].u);
     }
 }
@@ -160,17 +164,19 @@ function autoParty() {
     if (trainers.length === 0) return;
     const targets = trainers.flatMap(trainerTeam);
     const damage = main.bonuses.value.damage;
-    const scored = Object.keys(main.box.value).map(key => {
-        const id = Number(key);
-        const battler = main.battlerFor(id);
-        const score = targets.reduce(
-            (sum, target) => sum + memberDps(battler, target, damage) / maxHp(target),
-            0
-        );
-        return { id, score };
-    });
+    const scored = Object.keys(main.box.value)
+        .filter(key => main.canJoinParty(Number(key)))
+        .map(key => {
+            const id = Number(key);
+            const battler = main.battlerFor(id);
+            const score = targets.reduce(
+                (sum, target) => sum + memberDps(battler, target, damage) / maxHp(target),
+                0
+            );
+            return { id, score };
+        });
     scored.sort((a, b) => b.score - a.score);
-    const best = scored.slice(0, 6).map(s => s.id);
+    const best = scored.slice(0, main.maxParty.value).map(s => s.id);
     main.setParty(
         main.nextTrial.value == null && hof.newFacesForFinale.value
             ? (newFacesParty(
@@ -195,9 +201,10 @@ function newFacesParty(ranked: number[], trainers: TrainerDefinition[]): number[
             !hof.isEnshrined(id) &&
             ranked.findIndex(other => hallOfFameId(other) === hallOfFameId(id)) === i
     );
-    for (let count = Math.min(6, fresh.length); count > 0; count--) {
+    const size = main.maxParty.value;
+    for (let count = Math.min(size, fresh.length); count > 0; count--) {
         const team = fresh.slice(0, count);
-        team.push(...ranked.filter(id => !team.includes(id)).slice(0, 6 - count));
+        team.push(...ranked.filter(id => !team.includes(id)).slice(0, size - count));
         const party = team.map(id => main.battlerFor(id));
         if (trainers.every(t => simulateTrainerBattle(party, t, damage, hp, doubles).won)) {
             return team;
@@ -301,6 +308,11 @@ function autoPoketch() {
     }
 }
 
+/** The C-Gear: visits a filled Hidden Grotto between wild battles. */
+function autoCGear() {
+    if (main.grottoReady.value && main.battle.value.kind === "search") main.visitGrotto();
+}
+
 /** Runs every owned, enabled automation once. */
 export function runAutomation() {
     if (main.starter.value === 0) return;
@@ -308,6 +320,7 @@ export function runAutomation() {
     if (enabled("autoClaim")) autoClaim();
     if (main.inTrainerBattle.value) return;
     if (enabled("autoPoketch")) autoPoketch();
+    if (enabled("autoCGear")) autoCGear();
     if (enabled("autoEvolve")) autoEvolve();
     if (enabled("autoParty")) autoParty();
     if (enabled("autoTravel")) autoTravel();

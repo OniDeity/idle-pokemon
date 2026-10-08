@@ -1745,3 +1745,41 @@ span.pk-partner-choice {
     color: var(--layer-color, var(--foreground));
     border-bottom-color: var(--layer-color, var(--foreground));
 }
+
+/* ---------- Medals and challenges ---------- */
+
+.pk-challenge-keys {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+}
+
+.pk-challenge-keys label {
+    display: block;
+}
+
+.pk-medal {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--outline, rgba(127, 127, 127, 0.2));
+    opacity: 0.75;
+}
+
+.pk-medal.earned {
+    opacity: 1;
+}
+
+.pk-medal-icon {
+    font-size: 26px;
+    line-height: 1;
+    width: 32px;
+    text-align: center;
+}
+
+.pk-medal-info {
+    flex: 1;
+    min-width: 0;
+}
