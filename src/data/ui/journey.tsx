@@ -70,6 +70,8 @@ const CAVES = new Set([
     // Unova's
     "wellspringCave",
     "relicCastle",
+    "relicCastleBasement",
+    "relicCastleDepths",
     "chargestoneCave",
     "mistraltonCave",
     "twistMountain",

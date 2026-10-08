@@ -31,6 +31,7 @@ import type { RegionId } from "game/pokemon/zones";
 import { allZoneSpecies, DUAL_SLOT_GAMES, ZONES, ZONES_BY_ID } from "game/pokemon/zones";
 import { HONEY_SPECIES, SINNOH_EXTRAS } from "game/pokemon/sinnoh";
 import { UNDERGROUND_ITEMS } from "game/pokemon/underground";
+import { UNOVA_EXTRAS } from "game/pokemon/unova";
 import { SHADOW_TRAINERS } from "game/pokemon/colosseum";
 import { computed, ref } from "vue";
 import type { NavNode } from "../ui/nav";
@@ -67,9 +68,13 @@ type Filter =
     | "johto"
     | "hoenn"
     | "sinnoh"
+    | "unova"
     | "variants";
 
-/** Where Sinnoh's features bring a species: Honey Trees, the Underground, the Poké Radar, Pal Park. */
+/**
+ * Where regions' features bring a species: Sinnoh's Honey Trees, Underground, Poké Radar and Pal
+ * Park, and Unova's phenomena and Hidden Grottoes.
+ */
 function featureSources(id: number): string[] {
     const sources: string[] = [];
     const species = getSpecies(id);
@@ -98,6 +103,35 @@ function featureSources(id: number): string[] {
     if (radar.length > 0) {
         sources.push(
             `Sinnoh, with the Poké Radar: ${radar.map(([zoneId]) => ZONES_BY_ID[zoneId]?.name).join(", ")}`
+        );
+    }
+    // Deerling's and Sawsbuck's coats come with the seasons.
+    if ((species.baseSpecies === 585 || species.baseSpecies === 586) && id > 4300) {
+        sources.push(
+            `Wherever ${getSpecies(species.baseSpecies).name} live, in ${species.name.split(" ")[0].toLowerCase()} (the Seasons mechanic, met in Unova)`
+        );
+    }
+    // Unova's phenomena and Hidden Grottoes.
+    const phenomena = Object.entries(UNOVA_EXTRAS.phenomena).filter(([, kinds]) =>
+        Object.values(kinds).some(entries => entries?.some(e => e.id === id))
+    );
+    if (phenomena.length > 0) {
+        sources.push(
+            `Phenomena (shaking grass, dust clouds, rippling water, flying shadows): ${phenomena
+                .map(
+                    ([zoneId]) =>
+                        `${ZONES_BY_ID[zoneId]?.name} (${REGIONS[ZONES_BY_ID[zoneId]!.region].name})`
+                )
+                .slice(0, 6)
+                .join(", ")}${phenomena.length > 6 ? "…" : ""}`
+        );
+    }
+    const grottoes = Object.entries(UNOVA_EXTRAS.grottoes).filter(([, entries]) =>
+        entries.some(e => e.id === id)
+    );
+    if (grottoes.length > 0) {
+        sources.push(
+            `Hidden Grottoes in Unova (Black 2/White 2): ${grottoes.map(([zoneId]) => ZONES_BY_ID[zoneId]?.name).join(", ")}`
         );
     }
     const games = Object.entries(DUAL_SLOT_GAMES).filter(([, list]) =>
@@ -370,6 +404,8 @@ const layer = createLayer(id, () => {
                     return s.id > 251 && s.id <= 386;
                 case "sinnoh":
                     return s.id > 386 && s.id <= 493;
+                case "unova":
+                    return s.id > 493 && s.id <= 649;
                 default:
                     return true;
             }
@@ -446,6 +482,7 @@ const layer = createLayer(id, () => {
         ["johto", "#152–251"],
         ...(POKEDEX_SIZE > 251 ? [["hoenn", "#252–386"] as [Filter, string]] : []),
         ...(POKEDEX_SIZE > 386 ? [["sinnoh", "#387–493"] as [Filter, string]] : []),
+        ...(POKEDEX_SIZE > 493 ? [["unova", "#494–649"] as [Filter, string]] : []),
         ["variants", "Variants"]
     ];
 

@@ -22031,24 +22031,6 @@
     "relicCastle": {
         "walk": [
             {
-                "id": 344,
-                "weight": 200,
-                "minLevel": 47,
-                "maxLevel": 50
-            },
-            {
-                "id": 552,
-                "weight": 170,
-                "minLevel": 34,
-                "maxLevel": 50
-            },
-            {
-                "id": 563,
-                "weight": 140,
-                "minLevel": 34,
-                "maxLevel": 50
-            },
-            {
                 "id": 551,
                 "weight": 100,
                 "minLevel": 19,
@@ -22059,12 +22041,50 @@
                 "weight": 100,
                 "minLevel": 19,
                 "maxLevel": 22
+            }
+        ]
+    },
+    "relicCastleBasement": {
+        "walk": [
+            {
+                "id": 552,
+                "weight": 100,
+                "minLevel": 34,
+                "maxLevel": 37
+            },
+            {
+                "id": 563,
+                "weight": 100,
+                "minLevel": 34,
+                "maxLevel": 37
+            }
+        ]
+    },
+    "relicCastleDepths": {
+        "walk": [
+            {
+                "id": 344,
+                "weight": 200,
+                "minLevel": 47,
+                "maxLevel": 50
+            },
+            {
+                "id": 552,
+                "weight": 70,
+                "minLevel": 47,
+                "maxLevel": 50
             },
             {
                 "id": 28,
                 "weight": 60,
                 "minLevel": 47,
                 "maxLevel": 49
+            },
+            {
+                "id": 563,
+                "weight": 40,
+                "minLevel": 48,
+                "maxLevel": 50
             },
             {
                 "id": 95,

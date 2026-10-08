@@ -86,6 +86,19 @@ export const UNOVA_ZONES: ZoneDefinition[] = [
         blurb: "An ancient castle sinking into the sand, where the Cover and Plume Fossils lie."
     }),
     zone({
+        id: "relicCastleBasement",
+        name: "Relic Castle (basement)",
+        badgesRequired: 7,
+        blurb: "The castle's sunken floors, where Ghetsis waits after N flies off on his dragon."
+    }),
+    zone({
+        id: "relicCastleDepths",
+        name: "Relic Castle (depths)",
+        badgesRequired: 8,
+        postGame: true,
+        blurb: "The deepest rooms of the castle, where the sun of the desert rests."
+    }),
+    zone({
         id: "unovaRoute16",
         name: "Route 16",
         badgesRequired: 3,
@@ -365,13 +378,13 @@ export function criticalCaptureChance(chance: number, dexCaught: number, boost =
 
 /**
  * Stat multipliers for Unova's leaders, tuned with scripts/simulateProgression.ts: after Oblivia,
- * Unova's trainers carry eleven regions' Renown, and a first clear takes about 10-13 hours with
- * any starter. Drayden and the League (N and Ghetsis last) are the longest walls.
+ * Unova's trainers carry eleven regions' Renown, and a first clear takes about 10.5 hours on
+ * average (5-14 by starter and luck). Elesa, Drayden and the League are the longest walls.
  */
-const UNOVA_GYM_STRENGTHS = [1.8, 3.0, 3.6, 4.6, 4.4, 5.4, 5.8, 5.2];
-const UNOVA_ELITE_FOUR_STRENGTH = 3.69;
-const UNOVA_N_STRENGTH = 3.84;
-const UNOVA_GHETSIS_STRENGTH = 3.98;
+const UNOVA_GYM_STRENGTHS = [1.8, 3.0, 3.6, 3.8, 3.9, 4.6, 5.0, 4.6];
+const UNOVA_ELITE_FOUR_STRENGTH = 3.25;
+const UNOVA_N_STRENGTH = 3.38;
+const UNOVA_GHETSIS_STRENGTH = 3.5;
 
 function unovaGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">,
@@ -982,7 +995,7 @@ export const UNOVA_SPECIALS: SpecialEncounter[] = [
         region: "unova",
         speciesId: 637,
         level: 70,
-        zoneId: "relicCastle",
+        zoneId: "relicCastleDepths",
         place: "Relic Castle, the deepest room",
         badgesRequired: 8,
         postGame: true,

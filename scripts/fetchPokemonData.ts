@@ -589,7 +589,12 @@ const UNOVA_ZONE_AREAS: Record<string, [string, string][]> = {
         ["desert-resort", "entrance"],
         ["desert-resort", ""]
     ],
-    relicCastle: ["a", "b", "c", "d"].map(a => ["relic-castle", a] as [string, string]),
+    relicCastle: [["relic-castle", "a"]],
+    relicCastleBasement: [["relic-castle", "b"]],
+    relicCastleDepths: [
+        ["relic-castle", "c"],
+        ["relic-castle", "d"]
+    ],
     unovaRoute16: [["unova-route-16", ""]],
     lostlornForest: [["lostlorn-forest", ""]],
     unovaRoute5: [["unova-route-5", ""]],
