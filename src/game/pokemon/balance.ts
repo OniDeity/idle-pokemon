@@ -279,11 +279,114 @@ export interface UpgradeDefinition {
     maxLevel: number;
     badgesRequired: number;
     sprite: string;
+    /**
+     * Mastery: levels past maxLevel, each with a smaller effect, at prices that keep rising
+     * (MASTERY_COST_GROWTH a level), so a finished upgrade still has somewhere to go.
+     */
+    mastery?: { levels: number; description: string };
+    /** Hall of Fame entries needed before it's offered (the Journey page's late-game upgrades). */
+    entriesRequired?: number;
+    /** The Hall of Fame page it's listed on (default: battle, or mechanics with a mechanic). */
+    tab?: UpgradeTab;
+    /** What its levels do right now, e.g. "−50% search time". */
+    effect?: (level: number) => string;
 }
 
+export type UpgradeTab = "battle" | "catching" | "journey" | "mechanics";
+
+/**
+ * The Journey page's new upgrades (Starter Kit, Mart Membership, Exp. All, Fan Club) open after
+ * this many Hall of Fame entries: earlier, they drew Fame away from Champion's Might and the
+ * simulator's Johto took 40% longer.
+ */
+export const JOURNEY_UPGRADE_ENTRIES = 4;
+
+/** Each Mastery level costs this much more than the one before. */
+export const MASTERY_COST_GROWTH = 1.4;
+/** The share of an upgrade's Fame a refund gives back. */
+export const REFUND_SHARE = 0.9;
+
 export function upgradeCost(upgrade: UpgradeDefinition, level: number): number {
-    return Math.round(upgrade.baseCost * Math.pow(upgrade.costGrowth, level));
+    if (level < upgrade.maxLevel) {
+        return Math.round(upgrade.baseCost * Math.pow(upgrade.costGrowth, level));
+    }
+    return Math.round(
+        upgrade.baseCost *
+            Math.pow(upgrade.costGrowth, upgrade.maxLevel) *
+            Math.pow(MASTERY_COST_GROWTH, level - upgrade.maxLevel)
+    );
 }
+
+/** The highest level an upgrade can reach, Mastery included. */
+export function upgradeTopLevel(upgrade: UpgradeDefinition): number {
+    return upgrade.maxLevel + (upgrade.mastery?.levels ?? 0);
+}
+
+/** Fame spent on an upgrade's levels so far (what a refund is worked out from). */
+export function upgradeSpent(upgrade: UpgradeDefinition, level: number): number {
+    let total = 0;
+    for (let i = 0; i < level; i++) total += upgradeCost(upgrade, i);
+    return total;
+}
+
+/** An additive bonus: `per` a level up to `max`, then `mastery` a Mastery level. */
+function tiered(level = 0, max: number, per: number, mastery: number): number {
+    return per * Math.min(level, max) + mastery * Math.max(0, level - max);
+}
+
+/** A reduction: −`per` a level up to `max`, then ×0.95 a Mastery level. */
+function shrinking(level = 0, max: number, per: number): number {
+    return (1 - per * Math.min(level, max)) * Math.pow(0.95, Math.max(0, level - max));
+}
+
+const pct = (x: number) => `${Math.round(x * 100)}%`;
+
+/**
+ * What each Fame upgrade's levels do, Mastery included. Everything that reads a Fame upgrade
+ * goes through these, so the game, the simulator and the shop's "Now:" line agree.
+ */
+export const FAME_EFFECTS = {
+    /** Search time multiplier (Scouting Network). */
+    scout: (level?: number) => shrinking(level, 5, 0.1),
+    /** Catch chance multiplier (Catching Technique). */
+    catcher: (level?: number) => 1 + tiered(level, 10, 0.1, 0.05),
+    /** Shiny chance multiplier (Shiny Hunter). */
+    shinyHunter: (level?: number) => 1 + tiered(level, 10, 0.5, 0.25),
+    /** Wild battles per Day Care Egg multiplier (Flame Body). */
+    flameBody: (level?: number) => shrinking(level, 5, 0.1),
+    /** Egg shiny chance multiplier (Masuda Method). */
+    masudaMethod: (level?: number) => 1 + tiered(level, 6, 0.5, 0.25),
+    /** Condition each Pokéblock adds (Pokéblock Kit). */
+    pokeblockGain: (level?: number) => 10 + tiered(level, 4, 5, 2),
+    /** Contest win chance bonus (Contest Star). */
+    contestChance: (level?: number) => tiered(level, 5, 0.05, 0.02),
+    /** Contest time multiplier (Contest Star). */
+    contestTime: (level?: number) => shrinking(level, 5, 0.1),
+    /** Phenomenon chance multiplier (Encounter Power). */
+    encounterPower: (level?: number) => 1 + tiered(level, 4, 0.25, 0.1),
+    /** Critical capture chance multiplier (Capture Power). */
+    capturePower: (level?: number) => 1 + tiered(level, 4, 0.25, 0.1),
+    /** In-season experience and money bonus (Season Power). */
+    seasonPower: (level?: number) => tiered(level, 5, 0.1, 0.05),
+    /** Wild battles per Hidden Grotto multiplier (Grotto Power). */
+    grottoPower: (level?: number) => shrinking(level, 5, 0.1),
+    /** Extra starting levels (Head Start). */
+    headStart: (level?: number) => 5 * Math.min(level ?? 0, 3),
+    /** Hall of Fame Fame multiplier (Pokémon Fan Club). */
+    fanClub: (level?: number) => 1 + 0.03 * (level ?? 0),
+    /** Money and Poké Balls a journey starts with (Starter Kit). */
+    starterMoney: (level?: number) => 1000 * (level ?? 0),
+    starterBalls: (level?: number) => 10 * (level ?? 0),
+    /** Share of the party's experience box Pokémon get (Exp. All). */
+    expAll: (level?: number) => 0.05 * (level ?? 0),
+    /** Shiny chance bonus per Egg of the species hatched before, up to 25 (Breeder's Lineage). */
+    lineage: (level?: number) => 0.02 * (level ?? 0),
+    /** Poké Mart price multiplier (Mart Membership). */
+    martPrice: (level?: number) => 1 - 0.05 * (level ?? 0)
+};
+
+/** Eggs of a species that still raise Breeder's Lineage's bonus. */
+export const LINEAGE_MAX_EGGS = 25;
 
 /** Pokédollar upgrades sold at the Poké Mart. Reset on Hall of Fame. */
 export const MART_UPGRADES = {
@@ -353,7 +456,8 @@ export const HOF_UPGRADES = {
         costGrowth: 1.5,
         maxLevel: 50,
         badgesRequired: 0,
-        sprite: itemSprite("x-attack")
+        sprite: itemSprite("x-attack"),
+        effect: level => `+${level * 10}% damage and HP`
     },
     wisdom: {
         id: "wisdom",
@@ -363,7 +467,8 @@ export const HOF_UPGRADES = {
         costGrowth: 1.5,
         maxLevel: 50,
         badgesRequired: 0,
-        sprite: itemSprite("exp-share")
+        sprite: itemSprite("exp-share"),
+        effect: level => `+${level * 10}% experience`
     },
     fortune: {
         id: "fortune",
@@ -373,7 +478,8 @@ export const HOF_UPGRADES = {
         costGrowth: 1.5,
         maxLevel: 50,
         badgesRequired: 0,
-        sprite: itemSprite("nugget")
+        sprite: itemSprite("nugget"),
+        effect: level => `+${level * 10}% Pokédollars`
     },
     scout: {
         id: "scout",
@@ -383,7 +489,79 @@ export const HOF_UPGRADES = {
         costGrowth: 2,
         maxLevel: 5,
         badgesRequired: 0,
-        sprite: itemSprite("dowsing-machine")
+        sprite: itemSprite("dowsing-machine"),
+        mastery: {
+            levels: 10,
+            description: "Mastery: each level cuts the search time by another 5%."
+        },
+        effect: level => `-${pct(1 - FAME_EFFECTS.scout(level))} search time`
+    },
+    headStart: {
+        id: "headStart",
+        name: "Head Start",
+        description: "Your starter begins each journey 5 levels higher per level.",
+        baseCost: 2,
+        costGrowth: 2,
+        maxLevel: 3,
+        badgesRequired: 0,
+        sprite: itemSprite("rare-candy"),
+        tab: "journey",
+        effect: level => `+${FAME_EFFECTS.headStart(level)} starting levels`
+    },
+    starterKit: {
+        id: "starterKit",
+        name: "Starter Kit",
+        description: "Each journey begins with ₽1,000 and 10 Poké Balls more per level.",
+        baseCost: 5,
+        costGrowth: 2.2,
+        maxLevel: 5,
+        badgesRequired: 0,
+        sprite: itemSprite("poke-ball"),
+        entriesRequired: JOURNEY_UPGRADE_ENTRIES,
+        tab: "journey",
+        effect: level =>
+            `₽${FAME_EFFECTS.starterMoney(level).toLocaleString()} and ${FAME_EFFECTS.starterBalls(level)} Poké Balls`
+    },
+    martMembership: {
+        id: "martMembership",
+        name: "Mart Membership",
+        description:
+            "-5% Poké Mart prices (Poké Balls, evolution items and Mart upgrades) per level.",
+        baseCost: 8,
+        costGrowth: 2,
+        maxLevel: 6,
+        badgesRequired: 0,
+        sprite: itemSprite("discount-coupon"),
+        entriesRequired: JOURNEY_UPGRADE_ENTRIES,
+        tab: "journey",
+        effect: level => `-${pct(1 - FAME_EFFECTS.martPrice(level))} Poké Mart prices`
+    },
+    expAll: {
+        id: "expAll",
+        name: "Exp. All",
+        description:
+            "Box Pokémon outside the party get 5% of the party's experience per level (up to the level cap).",
+        baseCost: 8,
+        costGrowth: 2,
+        maxLevel: 5,
+        badgesRequired: 0,
+        sprite: itemSprite("lucky-punch"),
+        entriesRequired: JOURNEY_UPGRADE_ENTRIES,
+        tab: "journey",
+        effect: level => `box Pokémon get ${pct(FAME_EFFECTS.expAll(level))} of the experience`
+    },
+    fanClub: {
+        id: "fanClub",
+        name: "Pokémon Fan Club",
+        description: "Your fans spread the word: +3% Fame from every Hall of Fame entry per level.",
+        baseCost: 25,
+        costGrowth: 1.6,
+        maxLevel: 20,
+        badgesRequired: 0,
+        sprite: itemSprite("fame-checker"),
+        entriesRequired: JOURNEY_UPGRADE_ENTRIES,
+        tab: "journey",
+        effect: level => `+${pct(FAME_EFFECTS.fanClub(level) - 1)} Fame`
     },
     catcher: {
         id: "catcher",
@@ -393,7 +571,10 @@ export const HOF_UPGRADES = {
         costGrowth: 1.8,
         maxLevel: 10,
         badgesRequired: 0,
-        sprite: itemSprite("great-ball")
+        sprite: itemSprite("great-ball"),
+        tab: "catching",
+        mastery: { levels: 20, description: "Mastery: +5% catch chance per level." },
+        effect: level => `+${pct(FAME_EFFECTS.catcher(level) - 1)} catch chance`
     },
     shinyHunter: {
         id: "shinyHunter",
@@ -403,7 +584,10 @@ export const HOF_UPGRADES = {
         costGrowth: 2,
         maxLevel: 10,
         badgesRequired: 0,
-        sprite: itemSprite("shiny-stone")
+        sprite: itemSprite("shiny-stone"),
+        tab: "catching",
+        mastery: { levels: 20, description: "Mastery: +25% shiny chance per level." },
+        effect: level => `×${FAME_EFFECTS.shinyHunter(level)} shiny chance`
     },
     roddysRod: {
         id: "roddysRod",
@@ -414,7 +598,9 @@ export const HOF_UPGRADES = {
         costGrowth: 2,
         maxLevel: 7,
         badgesRequired: 0,
-        sprite: itemSprite("old-rod")
+        sprite: itemSprite("old-rod"),
+        tab: "catching",
+        effect: level => `${level} of 7 rods' patterns`
     },
     flameBody: {
         id: "flameBody",
@@ -426,7 +612,12 @@ export const HOF_UPGRADES = {
         maxLevel: 5,
         badgesRequired: 0,
         mechanic: "breeding",
-        sprite: itemSprite("fire-stone")
+        sprite: itemSprite("fire-stone"),
+        mastery: {
+            levels: 5,
+            description: "Mastery: each level cuts the wild battles per Egg by another 5%."
+        },
+        effect: level => `-${pct(1 - FAME_EFFECTS.flameBody(level))} wild battles per Egg`
     },
     masudaMethod: {
         id: "masudaMethod",
@@ -438,7 +629,22 @@ export const HOF_UPGRADES = {
         maxLevel: 6,
         badgesRequired: 0,
         mechanic: "breeding",
-        sprite: itemSprite("shiny-stone")
+        sprite: itemSprite("shiny-stone"),
+        mastery: { levels: 10, description: "Mastery: +25% shiny Eggs per level." },
+        effect: level => `×${FAME_EFFECTS.masudaMethod(level)} shiny Eggs`
+    },
+    breederLineage: {
+        id: "breederLineage",
+        name: "Breeder's Lineage",
+        description: `Every Egg of a species you've hatched before makes its next Eggs +2% likelier to be shiny per level (up to ${LINEAGE_MAX_EGGS} Eggs).`,
+        baseCost: 4,
+        costGrowth: 2,
+        maxLevel: 5,
+        badgesRequired: 0,
+        mechanic: "breeding",
+        sprite: itemSprite("oval-charm"),
+        effect: level =>
+            `+${pct(FAME_EFFECTS.lineage(level))} shiny Eggs per Egg before (up to ×${1 + FAME_EFFECTS.lineage(level) * LINEAGE_MAX_EGGS})`
     },
     pokeblockKit: {
         id: "pokeblockKit",
@@ -449,7 +655,9 @@ export const HOF_UPGRADES = {
         maxLevel: 4,
         badgesRequired: 0,
         mechanic: "contests",
-        sprite: itemSprite("pokeblock-case")
+        sprite: itemSprite("pokeblock-case"),
+        mastery: { levels: 5, description: "Mastery: +2 more condition per Pokéblock per level." },
+        effect: level => `+${FAME_EFFECTS.pokeblockGain(level)} condition per Pokéblock`
     },
     contestStar: {
         id: "contestStar",
@@ -460,7 +668,14 @@ export const HOF_UPGRADES = {
         maxLevel: 5,
         badgesRequired: 0,
         mechanic: "contests",
-        sprite: itemSprite("contest-pass")
+        sprite: itemSprite("contest-pass"),
+        mastery: {
+            levels: 5,
+            description:
+                "Mastery: +2% win chance per level, and each cuts contest time by another 5%."
+        },
+        effect: level =>
+            `+${pct(FAME_EFFECTS.contestChance(level))} win chance, -${pct(1 - FAME_EFFECTS.contestTime(level))} contest time`
     },
     encounterPower: {
         id: "encounterPower",
@@ -472,7 +687,9 @@ export const HOF_UPGRADES = {
         maxLevel: 4,
         badgesRequired: 0,
         mechanic: "phenomena",
-        sprite: itemSprite("pretty-wing")
+        sprite: itemSprite("pretty-wing"),
+        mastery: { levels: 6, description: "Mastery: +10% more phenomena per level." },
+        effect: level => `×${FAME_EFFECTS.encounterPower(level).toFixed(2)} phenomena`
     },
     capturePower: {
         id: "capturePower",
@@ -483,7 +700,9 @@ export const HOF_UPGRADES = {
         maxLevel: 4,
         badgesRequired: 0,
         mechanic: "criticalCapture",
-        sprite: itemSprite("dream-ball")
+        sprite: itemSprite("dream-ball"),
+        mastery: { levels: 6, description: "Mastery: +10% more critical captures per level." },
+        effect: level => `×${FAME_EFFECTS.capturePower(level).toFixed(2)} critical captures`
     },
     seasonPower: {
         id: "seasonPower",
@@ -495,7 +714,9 @@ export const HOF_UPGRADES = {
         maxLevel: 5,
         badgesRequired: 0,
         mechanic: "seasons",
-        sprite: itemSprite("gracidea")
+        sprite: itemSprite("gracidea"),
+        mastery: { levels: 10, description: "Mastery: +5% more per level." },
+        effect: level => `+${pct(FAME_EFFECTS.seasonPower(level))} from in-season Pokémon`
     },
     grottoPower: {
         id: "grottoPower",
@@ -506,17 +727,12 @@ export const HOF_UPGRADES = {
         maxLevel: 5,
         badgesRequired: 0,
         mechanic: "hiddenGrottoes",
-        sprite: itemSprite("dowsing-machine")
-    },
-    headStart: {
-        id: "headStart",
-        name: "Head Start",
-        description: "Your starter begins each journey 5 levels higher per level.",
-        baseCost: 2,
-        costGrowth: 2,
-        maxLevel: 3,
-        badgesRequired: 0,
-        sprite: itemSprite("rare-candy")
+        sprite: itemSprite("dowsing-machine"),
+        mastery: {
+            levels: 5,
+            description: "Mastery: each level cuts the wild battles per grotto by another 5%."
+        },
+        effect: level => `-${pct(1 - FAME_EFFECTS.grottoPower(level))} wild battles per grotto`
     }
 } satisfies Record<string, UpgradeDefinition>;
 export type HofUpgradeId = keyof typeof HOF_UPGRADES;
@@ -584,15 +800,15 @@ export function computeBonuses(input: BonusInputs): Bonuses {
     const catchBonus =
         (milestone("Oak's Letter") ? 1.1 : 1) *
         (milestone("Dream Ball") ? 1.2 : 1) *
-        (1 + 0.1 * lvl(hof.catcher));
+        FAME_EFFECTS.catcher(hof.catcher);
     const shiny =
         (milestone("Shiny Charm") ? 3 : 1) *
-        (1 + 0.5 * lvl(hof.shinyHunter)) *
+        FAME_EFFECTS.shinyHunter(hof.shinyHunter) *
         (1 + SHINY_BONUS_PER_VARIANT * (input.variantsCaught ?? 0));
     const searchTime =
         (BASE_SEARCH_TIME / (keyItems.bicycle ? 2 : 1)) *
         (1 - 0.08 * lvl(mart.repel)) *
-        (1 - 0.1 * lvl(hof.scout));
+        FAME_EFFECTS.scout(hof.scout);
 
     return {
         damage,
@@ -903,6 +1119,8 @@ export interface FameInputs {
     challenge?: number;
     /** The Medal Rally rank's Fame multiplier. */
     medals?: number;
+    /** Pokémon Fan Club's level (Fame upgrade). */
+    fanClub?: number;
 }
 
 /** Fame for enshrining a team. New faces in the Hall of Fame are worth the most. */
@@ -921,7 +1139,8 @@ export function fameGain(input: FameInputs): number {
         (hasMilestone(input.dexCaught, "Pass Orb") ? 1.25 : 1) *
         (hasMilestone(input.dexCaught, "Comet Shard") ? 1.25 : 1) *
         (input.challenge ?? 1) *
-        (input.medals ?? 1);
+        (input.medals ?? 1) *
+        FAME_EFFECTS.fanClub(input.fanClub);
     return Math.max(1, Math.floor(base * multiplier));
 }
 

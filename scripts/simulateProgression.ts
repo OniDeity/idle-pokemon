@@ -15,6 +15,7 @@ import {
     computeBonuses,
     effortMultiplier,
     HEART_BATTLES,
+    FAME_EFFECTS,
     fameGain,
     POKE_ASSIST_BONUS,
     STYLER_POWER,
@@ -26,6 +27,7 @@ import {
     simulateTrainerBattle,
     trainerTeam,
     upgradeCost,
+    upgradeTopLevel,
     wildDps
 } from "../src/game/pokemon/balance";
 import {
@@ -206,12 +208,16 @@ function runJourney(region: RegionDefinition, starter: number) {
     const owned = new Map<number, Owned>();
     let badges = 0;
     let cleared = false;
-    let money = 0;
+    let money = FAME_EFFECTS.starterMoney(hof.starterKit);
+    /** Poké Mart prices after Mart Membership. */
+    const mp = (price: number) => Math.ceil(price * FAME_EFFECTS.martPrice(hof.martMembership));
     let time = 0;
     const mart: Record<string, number> = {};
     const keyItems: Partial<Record<KeyItemId, boolean>> = {};
     region.startingKeyItems.forEach(k => (keyItems[k] = true));
-    const balls: Partial<Record<BallId, number>> = { pokeBall: 10 };
+    const balls: Partial<Record<BallId, number>> = {
+        pokeBall: 10 + FAME_EFFECTS.starterBalls(hof.starterKit)
+    };
     const claimed = new Set<string>();
     const tier = () => badges + region.shopTier;
     const doubles = () => {
@@ -263,12 +269,14 @@ function runJourney(region: RegionDefinition, starter: number) {
             ...(isShadow(id) ? { heart: HEART_BATTLES } : {})
         });
     }
-    catchSpecies(starter, region.startLevel + 5 * (hof.headStart ?? 0));
+    catchSpecies(starter, region.startLevel + FAME_EFFECTS.headStart(hof.headStart));
     // Colosseum's Espeon and Umbreon come as a pair.
     if (region.allStarters === true) {
         region.starters
             .filter(id => id !== starter)
-            .forEach(id => catchSpecies(id, region.startLevel + 5 * (hof.headStart ?? 0)));
+            .forEach(id =>
+                catchSpecies(id, region.startLevel + FAME_EFFECTS.headStart(hof.headStart))
+            );
     }
     // Orre's one-of-a-kind Shadow Pokémon snagged this journey.
     const snagged: Record<string, boolean> = {};
@@ -341,7 +349,7 @@ function runJourney(region: RegionDefinition, starter: number) {
                 tier() >= STONES[item].badgesRequired &&
                 (held == null || tier() >= STONES[held].badgesRequired)
             ) {
-                const price = STONES[item].price + (held != null ? STONES[held].price : 0);
+                const price = mp(STONES[item].price + (held != null ? STONES[held].price : 0));
                 if (money > price * 3) {
                     money -= price;
                     ok = true;
@@ -375,7 +383,7 @@ function runJourney(region: RegionDefinition, starter: number) {
             const options = MART_UPGRADE_LIST.filter(
                 u => tier() >= u.badgesRequired && (mart[u.id] ?? 0) < u.maxLevel
             )
-                .map(u => ({ u, cost: upgradeCost(u, mart[u.id] ?? 0) }))
+                .map(u => ({ u, cost: mp(upgradeCost(u, mart[u.id] ?? 0)) }))
                 .sort((a, b) => a.cost - b.cost);
             const best = options[0];
             if (!best || money < best.cost * 2) break;
@@ -460,6 +468,7 @@ function runJourney(region: RegionDefinition, starter: number) {
                         ).size,
                         firstClear: (clears[region.id] ?? 0) === 0,
                         rematch: strength,
+                        fanClub: hof.fanClub,
                         medals:
                             MEDAL_FAME > 0
                                 ? rankFameMultiplier(
@@ -562,7 +571,7 @@ function runJourney(region: RegionDefinition, starter: number) {
                         money >= (BALLS[b].price ?? Infinity) * 5
                 );
                 if (ball != null) {
-                    const price = BALLS[ball].price ?? 0;
+                    const price = mp(BALLS[ball].price ?? 0);
                     const count = Math.min(20, Math.floor(money / price));
                     money -= count * price;
                     balls[ball] = count;
@@ -594,11 +603,16 @@ function runJourney(region: RegionDefinition, starter: number) {
     return time;
 }
 
-function spendFame() {
+function spendFame(entries: number) {
     for (;;) {
-        // The Day Care and Contest upgrades don't change battles, which is all this plays.
+        // The Day Care and Contest upgrades don't change battles, which is all this plays, and
+        // box Pokémon outside the party don't train here (Exp. All).
         const options = HOF_UPGRADE_LIST.filter(
-            u => u.mechanic == null && (hof[u.id] ?? 0) < u.maxLevel
+            u =>
+                u.mechanic == null &&
+                u.id !== "expAll" &&
+                entries >= (u.entriesRequired ?? 0) &&
+                (hof[u.id] ?? 0) < upgradeTopLevel(u)
         )
             .map(u => ({ u, cost: upgradeCost(u, hof[u.id] ?? 0) }))
             .sort((a, b) => a.cost - b.cost);
@@ -638,7 +652,7 @@ plan.forEach(({ region: id, starter }, index) => {
     console.log(`Journey ${i + 1}: ${region.name} with ${getSpecies(choice).name}`);
     const time = runJourney(region, choice);
     summary.push(`#${i + 1} ${region.name}: ${(time / 3600).toFixed(1)}h`);
-    spendFame();
+    spendFame(i + 1);
     console.log(`  Fame upgrades: ${JSON.stringify(hof)} (medals have paid ${medalFame} Fame)`);
 });
 console.log(summary.join(" | "));

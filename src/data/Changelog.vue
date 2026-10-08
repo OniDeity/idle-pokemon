@@ -5,6 +5,30 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.12 Fan Club</summary>
+                <ul>
+                    <li class="feature">
+                        ★ Mastery: finished Fame upgrades keep going. Scouting Network, Catching
+                        Technique, Shiny Hunter and the Day Care, Contest, Pass Power, Season and
+                        Grotto upgrades take Mastery levels past their max, each a smaller step at
+                        rising prices
+                    </li>
+                    <li class="feature">
+                        New Fame upgrades: Pokémon Fan Club (+3% Fame from every Hall of Fame
+                        entry per level), Starter Kit (each journey begins with money and Poké
+                        Balls), Mart Membership (cheaper Poké Mart), Exp. All (box Pokémon outside
+                        the party share the experience) and, with the Day Care, Breeder's Lineage
+                        (Eggs of a species you've hatched before are likelier to be shiny). The
+                        first four open after your fourth Hall of Fame entry
+                    </li>
+                    <li class="feature">
+                        Fame upgrades are sorted into Battle, Catching, Journey and Mechanics
+                        pages, show what they do right now, and can be refunded for 90% of their
+                        Fame
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.11.2 Automation, part two</summary>
                 <ul>
                     <li class="feature">

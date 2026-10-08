@@ -32,7 +32,7 @@ const layer = createLayer(id, () => {
         if (current >= upgrade.maxLevel || main.martTier.value < upgrade.badgesRequired) return;
         // The Frugal challenge: no upgrades this journey.
         if (main.challengeOn("frugal")) return;
-        if (!main.spend(upgradeCost(upgrade, current))) return;
+        if (!main.spend(main.martPrice(upgradeCost(upgrade, current)))) return;
         levels.value = { ...levels.value, [upgrade.id]: current + 1 };
     }
 
@@ -54,7 +54,7 @@ const layer = createLayer(id, () => {
 
     function renderBall(ball: BallId) {
         const def = BALLS[ball];
-        const price = def.price;
+        const price = def.price == null ? undefined : main.martPrice(def.price);
         const unlocked = main.martTier.value >= def.badgesRequired;
         return (
             <div class={["pk-shop-row", unlocked ? "" : "locked"]}>
@@ -88,7 +88,7 @@ const layer = createLayer(id, () => {
         const current = level(upgrade.id);
         const unlocked = main.martTier.value >= upgrade.badgesRequired;
         const maxed = current >= upgrade.maxLevel;
-        const cost = upgradeCost(upgrade, current);
+        const cost = main.martPrice(upgradeCost(upgrade, current));
         return (
             <div class={["pk-shop-row", unlocked ? "" : "locked"]}>
                 <ItemIcon src={upgrade.sprite} alt={upgrade.name} />
@@ -242,10 +242,12 @@ const layer = createLayer(id, () => {
                                         {unlocked ? (
                                             <Button
                                                 kind="primary"
-                                                disabled={main.money.value < stone.price}
+                                                disabled={
+                                                    main.money.value < main.martPrice(stone.price)
+                                                }
                                                 onClick={() => main.buyStone(stone.id)}
                                             >
-                                                {formatMoney(stone.price)}
+                                                {formatMoney(main.martPrice(stone.price))}
                                             </Button>
                                         ) : null}
                                     </div>
