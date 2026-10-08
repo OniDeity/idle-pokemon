@@ -935,7 +935,8 @@ export type AutomationId =
     | "autoTravel"
     | "autoChallenge"
     | "autoPoketch"
-    | "autoCGear";
+    | "autoCGear"
+    | "autoContest";
 
 export interface AutomationDefinition {
     id: AutomationId;
@@ -943,6 +944,8 @@ export interface AutomationDefinition {
     description: string;
     cost: number;
     sprite: string;
+    /** Only offered once this generation mechanic is unlocked. */
+    mechanic?: MechanicId;
 }
 
 /** Where the Travel Planner takes you. */
@@ -1000,7 +1003,7 @@ export const AUTOMATIONS: AutomationDefinition[] = [
         id: "autoParty",
         name: "Team Strategist",
         description:
-            "Keeps the Pokémon that best counter your next opponent in your party. For the finale it can bring Pokémon new to this region's Hall of Fame instead, as many as you choose.",
+            "Keeps the Pokémon that best counter your next opponent in your party. It can train the bench between battles (Pokémon below the level cap take the spare places), and for the finale bring Pokémon new to this region's Hall of Fame, as many as you choose.",
         cost: 10,
         sprite: itemSprite("exp-share")
     },
@@ -1016,7 +1019,7 @@ export const AUTOMATIONS: AutomationDefinition[] = [
         id: "autoChallenge",
         name: "League Pass",
         description:
-            "Challenges the next Gym, quest or finale as soon as the forecast says you'll win.",
+            "Challenges the next Gym, quest or finale as soon as the forecast says you'll win, and legendary Pokémon you've caught before and bosses you've beaten before too.",
         cost: 15,
         sprite: itemSprite("gold-teeth")
     },
@@ -1035,8 +1038,53 @@ export const AUTOMATIONS: AutomationDefinition[] = [
             "Unova's wireless gear: visits the Hidden Grotto as soon as it fills, between wild battles (once Hidden Grottoes are unlocked).",
         cost: 15,
         sprite: itemSprite("xtransceiver")
+    },
+    {
+        id: "autoContest",
+        name: "Contest Pass",
+        description:
+            "Hoenn's Contest Pass: feeds Pokéblocks to the Pokémon likeliest to win a new ribbon, when you can easily afford them, and enters it in the next contest.",
+        cost: 12,
+        mechanic: "contests",
+        sprite: itemSprite("contest-pass")
     }
 ];
+
+/**
+ * Training the bench: members of the best team (strongest first) at the level cap, who only
+ * build Effort, give their places to the strongest Pokémon still below it (`ranked`, strongest
+ * first; `first` ones ahead), up to `slots` places, weakest at the cap leaving first. The top
+ * member always stays so wild battles keep their pace. `entry` keeps two forms of one Pokémon
+ * (one Hall of Fame entry) from both joining.
+ */
+export function benchTeam(
+    best: number[],
+    ranked: number[],
+    options: {
+        cap: number;
+        slots: number;
+        level: (id: number) => number;
+        first?: (id: number) => boolean;
+        entry?: (id: number) => number;
+    }
+): number[] {
+    const { cap, slots, level, first = () => false, entry = id => id } = options;
+    const spare = best
+        .slice(1)
+        .filter(id => level(id) >= cap)
+        .reverse()
+        .slice(0, slots);
+    if (spare.length === 0) return best;
+    const trainees = ranked
+        .filter(id => !best.includes(id) && level(id) < cap)
+        .map((id, i) => ({ id, i, first: first(id) }))
+        .sort((a, b) => Number(b.first) - Number(a.first) || a.i - b.i)
+        .filter((t, i, all) => all.findIndex(other => entry(other.id) === entry(t.id)) === i)
+        .slice(0, spare.length)
+        .map(t => t.id);
+    const leaving = spare.slice(0, trainees.length);
+    return [...best.filter(id => !leaving.includes(id)), ...trainees];
+}
 
 export function speciesPower(species: Species): number {
     const [hp, atk, def, spa, spd, spe] = species.baseStats;

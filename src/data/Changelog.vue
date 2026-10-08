@@ -5,6 +5,30 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.11.2 Automation, part two</summary>
+                <ul>
+                    <li class="feature">
+                        League Pass: it also battles legendary Pokémon already in your Pokédex
+                        and bosses you've beaten before, once the forecast says you'll win (a
+                        first meeting is still yours). It can be switched off in its settings
+                    </li>
+                    <li class="feature">
+                        Contest Pass (12 Fame, once Contests are unlocked): feeds Pokéblocks to
+                        the Pokémon likeliest to win a new ribbon while money is plentiful, and
+                        enters it in the next contest
+                    </li>
+                    <li class="feature">
+                        Team Strategist can train the bench: while your best counters can't win
+                        yet, Pokémon below the level cap (the Hall of Fame's new faces first)
+                        take the places of teammates stuck at the cap, as many as you choose
+                    </li>
+                    <li class="feature">
+                        Every automation now says what it last did or is waiting for on the
+                        Journey panel
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.11.1 Smarter automation</summary>
                 <ul>
                     <li class="feature">

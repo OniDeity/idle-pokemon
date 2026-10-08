@@ -87,6 +87,16 @@ const layer = createLayer(id, () => {
      * can still win.
      */
     const newFacesTrain = persistent<boolean>(false);
+    /**
+     * Team Strategist setting: between battles, Pokémon below the level cap take the party's
+     * spare places (benchSlots of them) while the best counters can't win yet.
+     */
+    const trainBench = persistent<boolean>(false);
+    const benchSlots = persistent<number>(2);
+    /** League Pass setting: also battle legendaries caught before and bosses beaten before. */
+    const autoLegends = persistent<boolean>(true);
+    /** Boss specials ever beaten (for the League Pass), by special id. */
+    const bossesBeaten = persistent<Record<string, boolean>>({}, false);
     /** Travel Planner setting: what it travels for. */
     const travelMode = persistent<TravelMode>("balanced");
     /**
@@ -437,11 +447,39 @@ const layer = createLayer(id, () => {
         );
     }
 
-    /** Team Strategist's Hall of Fame settings: how many new faces, and whether to train them. */
+    /**
+     * Team Strategist's settings: training the bench, and for the Hall of Fame how many new faces
+     * and whether to train them.
+     */
     function renderNewFaces() {
         const count = newFacesCount.value;
         return (
             <div class="pk-automation-settings">
+                <label class="pk-small pk-setting">
+                    <input
+                        type="checkbox"
+                        checked={trainBench.value}
+                        onChange={() => (trainBench.value = !trainBench.value)}
+                    />{" "}
+                    Train the bench: while your best counters can't win yet, Pokémon below the level
+                    cap take spare places in the party (the Hall of Fame's new faces first)
+                </label>
+                {trainBench.value ? (
+                    <label class="pk-small pk-setting">
+                        Places for training:{" "}
+                        <input
+                            type="range"
+                            min={1}
+                            max={5}
+                            step={1}
+                            value={benchSlots.value}
+                            onInput={(e: Event) =>
+                                (benchSlots.value = Number((e.target as HTMLInputElement).value))
+                            }
+                        />{" "}
+                        <b>{benchSlots.value}</b>
+                    </label>
+                ) : null}
                 <label class="pk-small pk-setting">
                     <input
                         type="checkbox"
@@ -513,7 +551,9 @@ const layer = createLayer(id, () => {
                     One-time purchases that play parts of the game for you. Switch them on or off
                     here or from the Journey panel.
                 </p>
-                {AUTOMATIONS.map(def => {
+                {AUTOMATIONS.filter(
+                    def => def.mechanic == null || mechanicUnlocked(def.mechanic)
+                ).map(def => {
                     const owned = automationsOwned.value[def.id] === true;
                     const on = automationsOn.value[def.id] === true;
                     return (
@@ -524,6 +564,21 @@ const layer = createLayer(id, () => {
                                 <div class="pk-small">{def.description}</div>
                                 {def.id === "autoParty" && owned ? renderNewFaces() : null}
                                 {def.id === "autoTravel" && owned ? renderTravelModes() : null}
+                                {def.id === "autoChallenge" && owned ? (
+                                    <div class="pk-automation-settings">
+                                        <label class="pk-small pk-setting">
+                                            <input
+                                                type="checkbox"
+                                                checked={autoLegends.value}
+                                                onChange={() =>
+                                                    (autoLegends.value = !autoLegends.value)
+                                                }
+                                            />{" "}
+                                            Legendary Pokémon already in your Pokédex and bosses
+                                            you've beaten before (a first meeting is yours)
+                                        </label>
+                                    </div>
+                                ) : null}
                             </div>
                             {owned ? (
                                 <Button
@@ -565,6 +620,10 @@ const layer = createLayer(id, () => {
         newFacesForFinale,
         newFacesCount,
         newFacesTrain,
+        trainBench,
+        benchSlots,
+        autoLegends,
+        bossesBeaten,
         travelMode,
         travelModeInEffect,
         chooseTravelMode,
