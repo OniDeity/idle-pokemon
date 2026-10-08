@@ -50,6 +50,9 @@ import dex from "./dex";
 import medals from "./medals";
 import mart from "./mart";
 
+/** A Pokémon kept in the Pokémon Bank: deposited from a journey's box, a partner choice for good. */
+export type BankEntry = { id: number; shiny: boolean; region: RegionId };
+
 export type HallOfFameEntry = {
     run: number;
     time: number;
@@ -98,6 +101,10 @@ const layer = createLayer(id, () => {
     const benchSlots = persistent<number>(2);
     /** League Pass setting: also battle legendaries caught before and bosses beaten before. */
     const autoLegends = persistent<boolean>(true);
+    /** The Pokémon Bank: one Pokémon deposited per Hall of Fame entry, a partner choice for good. */
+    const bank = persistent<BankEntry[]>([], false);
+    /** This journey's deposit, picked on the Hall of Fame screen (0 for none). */
+    const bankDeposit = persistent<number>(0);
     /** Day Care Eggs hatched, by species, for good (Breeder's Lineage). */
     const eggsBred = persistent<Record<string, number>>({}, false);
     /** Boss specials ever beaten (for the League Pass), by special id. */
@@ -263,13 +270,16 @@ const layer = createLayer(id, () => {
      * Team members not yet in this region's Hall of Fame (a Gyarados and a Gyarados ♀ count
      * once).
      */
-    const newSpecies = computed((): number[] =>
-        clearingTeam.value.filter(
-            (id, i, team) =>
+    const newSpecies = computed((): number[] => newFacesIn(clearingTeam.value));
+
+    /** A team's members not yet in this region's Hall of Fame (one per Hall of Fame entry). */
+    function newFacesIn(team: number[]): number[] {
+        return team.filter(
+            (id, i) =>
                 !isEnshrined(id) &&
                 team.findIndex(other => hallOfFameId(other) === hallOfFameId(id)) === i
-        )
-    );
+        );
+    }
 
     /** How long this journey took to clear its finale (for the Time Trial). */
     const clearTime = computed(
@@ -312,6 +322,29 @@ const layer = createLayer(id, () => {
         ];
     }
 
+    /** A title defence's team takes over this journey's Champions entry (its clear time stays). */
+    function replaceChampionTeam(team: { id: number; level: number; shiny: boolean }[]) {
+        const run = timesEntered.value + 1;
+        entries.value = entries.value.map(e =>
+            e.run === run
+                ? { ...e, team: team.map(({ id, level, shiny }) => ({ id, level, shiny })) }
+                : e
+        );
+    }
+
+    /** Puts this journey's chosen Pokémon in the Pokémon Bank (called on entering the Hall). */
+    function depositInBank() {
+        const id = bankDeposit.value;
+        bankDeposit.value = 0;
+        const entry = main.box.value[id];
+        if (id === 0 || entry == null) return;
+        const shiny = entry.shiny || bank.value.some(b => b.id === id && b.shiny);
+        bank.value = [
+            ...bank.value.filter(b => b.id !== id),
+            { id, shiny, region: main.region.value }
+        ];
+    }
+
     const reset = createReset(() => ({
         thingsToReset: (): Record<string, unknown>[] => [main, mart]
     }));
@@ -334,6 +367,7 @@ const layer = createLayer(id, () => {
             clearCount("sinnoh") > 0 &&
             !palPark.value[region];
         if (migrates) palPark.value = { ...palPark.value, [region]: true };
+        depositInBank();
         clears.value = { ...clears.value, [region]: clearCount(region) + 1 };
         // How you catch is a preference, not journey progress: it carries over.
         const catching = {
@@ -552,12 +586,54 @@ const layer = createLayer(id, () => {
                         )}
                     </div>
                 ) : null}
+                {main.champion.value && mechanicUnlocked("partner") ? renderBank() : null}
                 <Button kind="primary" disabled={!main.champion.value} onClick={enterHallOfFame}>
                     {main.champion.value
                         ? `Enter the Hall of Fame (+${pendingFame.value} Fame)`
                         : `Clear the ${region.finaleName} to enter`}
                 </Button>
             </Panel>
+        );
+    }
+
+    /**
+     * The Pokémon Bank: pick one Pokémon from this journey's box to keep as a partner choice, even
+     * one that never entered the Hall of Fame (a post-game legendary, a form).
+     */
+    function renderBank() {
+        const kept = new Set(bank.value.map(b => b.id));
+        const team = new Set(clearingTeam.value);
+        const options = Object.keys(main.box.value)
+            .map(Number)
+            .filter(id => !kept.has(id) && !team.has(id))
+            .sort((a, b) => getSpecies(a).name.localeCompare(getSpecies(b).name));
+        return (
+            <div class="pk-bank">
+                <label class="pk-small">
+                    <b>Pokémon Bank</b>: keep one Pokémon from this journey as a partner choice for
+                    later journeys (your Hall of Fame team already is one).{" "}
+                    <select
+                        value={String(bankDeposit.value)}
+                        onChange={(e: Event) =>
+                            (bankDeposit.value = Number((e.target as HTMLSelectElement).value))
+                        }
+                    >
+                        <option value="0">Nobody</option>
+                        {options.map(id => (
+                            <option value={String(id)}>
+                                {getSpecies(id).name}
+                                {main.box.value[id]?.shiny ? " ✨" : ""}
+                                {getSpecies(id).legendary ? " ★" : ""}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+                {bank.value.length > 0 ? (
+                    <div class="pk-small pk-muted">
+                        In the Bank: {bank.value.map(b => getSpecies(b.id).name).join(", ")}
+                    </div>
+                ) : null}
+            </div>
         );
     }
 
@@ -738,6 +814,10 @@ const layer = createLayer(id, () => {
         benchSlots,
         autoLegends,
         bossesBeaten,
+        bank,
+        bankDeposit,
+        newFacesIn,
+        replaceChampionTeam,
         eggsBred,
         refundUpgrade,
         travelMode,

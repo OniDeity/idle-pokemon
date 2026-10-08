@@ -221,7 +221,10 @@ function evolveAll() {
 
 /** Keeps the Pokémon that best counter the next trainer's team in the party. */
 function autoParty() {
-    const trainers = main.nextTrainers.value;
+    // After the finale, with new faces for the Hall of Fame on, it lines up a title defence.
+    const defending =
+        main.nextTrainers.value.length === 0 && main.champion.value && hof.newFacesForFinale.value;
+    const trainers = defending ? main.finale.value : main.nextTrainers.value;
     if (trainers.length === 0) return;
     const targets = trainers.flatMap(trainerTeam);
     const damage = main.bonuses.value.damage;
@@ -497,6 +500,13 @@ function autoChallenge() {
         for (const special of SPECIAL_ENCOUNTERS) {
             if (special.kind !== "legendary" && special.kind !== "boss") continue;
             if (main.claimedSpecials.value[special.id] || !main.specialAvailable(special)) continue;
+            // A legendary already in the box this journey isn't worth another battle, and one
+            // can't be caught without a ball to throw (Ranger regions capture with the Styler).
+            if (special.kind === "legendary") {
+                if (main.owns(special.speciesId)) continue;
+                const styler = main.regionDef.value.styler === true;
+                if (!styler && !Object.values(main.balls.value).some(n => (n ?? 0) > 0)) continue;
+            }
             const metBefore =
                 special.kind === "legendary"
                     ? dex.entry(special.speciesId).caught
@@ -510,6 +520,20 @@ function autoChallenge() {
             );
             main.claimSpecial(special);
             return;
+        }
+    }
+    // A title defence, when this party would put more new faces in the Hall of Fame (post-game
+    // catches) and the forecast says it wins.
+    if (main.champion.value && hof.newFacesForFinale.value && trainers.length === 0) {
+        const faces = hof.newFacesIn(main.partyIds.value).length;
+        if (faces > hof.newFacesIn(main.clearTeam.value).length) {
+            const tough = loser(main.finale.value);
+            if (tough == null) {
+                report("autoChallenge", `defending the title with ${plural(faces, "new face")}`);
+                main.challengeFinale();
+                return;
+            }
+            waiting = `a title defence with ${plural(faces, "new face")} waits until the forecast beats ${tough.name}`;
         }
     }
     report("autoChallenge", waiting === "" ? "every challenge done" : waiting);

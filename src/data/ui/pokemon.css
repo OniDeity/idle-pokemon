@@ -1797,3 +1797,7 @@ span.pk-partner-choice {
     align-items: flex-end;
     gap: 4px;
 }
+
+.pk-bank {
+    margin: 8px 0;
+}
