@@ -4,6 +4,8 @@
  * Teams with Pokémon not yet in that region's Hall of Fame earn the most. The Pokédex is kept.
  */
 import type { ContestCategory, ContestRank } from "game/pokemon/contests";
+import type { ChallengeId } from "game/pokemon/challenges";
+import { CHALLENGES, challengeFame, challengesMet } from "game/pokemon/challenges";
 import { main } from "data/projEntry";
 import { openLayer } from "../ui/nav";
 import { createReset } from "features/reset";
@@ -22,6 +24,7 @@ import type { PokemonType } from "game/pokemon/data";
 import { getSpecies, hallOfFameId } from "game/pokemon/data";
 import type { MechanicId } from "game/pokemon/mechanics";
 import { MECHANIC_LIST } from "game/pokemon/mechanics";
+import { rankFameMultiplier } from "game/pokemon/medals";
 import { pokedexRequirement } from "game/pokemon/pokedex";
 import { REGIONS } from "game/pokemon/regions";
 import type { RegionId } from "game/pokemon/zones";
@@ -40,6 +43,7 @@ import {
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
 import dex from "./dex";
+import medals from "./medals";
 import mart from "./mart";
 
 export type HallOfFameEntry = {
@@ -49,6 +53,8 @@ export type HallOfFameEntry = {
     team: { id: number; level: number; shiny: boolean }[];
     region?: RegionId;
     fame?: number;
+    /** The challenges the journey was cleared with (a late Time Trial isn't counted). */
+    challenges?: ChallengeId[];
 };
 
 const id = "hof";
@@ -92,6 +98,19 @@ const layer = createLayer(id, () => {
     const palParkRegions = computed(() =>
         (Object.keys(palPark.value) as RegionId[]).filter(r => palPark.value[r] === true)
     );
+    /**
+     * The Key System's challenges set for the next journeys (Black 2 and White 2's keys): kept
+     * between journeys, and taken up when a starter is chosen.
+     */
+    const challengeKeys = persistent<ChallengeId[]>([], false);
+
+    function toggleChallengeKey(challenge: ChallengeId) {
+        if (main.starter.value !== 0 || timesEntered.value === 0) return;
+        challengeKeys.value = challengeKeys.value.includes(challenge)
+            ? challengeKeys.value.filter(c => c !== challenge)
+            : [...challengeKeys.value, challenge];
+    }
+
     /** Contest ribbons by species: the highest rank won in each category. */
     const ribbons = persistent<Record<string, Partial<Record<ContestCategory, ContestRank>>>>(
         {},
@@ -216,8 +235,20 @@ const layer = createLayer(id, () => {
         )
     );
 
+    /** How long this journey took to clear its finale (for the Time Trial). */
+    const clearTime = computed(
+        (): number =>
+            entries.value.find(e => e.run === timesEntered.value + 1)?.time ?? main.runTime.value
+    );
+    /** The journey's challenges' Fame multiplier. */
+    const challengeMultiplier = computed((): number =>
+        challengeFame(main.challenges.value, clearTime.value)
+    );
+
     const pendingFame = computed((): number =>
         fameGain({
+            challenge: challengeMultiplier.value,
+            medals: rankFameMultiplier(medals.tiersEarned.value),
             regionFame: main.regionDef.value.fame,
             dexCaught: dex.caughtCount.value,
             shinyCaught: dex.shinyCount.value,
@@ -236,7 +267,10 @@ const layer = createLayer(id, () => {
                 time: main.runTime.value,
                 dexCaught: dex.caughtCount.value,
                 region: main.region.value,
-                team: team.map(({ id, level, shiny }) => ({ id, level, shiny }))
+                team: team.map(({ id, level, shiny }) => ({ id, level, shiny })),
+                ...(main.challenges.value.length > 0
+                    ? { challenges: challengesMet(main.challenges.value, main.runTime.value) }
+                    : {})
             }
         ];
     }
@@ -329,8 +363,12 @@ const layer = createLayer(id, () => {
                             {dex.shinyCount.value * 2} · New to {region.name}'s Hall of Fame:{" "}
                             {newSpecies.value.length} × {FAME_PER_NEW_SPECIES}
                             {clearCount(region.id) === 0 ? " · First clear ×1.5" : ""}
-                            {main.fameBonus.value > 1
-                                ? ` · Distortion World ×${main.fameBonus.value}`
+                            {main.fameBonus.value > 1 ? ` · Bonus ×${main.fameBonus.value}` : ""}
+                            {challengeMultiplier.value > 1
+                                ? ` · Challenges ×${challengeMultiplier.value.toFixed(2)}`
+                                : ""}
+                            {rankFameMultiplier(medals.tiersEarned.value) > 1
+                                ? ` · Medal Rally ×${rankFameMultiplier(medals.tiersEarned.value).toFixed(2)}`
                                 : ""}
                             {main.rematch.value > 1
                                 ? ` · ${main.rematchClears.value > 0 ? "Rematch" : "Renown"} ×${main.rematch.value.toFixed(1)}`
@@ -458,6 +496,9 @@ const layer = createLayer(id, () => {
         palPark,
         palParkRegions,
         ribbons,
+        challengeKeys,
+        toggleChallengeKey,
+        challengeMultiplier,
         unlockMechanic,
         isEnshrined,
         pendingFame,
@@ -536,6 +577,9 @@ const layer = createLayer(id, () => {
                                                 {formatDuration(entry.time)} · {entry.dexCaught}{" "}
                                                 species
                                                 {entry.fame != null ? ` · +${entry.fame} Fame` : ""}
+                                                {(entry.challenges ?? []).length > 0
+                                                    ? ` · ${entry.challenges!.map(c => CHALLENGES[c].name).join(", ")}`
+                                                    : ""}
                                             </span>
                                         </div>
                                         <div class="pk-hof-team">

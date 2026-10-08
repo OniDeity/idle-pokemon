@@ -900,6 +900,8 @@ export interface FameInputs {
     bonus?: number;
     /** The journey's challenges' Fame multiplier. */
     challenge?: number;
+    /** The Medal Rally rank's Fame multiplier. */
+    medals?: number;
 }
 
 /** Fame for enshrining a team. New faces in the Hall of Fame are worth the most. */
@@ -917,7 +919,8 @@ export function fameGain(input: FameInputs): number {
         (hasMilestone(input.dexCaught, "Azure Flute") ? 1.25 : 1) *
         (hasMilestone(input.dexCaught, "Pass Orb") ? 1.25 : 1) *
         (hasMilestone(input.dexCaught, "Comet Shard") ? 1.25 : 1) *
-        (input.challenge ?? 1);
+        (input.challenge ?? 1) *
+        (input.medals ?? 1);
     return Math.max(1, Math.floor(base * multiplier));
 }
 

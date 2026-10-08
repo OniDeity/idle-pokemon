@@ -369,9 +369,9 @@ export function criticalCaptureChance(chance: number, dexCaught: number, boost =
  * any starter. Drayden and the League (N and Ghetsis last) are the longest walls.
  */
 const UNOVA_GYM_STRENGTHS = [1.8, 3.0, 3.6, 4.6, 4.4, 5.4, 5.8, 5.2];
-const UNOVA_ELITE_FOUR_STRENGTH = 3.93;
-const UNOVA_N_STRENGTH = 4.08;
-const UNOVA_GHETSIS_STRENGTH = 4.23;
+const UNOVA_ELITE_FOUR_STRENGTH = 3.69;
+const UNOVA_N_STRENGTH = 3.84;
+const UNOVA_GHETSIS_STRENGTH = 3.98;
 
 function unovaGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">,

@@ -392,8 +392,8 @@ export function grottoPool(
  * League are the longest walls.
  */
 const UNOVA2_GYM_STRENGTHS = [1.8, 3.0, 3.6, 4.6, 4.4, 5.2, 5.3, 5.4];
-const UNOVA2_ELITE_FOUR_STRENGTH = 4.16;
-const UNOVA2_CHAMPION_STRENGTH = 4.4;
+const UNOVA2_ELITE_FOUR_STRENGTH = 3.87;
+const UNOVA2_CHAMPION_STRENGTH = 4.09;
 
 function unova2Gym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">,

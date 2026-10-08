@@ -23,6 +23,7 @@ import type { BallId } from "game/pokemon/items";
 import { APRICORN_BALLS, BALLS } from "game/pokemon/items";
 import { maxHp, xpForLevel } from "game/pokemon/stats";
 import type { RegionDefinition } from "game/pokemon/regions";
+import { CHALLENGE_LIST, CHALLENGES } from "game/pokemon/challenges";
 import { REGION_LIST, REGIONS, startersFor } from "game/pokemon/regions";
 import type { RegionId } from "game/pokemon/zones";
 import { formatTime } from "util/bignum";
@@ -188,6 +189,14 @@ function renderHud() {
             <div class="pk-hud-stat" title="Level cap">
                 Cap Lv. {main.cap.value}
             </div>
+            {main.challenges.value.length > 0 ? (
+                <div
+                    class="pk-hud-stat"
+                    title={`Challenges: ${main.challenges.value.map(c => CHALLENGES[c].name).join(", ")}`}
+                >
+                    🔑 {main.challenges.value.length}
+                </div>
+            ) : null}
             {hof.fame.value > 0 || hof.timesEntered.value > 0 ? (
                 <div class="pk-hud-stat" title="Fame">
                     ★ {hof.fame.value}
@@ -307,6 +316,7 @@ function renderStarterSelect() {
                 ? renderPartnerPicker(region)
                 : null}
             {again ? renderSuggestedTeam(region) : null}
+            {again ? renderChallengeKeys() : null}
             {region.allStarters === true ? (
                 <p class="pk-small pk-muted">
                     Both {region.starters.map(id => getSpecies(id).name).join(" and ")} join you;
@@ -319,6 +329,39 @@ function renderStarterSelect() {
                     make short work of them.
                 </p>
             ) : null}
+        </div>
+    );
+}
+
+/**
+ * The Key System (Black 2 and White 2's keys, as challenges): rules for the next journey, set
+ * before choosing a starter, each multiplying the journey's Fame.
+ */
+function renderChallengeKeys() {
+    const keys = hof.challengeKeys.value;
+    const fame = CHALLENGE_LIST.filter(c => keys.includes(c.id)).reduce(
+        (product, c) => product * c.fame,
+        1
+    );
+    return (
+        <div class="pk-partner-picker">
+            <p class="pk-small">
+                <b>Key System:</b> challenges for this journey, each worth more Fame when you enter
+                the Hall of Fame (and its own medal).
+                {keys.length > 0 ? ` Fame ×${fame.toFixed(2)}.` : ""}
+            </p>
+            <div class="pk-challenge-keys">
+                {CHALLENGE_LIST.map(c => (
+                    <label class="pk-small pk-setting" title={c.description}>
+                        <input
+                            type="checkbox"
+                            checked={keys.includes(c.id)}
+                            onChange={() => hof.toggleChallengeKey(c.id)}
+                        />{" "}
+                        <b>{c.name}</b> (×{c.fame}): {c.description}
+                    </label>
+                ))}
+            </div>
         </div>
     );
 }

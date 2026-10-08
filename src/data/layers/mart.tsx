@@ -30,6 +30,8 @@ const layer = createLayer(id, () => {
     function buyUpgrade(upgrade: UpgradeDefinition & { id: MartUpgradeId }) {
         const current = level(upgrade.id);
         if (current >= upgrade.maxLevel || main.martTier.value < upgrade.badgesRequired) return;
+        // The Frugal challenge: no upgrades this journey.
+        if (main.challengeOn("frugal")) return;
         if (!main.spend(upgradeCost(upgrade, current))) return;
         levels.value = { ...levels.value, [upgrade.id]: current + 1 };
     }
@@ -205,7 +207,15 @@ const layer = createLayer(id, () => {
                     ) : null}
 
                     {page === "training" ? (
-                        <Panel>{MART_UPGRADE_LIST.map(renderUpgrade)}</Panel>
+                        <Panel>
+                            {main.challengeOn("frugal") ? (
+                                <p class="pk-small pk-muted">
+                                    Frugal challenge: no upgrades are sold this journey.
+                                </p>
+                            ) : (
+                                MART_UPGRADE_LIST.map(renderUpgrade)
+                            )}
+                        </Panel>
                     ) : null}
 
                     {page === "items" ? (
