@@ -3,6 +3,12 @@ import { requiredSpritePaths } from "../../scripts/fetchSprites";
 import type { BallContext, PartyBattler } from "game/pokemon/balance";
 import {
     benchTeam,
+    FAME_EFFECTS,
+    HOF_UPGRADES,
+    MASTERY_COST_GROWTH,
+    upgradeCost,
+    upgradeSpent,
+    upgradeTopLevel,
     ballCatchChance,
     ballEffect,
     catchChance,
@@ -1522,6 +1528,7 @@ describe("Fame upgrades", () => {
         expect(gated.map(u => [u.id, u.mechanic])).toEqual([
             ["flameBody", "breeding"],
             ["masudaMethod", "breeding"],
+            ["breederLineage", "breeding"],
             ["pokeblockKit", "contests"],
             ["contestStar", "contests"],
             ["encounterPower", "phenomena"],
@@ -1868,5 +1875,59 @@ describe("Team Strategist's bench training", () => {
 
     test("never leaves a place empty when there are fewer trainees", () => {
         expect(benchTeam([1, 2, 3], [1, 2, 3, 7], options)).toEqual([1, 2, 7]);
+    });
+});
+
+describe("Fame upgrades", () => {
+    test("Mastery continues past the max at rising prices", () => {
+        const scout = HOF_UPGRADES.scout;
+        expect(upgradeTopLevel(scout)).toBe(15);
+        expect(upgradeCost(scout, 4)).toBe(48);
+        const first = upgradeCost(scout, 5);
+        expect(first).toBe(96);
+        expect(upgradeCost(scout, 6)).toBe(Math.round(96 * MASTERY_COST_GROWTH));
+        expect(upgradeSpent(scout, 2)).toBe(3 + 6);
+    });
+
+    test("levels up to the max keep their old effect; Mastery adds a smaller one", () => {
+        expect(FAME_EFFECTS.scout(5)).toBeCloseTo(0.5);
+        expect(FAME_EFFECTS.scout(6)).toBeCloseTo(0.475);
+        expect(FAME_EFFECTS.catcher(10)).toBeCloseTo(2);
+        expect(FAME_EFFECTS.catcher(12)).toBeCloseTo(2.1);
+        expect(FAME_EFFECTS.shinyHunter(10)).toBeCloseTo(6);
+        expect(FAME_EFFECTS.masudaMethod(6)).toBeCloseTo(4);
+        expect(FAME_EFFECTS.headStart(3)).toBe(15);
+        expect(FAME_EFFECTS.martPrice(6)).toBeCloseTo(0.7);
+    });
+
+    test("every upgrade describes its effect at every level", () => {
+        for (const upgrade of HOF_UPGRADE_LIST) {
+            for (let level = 1; level <= upgradeTopLevel(upgrade); level++) {
+                const text = (upgrade as { effect?: (n: number) => string }).effect?.(level);
+                expect(text, upgrade.id).toBeDefined();
+                expect(text, upgrade.id).not.toMatch(/NaN|undefined|Infinity/);
+            }
+        }
+    });
+
+    test("reductions never reach zero, even fully mastered", () => {
+        for (const id of ["scout", "flameBody", "grottoPower"] as const) {
+            const top = upgradeTopLevel(HOF_UPGRADES[id]);
+            expect(FAME_EFFECTS[id](top)).toBeGreaterThan(0.25);
+        }
+        expect(FAME_EFFECTS.contestTime(upgradeTopLevel(HOF_UPGRADES.contestStar))).toBeGreaterThan(
+            0.3
+        );
+    });
+
+    test("the Pokémon Fan Club multiplies Hall of Fame Fame", () => {
+        const base = {
+            regionFame: 100,
+            dexCaught: 0,
+            shinyCaught: 0,
+            newSpecies: 0,
+            firstClear: false
+        };
+        expect(fameGain({ ...base, fanClub: 10 })).toBe(Math.floor(fameGain(base) * 1.3));
     });
 });

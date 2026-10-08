@@ -17,10 +17,13 @@ import {
     FAME_PER_NEW_SPECIES,
     fameGain,
     HOF_UPGRADE_LIST,
+    REFUND_SHARE,
     TRAVEL_MODES,
-    upgradeCost
+    upgradeCost,
+    upgradeSpent,
+    upgradeTopLevel
 } from "game/pokemon/balance";
-import type { UpgradeDefinition } from "game/pokemon/balance";
+import type { UpgradeDefinition, UpgradeTab } from "game/pokemon/balance";
 import type { PokemonType } from "game/pokemon/data";
 import { getSpecies, hallOfFameId } from "game/pokemon/data";
 import type { MechanicId } from "game/pokemon/mechanics";
@@ -95,6 +98,8 @@ const layer = createLayer(id, () => {
     const benchSlots = persistent<number>(2);
     /** League Pass setting: also battle legendaries caught before and bosses beaten before. */
     const autoLegends = persistent<boolean>(true);
+    /** Day Care Eggs hatched, by species, for good (Breeder's Lineage). */
+    const eggsBred = persistent<Record<string, number>>({}, false);
     /** Boss specials ever beaten (for the League Pass), by special id. */
     const bossesBeaten = persistent<Record<string, boolean>>({}, false);
     /** Travel Planner setting: what it travels for. */
@@ -286,7 +291,8 @@ const layer = createLayer(id, () => {
             newSpecies: newSpecies.value.length,
             firstClear: clearCount(main.region.value) === 0,
             rematch: main.rematch.value,
-            bonus: main.fameBonus.value
+            bonus: main.fameBonus.value,
+            fanClub: main.fameLevels.value.fanClub
         })
     );
 
@@ -358,9 +364,117 @@ const layer = createLayer(id, () => {
     function buyUpgrade(upgrade: UpgradeDefinition & { id: HofUpgradeId }) {
         const current = level(upgrade.id);
         const cost = upgradeCost(upgrade, current);
-        if (current >= upgrade.maxLevel || fame.value < cost) return;
+        if (current >= upgradeTopLevel(upgrade) || fame.value < cost) return;
+        if (timesEntered.value < (upgrade.entriesRequired ?? 0)) return;
         fame.value -= cost;
         levels.value = { ...levels.value, [upgrade.id]: current + 1 };
+    }
+
+    /** What refunding an upgrade gives back: most of the Fame spent on it. */
+    function refundValue(upgrade: UpgradeDefinition & { id: HofUpgradeId }) {
+        return Math.floor(upgradeSpent(upgrade, level(upgrade.id)) * REFUND_SHARE);
+    }
+
+    function refundUpgrade(upgrade: UpgradeDefinition & { id: HofUpgradeId }) {
+        if (level(upgrade.id) === 0) return;
+        fame.value += refundValue(upgrade);
+        levels.value = { ...levels.value, [upgrade.id]: 0 };
+    }
+
+    const UPGRADE_TABS: [UpgradeTab, string][] = [
+        ["battle", "Battle"],
+        ["catching", "Catching"],
+        ["journey", "Journey"],
+        ["mechanics", "Mechanics"]
+    ];
+
+    function upgradeTab(upgrade: UpgradeDefinition): UpgradeTab {
+        return upgrade.tab ?? (upgrade.mechanic != null ? "mechanics" : "battle");
+    }
+
+    function renderUpgrade(upgrade: UpgradeDefinition & { id: HofUpgradeId }) {
+        const current = level(upgrade.id);
+        const cost = upgradeCost(upgrade, current);
+        const top = upgradeTopLevel(upgrade);
+        const maxed = current >= top;
+        const mastering = current >= upgrade.maxLevel && upgrade.mastery != null;
+        const locked = timesEntered.value < (upgrade.entriesRequired ?? 0);
+        return (
+            <div class="pk-shop-row">
+                <ItemIcon src={upgrade.sprite} alt={upgrade.name} />
+                <div class="pk-shop-info">
+                    <b>{upgrade.name}</b>{" "}
+                    <span class="pk-muted">
+                        Lv. {Math.min(current, upgrade.maxLevel)}/{upgrade.maxLevel}
+                        {mastering
+                            ? ` · ★ Mastery ${current - upgrade.maxLevel}/${upgrade.mastery!.levels}`
+                            : ""}
+                    </span>
+                    <div class="pk-small">
+                        {mastering ? upgrade.mastery!.description : upgrade.description}
+                    </div>
+                    {current > 0 && upgrade.effect != null ? (
+                        <div class="pk-small pk-muted">Now: {upgrade.effect(current)}</div>
+                    ) : null}
+                </div>
+                <div class="pk-upgrade-buttons">
+                    {locked ? (
+                        <span class="pk-small pk-muted">
+                            🔒 After {upgrade.entriesRequired} Hall of Fame entries
+                        </span>
+                    ) : (
+                        <Button
+                            kind="primary"
+                            disabled={maxed || fame.value < cost}
+                            onClick={() => buyUpgrade(upgrade)}
+                        >
+                            {maxed ? "Maxed" : `${formatNumber(cost)} Fame`}
+                        </Button>
+                    )}
+                    {current > 0 ? (
+                        <Button
+                            kind="small"
+                            title={`Sets it back to Lv. 0 and returns ${Math.round(REFUND_SHARE * 100)}% of the Fame spent on it.`}
+                            onClick={() => {
+                                if (
+                                    window.confirm(
+                                        `Refund ${upgrade.name}? You get ${formatNumber(refundValue(upgrade))} Fame back and it goes back to Lv. 0.`
+                                    )
+                                ) {
+                                    refundUpgrade(upgrade);
+                                }
+                            }}
+                        >
+                            Refund
+                        </Button>
+                    ) : null}
+                </div>
+            </div>
+        );
+    }
+
+    function renderUpgrades() {
+        const offered = HOF_UPGRADE_LIST.filter(
+            u => u.mechanic == null || mechanicUnlocked(u.mechanic)
+        );
+        const tabs: TabOption[] = UPGRADE_TABS.map(([id, label]) => ({
+            id,
+            label,
+            show: offered.some(u => upgradeTab(u) === id)
+        }));
+        const page = currentTab("hofUpgrades", tabs);
+        return (
+            <>
+                {renderTabs("hofUpgrades", tabs)}
+                <Panel>
+                    <p class="pk-small pk-muted">
+                        Kept for good. A finished upgrade with ★ Mastery keeps going, a little at a
+                        time. A refund returns {Math.round(REFUND_SHARE * 100)}% of its Fame.
+                    </p>
+                    {offered.filter(u => upgradeTab(u) === page).map(renderUpgrade)}
+                </Panel>
+            </>
+        );
     }
 
     function buyAutomation(id: AutomationId) {
@@ -624,6 +738,8 @@ const layer = createLayer(id, () => {
         benchSlots,
         autoLegends,
         bossesBeaten,
+        eggsBred,
+        refundUpgrade,
         travelMode,
         travelModeInEffect,
         chooseTravelMode,
@@ -675,36 +791,7 @@ const layer = createLayer(id, () => {
                     {page === "automation" ? renderAutomation() : null}
                     {page === "mechanics" ? renderMechanics() : null}
 
-                    {page === "upgrades" ? (
-                        <Panel>
-                            {HOF_UPGRADE_LIST.filter(
-                                u => u.mechanic == null || mechanicUnlocked(u.mechanic)
-                            ).map(upgrade => {
-                                const current = level(upgrade.id);
-                                const cost = upgradeCost(upgrade, current);
-                                const maxed = current >= upgrade.maxLevel;
-                                return (
-                                    <div class="pk-shop-row">
-                                        <ItemIcon src={upgrade.sprite} alt={upgrade.name} />
-                                        <div class="pk-shop-info">
-                                            <b>{upgrade.name}</b>{" "}
-                                            <span class="pk-muted">
-                                                Lv. {current}/{upgrade.maxLevel}
-                                            </span>
-                                            <div class="pk-small">{upgrade.description}</div>
-                                        </div>
-                                        <Button
-                                            kind="primary"
-                                            disabled={maxed || fame.value < cost}
-                                            onClick={() => buyUpgrade(upgrade)}
-                                        >
-                                            {maxed ? "Maxed" : `${formatNumber(cost)} Fame`}
-                                        </Button>
-                                    </div>
-                                );
-                            })}
-                        </Panel>
-                    ) : null}
+                    {page === "upgrades" ? renderUpgrades() : null}
 
                     {page === "champions" ? (
                         <Panel>
