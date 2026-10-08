@@ -1702,25 +1702,33 @@ export const main = createLayer("main", layer => {
         });
     }
 
+    /** Who you face in a legendary or boss battle (for the battle and its forecast). */
+    function specialTrainers(
+        special: Extract<SpecialEncounter, { kind: "legendary" | "boss" }>
+    ): TrainerDefinition[] {
+        if (special.kind === "boss") return [withStrength(special.trainer, trainerStrength.value)];
+        return [
+            {
+                id: special.id,
+                name: getSpecies(special.speciesId).name,
+                title: "Legendary Pokémon",
+                specialty: null,
+                team: [{ id: special.speciesId, level: special.level }],
+                timeLimit: LEGENDARY_TIME_LIMIT,
+                statMultiplier: special.strength,
+                prizeMoney: 0,
+                quote: special.text
+            }
+        ];
+    }
+
     function challengeLegendary(special: Extract<SpecialEncounter, { kind: "legendary" }>) {
         if (claimedSpecials.value[special.id] || !specialAvailable(special)) return;
         const species = getSpecies(special.speciesId);
         startTrainerBattle({
             label: `Wild ${species.name}`,
             legendary: special,
-            trainers: [
-                {
-                    id: special.id,
-                    name: species.name,
-                    title: "Legendary Pokémon",
-                    specialty: null,
-                    team: [{ id: special.speciesId, level: special.level }],
-                    timeLimit: LEGENDARY_TIME_LIMIT,
-                    statMultiplier: special.strength,
-                    prizeMoney: 0,
-                    quote: special.text
-                }
-            ],
+            trainers: specialTrainers(special),
             onWin() {
                 // In a Pokémon Ranger region the battle was the capture: the Styler's loops hold.
                 if (regionDef.value.styler === true) {
@@ -2012,9 +2020,10 @@ export const main = createLayer("main", layer => {
     function challengeBoss(special: Extract<SpecialEncounter, { kind: "boss" }>) {
         startTrainerBattle({
             label: `${special.trainer.name} ${special.fameBonus != null ? "in" : "on"} ${special.place}`,
-            trainers: [withStrength(special.trainer, trainerStrength.value)],
+            trainers: specialTrainers(special),
             onWin() {
                 claimedSpecials.value = { ...claimedSpecials.value, [special.id]: true };
+                hof.bossesBeaten.value = { ...hof.bossesBeaten.value, [special.id]: true };
                 medals.count("bossesBeaten");
                 if (special.keyItem != null) grantKeyItem(special.keyItem);
                 const prizes: string[] = [];
@@ -2118,6 +2127,7 @@ export const main = createLayer("main", layer => {
         conditionOf,
         feedPokeblock,
         contestRankFor,
+        specialTrainers,
         contestScoreOf,
         enterContest,
         journeyPartner,

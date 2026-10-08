@@ -185,7 +185,12 @@ journeys.
   the Travel Planner follows `hof.travelModeInEffect` (`TRAVEL_MODES` in balance.ts; catch mode
   "all" means Catch 'em all: encounter odds of species/forms not in the box ÷
   `zoneRates().secondsPerBattle`, Pokédex newcomers ×3). Status lines go through
-  `automationStatus`. Catch settings survive a Hall of Fame entry.
+  `automationStatus` (every automation reports). Catch settings survive a Hall of Fame entry.
+  v2.11.2: League Pass also battles legendaries already caught in the Pokédex and bosses in
+  `hof.bossesBeaten` (`hof.autoLegends`, forecast via `main.specialTrainers`); Contest Pass
+  (`autoContest`, `AutomationDefinition.mechanic` hides it until Contests are unlocked);
+  bench training (`hof.trainBench`/`benchSlots`, pure `benchTeam()` in balance.ts) only while
+  the best team's forecast loses.
 - Challenges (`challenges.ts`): set on the starter screen in `hof.challengeKeys` (kept between
   journeys), copied into `main.challenges` when the starter is picked. Enforced in
   `main.canJoinParty`/`maxParty`/`trainerStrength`/`fameLevels` and the Mart; HoF entries keep

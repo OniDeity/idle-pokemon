@@ -5,6 +5,7 @@
 import dex from "data/layers/dex";
 import hof from "data/layers/hof";
 import type { BallMode, BattleState, CatchMode, LogEntry } from "data/projEntry";
+import type { AutomationId } from "game/pokemon/balance";
 import { main } from "data/projEntry";
 import player from "game/player";
 import {
@@ -40,6 +41,18 @@ import {
 } from "./components";
 import { openLayer, renderNav } from "./nav";
 import { automationStatus } from "data/automation";
+
+const AUTOMATION_ICONS: Record<AutomationId, string> = {
+    autoShop: "🛒",
+    autoClaim: "📞",
+    autoEvolve: "⬆",
+    autoParty: "🧩",
+    autoTravel: "🧭",
+    autoChallenge: "🏟",
+    autoPoketch: "⌚",
+    autoCGear: "📡",
+    autoContest: "🎀"
+};
 
 const CAVES = new Set([
     "mtMoon",
@@ -806,14 +819,13 @@ function renderControls() {
                     ))}
                 </div>
             ) : null}
-            {(["autoTravel", "autoParty"] as const)
-                .filter(id => hof.automationActive(id) && automationStatus.value[id] != null)
-                .map(id => (
-                    <div class="pk-small pk-muted">
-                        {id === "autoTravel" ? "🧭 Travel Planner" : "🧩 Team Strategist"}:{" "}
-                        {automationStatus.value[id]}
-                    </div>
-                ))}
+            {AUTOMATIONS.filter(
+                a => hof.automationActive(a.id) && automationStatus.value[a.id] != null
+            ).map(a => (
+                <div class="pk-small pk-muted">
+                    {AUTOMATION_ICONS[a.id]} {a.name}: {automationStatus.value[a.id]}
+                </div>
+            ))}
             {main.balls.value.masterBall > 0 && !styler ? (
                 <label class="pk-small pk-check">
                     <input

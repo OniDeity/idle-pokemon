@@ -2,6 +2,7 @@ import { existsSync } from "fs";
 import { requiredSpritePaths } from "../../scripts/fetchSprites";
 import type { BallContext, PartyBattler } from "game/pokemon/balance";
 import {
+    benchTeam,
     ballCatchChance,
     ballEffect,
     catchChance,
@@ -1827,5 +1828,45 @@ describe("challenges", () => {
         // Grounded: no legendaries.
         expect(partyAllowed(getSpecies(150), ["grounded"], bulbasaur)).toBe(false);
         expect(partyAllowed(getSpecies(150), [], bulbasaur)).toBe(true);
+    });
+});
+
+describe("Team Strategist's bench training", () => {
+    const levels: Record<number, number> = {
+        1: 50,
+        2: 50,
+        3: 50,
+        4: 30,
+        5: 50,
+        6: 20,
+        7: 10,
+        8: 12,
+        9: 8
+    };
+    const options = { cap: 50, slots: 2, level: (id: number) => levels[id] };
+
+    test("gives the places of the weakest members at the cap to Pokémon below it", () => {
+        // 5 and 3 are the weakest at the cap; 1 stays (the top member); 4 and 6 are still growing.
+        expect(benchTeam([1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6, 8, 7, 9], options)).toEqual([
+            1, 2, 4, 6, 8, 7
+        ]);
+    });
+
+    test("keeps the top member and the team when nobody is at the cap", () => {
+        expect(benchTeam([4, 6, 7], [4, 6, 7, 8], options)).toEqual([4, 6, 7]);
+        expect(benchTeam([1, 4], [1, 4, 8], options)).toEqual([1, 4]);
+    });
+
+    test("puts new faces first and keeps one form per Hall of Fame entry", () => {
+        const team = benchTeam([1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6, 8, 7, 9], {
+            ...options,
+            first: id => id === 9,
+            entry: id => (id === 7 ? 8 : id)
+        });
+        expect(team).toEqual([1, 2, 4, 6, 9, 8]);
+    });
+
+    test("never leaves a place empty when there are fewer trainees", () => {
+        expect(benchTeam([1, 2, 3], [1, 2, 3, 7], options)).toEqual([1, 2, 7]);
     });
 });
