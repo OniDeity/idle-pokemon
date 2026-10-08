@@ -919,6 +919,12 @@ export const OBLIVIA_ZONES: ZoneDefinition[] = [
 const OBLIVIA_MISSION_STRENGTHS = [2.8, 4.4, 4.8, 5.0, 5.2, 5.4, 5.6, 4.6];
 const OBLIVIA_FINALE_STRENGTH = 3.22;
 const OBLIVIA_MEWTWO_STRENGTH = 3.332;
+/**
+ * v2.12's retune: with the Fame upgrades' Mastery and Fan Club, the simulator's first clear fell
+ * under 10 hours, so every trial and the finale are this much stronger (strengths above are the
+ * earlier tuning). The sim is very sensitive here: ×1.05 doubled some runs.
+ */
+const OBLIVIA_TUNING = 1.05;
 
 function mission(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "keyItems">
@@ -926,7 +932,7 @@ function mission(
     return trial({
         keyItems: [],
         ...options,
-        statMultiplier: OBLIVIA_MISSION_STRENGTHS[options.badgeNumber - 1]
+        statMultiplier: OBLIVIA_TUNING * OBLIVIA_MISSION_STRENGTHS[options.badgeNumber - 1]
     });
 }
 
@@ -1085,6 +1091,13 @@ function boss(
  * Mewtwo, then Purple Eyes with the Golden Armor's full power.
  */
 export function obliviaFinale(): TrainerDefinition[] {
+    return obliviaFinaleUntuned().map(t => ({
+        ...t,
+        statMultiplier: t.statMultiplier * OBLIVIA_TUNING
+    }));
+}
+
+function obliviaFinaleUntuned(): TrainerDefinition[] {
     const societea = OBLIVIA_FINALE_STRENGTH;
     return [
         boss(
