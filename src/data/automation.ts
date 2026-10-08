@@ -3,15 +3,16 @@
  * switched it off, and only makes choices a sensible player would: it keeps a cash reserve,
  * never wastes Master Balls, and never starts a battle the forecast says it would lose.
  */
-import type { AutomationId, MartUpgradeId } from "game/pokemon/balance";
+import type { AutomationId, MartUpgradeId, TravelMode } from "game/pokemon/balance";
 import {
     MART_UPGRADE_LIST,
+    zoneRates,
     memberDps,
     simulateTrainerBattle,
     trainerTeam,
     upgradeCost
 } from "game/pokemon/balance";
-import { hallOfFameId } from "game/pokemon/data";
+import { getSpecies, hallOfFameId, isShadow } from "game/pokemon/data";
 import type { BallId } from "game/pokemon/items";
 import type { StoneId } from "game/pokemon/data";
 import { APRICORN_BALLS, BALLS, STONES } from "game/pokemon/items";
@@ -23,6 +24,7 @@ import type { TrainerDefinition } from "game/pokemon/trainers";
 import type { ZoneDefinition } from "game/pokemon/zones";
 import {
     availableZoneSpecies,
+    catchableIn,
     encounterOdds,
     typicalLevel,
     zonesIn,
@@ -32,6 +34,7 @@ import dex from "./layers/dex";
 import hof from "./layers/hof";
 import mart from "./layers/mart";
 import { main, POKE_SNACK_PRICE } from "./projEntry";
+import { ref } from "vue";
 
 function enabled(id: AutomationId) {
     return hof.automationActive(id);
@@ -158,7 +161,19 @@ function autoEvolve() {
     }
 }
 
-/** How much each owned Pokémon contributes against the next trainer's team. */
+/**
+ * What each automation last decided, in a few words, for the Journey panel. Travel Planner and
+ * Team Strategist report here.
+ */
+export const automationStatus = ref<Partial<Record<AutomationId, string>>>({});
+
+function report(id: AutomationId, text: string) {
+    if (automationStatus.value[id] !== text) {
+        automationStatus.value = { ...automationStatus.value, [id]: text };
+    }
+}
+
+/** Keeps the Pokémon that best counter the next trainer's team in the party. */
 function autoParty() {
     const trainers = main.nextTrainers.value;
     if (trainers.length === 0) return;
@@ -177,22 +192,36 @@ function autoParty() {
         });
     scored.sort((a, b) => b.score - a.score);
     const best = scored.slice(0, main.maxParty.value).map(s => s.id);
-    main.setParty(
-        main.nextTrial.value == null && hof.newFacesForFinale.value
-            ? (newFacesParty(
-                  scored.map(s => s.id),
-                  trainers
-              ) ?? best)
-            : best
-    );
+    let team = best;
+    if (main.nextTrial.value == null && hof.newFacesForFinale.value) {
+        const faces = newFacesParty(
+            scored.map(s => s.id),
+            trainers
+        );
+        if (faces != null) {
+            team = faces.team;
+            report(
+                "autoParty",
+                faces.count > 0
+                    ? `${faces.count} new face${faces.count === 1 ? "" : "s"} for the Hall of Fame${faces.wins ? "" : ", training until they'd win"}`
+                    : "no new face can win the finale yet: the strongest team"
+            );
+        }
+    } else {
+        report("autoParty", `the best counters to ${trainers[0].name}`);
+    }
+    main.setParty(team);
 }
 
 /**
- * For the finale: the team with the most Pokémon new to the Hall of Fame (each worth extra Fame)
- * that the forecast says still wins, filled out with the strongest of the rest. Undefined when
- * even one newcomer would cost the win.
+ * For the finale: up to the chosen number of Pokémon new to this region's Hall of Fame (each
+ * worth extra Fame), strongest first, filled out with the strongest of the rest. Unless they're
+ * set to train, it's as many of them as the forecast says can still win.
  */
-function newFacesParty(ranked: number[], trainers: TrainerDefinition[]): number[] | undefined {
+function newFacesParty(
+    ranked: number[],
+    trainers: TrainerDefinition[]
+): { team: number[]; count: number; wins: boolean } | undefined {
     const { damage, hp } = main.bonuses.value;
     const doubles = main.mechanicOn("doubleBattles");
     // Strongest first; a Gyarados and a Gyarados ♀ are one Hall of Fame entry.
@@ -202,56 +231,110 @@ function newFacesParty(ranked: number[], trainers: TrainerDefinition[]): number[
             ranked.findIndex(other => hallOfFameId(other) === hallOfFameId(id)) === i
     );
     const size = main.maxParty.value;
-    for (let count = Math.min(size, fresh.length); count > 0; count--) {
+    const wanted = Math.min(size, hof.newFacesCount.value, fresh.length);
+    const teamWith = (count: number) => {
         const team = fresh.slice(0, count);
-        team.push(...ranked.filter(id => !team.includes(id)).slice(0, size - count));
+        // Fill out with the strongest others (not a second form of a newcomer).
+        team.push(
+            ...ranked
+                .filter(id => !team.some(other => hallOfFameId(other) === hallOfFameId(id)))
+                .slice(0, size - count)
+        );
+        return team;
+    };
+    const wins = (team: number[]) => {
         const party = team.map(id => main.battlerFor(id));
-        if (trainers.every(t => simulateTrainerBattle(party, t, damage, hp, doubles).won)) {
-            return team;
-        }
+        return trainers.every(t => simulateTrainerBattle(party, t, damage, hp, doubles).won);
+    };
+    if (wanted === 0) return undefined;
+    // Training: field them all, win or not; the League Pass waits for the forecast.
+    if (hof.newFacesTrain.value) {
+        const team = teamWith(wanted);
+        return { team, count: wanted, wins: wins(team) };
     }
-    return undefined;
+    for (let count = wanted; count > 0; count--) {
+        const team = teamWith(count);
+        if (wins(team)) return { team, count, wins: true };
+    }
+    return { team: teamWith(0), count: 0, wins: true };
+}
+
+/** How much a Pokémon you might meet is worth to the Travel Planner's catching modes. */
+function catchValue(id: number, mode: TravelMode): number {
+    if (main.owns(id)) return 0;
+    if (!dex.entry(id).caught) return 3;
+    return mode === "catchAll" ? 1 : 0;
 }
 
 /**
- * For "catch 'em all": the place where an encounter is most likely to be a Pokémon (or form:
- * variants, female forms, patterns) you've caught before but don't have this journey, at any
- * level. Brand-new Pokédex entries are left for the player to find.
+ * For the catching modes: the place where Pokémon worth catching turn up fastest (chance per
+ * encounter over the time an encounter takes there), or undefined once there are none. Catching
+ * has to be on: with it off nothing would be caught.
  */
-function bestZoneToRecatch(zones: ZoneDefinition[]): ZoneDefinition | undefined {
-    const rodLevel = hof.levels.value.roddysRod ?? 0;
-    let best: ZoneDefinition | undefined;
-    let bestChance = 0;
+function bestZoneToCatch(
+    zones: ZoneDefinition[],
+    mode: TravelMode
+): { zone: ZoneDefinition; ids: number[] } | undefined {
+    if (main.catchMode.value === "off") return undefined;
+    const rodLevel = main.fameLevels.value.roddysRod ?? 0;
+    const extras = main.zoneExtras.value;
+    let best: { zone: ZoneDefinition; ids: number[] } | undefined;
+    let bestRate = 0;
     for (const zone of zones) {
-        let chance = 0;
-        for (const [id, p] of encounterOdds(
+        let value = 0;
+        const ids: number[] = [];
+        for (const [id, p] of encounterOdds(zone.id, main.keyItems.value, rodLevel, extras)) {
+            if (!catchableIn(zone.id, id) || (isShadow(id) && !main.keyItems.value.snagMachine)) {
+                continue;
+            }
+            const worth = catchValue(id, mode);
+            if (worth > 0) {
+                value += p * worth;
+                ids.push(id);
+            }
+        }
+        if (value === 0) continue;
+        const { secondsPerBattle } = zoneRates(
             zone.id,
             main.keyItems.value,
-            rodLevel,
-            main.zoneExtras.value
-        )) {
-            if (dex.entry(id).caught && !main.owns(id)) chance += p;
-        }
+            main.partyBattlers.value,
+            main.bonuses.value,
+            extras
+        );
         // Stay put unless somewhere else is clearly better, so it doesn't hop on ties.
-        const here = zone.id === main.zoneId.value ? 1.05 : 1;
-        if (chance * here > bestChance) {
-            best = zone;
-            bestChance = chance * here;
+        const here = zone.id === main.zoneId.value ? 1.1 : 1;
+        const rate = (value / secondsPerBattle) * here;
+        if (rate > bestRate) {
+            best = { zone, ids };
+            bestRate = rate;
         }
     }
     return best;
 }
 
-function autoTravel() {
-    const zones = zonesIn(main.region.value).filter(z => main.zoneUnlocked(z.id));
-    if (zones.length === 0) return;
-    if (hof.catchEmAll.value) {
-        const best = bestZoneToRecatch(zones);
-        if (best != null) {
-            main.travel(best.id);
-            return;
+/** The place your party earns the most experience per minute (Effort past the level cap). */
+function bestZoneToTrain(zones: ZoneDefinition[]): ZoneDefinition {
+    let best = zones[0];
+    let bestXp = -1;
+    for (const zone of zones) {
+        const { xpPerMinute } = zoneRates(
+            zone.id,
+            main.keyItems.value,
+            main.partyBattlers.value,
+            main.bonuses.value,
+            main.zoneExtras.value
+        );
+        const here = zone.id === main.zoneId.value ? 1.05 : 1;
+        if (xpPerMinute * here > bestXp) {
+            best = zone;
+            bestXp = xpPerMinute * here;
         }
     }
+    return best;
+}
+
+/** Balanced: the newest place with Pokémon you haven't caught this journey, or the toughest. */
+function balancedZone(zones: ZoneDefinition[]): ZoneDefinition {
     const levels = main.partyIds.value.map(id => main.box.value[id]?.level ?? 1);
     const average = levels.reduce((a, b) => a + b, 0) / Math.max(1, levels.length);
     // Newest zone that still has Pokémon we haven't caught this journey, unless it's so weak
@@ -263,15 +346,49 @@ function autoTravel() {
                 id => !main.owns(id)
             )
     );
-    let target = withNew[withNew.length - 1];
-    if (target == null) {
-        // Otherwise the toughest zone our party comfortably out-levels.
-        const comfortable = zones.filter(z => typicalLevel(z.id) <= average + 3);
-        target = (comfortable.length > 0 ? comfortable : zones).reduce((best, z) =>
-            typicalLevel(z.id) > typicalLevel(best.id) ? z : best
-        );
+    const target = withNew[withNew.length - 1];
+    if (target != null) return target;
+    // Otherwise the toughest zone our party comfortably out-levels.
+    const comfortable = zones.filter(z => typicalLevel(z.id) <= average + 3);
+    return (comfortable.length > 0 ? comfortable : zones).reduce((best, z) =>
+        typicalLevel(z.id) > typicalLevel(best.id) ? z : best
+    );
+}
+
+/** Game-time automation runs between the Travel Planner's decisions (they weigh every place). */
+const TRAVEL_EVERY = 5;
+let travelCountdown = 0;
+
+function autoTravel() {
+    if (travelCountdown-- > 0) return;
+    travelCountdown = TRAVEL_EVERY - 1;
+    const zones = zonesIn(main.region.value).filter(z => main.zoneUnlocked(z.id));
+    if (zones.length === 0) return;
+    const mode = hof.travelModeInEffect.value;
+    if (mode === "catchAll" || mode === "pokedex") {
+        const found = bestZoneToCatch(zones, mode);
+        if (found != null) {
+            main.travel(found.zone.id);
+            const names = found.ids.slice(0, 3).map(id => getSpecies(id).name);
+            report(
+                "autoTravel",
+                `${found.zone.name}: ${names.join(", ")}${found.ids.length > 3 ? ` and ${found.ids.length - 3} more` : ""} to catch`
+            );
+            return;
+        }
     }
-    main.travel(target.id);
+    if (mode === "train") {
+        const zone = bestZoneToTrain(zones);
+        main.travel(zone.id);
+        report("autoTravel", `${zone.name}, training`);
+        return;
+    }
+    const zone = balancedZone(zones);
+    main.travel(zone.id);
+    report(
+        "autoTravel",
+        mode === "balanced" ? zone.name : `${zone.name} (nothing left to catch here: balanced)`
+    );
 }
 
 function autoChallenge() {

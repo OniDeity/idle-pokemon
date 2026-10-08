@@ -517,7 +517,8 @@ const layer = createLayer(id, () => {
                             zone.id,
                             main.keyItems.value,
                             main.partyBattlers.value,
-                            main.bonuses.value
+                            main.bonuses.value,
+                            main.zoneExtras.value
                         )
                     );
                 }

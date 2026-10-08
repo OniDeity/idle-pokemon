@@ -180,6 +180,12 @@ journeys.
   loop) plus values read from the Pokédex and Hall of Fame; tiers pay `TIER_FAME` and Medal
   Rally ranks multiply Fame (`rankFameMultiplier`). Larger medal Fame (2/5/12/30) sped up
   Orange by about 25% in the sim, hence the small values. The simulator plays medals too.
+- Automation (`data/automation.ts`, v2.11.1): Team Strategist brings `hof.newFacesCount` new
+  faces to the finale (as many as the forecast still beats, or all with `hof.newFacesTrain`);
+  the Travel Planner follows `hof.travelModeInEffect` (`TRAVEL_MODES` in balance.ts; catch mode
+  "all" means Catch 'em all: encounter odds of species/forms not in the box ÷
+  `zoneRates().secondsPerBattle`, Pokédex newcomers ×3). Status lines go through
+  `automationStatus`. Catch settings survive a Hall of Fame entry.
 - Challenges (`challenges.ts`): set on the starter screen in `hof.challengeKeys` (kept between
   journeys), copied into `main.challenges` when the starter is picked. Enforced in
   `main.canJoinParty`/`maxParty`/`trainerStrength`/`fameLevels` and the Mart; HoF entries keep

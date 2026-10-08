@@ -5,6 +5,29 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.11.1 Smarter automation</summary>
+                <ul>
+                    <li class="feature">
+                        Team Strategist: a slider picks how many Pokémon new to the region's Hall
+                        of Fame it brings to the finale (1 to the whole team). It fields as many
+                        as still win; tick "train them" to field them all regardless
+                    </li>
+                    <li class="feature">
+                        Travel Planner modes: Balanced, Catch 'em all (goes wherever you meet
+                        Pokémon not yet in your box fastest, forms too, Pokédex newcomers first),
+                        Pokédex, and Train. Picking "Catch all Pokémon" uses Catch 'em all
+                    </li>
+                    <li class="feature">
+                        The Journey panel shows what the Travel Planner and Team Strategist are
+                        doing and why
+                    </li>
+                    <li class="fix">
+                        Your catch settings (catch mode, ball choice, Master Ball use) are kept
+                        when you enter the Hall of Fame
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.11 Unova</summary>
                 <ul>
                     <li class="feature">
