@@ -392,6 +392,12 @@ const UNOVA_GYM_STRENGTHS = [1.8, 3.0, 3.6, 3.8, 3.9, 4.6, 5.0, 4.6];
 const UNOVA_ELITE_FOUR_STRENGTH = 3.25;
 const UNOVA_N_STRENGTH = 3.38;
 const UNOVA_GHETSIS_STRENGTH = 3.5;
+/**
+ * v2.12's retune: with the Fame upgrades' Mastery and Fan Club, the simulator's first clear fell
+ * under 10 hours, so every trial and the finale are this much stronger (strengths above are the
+ * earlier tuning). The sim is very sensitive here: ×1.05 doubled some runs.
+ */
+const UNOVA_TUNING = 1.03;
 
 function unovaGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">,
@@ -399,7 +405,7 @@ function unovaGym(
 ): GymDefinition {
     return trial({
         ...options,
-        statMultiplier: UNOVA_GYM_STRENGTHS[options.badgeNumber - 1],
+        statMultiplier: UNOVA_TUNING * UNOVA_GYM_STRENGTHS[options.badgeNumber - 1],
         // PokeAPI numbers Unova's badges from 33 (Black and White's and Black 2 and White 2's).
         badgeIcon: `badges/${badgeIcon}.png`
     });
@@ -631,6 +637,13 @@ function leagueMember(
  * Unova's Champion Alder is beaten by N before you arrive; he's battled after the League.
  */
 export function unovaFinale(): TrainerDefinition[] {
+    return unovaFinaleUntuned().map(t => ({
+        ...t,
+        statMultiplier: t.statMultiplier * UNOVA_TUNING
+    }));
+}
+
+function unovaFinaleUntuned(): TrainerDefinition[] {
     const e4 = UNOVA_ELITE_FOUR_STRENGTH;
     return [
         leagueMember(
