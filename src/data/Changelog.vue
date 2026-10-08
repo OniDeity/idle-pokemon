@@ -5,6 +5,64 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.11 Unova</summary>
+                <ul>
+                    <li class="feature">
+                        Gen 5: species #494-649, with their forms (Deerling's and Sawsbuck's
+                        seasons, Blue-Striped Basculin, the Therian Formes, Black and White
+                        Kyurem, Resolute Keldeo, Genesect's drives). The Pokédex now goes to 649
+                    </li>
+                    <li class="feature">
+                        Unova (Black/White), after Oblivia and a complete Pokédex: 42 places with
+                        Black and White's wild Pokémon (only new ones until the League), eight
+                        Gyms from the Striaton triplets (you face the one who beats your starter)
+                        to Drayden, then the Elite Four, N with Zekrom and Ghetsis back-to-back.
+                        Alder waits after the League for ×1.25 Fame; Victini, the Swords of
+                        Justice, the Forces of Nature, Reshiram, Zekrom, Kyurem and Volcarona too
+                    </li>
+                    <li class="feature">
+                        Unova (Black 2/White 2), two years on: 53 places from Aspertia City to
+                        the Nature Sanctuary, Cheren to Marlon, Champion Iris, Colress and
+                        Ghetsis's Kyurem, and after the League the Pokémon World Tournament:
+                        Leaders of every region you've cleared, and the Champions Tournament
+                        (Red, Lance, Steven, Wallace, Cynthia, Alder) for ×1.25 Fame. Plus the
+                        Regis, the lake guardians, Latios and Latias, Heatran, Cresselia, Keldeo,
+                        Meloetta and Genesect
+                    </li>
+                    <li class="feature">
+                        Four new generation mechanics that carry back to every region: the
+                        Seasons (they turn every 150 wild battles; each brings out its own types,
+                        and Deerling wander the grass in its coat), phenomena (shaking grass and
+                        rippling water bring rarer Pokémon and Audino; Unova has dust clouds and
+                        flying shadows too), critical captures (likelier the bigger your
+                        Pokédex) and Hidden Grottoes (one fills every 80 wild battles: its Pokémon
+                        is caught for sure, and away from Black 2 and White 2's own grottoes it's
+                        one your Pokédex is missing). Their status is on the Map's new C-Gear tab
+                    </li>
+                    <li class="feature">
+                        Medals: a Medal Box of 56 medals, with Bronze, Silver, Gold and
+                        Platinum tiers for battles, catches, Eggs, evolutions, regions, records and
+                        more. Every tier pays Fame, and Medal Rally ranks add +5% Fame each to
+                        every Hall of Fame entry. Medals you've already earned are awarded when
+                        you load
+                    </li>
+                    <li class="feature">
+                        Challenges (the Key System): from your second journey, pick rules before
+                        your starter. Challenge Mode (Trainers +50%), Trio (a party of three),
+                        Specialist (only your starter's types), Frugal (no Poké Mart upgrades),
+                        Grounded (no legendaries), Fresh Start (no Fame upgrades) and Time Trial
+                        (clear in 6 hours). Each multiplies the journey's Fame and has its own
+                        medal; the Hall of Fame remembers which you cleared with
+                    </li>
+                    <li class="feature">
+                        New Pokédex rewards from 500 to 649: the Liberty Pass (Victini), Oval
+                        Charm, Muscle Band, Wise Glasses, Big Nugget, Pass Orb, Dream Ball and the
+                        Comet Shard. New Fame upgrades (Pass Powers): Encounter, Capture, Season
+                        and Grotto Power. New automation: the C-Gear visits Hidden Grottoes
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.10.1 Quieter returns</summary>
                 <ul>
                     <li class="feature">

@@ -1,14 +1,18 @@
 /**
  * Regenerates the static Pokémon data the game ships with:
- *   - src/data/pokemon/species.json     Species #1-493 (stats, types, catch rate, evolutions)
+ *   - src/data/pokemon/species.json     Species #1-649 (stats, types, catch rate, evolutions)
  *   - src/data/pokemon/encounters.json  Wild encounter pools: Red/Blue for Kanto, FireRed/LeafGreen for Sevii,
  *                                      HeartGold/SoulSilver for Johto, Ruby/Sapphire/Emerald for Hoenn,
- *                                      Diamond/Pearl/Platinum for Sinnoh
+ *                                      Diamond/Pearl/Platinum for Sinnoh, Black/White and Black 2/
+ *                                      White 2 for the two Unova journeys
  *   - src/data/pokemon/sinnohExtras.json Sinnoh's Poké Radar, swarm, dual-slot and Honey Tree tables
+ *   - src/data/pokemon/unovaExtras.json  Unova's phenomena (shaking grass, dust clouds, rippling
+ *                                       water, flying shadows) and Hidden Grottoes
  *   - src/data/pokemon/typeChart.json   Non-neutral type matchups
  *   - src/data/pokemon/forms.json       Official alternate forms of #1-251 (regional forms, Pikachu
  *                                       caps, partner Pokémon, Unown letters, Spiky-eared Pichu) and
- *                                       Gen 4's (cloaks, seas, Rotom, Giratina, Shaymin, Arceus)
+ *                                       Gen 4's (cloaks, seas, Rotom, Giratina, Shaymin, Arceus) and
+ *                                       Gen 5's (seasons, stripes, Therian Formes, Kyurem, drives)
  *
  * Source: the PokeAPI CSV dump on GitHub (https://github.com/PokeAPI/pokeapi/tree/master/data/v2/csv).
  * Reading the CSVs directly means one request per table instead of hundreds of REST calls.
@@ -19,18 +23,22 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const CSV_BASE = "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv";
-/** Species data covers Gens 1-4; later Pokémon join the Pokédex as regions bring them. */
-const MAX_SPECIES = 493;
-/** Encounter tables before Hoenn stay Gen 1-2; Hoenn's go to #386, Sinnoh's to #493. */
+/** Species data covers Gens 1-5; later Pokémon join the Pokédex as regions bring them. */
+const MAX_SPECIES = 649;
+/** Encounter tables before Hoenn stay Gen 1-2; Hoenn's go to #386, Sinnoh's to #493, Unova's to #649. */
 const MAX_DEX = 251;
 const MAX_HOENN = 386;
-/** Official forms of Gen 4 species, numbered after the earlier ones so their ids never move. */
+const MAX_SINNOH = 493;
+/** Official forms of Gen 4 and 5 species, numbered after the earlier ones so their ids never move. */
 const GEN4_FIRST = 387;
+const GEN5_FIRST = 494;
 const RED_BLUE_VERSION_IDS = new Set(["1", "2"]);
 const FRLG_VERSION_IDS = new Set(["10", "11"]);
 const HGSS_VERSION_IDS = new Set(["15", "16"]);
 const RSE_VERSION_IDS = new Set(["7", "8", "9"]);
 const DPPT_VERSION_IDS = new Set(["12", "13", "14"]);
+const BW_VERSION_IDS = new Set(["17", "18"]);
+const B2W2_VERSION_IDS = new Set(["21", "22"]);
 const ENGLISH = "9";
 
 /**
@@ -556,6 +564,264 @@ const SINNOH_ZONE_AREAS: Record<string, [string, string][]> = {
 };
 
 /**
+ * Unova zones from Black and White. Towns with only water join a nearby route, and multi-floor
+ * dungeons are merged. Dark grass is grass; shaking grass, dust clouds, rippling water and flying
+ * shadows (the "-spots" methods) go to unovaExtras.json as phenomena.
+ */
+const UNOVA_ZONE_AREAS: Record<string, [string, string][]> = {
+    unovaRoute1: [["unova-route-1", ""]],
+    unovaRoute2: [["unova-route-2", ""]],
+    dreamyard: [
+        ["dreamyard", ""],
+        ["dreamyard", "b1f"]
+    ],
+    unovaRoute3: [
+        ["unova-route-3", ""],
+        ["striaton-city", ""]
+    ],
+    wellspringCave: [["wellspring-cave", ""]],
+    pinwheelForest: [
+        ["pinwheel-forest", "outside"],
+        ["pinwheel-forest", "inside"]
+    ],
+    unovaRoute4: [["unova-route-4", ""]],
+    desertResort: [
+        ["desert-resort", "entrance"],
+        ["desert-resort", ""]
+    ],
+    relicCastle: [["relic-castle", "a"]],
+    relicCastleBasement: [["relic-castle", "b"]],
+    relicCastleDepths: [
+        ["relic-castle", "c"],
+        ["relic-castle", "d"]
+    ],
+    unovaRoute16: [["unova-route-16", ""]],
+    lostlornForest: [["lostlorn-forest", ""]],
+    unovaRoute5: [["unova-route-5", ""]],
+    driftveilDrawbridge: [["driftveil-drawbridge", ""]],
+    coldStorage: [["cold-storage", ""]],
+    unovaRoute6: [
+        ["unova-route-6", ""],
+        ["driftveil-city", ""]
+    ],
+    chargestoneCave: ["1f", "b1f", "b2f"].map(a => ["chargestone-cave", a] as [string, string]),
+    mistraltonCave: [
+        ["mistralton-cave", ""],
+        ["guidance-chamber", ""]
+    ],
+    unovaRoute7: [["unova-route-7", ""]],
+    celestialTower: ["2f", "3f", "4f", "5f"].map(a => ["celestial-tower", a] as [string, string]),
+    twistMountain: [["twist-mountain", "b1f-3f"]],
+    icirrusCity: [["icirrus-city", ""]],
+    dragonspiralTower: ["entrance", "outside", "1f", "2f"].map(
+        a => ["dragonspiral-tower", a] as [string, string]
+    ),
+    unovaRoute8: [["unova-route-8", ""]],
+    moorOfIcirrus: [["moor-of-icirrus", ""]],
+    unovaRoute9: [["unova-route-9", ""]],
+    challengersCave: ["1f", "b1f", "b2f"].map(a => ["challengers-cave", a] as [string, string]),
+    unovaRoute10: [
+        ["unova-route-10", ""],
+        ["unova-route-10", "victory-road-gate"]
+    ],
+    unovaVictoryRoad: [
+        ["unova-victory-road", "outside"],
+        ["unova-victory-road", "4f-middle-room"],
+        ["unova-victory-road", "1f-unknown-room"],
+        ...[53, 54, 55, 57, 59, 60, 61, 62, 63, 64, 65, 66].map(
+            n => ["unova-victory-road", `unknown-area-${n}`] as [string, string]
+        ),
+        ["trial-chamber", ""]
+    ],
+    unovaRoute11: [["unova-route-11", ""]],
+    villageBridge: [["village-bridge", ""]],
+    unovaRoute12: [["unova-route-12", ""]],
+    unovaRoute13: [["unova-route-13", ""]],
+    giantChasm: ["outside", "", "forest", "forest-cave"].map(
+        a => ["giant-chasm", a] as [string, string]
+    ),
+    unovaRoute14: [["unova-route-14", ""]],
+    abundantShrine: [["abundant-shrine", ""]],
+    undellaBay: [
+        ["undella-bay", ""],
+        ["undella-town", ""],
+        ["unova-route-17", ""]
+    ],
+    unovaRoute15: [["unova-route-15", ""]],
+    marvelousBridge: [["marvelous-bridge", ""]],
+    unovaRoute18: [["unova-route-18", ""]],
+    p2Laboratory: [["p2-laboratory", ""]]
+};
+
+/**
+ * Unova zones from Black 2 and White 2, two years on. Their ids start with "b2w2" so they never
+ * collide with Black and White's. Hidden Grottoes go to unovaExtras.json.
+ */
+const UNOVA2_ZONE_AREAS: Record<string, [string, string][]> = {
+    b2w2Route19: [
+        ["unova-route-19", ""],
+        ["aspertia-city", ""]
+    ],
+    b2w2Route20: [["unova-route-20", ""]],
+    floccesyRanch: [
+        ["floccesy-ranch", "outer"],
+        ["floccesy-ranch", "inner"]
+    ],
+    virbankComplex: [
+        ["virbank-complex", "outer"],
+        ["virbank-complex", "inner"],
+        ["virbank-city", ""]
+    ],
+    casteliaSewers: [
+        ["castelia-sewers", ""],
+        ["castelia-sewers", "unknown-area-38"],
+        ["castelia-city", ""],
+        ["relic-passage", "castelia-sewers-entrance"]
+    ],
+    b2w2Route4: [["unova-route-4", ""]],
+    b2w2DesertResort: [
+        ["desert-resort", "entrance"],
+        ["desert-resort", ""]
+    ],
+    b2w2RelicCastle: ["a", "c", "d"].map(a => ["relic-castle", a] as [string, string]),
+    relicPassage: [
+        ["relic-passage", "relic-castle-entrance"],
+        ["relic-passage", "pwt-entrance"]
+    ],
+    b2w2Route16: [["unova-route-16", ""]],
+    b2w2LostlornForest: [["lostlorn-forest", ""]],
+    b2w2Route5: [["unova-route-5", ""]],
+    b2w2DriftveilDrawbridge: [["driftveil-drawbridge", ""]],
+    b2w2Route6: [["unova-route-6", ""]],
+    b2w2ChargestoneCave: ["1f", "b1f", "b2f"].map(a => ["chargestone-cave", a] as [string, string]),
+    b2w2MistraltonCave: [
+        ["mistralton-cave", ""],
+        ["guidance-chamber", ""]
+    ],
+    b2w2Route7: [["unova-route-7", ""]],
+    b2w2CelestialTower: ["2f", "3f", "4f", "5f"].map(
+        a => ["celestial-tower", a] as [string, string]
+    ),
+    b2w2TwistMountain: [["twist-mountain", "b1f-3f"]],
+    b2w2IcirrusCity: [["icirrus-city", ""]],
+    b2w2DragonspiralTower: ["entrance", "outside", "1f", "2f"].map(
+        a => ["dragonspiral-tower", a] as [string, string]
+    ),
+    b2w2Route8: [["unova-route-8", ""]],
+    b2w2MoorOfIcirrus: [["moor-of-icirrus", ""]],
+    reversalMountain: [48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60].map(
+        n => ["reversal-mountain", `unknown-area-${n}`] as [string, string]
+    ),
+    strangeHouse: [
+        ["strange-house", "1f"],
+        ["strange-house", "b1f"]
+    ],
+    b2w2UndellaBay: [
+        ["undella-bay", ""],
+        ["undella-town", ""]
+    ],
+    b2w2Route13: [["unova-route-13", ""]],
+    b2w2Route12: [["unova-route-12", ""]],
+    b2w2VillageBridge: [["village-bridge", ""]],
+    b2w2Route11: [["unova-route-11", ""]],
+    b2w2Route9: [["unova-route-9", ""]],
+    b2w2Route21: [["unova-route-21", ""]],
+    b2w2Route22: [
+        ["unova-route-22", ""],
+        ["humilau-city", ""]
+    ],
+    seasideCave: [
+        ["seaside-cave", "1f"],
+        ["seaside-cave", "b1f"]
+    ],
+    b2w2GiantChasm: ["outside", "", "forest", "forest-cave"].map(
+        a => ["giant-chasm", a] as [string, string]
+    ),
+    b2w2Route23: [["unova-route-23", ""]],
+    b2w2VictoryRoad: [
+        ["unova-victory-road", "7f"],
+        ...[71, 72, 73, 74, 75, 76, 77, 78, 79, 80].map(
+            n => ["unova-victory-road-2", `unknown-area-${n}`] as [string, string]
+        )
+    ],
+    b2w2Route1: [["unova-route-1", ""]],
+    b2w2Route2: [["unova-route-2", ""]],
+    b2w2Route3: [
+        ["unova-route-3", ""],
+        ["striaton-city", ""]
+    ],
+    b2w2WellspringCave: [["wellspring-cave", ""]],
+    b2w2Dreamyard: [
+        ["dreamyard", ""],
+        ["dreamyard", "b1f"]
+    ],
+    b2w2PinwheelForest: [
+        ["pinwheel-forest", "outside"],
+        ["pinwheel-forest", "inside"]
+    ],
+    b2w2Route14: [["unova-route-14", ""]],
+    b2w2AbundantShrine: [["abundant-shrine", ""]],
+    b2w2Route15: [["unova-route-15", ""]],
+    b2w2MarvelousBridge: [["marvelous-bridge", ""]],
+    b2w2Route18: [["unova-route-18", ""]],
+    b2w2P2Laboratory: [["p2-laboratory", ""]],
+    b2w2Route17: [["unova-route-17", ""]],
+    clayTunnel: [["clay-tunnel", ""]],
+    natureSanctuary: [["nature-sanctuary", ""]],
+    undergroundRuins: [
+        ["underground-ruins", ""],
+        ["rocky-mountain-room", ""],
+        ["glacier-room", ""],
+        ["iron-room", ""]
+    ]
+};
+
+/** Black 2 and White 2's Hidden Grottoes, by the place each is found in. */
+const UNOVA2_GROTTO_AREAS: Record<string, [string, string][]> = {
+    b2w2Route2: [["unova-route-2", "hidden-grotto"]],
+    b2w2Route3: [
+        ["unova-route-3", "hidden-grotto-dark-grass"],
+        ["unova-route-3", "hidden-grotto-pond"]
+    ],
+    b2w2Route5: [["unova-route-5", "hidden-grotto"]],
+    b2w2Route6: [
+        ["unova-route-6", "hidden-grotto-near-pokemon-breeder"],
+        ["unova-route-6", "hidden-grotto-mistralton-cave"]
+    ],
+    b2w2Route7: [["unova-route-7", "hidden-grotto"]],
+    b2w2Route9: [["unova-route-9", "hidden-grotto"]],
+    b2w2Route13: [
+        ["unova-route-13", "hidden-grotto-giant-chasm"],
+        ["unova-route-13", "hidden-grotto-stairs"]
+    ],
+    b2w2Route18: [["unova-route-18", "hidden-grotto"]],
+    b2w2Route22: [["unova-route-22", "hidden-grotto"]],
+    b2w2Route23: [["unova-route-23", "hidden-grotto"]],
+    floccesyRanch: [["floccesy-ranch", "hidden-grotto"]],
+    b2w2LostlornForest: [["lostlorn-forest", "hidden-grotto"]],
+    b2w2GiantChasm: [["giant-chasm", "hidden-grotto"]],
+    b2w2AbundantShrine: [
+        ["abundant-shrine", "hidden-grotto-near-youngster"],
+        ["abundant-shrine", "hidden-grotto-shrine"]
+    ],
+    b2w2PinwheelForest: [
+        ["pinwheel-forest", "hidden-grotto-outer-area"],
+        ["pinwheel-forest", "hidden-grotto-inner-area"]
+    ]
+};
+
+/** Black and White's phenomena, by encounter method: what turns up in each. */
+const PHENOMENON_BY_METHOD: Record<string, string> = {
+    "grass-spots": "shakingGrass",
+    "cave-spots": "dustCloud",
+    "bridge-spots": "flyingShadow",
+    "surf-spots": "ripplingWater",
+    "super-rod-spots": "ripplingWater"
+};
+
+const SEASONS = ["spring", "summer", "autumn", "winter"] as const;
+
+/**
  * Diamond/Pearl/Platinum tables that only apply under a condition the game turns into its own
  * feature: the Poké Radar's patches, swarms, and a Game Boy Advance game in the DS's second slot
  * (Pal Park's regions). Everything else with a condition is left in the plain tables.
@@ -847,32 +1113,51 @@ async function main() {
     const methodName = new Map(methodRows.map(r => [r.id, r.identifier]));
     const slots = new Map(slotRows.map(r => [r.id, r]));
 
-    const zoneByArea = new Map<string, string>();
+    // Black/White and Black 2/White 2 share Unova's areas, so an area can belong to one zone per
+    // game; the encounter's version picks which.
+    const zonesByArea = new Map<string, string[]>();
     const zoneVersions = new Map<string, Set<string>>();
     const allZones = {
         ...ZONE_AREAS,
         ...SEVII_ZONE_AREAS,
         ...JOHTO_ZONE_AREAS,
         ...HOENN_ZONE_AREAS,
-        ...SINNOH_ZONE_AREAS
+        ...SINNOH_ZONE_AREAS,
+        ...UNOVA_ZONE_AREAS,
+        ...UNOVA2_ZONE_AREAS
     };
+    const unovaZone = (zoneId: string | undefined) =>
+        zoneId != null && (zoneId in UNOVA_ZONE_AREAS || zoneId in UNOVA2_ZONE_AREAS);
     for (const [zoneId, areas] of Object.entries(allZones)) {
         zoneVersions.set(
             zoneId,
-            zoneId in SINNOH_ZONE_AREAS
-                ? DPPT_VERSION_IDS
-                : zoneId in HOENN_ZONE_AREAS
-                  ? RSE_VERSION_IDS
-                  : zoneId in JOHTO_ZONE_AREAS
-                    ? HGSS_VERSION_IDS
-                    : zoneId in SEVII_ZONE_AREAS
-                      ? FRLG_VERSION_IDS
-                      : RED_BLUE_VERSION_IDS
+            zoneId in UNOVA2_ZONE_AREAS
+                ? B2W2_VERSION_IDS
+                : zoneId in UNOVA_ZONE_AREAS
+                  ? BW_VERSION_IDS
+                  : zoneId in SINNOH_ZONE_AREAS
+                    ? DPPT_VERSION_IDS
+                    : zoneId in HOENN_ZONE_AREAS
+                      ? RSE_VERSION_IDS
+                      : zoneId in JOHTO_ZONE_AREAS
+                        ? HGSS_VERSION_IDS
+                        : zoneId in SEVII_ZONE_AREAS
+                          ? FRLG_VERSION_IDS
+                          : RED_BLUE_VERSION_IDS
         );
         for (const [location, area] of areas) {
             const id = areaKey.get(`${locationId.get(location)}/${area}`);
             if (id == null) throw new Error(`Unknown location area ${location}/${area}`);
-            zoneByArea.set(id, zoneId);
+            zonesByArea.set(id, [...(zonesByArea.get(id) ?? []), zoneId]);
+        }
+    }
+
+    const grottoZoneByArea = new Map<string, string>();
+    for (const [zoneId, areas] of Object.entries(UNOVA2_GROTTO_AREAS)) {
+        for (const [location, area] of areas) {
+            const id = areaKey.get(`${locationId.get(location)}/${area}`);
+            if (id == null) throw new Error(`Unknown location area ${location}/${area}`);
+            grottoZoneByArea.set(id, zoneId);
         }
     }
 
@@ -897,45 +1182,68 @@ async function main() {
         minLevel: number;
         maxLevel: number;
         byTime: Record<(typeof TIMES)[number], number>;
+        bySeason: Record<(typeof SEASONS)[number], number>;
     };
     // Pools by zone. Sinnoh's conditional tables (Poké Radar, swarms, dual-slot) and Honey
     // Trees collect under their own keys ("radar/route201", "honey/a") for sinnohExtras.json.
     const pools: Record<string, Record<string, Map<number, Acc>>> = {};
     const timedPools = new Set<string>();
+    const seasonalPools = new Set<string>();
     for (const r of encounterRows) {
         const slot = slots.get(r.encounter_slot_id);
         const method = methodName.get(slot?.encounter_method_id ?? "") ?? "";
         const honey = method === "honey-tree" && DPPT_VERSION_IDS.has(r.version_id);
-        const pool = honey ? "walk" : POOL_BY_METHOD[method];
+        // Unova's phenomena and Hidden Grottoes collect under their own keys
+        // ("shakingGrass/unovaRoute1", "grotto/b2w2Route2") for unovaExtras.json.
+        const grottoZone =
+            method === "hidden-grotto" && B2W2_VERSION_IDS.has(r.version_id)
+                ? grottoZoneByArea.get(r.location_area_id)
+                : undefined;
+        const phenomenon = PHENOMENON_BY_METHOD[method];
+        const pool =
+            honey || grottoZone != null || phenomenon != null ? "walk" : POOL_BY_METHOD[method];
         const headbuttZone = headbuttZoneByArea.get(r.location_area_id);
         const borrowed =
             pool === "headbutt" && headbuttZone != null && HGSS_VERSION_IDS.has(r.version_id);
-        const zoneId = borrowed ? headbuttZone : zoneByArea.get(r.location_area_id);
+        const zoneId = borrowed
+            ? headbuttZone
+            : ((zonesByArea.get(r.location_area_id) ?? []).find(z =>
+                  zoneVersions.get(z)?.has(r.version_id)
+              ) ?? zonesByArea.get(r.location_area_id)?.[0]);
         const conditions = conditionsOf.get(r.id) ?? [];
         // Every tree shares its group's table, wherever it grows.
         let key = zoneId;
         if (honey) {
             const group = conditions.find(c => c.startsWith("honey-tree-group-"));
             key = group != null ? `honey/${group.slice(-1)}` : undefined;
+        } else if (grottoZone != null) {
+            key = `grotto/${grottoZone}`;
         } else if (zoneId == null || (!borrowed && !zoneVersions.get(zoneId)?.has(r.version_id))) {
             continue;
         }
         const id = Number(r.pokemon_id);
         const sinnoh = honey || (zoneId != null && zoneId in SINNOH_ZONE_AREAS);
-        const maxDex = sinnoh
-            ? MAX_SPECIES
-            : zoneId != null && zoneId in HOENN_ZONE_AREAS
-              ? MAX_HOENN
-              : MAX_DEX;
+        const maxDex =
+            grottoZone != null || unovaZone(zoneId)
+                ? MAX_SPECIES
+                : sinnoh
+                  ? MAX_SINNOH
+                  : zoneId != null && zoneId in HOENN_ZONE_AREAS
+                    ? MAX_HOENN
+                    : MAX_DEX;
         if (key == null || slot == null || pool == null || id > maxDex) continue;
         if (sinnoh && !honey) {
             const extra = sinnohExtra(conditions);
             if (extra != null) key = `${extra}/${zoneId}`;
+        } else if (phenomenon != null && grottoZone == null) {
+            key = `${phenomenon}/${zoneId}`;
         } else if (conditions.some(excludedCondition)) {
             continue;
         }
         const times = TIMES.filter(t => conditions.includes(`time-${t}`));
         if (times.length > 0) timedPools.add(`${key}/${pool}`);
+        const seasons = SEASONS.filter(t => conditions.includes(`season-${t}`));
+        if (seasons.length > 0) seasonalPools.add(`${key}/${pool}`);
 
         const zonePools = (pools[key] ??= {});
         const entries = (zonePools[pool] ??= new Map());
@@ -943,11 +1251,13 @@ async function main() {
             weight: 0,
             minLevel: Infinity,
             maxLevel: -Infinity,
-            byTime: { morning: 0, day: 0, night: 0 }
+            byTime: { morning: 0, day: 0, night: 0 },
+            bySeason: { spring: 0, summer: 0, autumn: 0, winter: 0 }
         };
         const rarity = Number(slot.rarity);
         acc.weight += rarity;
         for (const t of times.length > 0 ? times : TIMES) acc.byTime[t] += rarity;
+        for (const t of seasons.length > 0 ? seasons : SEASONS) acc.bySeason[t] += rarity;
         acc.minLevel = Math.min(acc.minLevel, Number(r.min_level));
         acc.maxLevel = Math.max(acc.maxLevel, Number(r.max_level));
         entries.set(id, acc);
@@ -963,15 +1273,27 @@ async function main() {
                         const timed = timedPools.has(`${key}/${pool}`);
                         const { morning, day, night } = acc.byTime;
                         const varies = morning !== day || day !== night;
+                        // Black and White's seasonal tables count each slot once per season.
+                        const seasonal = seasonalPools.has(`${key}/${pool}`);
+                        const { spring, summer, autumn, winter } = acc.bySeason;
+                        const changes = new Set([spring, summer, autumn, winter]).size > 1;
                         return {
                             id,
                             // A timed table counts each slot once per time of day.
-                            weight: timed ? (morning + day + night) / 3 : acc.weight,
+                            weight: timed
+                                ? (morning + day + night) / 3
+                                : seasonal
+                                  ? (spring + summer + autumn + winter) / 4
+                                  : acc.weight,
                             minLevel: acc.minLevel,
                             maxLevel: acc.maxLevel,
-                            ...(timed && varies ? { byTime: { morning, day, night } } : {})
+                            ...(timed && varies ? { byTime: { morning, day, night } } : {}),
+                            ...(seasonal && changes
+                                ? { bySeason: { spring, summer, autumn, winter } }
+                                : {})
                         };
                     })
+                    .filter(e => e.weight > 0)
             ])
         );
 
@@ -985,6 +1307,26 @@ async function main() {
             ])
         ),
         honey: Object.fromEntries(["a", "b", "c"].map(g => [g, poolsOf(`honey/${g}`).walk ?? []]))
+    };
+    const unovaExtras = {
+        phenomena: Object.fromEntries(
+            [...Object.keys(UNOVA_ZONE_AREAS), ...Object.keys(UNOVA2_ZONE_AREAS)]
+                .map(zoneId => {
+                    const found = Object.fromEntries(
+                        [...new Set(Object.values(PHENOMENON_BY_METHOD))]
+                            .map(kind => [kind, poolsOf(`${kind}/${zoneId}`).walk ?? []] as const)
+                            .filter(([, entries]) => entries.length > 0)
+                    );
+                    return [zoneId, found] as const;
+                })
+                .filter(([, found]) => Object.keys(found).length > 0)
+        ),
+        grottoes: Object.fromEntries(
+            Object.keys(UNOVA2_GROTTO_AREAS).map(zoneId => [
+                zoneId,
+                poolsOf(`grotto/${zoneId}`).walk ?? []
+            ])
+        )
     };
     function extrasFor(extra: string) {
         return Object.fromEntries(
@@ -1050,9 +1392,12 @@ async function main() {
             identifier: r.identifier,
             name: names?.pokemon_name || `${baseName} (${names?.form_name ?? r.form_identifier})`,
             region:
-                species >= GEN4_FIRST
-                    ? "sinnoh"
-                    : (REGION_OF_FORM.find(([pattern]) => pattern.test(r.identifier))?.[1] ?? null),
+                species >= GEN5_FIRST
+                    ? "unova"
+                    : species >= GEN4_FIRST
+                      ? "sinnoh"
+                      : (REGION_OF_FORM.find(([pattern]) => pattern.test(r.identifier))?.[1] ??
+                        null),
             // Unown A is the default Unown sprite; the repo has no front "201-a".
             sprite: ownPokemon
                 ? String(pokemonId)
@@ -1077,11 +1422,21 @@ async function main() {
         // its Plates give in Gen 4). Default forms are the species itself; forms added by later
         // games (Mothim's cloaks, Dialga's and Palkia's Origin Formes) wait for them.
         ...formCandidates
-            .filter(({ species }) => species >= GEN4_FIRST && species <= MAX_SPECIES)
+            .filter(({ species }) => species >= GEN4_FIRST && species <= MAX_SINNOH)
             .filter(({ r, species }) => !(r.is_default === "1" && Number(r.pokemon_id) === species))
             .filter(({ r }) => Number(r.introduced_in_version_group_id) <= 10)
             .filter(({ r }) => r.identifier !== "arceus-unknown")
-            .map(({ r, species }, i) => formData(r, species, 4200 + i))
+            .map(({ r, species }, i) => formData(r, species, 4200 + i)),
+        // Gen 5's: Basculin's Blue Stripes, Deerling's and Sawsbuck's seasons, the Forces of
+        // Nature's Therian Formes, Black and White Kyurem, Resolute Keldeo and Genesect's drives,
+        // the ones Black, White, Black 2 and White 2 have (battle-only forms are left out above).
+        ...formCandidates
+            .filter(({ species }) => species >= GEN5_FIRST && species <= MAX_SPECIES)
+            .filter(({ r, species }) => !(r.is_default === "1" && Number(r.pokemon_id) === species))
+            .filter(({ r }) => Number(r.introduced_in_version_group_id) <= 14)
+            // Frillish's and Jellicent's female forms are the game's own female forms (5000+).
+            .filter(({ r }) => !r.identifier.endsWith("-female"))
+            .map(({ r, species }, i) => formData(r, species, 4300 + i))
     ];
 
     const dataDir = path.resolve(import.meta.dirname, "../src/data/pokemon");
@@ -1094,6 +1449,10 @@ async function main() {
     await writeFile(
         path.join(dataDir, "sinnohExtras.json"),
         JSON.stringify(sinnohExtras, null, 1) + "\n"
+    );
+    await writeFile(
+        path.join(dataDir, "unovaExtras.json"),
+        JSON.stringify(unovaExtras, null, 1) + "\n"
     );
     await writeFile(path.join(dataDir, "forms.json"), JSON.stringify(forms, null, 1) + "\n");
     await writeFile(

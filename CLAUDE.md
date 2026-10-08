@@ -1,9 +1,10 @@
 # Idle Pokémon: project memory
 
 An idle Pokémon game on Profectus 0.7 (Vue 3 TSX). Journeys through regions (Kanto → Orange
-Islands → Sevii Islands → Johto → Hoenn → Orre (Colosseum) → Orre (XD) → Sinnoh → Fiore → Almia → Oblivia), Gyms/trials and a
-finale per region, a Hall of Fame prestige layer (Fame upgrades, automation), and a Pokédex kept
-across journeys.
+Islands → Sevii Islands → Johto → Hoenn → Orre (Colosseum) → Orre (XD) → Sinnoh → Fiore → Almia → Oblivia →
+Unova (Black/White) → Unova (Black 2/White 2)), Gyms/trials and a finale per region, a Hall of
+Fame prestige layer (Fame upgrades, automation, challenges), Medals, and a Pokédex kept across
+journeys.
 
 ## Workflow (how the owner wants changes shipped)
 
@@ -26,7 +27,10 @@ across journeys.
 - Format with `node_modules/.bin/prettier` (3.3.3). Never run Prettier on `src/data/Changelog.vue`;
   edit it by hand.
 - Pacing: `scripts/simulateProgression.ts` (knobs `GYMS_<region>`, `SCALE_<region>`,
-  `FINALE_<region>`). Each region's first clear is tuned to roughly 10–12 h of play.
+  `FINALE_<region>`, `MEDAL_FAME`). Each region's first clear is tuned to roughly 10–12 h of play.
+  `SIM_SAVE=file` saves the permanent state after a plan and `SIM_LOAD=file` resumes from it, so
+  late regions tune without replaying 100 h of earlier ones. The sim is noisy (other seeds move a
+  region by ±50%): check new regions with all starters and two or three seeds.
 - `vite.config.ts` uses `base: "./"`: serve builds from the server root (`vite preview`), not
   `/idle-pokemon/`, or sprites 404.
 
@@ -36,11 +40,15 @@ across journeys.
   (encounters, `ZoneExtras`), `regions.ts`, `trainers.ts`, `specials.ts` (gifts/trades/legendaries/
   bosses), `balance.ts`, `items.ts`, `mechanics.ts` (generation mechanics), `pokedex.ts`, and region
   files `kantoAnime.ts`, `orange.ts`, `sevii.ts`, `johto.ts`, `johtoAnime.ts`, `hoenn.ts`,
-  `hoennAnime.ts`, `colosseum.ts`, `xd.ts`, `sinnoh.ts` (+ `underground.ts`), `fiore.ts`, `almia.ts`, `oblivia.ts`.
+  `hoennAnime.ts`, `colosseum.ts`, `xd.ts`, `sinnoh.ts` (+ `underground.ts`), `fiore.ts`, `almia.ts`, `oblivia.ts`,
+  `unova.ts`, `unova2.ts`; `medals.ts` and `challenges.ts` (pure definitions).
 - `src/data/projEntry.tsx`: main layer state and game loop. Layers in `src/data/layers/`
-  (party, map, mart, dex, hof); `src/data/automation.ts`; UI kit in `src/data/ui/components.tsx`.
+  (party, map, mart, dex, hof, medals); `src/data/automation.ts`; UI kit in `src/data/ui/components.tsx`.
+  A layer's own events go through its setup parameter (`createLayer(id, base => base.on(...))`):
+  using the exported layer inside its own setup is a lazy-proxy cycle and no save loads.
 - Data: `scripts/fetchPokemonData.ts` (PokeAPI CSV → `src/data/pokemon/*.json`, plus
-  `sinnohExtras.json` for Sinnoh's radar/swarm/dual-slot/Honey Tree tables), sprite
+  `sinnohExtras.json` for Sinnoh's radar/swarm/dual-slot/Honey Tree tables, `unovaExtras.json`
+  for Unova's phenomena and Hidden Grottoes), sprite
   generators `scripts/generate*.py`, `scripts/fetchSprites.ts`.
 - Tests: `tests/pokemon/engine.test.ts`.
 
@@ -48,10 +56,12 @@ across journeys.
 
 - Variant ids: 1000+ Pinkan, 2000+ Valencian, 3xxx one-of-a-kind (3016 Pudgy Pidgey,
   3244 Unown Entei, 3248 Dark Tyranitar, 3249 Silver, 3251 Dark Celebi, 3383 Meta Groudon), 4000–4027 Unown, 4028
-  Spiky-eared Pichu, 5000+ female, 6000+/6100+ Magikarp/Gyarados patterns, 7001+ cosmetic,
-  7150–7153 giants, 7200+base clones.
+  Spiky-eared Pichu, 4200+ Gen 4 looks-only forms, 4300+ Gen 5's (Deerling's seasons 4301-4306,
+  Genesect's drives 4307-4310), 5000+ female, 6000+/6100+ Magikarp/Gyarados patterns, 7001+
+  cosmetic, 7150–7153 giants, 7200+base clones, 8000+ Shadow forms (to 8649).
 - Local sprites need literal `itemSprite("slug")` calls (fetchSprites scans for them).
-- Zone ids must be unique across regions (Johto's Silver Town is `johtoSilverTown`).
+- Zone ids must be unique across regions (Johto's Silver Town is `johtoSilverTown`; Black 2 and
+  White 2's places start with `b2w2` where Black and White have the same place).
 - Every encounter pool's key item must be obtainable in its region (a test enforces it).
 - Generation mechanics (`mechanics.ts`): met first in their own region, then unlocked for good
   (in `hof.mechanics`) and on in every region. Gate features with `main.mechanicOn(id)`.
@@ -149,6 +159,32 @@ across journeys.
   `hof.rangerSigns` on capture; with the mechanic on, their types join Poké Assist everywhere.
   The simulator skips legendaries, so it never has Signs. Ukulele Pichu isn't in (no sprite).
 
+- Unova (`unova.ts`, v2.11, Black/White; `unova2.ts`, Black 2/White 2): PokeAPI's BW and B2W2
+  tables (species to #649 in Unova zones only; the fetch maps an area to one zone per game).
+  Dark grass is grass; the "-spots" methods are phenomena and `hidden-grotto` the grottoes
+  (`unovaExtras.json`); `bySeason` weights where a table changes. Bridges' only Pokémon are
+  their flying shadows. `GymDefinition.forStarter` + `trialFor()` give Striaton's Leader by
+  starter; gifts can be `byStarter` (the Dreamyard monkey); boss specials can need
+  `requiresCleared` regions (the World Tournament's Leaders, built from each region's Gym aces).
+  Black and White's Relic Castle is split by story stage (entrance / basement at 7 badges /
+  post-game depths). Super Rods come with the 8th badge (post-game in the games).
+- Gen 5 mechanics (`mechanics.ts`): `seasons` (every `SEASON_BATTLES` wild battles; Unova's
+  tables use `bySeason`, Deerling/Sawsbuck take the season's form via `seasonForm()`; elsewhere
+  `SEASON_TYPES` ×1.5 and seasonal Deerling join walk pools), `phenomena` (an extra
+  "phenomenon" pool of `PHENOMENON_CHANCE`; Unova's tables, elsewhere flattened walk/surf
+  entries at max level plus Audino), `criticalCapture` (Black and White's Pokédex factor, rolled
+  before the normal catch), `hiddenGrottoes` (one grotto, filling every `GROTTO_BATTLES`, a
+  guaranteed catch: B2W2's table or a missing species of the place). Gen 5 added no evolutions
+  to older species, so `generationOpen()` always allows #494+. The C-Gear tab and automation.
+- Medals (`medals.ts`, `layers/medals.tsx`): lifetime counts (`medals.count(stat)` from the game
+  loop) plus values read from the Pokédex and Hall of Fame; tiers pay `TIER_FAME` and Medal
+  Rally ranks multiply Fame (`rankFameMultiplier`). Larger medal Fame (2/5/12/30) sped up
+  Orange by about 25% in the sim, hence the small values. The simulator plays medals too.
+- Challenges (`challenges.ts`): set on the starter screen in `hof.challengeKeys` (kept between
+  journeys), copied into `main.challenges` when the starter is picked. Enforced in
+  `main.canJoinParty`/`maxParty`/`trainerStrength`/`fameLevels` and the Mart; HoF entries keep
+  the challenges met. The simulator plays none.
+
 ## Done (v2.2 "Johto")
 
 - Johto: 50 HG/SS places, Gyms, Elite Four and Lance (unlocks after Sevii plus a complete Pokédex
@@ -169,6 +205,9 @@ across journeys.
   Cap Pikachu (Littleroot gift). Alto Mare's Latios/Latias stay in Johto's anime places.
 - The three Ranger games are done (Fiore, Almia, Oblivia). Not done: Guardian Signs' past
   (time travel) Browser and Ukulele Pichu.
+- Gen 5 (v2.11) is done: both Unova journeys, Seasons, phenomena, critical captures, Hidden
+  Grottoes, Medals and challenges. Not done: Triple/Rotation Battles, Unova anime places,
+  Black City/White Forest, Join Avenue, Musicals.
 - Later: Pokémon Conquest with Gen 5 (Unova); Mystery Dungeon after Gen 7 (the owner plans other
   games and romhacks as a "multiverse"). Not wanted: Pokéwalker, Pokéathlon. Not done yet:
   Sinnoh's swarms (PokeAPI's tables are in `sinnohExtras.json`), Sinnoh anime places.

@@ -6,6 +6,8 @@ import { SINNOH_SPECIALS } from "./sinnoh";
 import { ALMIA_SPECIALS } from "./almia";
 import { FIORE_SPECIALS } from "./fiore";
 import { OBLIVIA_SPECIALS } from "./oblivia";
+import { UNOVA_SPECIALS } from "./unova";
+import { UNOVA2_SPECIALS } from "./unova2";
 import { JOHTO_SPECIALS } from "./johto";
 import { COLOSSEUM_SPECIALS } from "./colosseum";
 import { XD_SPECIALS } from "./xd";
@@ -36,6 +38,8 @@ export type SpecialEncounter =
           pool?: number[];
           /** Chance the gift is shiny (the Odd Egg's 14%). */
           shinyChance?: number;
+          /** A gift that depends on the starter (the Dreamyard's monkey), by starter species. */
+          byStarter?: Record<number, number>;
           text: string;
       }
     | {
@@ -88,6 +92,8 @@ export type SpecialEncounter =
           keyItem?: KeyItemId;
           /** Multiplies this journey's Hall of Fame Fame once won (the Distortion World). */
           fameBonus?: number;
+          /** Only once these regions have been cleared (the World Tournament's Leaders). */
+          requiresCleared?: RegionId[];
           text: string;
       };
 
@@ -95,6 +101,9 @@ export type SpecialEncounter =
 export function specialSpecies(special: SpecialEncounter): number[] {
     if (special.kind === "boss") return [];
     if (special.kind === "gift" && special.pool != null) return special.pool;
+    if (special.kind === "gift" && special.byStarter != null) {
+        return [...new Set([special.speciesId, ...Object.values(special.byStarter)])];
+    }
     return [special.speciesId];
 }
 
@@ -423,7 +432,9 @@ export const SPECIAL_ENCOUNTERS: SpecialEncounter[] = [
     ...SINNOH_SPECIALS,
     ...FIORE_SPECIALS,
     ...ALMIA_SPECIALS,
-    ...OBLIVIA_SPECIALS
+    ...OBLIVIA_SPECIALS,
+    ...UNOVA_SPECIALS,
+    ...UNOVA2_SPECIALS
 ];
 
 /** Seconds allowed to defeat a legendary before it flees. */

@@ -167,6 +167,8 @@ export interface EncounterEntry {
     obstacle?: FieldNeed;
     /** HeartGold/SoulSilver tables that change with the time of day: the weight at each time. */
     byTime?: Record<TimeOfDay, number>;
+    /** Black/White tables that change with the season: the weight in each (Seasons mechanic). */
+    bySeason?: Record<Season, number>;
 }
 
 export type EncounterPoolId =
@@ -181,7 +183,11 @@ export type EncounterPoolId =
 
 export type TimeOfDay = "morning" | "day" | "night";
 
-/** The regular National Pokédex species, #1-493, in order. */
+/** Unova's four seasons (Black and White's mechanic), in the order they come. */
+export type Season = "spring" | "summer" | "autumn" | "winter";
+export const SEASONS: Season[] = ["spring", "summer", "autumn", "winter"];
+
+/** The regular National Pokédex species, #1-649, in order. */
 export const SPECIES = speciesJson as Species[];
 export const DEX_SIZE = SPECIES.length;
 

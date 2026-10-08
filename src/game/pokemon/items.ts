@@ -385,7 +385,8 @@ export type KeyItemId =
     | "radioCard"
     | "snagMachine"
     | "oddKeystone"
-    | "griseousOrb";
+    | "griseousOrb"
+    | "libertyPass";
 
 export interface KeyItemDefinition {
     id: KeyItemId;
@@ -482,5 +483,12 @@ export const KEY_ITEMS: Record<KeyItemId, KeyItemDefinition> = {
         description:
             "Found at the bottom of the Distortion World. Giratina holding it keeps its Origin Forme.",
         sprite: itemSprite("griseous-orb")
+    },
+    libertyPass: {
+        id: "libertyPass",
+        name: "Liberty Pass",
+        description:
+            "A Pokédex reward from Professor Juniper: a ticket for the boat from Castelia City to Liberty Garden, where Victini lives.",
+        sprite: itemSprite("liberty-pass")
     }
 };

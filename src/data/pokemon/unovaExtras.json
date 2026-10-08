@@ -1,0 +1,4398 @@
+{
+    "phenomena": {
+        "unovaRoute1": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 200,
+                    "minLevel": 2,
+                    "maxLevel": 4
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 155,
+                    "minLevel": 5,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 349,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 350,
+                    "weight": 10,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "unovaRoute2": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 200,
+                    "minLevel": 4,
+                    "maxLevel": 7
+                }
+            ]
+        },
+        "dreamyard": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 190,
+                    "minLevel": 8,
+                    "maxLevel": 11
+                },
+                {
+                    "id": 518,
+                    "weight": 10,
+                    "minLevel": 11,
+                    "maxLevel": 11
+                }
+            ]
+        },
+        "unovaRoute3": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 200,
+                    "minLevel": 8,
+                    "maxLevel": 11
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 280,
+                    "minLevel": 5,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 118,
+                    "weight": 160,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "wellspringCave": {
+            "dustCloud": [
+                {
+                    "id": 529,
+                    "weight": 200,
+                    "minLevel": 10,
+                    "maxLevel": 13
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 5,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 62,
+                    "weight": 10,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "pinwheelForest": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 320,
+                    "minLevel": 12,
+                    "maxLevel": 17
+                },
+                {
+                    "id": 511,
+                    "weight": 20,
+                    "minLevel": 15,
+                    "maxLevel": 15
+                },
+                {
+                    "id": 513,
+                    "weight": 20,
+                    "minLevel": 15,
+                    "maxLevel": 15
+                },
+                {
+                    "id": 515,
+                    "weight": 20,
+                    "minLevel": 15,
+                    "maxLevel": 15
+                },
+                {
+                    "id": 538,
+                    "weight": 5,
+                    "minLevel": 15,
+                    "maxLevel": 15
+                },
+                {
+                    "id": 547,
+                    "weight": 5,
+                    "minLevel": 17,
+                    "maxLevel": 17
+                },
+                {
+                    "id": 539,
+                    "weight": 5,
+                    "minLevel": 15,
+                    "maxLevel": 15
+                },
+                {
+                    "id": 549,
+                    "weight": 5,
+                    "minLevel": 17,
+                    "maxLevel": 17
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 5,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 118,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 40,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "unovaRoute4": {
+            "ripplingWater": [
+                {
+                    "id": 594,
+                    "weight": 190,
+                    "minLevel": 5,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 369,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 370,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 99,
+                    "weight": 30,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 593,
+                    "weight": 10,
+                    "minLevel": 5,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 367,
+                    "weight": 5,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 368,
+                    "weight": 5,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "unovaRoute16": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 19,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 20,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 573,
+                    "weight": 10,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                }
+            ]
+        },
+        "lostlornForest": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 90,
+                    "minLevel": 19,
+                    "maxLevel": 21
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 20,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 511,
+                    "weight": 20,
+                    "minLevel": 20,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 513,
+                    "weight": 20,
+                    "minLevel": 20,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 515,
+                    "weight": 20,
+                    "minLevel": 20,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 521,
+                    "weight": 10,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 542,
+                    "weight": 10,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 547,
+                    "weight": 5,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 549,
+                    "weight": 5,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 5,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 118,
+                    "weight": 120,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "unovaRoute5": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 19,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 20,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 573,
+                    "weight": 10,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                }
+            ]
+        },
+        "driftveilDrawbridge": {
+            "flyingShadow": [
+                {
+                    "id": 580,
+                    "weight": 200,
+                    "minLevel": 22,
+                    "maxLevel": 25
+                }
+            ]
+        },
+        "coldStorage": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 180,
+                    "minLevel": 20,
+                    "maxLevel": 23
+                },
+                {
+                    "id": 573,
+                    "weight": 10,
+                    "minLevel": 23,
+                    "maxLevel": 23
+                },
+                {
+                    "id": 508,
+                    "weight": 10,
+                    "minLevel": 23,
+                    "maxLevel": 23
+                }
+            ]
+        },
+        "unovaRoute6": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 142.5,
+                    "minLevel": 22,
+                    "maxLevel": 25,
+                    "bySeason": {
+                        "spring": 140,
+                        "summer": 140,
+                        "autumn": 140,
+                        "winter": 150
+                    }
+                },
+                {
+                    "id": 587,
+                    "weight": 40,
+                    "minLevel": 23,
+                    "maxLevel": 25
+                },
+                {
+                    "id": 521,
+                    "weight": 7.5,
+                    "minLevel": 25,
+                    "maxLevel": 25,
+                    "bySeason": {
+                        "spring": 10,
+                        "summer": 10,
+                        "autumn": 10,
+                        "winter": 0
+                    }
+                },
+                {
+                    "id": 542,
+                    "weight": 10,
+                    "minLevel": 25,
+                    "maxLevel": 25
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 594,
+                    "weight": 190,
+                    "minLevel": 10,
+                    "maxLevel": 30
+                },
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 10,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 170,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 370,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 99,
+                    "weight": 30,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 171,
+                    "weight": 10,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 593,
+                    "weight": 10,
+                    "minLevel": 10,
+                    "maxLevel": 30
+                },
+                {
+                    "id": 186,
+                    "weight": 10,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "chargestoneCave": {
+            "dustCloud": [
+                {
+                    "id": 529,
+                    "weight": 600,
+                    "minLevel": 24,
+                    "maxLevel": 27
+                }
+            ]
+        },
+        "mistraltonCave": {
+            "dustCloud": [
+                {
+                    "id": 529,
+                    "weight": 400,
+                    "minLevel": 28,
+                    "maxLevel": 31
+                }
+            ]
+        },
+        "unovaRoute7": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 172.5,
+                    "minLevel": 26,
+                    "maxLevel": 29,
+                    "bySeason": {
+                        "spring": 170,
+                        "summer": 170,
+                        "autumn": 170,
+                        "winter": 180
+                    }
+                },
+                {
+                    "id": 521,
+                    "weight": 7.5,
+                    "minLevel": 29,
+                    "maxLevel": 29,
+                    "bySeason": {
+                        "spring": 10,
+                        "summer": 10,
+                        "autumn": 10,
+                        "winter": 0
+                    }
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 27,
+                    "maxLevel": 27
+                }
+            ]
+        },
+        "twistMountain": {
+            "dustCloud": [
+                {
+                    "id": 529,
+                    "weight": 200,
+                    "minLevel": 28,
+                    "maxLevel": 31
+                }
+            ]
+        },
+        "icirrusCity": {
+            "ripplingWater": [
+                {
+                    "id": 618,
+                    "weight": 270,
+                    "minLevel": 15,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 339,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 340,
+                    "weight": 40,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 537,
+                    "weight": 10,
+                    "minLevel": 15,
+                    "maxLevel": 40
+                }
+            ]
+        },
+        "dragonspiralTower": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 345,
+                    "minLevel": 30,
+                    "maxLevel": 33,
+                    "bySeason": {
+                        "spring": 340,
+                        "summer": 340,
+                        "autumn": 340,
+                        "winter": 360
+                    }
+                },
+                {
+                    "id": 521,
+                    "weight": 15,
+                    "minLevel": 33,
+                    "maxLevel": 33,
+                    "bySeason": {
+                        "spring": 20,
+                        "summer": 20,
+                        "autumn": 20,
+                        "winter": 0
+                    }
+                },
+                {
+                    "id": 587,
+                    "weight": 40,
+                    "minLevel": 31,
+                    "maxLevel": 31
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 15,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 147,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 148,
+                    "weight": 38,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 149,
+                    "weight": 2,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "unovaRoute8": {
+            "ripplingWater": [
+                {
+                    "id": 618,
+                    "weight": 270,
+                    "minLevel": 15,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 339,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 340,
+                    "weight": 40,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 537,
+                    "weight": 10,
+                    "minLevel": 15,
+                    "maxLevel": 40
+                }
+            ]
+        },
+        "moorOfIcirrus": {
+            "ripplingWater": [
+                {
+                    "id": 618,
+                    "weight": 270,
+                    "minLevel": 15,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 339,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 340,
+                    "weight": 40,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 537,
+                    "weight": 10,
+                    "minLevel": 15,
+                    "maxLevel": 40
+                }
+            ]
+        },
+        "unovaRoute9": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 160,
+                    "minLevel": 31,
+                    "maxLevel": 34
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 32,
+                    "maxLevel": 32
+                },
+                {
+                    "id": 573,
+                    "weight": 10,
+                    "minLevel": 34,
+                    "maxLevel": 34
+                },
+                {
+                    "id": 576,
+                    "weight": 5,
+                    "minLevel": 34,
+                    "maxLevel": 34
+                },
+                {
+                    "id": 579,
+                    "weight": 5,
+                    "minLevel": 34,
+                    "maxLevel": 34
+                }
+            ]
+        },
+        "challengersCave": {
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 600,
+                    "minLevel": 47,
+                    "maxLevel": 50
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 25,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 62,
+                    "weight": 10,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "unovaRoute10": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 320,
+                    "minLevel": 33,
+                    "maxLevel": 36
+                },
+                {
+                    "id": 587,
+                    "weight": 40,
+                    "minLevel": 34,
+                    "maxLevel": 34
+                },
+                {
+                    "id": 508,
+                    "weight": 20,
+                    "minLevel": 36,
+                    "maxLevel": 36
+                },
+                {
+                    "id": 538,
+                    "weight": 10,
+                    "minLevel": 36,
+                    "maxLevel": 36
+                },
+                {
+                    "id": 539,
+                    "weight": 10,
+                    "minLevel": 36,
+                    "maxLevel": 36
+                }
+            ]
+        },
+        "unovaVictoryRoad": {
+            "shakingGrass": [
+                {
+                    "id": 530,
+                    "weight": 2600,
+                    "minLevel": 37,
+                    "maxLevel": 42
+                }
+            ],
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 400,
+                    "minLevel": 37,
+                    "maxLevel": 40
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 280,
+                    "minLevel": 20,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 61,
+                    "weight": 220,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 62,
+                    "weight": 20,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "unovaRoute11": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 47,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 48,
+                    "maxLevel": 48
+                },
+                {
+                    "id": 472,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 418,
+                    "weight": 120,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 118,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 550,
+                    "weight": 70,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 40,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 419,
+                    "weight": 20,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "villageBridge": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 180,
+                    "minLevel": 47,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 48,
+                    "maxLevel": 48
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 135,
+                    "minLevel": 25,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 318,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 319,
+                    "weight": 40,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 131,
+                    "weight": 10,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "unovaRoute12": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 140,
+                    "minLevel": 47,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 48,
+                    "maxLevel": 48
+                },
+                {
+                    "id": 521,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 416,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 192,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 15,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 12,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                }
+            ]
+        },
+        "unovaRoute13": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 160,
+                    "minLevel": 47,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 48,
+                    "maxLevel": 48
+                },
+                {
+                    "id": 169,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 465,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 120,
+                    "weight": 120,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 90,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 370,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 222,
+                    "weight": 60,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 99,
+                    "weight": 30,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 121,
+                    "weight": 20,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 91,
+                    "weight": 10,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "giantChasm": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 330,
+                    "minLevel": 47,
+                    "maxLevel": 55
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 48,
+                    "maxLevel": 48
+                },
+                {
+                    "id": 169,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 465,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 473,
+                    "weight": 10,
+                    "minLevel": 55,
+                    "maxLevel": 55
+                },
+                {
+                    "id": 36,
+                    "weight": 10,
+                    "minLevel": 55,
+                    "maxLevel": 55
+                },
+                {
+                    "id": 376,
+                    "weight": 10,
+                    "minLevel": 55,
+                    "maxLevel": 55
+                }
+            ],
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 400,
+                    "minLevel": 47,
+                    "maxLevel": 60
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 86,
+                    "weight": 240,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 61,
+                    "weight": 220,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 87,
+                    "weight": 40,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 62,
+                    "weight": 20,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "unovaRoute14": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 47,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 48,
+                    "maxLevel": 48
+                },
+                {
+                    "id": 40,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 418,
+                    "weight": 120,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 118,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 550,
+                    "weight": 70,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 40,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 419,
+                    "weight": 20,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "abundantShrine": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 150,
+                    "minLevel": 47,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 48,
+                    "maxLevel": 48
+                },
+                {
+                    "id": 38,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 430,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 547,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 429,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 549,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 79,
+                    "weight": 120,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 118,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 550,
+                    "weight": 70,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 40,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 80,
+                    "weight": 10,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 199,
+                    "weight": 10,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "undellaBay": {
+            "ripplingWater": [
+                {
+                    "id": 320,
+                    "weight": 285,
+                    "minLevel": 25,
+                    "maxLevel": 60,
+                    "bySeason": {
+                        "spring": 300,
+                        "summer": 300,
+                        "autumn": 300,
+                        "winter": 240
+                    }
+                },
+                {
+                    "id": 594,
+                    "weight": 190,
+                    "minLevel": 5,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 90,
+                    "weight": 160,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 370,
+                    "weight": 160,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 117,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 211,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 224,
+                    "weight": 60,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 364,
+                    "weight": 15,
+                    "minLevel": 25,
+                    "maxLevel": 60,
+                    "bySeason": {
+                        "spring": 0,
+                        "summer": 0,
+                        "autumn": 0,
+                        "winter": 60
+                    }
+                },
+                {
+                    "id": 222,
+                    "weight": 60,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 226,
+                    "weight": 27.5,
+                    "minLevel": 35,
+                    "maxLevel": 70,
+                    "bySeason": {
+                        "spring": 30,
+                        "summer": 30,
+                        "autumn": 30,
+                        "winter": 20
+                    }
+                },
+                {
+                    "id": 321,
+                    "weight": 10,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 457,
+                    "weight": 30,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 91,
+                    "weight": 20,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 365,
+                    "weight": 2.5,
+                    "minLevel": 35,
+                    "maxLevel": 70,
+                    "bySeason": {
+                        "spring": 0,
+                        "summer": 0,
+                        "autumn": 0,
+                        "winter": 10
+                    }
+                },
+                {
+                    "id": 230,
+                    "weight": 10,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 593,
+                    "weight": 10,
+                    "minLevel": 5,
+                    "maxLevel": 20
+                }
+            ]
+        },
+        "unovaRoute15": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 150,
+                    "minLevel": 47,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 48,
+                    "maxLevel": 48
+                },
+                {
+                    "id": 472,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 248,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 538,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 539,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                }
+            ]
+        },
+        "marvelousBridge": {
+            "flyingShadow": [
+                {
+                    "id": 581,
+                    "weight": 200,
+                    "minLevel": 47,
+                    "maxLevel": 50
+                }
+            ]
+        },
+        "unovaRoute18": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 190,
+                    "minLevel": 28,
+                    "maxLevel": 31
+                },
+                {
+                    "id": 538,
+                    "weight": 5,
+                    "minLevel": 31,
+                    "maxLevel": 31
+                },
+                {
+                    "id": 539,
+                    "weight": 5,
+                    "minLevel": 31,
+                    "maxLevel": 31
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 594,
+                    "weight": 190,
+                    "minLevel": 5,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 117,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 211,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 457,
+                    "weight": 30,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 230,
+                    "weight": 10,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 593,
+                    "weight": 10,
+                    "minLevel": 5,
+                    "maxLevel": 20
+                }
+            ]
+        },
+        "p2Laboratory": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 190,
+                    "minLevel": 28,
+                    "maxLevel": 31
+                },
+                {
+                    "id": 508,
+                    "weight": 10,
+                    "minLevel": 31,
+                    "maxLevel": 31
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 594,
+                    "weight": 190,
+                    "minLevel": 5,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 117,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 211,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 457,
+                    "weight": 30,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 230,
+                    "weight": 10,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 593,
+                    "weight": 10,
+                    "minLevel": 5,
+                    "maxLevel": 20
+                }
+            ]
+        },
+        "b2w2Route19": {
+            "shakingGrass": [
+                {
+                    "id": 504,
+                    "weight": 200,
+                    "minLevel": 2,
+                    "maxLevel": 4
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 280,
+                    "minLevel": 5,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 118,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 40,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 186,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "b2w2Route20": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 180,
+                    "minLevel": 2,
+                    "maxLevel": 4
+                },
+                {
+                    "id": 206,
+                    "weight": 20,
+                    "minLevel": 3,
+                    "maxLevel": 3
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 550,
+                    "weight": 105,
+                    "minLevel": 5,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 183,
+                    "weight": 60,
+                    "minLevel": 5,
+                    "maxLevel": 15
+                },
+                {
+                    "id": 186,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 5,
+                    "maxLevel": 15
+                }
+            ]
+        },
+        "floccesyRanch": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 180,
+                    "minLevel": 4,
+                    "maxLevel": 7
+                },
+                {
+                    "id": 206,
+                    "weight": 20,
+                    "minLevel": 5,
+                    "maxLevel": 5
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 61,
+                    "weight": 220,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 550,
+                    "weight": 210,
+                    "minLevel": 5,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 183,
+                    "weight": 120,
+                    "minLevel": 5,
+                    "maxLevel": 15
+                },
+                {
+                    "id": 186,
+                    "weight": 20,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 184,
+                    "weight": 20,
+                    "minLevel": 5,
+                    "maxLevel": 15
+                }
+            ]
+        },
+        "virbankComplex": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 400,
+                    "minLevel": 10,
+                    "maxLevel": 13
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 594,
+                    "weight": 380,
+                    "minLevel": 5,
+                    "maxLevel": 15
+                },
+                {
+                    "id": 98,
+                    "weight": 160,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 457,
+                    "weight": 160,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 99,
+                    "weight": 80,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 593,
+                    "weight": 20,
+                    "minLevel": 5,
+                    "maxLevel": 15
+                }
+            ]
+        },
+        "casteliaSewers": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 180,
+                    "minLevel": 15,
+                    "maxLevel": 18
+                },
+                {
+                    "id": 428,
+                    "weight": 5,
+                    "minLevel": 18,
+                    "maxLevel": 18
+                },
+                {
+                    "id": 547,
+                    "weight": 5,
+                    "minLevel": 18,
+                    "maxLevel": 18
+                },
+                {
+                    "id": 301,
+                    "weight": 5,
+                    "minLevel": 18,
+                    "maxLevel": 18
+                },
+                {
+                    "id": 549,
+                    "weight": 5,
+                    "minLevel": 18,
+                    "maxLevel": 18
+                }
+            ],
+            "dustCloud": [
+                {
+                    "id": 529,
+                    "weight": 160,
+                    "minLevel": 16,
+                    "maxLevel": 19
+                },
+                {
+                    "id": 95,
+                    "weight": 40,
+                    "minLevel": 16,
+                    "maxLevel": 16
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 88,
+                    "weight": 700,
+                    "minLevel": 5,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 89,
+                    "weight": 100,
+                    "minLevel": 5,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "b2w2Route4": {
+            "ripplingWater": [
+                {
+                    "id": 594,
+                    "weight": 190,
+                    "minLevel": 5,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 457,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 211,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 369,
+                    "weight": 30,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 593,
+                    "weight": 10,
+                    "minLevel": 5,
+                    "maxLevel": 20
+                },
+                {
+                    "id": 367,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 368,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "relicPassage": {
+            "dustCloud": [
+                {
+                    "id": 529,
+                    "weight": 320,
+                    "minLevel": 27,
+                    "maxLevel": 30
+                },
+                {
+                    "id": 95,
+                    "weight": 80,
+                    "minLevel": 27,
+                    "maxLevel": 27
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 183,
+                    "weight": 120,
+                    "minLevel": 10,
+                    "maxLevel": 30
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 550,
+                    "weight": 75,
+                    "minLevel": 10,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 62,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 10,
+                    "maxLevel": 30
+                }
+            ]
+        },
+        "b2w2Route16": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 21,
+                    "maxLevel": 24
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 573,
+                    "weight": 10,
+                    "minLevel": 24,
+                    "maxLevel": 24
+                }
+            ]
+        },
+        "b2w2LostlornForest": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 80,
+                    "minLevel": 21,
+                    "maxLevel": 23
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 511,
+                    "weight": 20,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 513,
+                    "weight": 20,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 515,
+                    "weight": 20,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 416,
+                    "weight": 10,
+                    "minLevel": 24,
+                    "maxLevel": 24
+                },
+                {
+                    "id": 407,
+                    "weight": 10,
+                    "minLevel": 24,
+                    "maxLevel": 24
+                },
+                {
+                    "id": 542,
+                    "weight": 10,
+                    "minLevel": 24,
+                    "maxLevel": 24
+                },
+                {
+                    "id": 547,
+                    "weight": 5,
+                    "minLevel": 24,
+                    "maxLevel": 24
+                },
+                {
+                    "id": 549,
+                    "weight": 5,
+                    "minLevel": 24,
+                    "maxLevel": 24
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 418,
+                    "weight": 120,
+                    "minLevel": 10,
+                    "maxLevel": 30
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 550,
+                    "weight": 70,
+                    "minLevel": 10,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 419,
+                    "weight": 20,
+                    "minLevel": 10,
+                    "maxLevel": 30
+                },
+                {
+                    "id": 186,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "b2w2Route5": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 21,
+                    "maxLevel": 24
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 22,
+                    "maxLevel": 22
+                },
+                {
+                    "id": 573,
+                    "weight": 10,
+                    "minLevel": 24,
+                    "maxLevel": 24
+                }
+            ]
+        },
+        "b2w2DriftveilDrawbridge": {
+            "flyingShadow": [
+                {
+                    "id": 580,
+                    "weight": 200,
+                    "minLevel": 23,
+                    "maxLevel": 26
+                }
+            ]
+        },
+        "b2w2Route6": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 100,
+                    "minLevel": 23,
+                    "maxLevel": 25
+                },
+                {
+                    "id": 587,
+                    "weight": 40,
+                    "minLevel": 24,
+                    "maxLevel": 25
+                },
+                {
+                    "id": 206,
+                    "weight": 20,
+                    "minLevel": 25,
+                    "maxLevel": 25
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 26,
+                    "maxLevel": 26
+                },
+                {
+                    "id": 351,
+                    "weight": 10,
+                    "minLevel": 26,
+                    "maxLevel": 26
+                },
+                {
+                    "id": 521,
+                    "weight": 10,
+                    "minLevel": 26,
+                    "maxLevel": 26
+                },
+                {
+                    "id": 542,
+                    "weight": 10,
+                    "minLevel": 26,
+                    "maxLevel": 26
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 183,
+                    "weight": 120,
+                    "minLevel": 10,
+                    "maxLevel": 35
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 550,
+                    "weight": 75,
+                    "minLevel": 10,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 186,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 10,
+                    "maxLevel": 35
+                }
+            ]
+        },
+        "b2w2ChargestoneCave": {
+            "dustCloud": [
+                {
+                    "id": 529,
+                    "weight": 600,
+                    "minLevel": 25,
+                    "maxLevel": 31
+                }
+            ]
+        },
+        "b2w2MistraltonCave": {
+            "dustCloud": [
+                {
+                    "id": 529,
+                    "weight": 400,
+                    "minLevel": 27,
+                    "maxLevel": 30
+                }
+            ]
+        },
+        "b2w2Route7": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 30,
+                    "maxLevel": 33
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 31,
+                    "maxLevel": 31
+                },
+                {
+                    "id": 521,
+                    "weight": 10,
+                    "minLevel": 33,
+                    "maxLevel": 33
+                }
+            ]
+        },
+        "b2w2TwistMountain": {
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 150,
+                    "minLevel": 54,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 95,
+                    "weight": 40,
+                    "minLevel": 54,
+                    "maxLevel": 54
+                },
+                {
+                    "id": 208,
+                    "weight": 10,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                }
+            ]
+        },
+        "b2w2IcirrusCity": {
+            "ripplingWater": [
+                {
+                    "id": 618,
+                    "weight": 270,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 340,
+                    "weight": 40,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 339,
+                    "weight": 80,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 537,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "b2w2DragonspiralTower": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 340,
+                    "minLevel": 55,
+                    "maxLevel": 58
+                },
+                {
+                    "id": 521,
+                    "weight": 15,
+                    "minLevel": 57,
+                    "maxLevel": 58,
+                    "bySeason": {
+                        "spring": 20,
+                        "summer": 20,
+                        "autumn": 20,
+                        "winter": 0
+                    }
+                },
+                {
+                    "id": 587,
+                    "weight": 40,
+                    "minLevel": 56,
+                    "maxLevel": 56
+                },
+                {
+                    "id": 584,
+                    "weight": 5,
+                    "minLevel": 57,
+                    "maxLevel": 58,
+                    "bySeason": {
+                        "spring": 0,
+                        "summer": 0,
+                        "autumn": 0,
+                        "winter": 20
+                    }
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 147,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 148,
+                    "weight": 38,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 149,
+                    "weight": 2,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "b2w2Route8": {
+            "ripplingWater": [
+                {
+                    "id": 618,
+                    "weight": 210,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 340,
+                    "weight": 40,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 339,
+                    "weight": 80,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 536,
+                    "weight": 60,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 537,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "b2w2MoorOfIcirrus": {
+            "ripplingWater": [
+                {
+                    "id": 618,
+                    "weight": 270,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 340,
+                    "weight": 40,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 339,
+                    "weight": 80,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 537,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "reversalMountain": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 200,
+                    "minLevel": 31,
+                    "maxLevel": 34
+                }
+            ],
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 2400,
+                    "minLevel": 32,
+                    "maxLevel": 35
+                }
+            ]
+        },
+        "b2w2UndellaBay": {
+            "ripplingWater": [
+                {
+                    "id": 593,
+                    "weight": 150,
+                    "minLevel": 25,
+                    "maxLevel": 40,
+                    "bySeason": {
+                        "spring": 180,
+                        "summer": 180,
+                        "autumn": 180,
+                        "winter": 60
+                    }
+                },
+                {
+                    "id": 320,
+                    "weight": 75,
+                    "minLevel": 25,
+                    "maxLevel": 40,
+                    "bySeason": {
+                        "spring": 60,
+                        "summer": 60,
+                        "autumn": 60,
+                        "winter": 120
+                    }
+                },
+                {
+                    "id": 120,
+                    "weight": 120,
+                    "minLevel": 25,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 90,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 223,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 170,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 370,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 364,
+                    "weight": 15,
+                    "minLevel": 25,
+                    "maxLevel": 40,
+                    "bySeason": {
+                        "spring": 0,
+                        "summer": 0,
+                        "autumn": 0,
+                        "winter": 60
+                    }
+                },
+                {
+                    "id": 171,
+                    "weight": 30,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 226,
+                    "weight": 7.5,
+                    "minLevel": 30,
+                    "maxLevel": 40,
+                    "bySeason": {
+                        "spring": 10,
+                        "summer": 10,
+                        "autumn": 10,
+                        "winter": 0
+                    }
+                },
+                {
+                    "id": 224,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 365,
+                    "weight": 2.5,
+                    "minLevel": 30,
+                    "maxLevel": 40,
+                    "bySeason": {
+                        "spring": 0,
+                        "summer": 0,
+                        "autumn": 0,
+                        "winter": 10
+                    }
+                },
+                {
+                    "id": 321,
+                    "weight": 10,
+                    "minLevel": 30,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 91,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 121,
+                    "weight": 10,
+                    "minLevel": 30,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 550,
+                    "weight": 5,
+                    "minLevel": 30,
+                    "maxLevel": 40
+                }
+            ]
+        },
+        "b2w2Route13": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 34,
+                    "maxLevel": 37
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 35,
+                    "maxLevel": 35
+                },
+                {
+                    "id": 465,
+                    "weight": 10,
+                    "minLevel": 37,
+                    "maxLevel": 37
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 120,
+                    "weight": 120,
+                    "minLevel": 25,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 90,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 370,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 593,
+                    "weight": 60,
+                    "minLevel": 25,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 91,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 121,
+                    "weight": 10,
+                    "minLevel": 30,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 550,
+                    "weight": 5,
+                    "minLevel": 30,
+                    "maxLevel": 40
+                }
+            ]
+        },
+        "b2w2Route12": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 120,
+                    "minLevel": 35,
+                    "maxLevel": 37
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 36,
+                    "maxLevel": 36
+                },
+                {
+                    "id": 206,
+                    "weight": 20,
+                    "minLevel": 36,
+                    "maxLevel": 36
+                },
+                {
+                    "id": 521,
+                    "weight": 10,
+                    "minLevel": 38,
+                    "maxLevel": 38
+                },
+                {
+                    "id": 542,
+                    "weight": 10,
+                    "minLevel": 38,
+                    "maxLevel": 38
+                },
+                {
+                    "id": 416,
+                    "weight": 10,
+                    "minLevel": 38,
+                    "maxLevel": 38
+                },
+                {
+                    "id": 407,
+                    "weight": 10,
+                    "minLevel": 38,
+                    "maxLevel": 38
+                }
+            ]
+        },
+        "b2w2VillageBridge": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 150,
+                    "minLevel": 36,
+                    "maxLevel": 39
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 37,
+                    "maxLevel": 37
+                },
+                {
+                    "id": 206,
+                    "weight": 20,
+                    "minLevel": 37,
+                    "maxLevel": 37
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 39,
+                    "maxLevel": 39
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 183,
+                    "weight": 120,
+                    "minLevel": 25,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 318,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 550,
+                    "weight": 70,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 319,
+                    "weight": 40,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 30,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 131,
+                    "weight": 10,
+                    "minLevel": 30,
+                    "maxLevel": 40
+                }
+            ]
+        },
+        "b2w2Route11": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 160,
+                    "minLevel": 36,
+                    "maxLevel": 39
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 37,
+                    "maxLevel": 37
+                },
+                {
+                    "id": 472,
+                    "weight": 10,
+                    "minLevel": 39,
+                    "maxLevel": 39
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 39,
+                    "maxLevel": 39
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 418,
+                    "weight": 120,
+                    "minLevel": 25,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 118,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 550,
+                    "weight": 70,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 40,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 419,
+                    "weight": 20,
+                    "minLevel": 30,
+                    "maxLevel": 40
+                }
+            ]
+        },
+        "b2w2Route9": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 160,
+                    "minLevel": 37,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 38,
+                    "maxLevel": 38
+                },
+                {
+                    "id": 573,
+                    "weight": 10,
+                    "minLevel": 40,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 576,
+                    "weight": 5,
+                    "minLevel": 40,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 579,
+                    "weight": 5,
+                    "minLevel": 40,
+                    "maxLevel": 40
+                }
+            ]
+        },
+        "b2w2Route21": {
+            "ripplingWater": [
+                {
+                    "id": 593,
+                    "weight": 120,
+                    "minLevel": 30,
+                    "maxLevel": 45
+                },
+                {
+                    "id": 223,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 370,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 594,
+                    "weight": 70,
+                    "minLevel": 30,
+                    "maxLevel": 45
+                },
+                {
+                    "id": 224,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 226,
+                    "weight": 10,
+                    "minLevel": 35,
+                    "maxLevel": 45
+                }
+            ]
+        },
+        "b2w2Route22": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 39,
+                    "maxLevel": 42
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 40,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 42,
+                    "maxLevel": 42
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 593,
+                    "weight": 120,
+                    "minLevel": 35,
+                    "maxLevel": 45
+                },
+                {
+                    "id": 183,
+                    "weight": 120,
+                    "minLevel": 15,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 90,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 370,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 118,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 550,
+                    "weight": 80,
+                    "minLevel": 15,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 222,
+                    "weight": 60,
+                    "minLevel": 35,
+                    "maxLevel": 45
+                },
+                {
+                    "id": 119,
+                    "weight": 40,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 91,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 121,
+                    "weight": 10,
+                    "minLevel": 35,
+                    "maxLevel": 45
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 25,
+                    "maxLevel": 45
+                }
+            ]
+        },
+        "seasideCave": {
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 400,
+                    "minLevel": 34,
+                    "maxLevel": 42
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 86,
+                    "weight": 120,
+                    "minLevel": 25,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 90,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 370,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 593,
+                    "weight": 60,
+                    "minLevel": 25,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 87,
+                    "weight": 20,
+                    "minLevel": 30,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 91,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "b2w2GiantChasm": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 510,
+                    "minLevel": 44,
+                    "maxLevel": 47
+                },
+                {
+                    "id": 36,
+                    "weight": 30,
+                    "minLevel": 47,
+                    "maxLevel": 47
+                },
+                {
+                    "id": 473,
+                    "weight": 20,
+                    "minLevel": 47,
+                    "maxLevel": 47
+                },
+                {
+                    "id": 376,
+                    "weight": 20,
+                    "minLevel": 47,
+                    "maxLevel": 47
+                },
+                {
+                    "id": 584,
+                    "weight": 10,
+                    "minLevel": 47,
+                    "maxLevel": 47
+                },
+                {
+                    "id": 465,
+                    "weight": 10,
+                    "minLevel": 47,
+                    "maxLevel": 47
+                }
+            ],
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 200,
+                    "minLevel": 44,
+                    "maxLevel": 47
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 86,
+                    "weight": 120,
+                    "minLevel": 35,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 550,
+                    "weight": 70,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 87,
+                    "weight": 20,
+                    "minLevel": 40,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 62,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "b2w2Route23": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 160,
+                    "minLevel": 48,
+                    "maxLevel": 51
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 49,
+                    "maxLevel": 49
+                },
+                {
+                    "id": 472,
+                    "weight": 10,
+                    "minLevel": 51,
+                    "maxLevel": 51
+                },
+                {
+                    "id": 538,
+                    "weight": 5,
+                    "minLevel": 51,
+                    "maxLevel": 51
+                },
+                {
+                    "id": 539,
+                    "weight": 5,
+                    "minLevel": 51,
+                    "maxLevel": 51
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 418,
+                    "weight": 120,
+                    "minLevel": 40,
+                    "maxLevel": 55
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 550,
+                    "weight": 70,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 419,
+                    "weight": 20,
+                    "minLevel": 45,
+                    "maxLevel": 55
+                },
+                {
+                    "id": 62,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "b2w2VictoryRoad": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 690,
+                    "minLevel": 47,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 206,
+                    "weight": 60,
+                    "minLevel": 49,
+                    "maxLevel": 49
+                },
+                {
+                    "id": 521,
+                    "weight": 20,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 407,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 539,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 547,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 549,
+                    "weight": 5,
+                    "minLevel": 50,
+                    "maxLevel": 50
+                }
+            ],
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 840,
+                    "minLevel": 41,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 95,
+                    "weight": 160,
+                    "minLevel": 41,
+                    "maxLevel": 47
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 61,
+                    "weight": 550,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 550,
+                    "weight": 365,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 183,
+                    "weight": 360,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 418,
+                    "weight": 240,
+                    "minLevel": 35,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 419,
+                    "weight": 40,
+                    "minLevel": 40,
+                    "maxLevel": 50
+                },
+                {
+                    "id": 62,
+                    "weight": 30,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 184,
+                    "weight": 30,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 186,
+                    "weight": 20,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "b2w2Route1": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 160,
+                    "minLevel": 56,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 206,
+                    "weight": 20,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 508,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 40,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 349,
+                    "weight": 110,
+                    "minLevel": 40,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 350,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                }
+            ]
+        },
+        "b2w2Route2": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 150,
+                    "minLevel": 56,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 206,
+                    "weight": 20,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 463,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 508,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 40,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                }
+            ]
+        },
+        "b2w2Route3": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 55,
+                    "maxLevel": 58
+                },
+                {
+                    "id": 469,
+                    "weight": 10,
+                    "minLevel": 58,
+                    "maxLevel": 58
+                },
+                {
+                    "id": 521,
+                    "weight": 10,
+                    "minLevel": 58,
+                    "maxLevel": 58
+                },
+                {
+                    "id": 508,
+                    "weight": 10,
+                    "minLevel": 58,
+                    "maxLevel": 58
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 200,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 118,
+                    "weight": 160,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 341,
+                    "weight": 120,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 80,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 342,
+                    "weight": 40,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "b2w2WellspringCave": {
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 200,
+                    "minLevel": 55,
+                    "maxLevel": 58
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 62,
+                    "weight": 10,
+                    "minLevel": 60,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "b2w2Dreamyard": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 150,
+                    "minLevel": 56,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 206,
+                    "weight": 20,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 40,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 169,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 518,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                }
+            ]
+        },
+        "b2w2PinwheelForest": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 280,
+                    "minLevel": 54,
+                    "maxLevel": 64
+                },
+                {
+                    "id": 511,
+                    "weight": 20,
+                    "minLevel": 55,
+                    "maxLevel": 55
+                },
+                {
+                    "id": 513,
+                    "weight": 20,
+                    "minLevel": 55,
+                    "maxLevel": 55
+                },
+                {
+                    "id": 515,
+                    "weight": 20,
+                    "minLevel": 55,
+                    "maxLevel": 55
+                },
+                {
+                    "id": 469,
+                    "weight": 10,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 537,
+                    "weight": 10,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 545,
+                    "weight": 10,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 289,
+                    "weight": 10,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 538,
+                    "weight": 5,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 547,
+                    "weight": 5,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 539,
+                    "weight": 5,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 549,
+                    "weight": 5,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 183,
+                    "weight": 120,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 118,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 550,
+                    "weight": 75,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 40,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "b2w2Route14": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 180,
+                    "minLevel": 33,
+                    "maxLevel": 36
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 34,
+                    "maxLevel": 34
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 418,
+                    "weight": 120,
+                    "minLevel": 15,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 118,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 550,
+                    "weight": 70,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 40,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 419,
+                    "weight": 20,
+                    "minLevel": 25,
+                    "maxLevel": 40
+                }
+            ]
+        },
+        "b2w2AbundantShrine": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 155,
+                    "minLevel": 33,
+                    "maxLevel": 36
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 34,
+                    "maxLevel": 34
+                },
+                {
+                    "id": 38,
+                    "weight": 10,
+                    "minLevel": 36,
+                    "maxLevel": 36
+                },
+                {
+                    "id": 547,
+                    "weight": 5,
+                    "minLevel": 36,
+                    "maxLevel": 36
+                },
+                {
+                    "id": 184,
+                    "weight": 5,
+                    "minLevel": 36,
+                    "maxLevel": 36
+                },
+                {
+                    "id": 549,
+                    "weight": 5,
+                    "minLevel": 36,
+                    "maxLevel": 36
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 183,
+                    "weight": 120,
+                    "minLevel": 25,
+                    "maxLevel": 40
+                },
+                {
+                    "id": 118,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 550,
+                    "weight": 75,
+                    "minLevel": 25,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 119,
+                    "weight": 40,
+                    "minLevel": 50,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 184,
+                    "weight": 10,
+                    "minLevel": 30,
+                    "maxLevel": 40
+                }
+            ]
+        },
+        "b2w2Route15": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 150,
+                    "minLevel": 54,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 587,
+                    "weight": 20,
+                    "minLevel": 55,
+                    "maxLevel": 55
+                },
+                {
+                    "id": 472,
+                    "weight": 10,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 248,
+                    "weight": 10,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 538,
+                    "weight": 5,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 539,
+                    "weight": 5,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                }
+            ]
+        },
+        "b2w2MarvelousBridge": {
+            "flyingShadow": [
+                {
+                    "id": 581,
+                    "weight": 200,
+                    "minLevel": 54,
+                    "maxLevel": 57
+                }
+            ]
+        },
+        "b2w2Route18": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 56,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 206,
+                    "weight": 20,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 538,
+                    "weight": 5,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 539,
+                    "weight": 5,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 594,
+                    "weight": 190,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 116,
+                    "weight": 80,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 457,
+                    "weight": 80,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 117,
+                    "weight": 30,
+                    "minLevel": 60,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 230,
+                    "weight": 10,
+                    "minLevel": 60,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 593,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "b2w2P2Laboratory": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 56,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 462,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 601,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 508,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 594,
+                    "weight": 190,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 117,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 211,
+                    "weight": 80,
+                    "minLevel": 35,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 457,
+                    "weight": 30,
+                    "minLevel": 35,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 230,
+                    "weight": 10,
+                    "minLevel": 45,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 593,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "b2w2Route17": {
+            "ripplingWater": [
+                {
+                    "id": 594,
+                    "weight": 190,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 116,
+                    "weight": 80,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 457,
+                    "weight": 80,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 117,
+                    "weight": 30,
+                    "minLevel": 60,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 230,
+                    "weight": 10,
+                    "minLevel": 60,
+                    "maxLevel": 70
+                },
+                {
+                    "id": 593,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "clayTunnel": {
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 150,
+                    "minLevel": 54,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 95,
+                    "weight": 40,
+                    "minLevel": 54,
+                    "maxLevel": 54
+                },
+                {
+                    "id": 208,
+                    "weight": 10,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 550,
+                    "weight": 140,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 61,
+                    "weight": 110,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 62,
+                    "weight": 10,
+                    "minLevel": 60,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "natureSanctuary": {
+            "shakingGrass": [
+                {
+                    "id": 531,
+                    "weight": 170,
+                    "minLevel": 56,
+                    "maxLevel": 59
+                },
+                {
+                    "id": 206,
+                    "weight": 20,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 275,
+                    "weight": 10,
+                    "minLevel": 59,
+                    "maxLevel": 59
+                }
+            ],
+            "ripplingWater": [
+                {
+                    "id": 418,
+                    "weight": 120,
+                    "minLevel": 45,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 129,
+                    "weight": 80,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 550,
+                    "weight": 75,
+                    "minLevel": 40,
+                    "maxLevel": 60
+                },
+                {
+                    "id": 130,
+                    "weight": 40,
+                    "minLevel": 1,
+                    "maxLevel": 100
+                },
+                {
+                    "id": 419,
+                    "weight": 10,
+                    "minLevel": 50,
+                    "maxLevel": 60
+                }
+            ]
+        },
+        "undergroundRuins": {
+            "dustCloud": [
+                {
+                    "id": 530,
+                    "weight": 600,
+                    "minLevel": 54,
+                    "maxLevel": 57
+                },
+                {
+                    "id": 95,
+                    "weight": 160,
+                    "minLevel": 54,
+                    "maxLevel": 54
+                },
+                {
+                    "id": 208,
+                    "weight": 40,
+                    "minLevel": 57,
+                    "maxLevel": 57
+                }
+            ]
+        }
+    },
+    "grottoes": {
+        "b2w2Route2": [
+            {
+                "id": 505,
+                "weight": 150,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 29,
+                "weight": 20,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 32,
+                "weight": 20,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 210,
+                "weight": 10,
+                "minLevel": 55,
+                "maxLevel": 59
+            }
+        ],
+        "b2w2Route3": [
+            {
+                "id": 417,
+                "weight": 150,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 400,
+                "weight": 150,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 310,
+                "weight": 40,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 48,
+                "weight": 40,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 523,
+                "weight": 10,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 271,
+                "weight": 10,
+                "minLevel": 55,
+                "maxLevel": 59
+            }
+        ],
+        "b2w2Route5": [
+            {
+                "id": 590,
+                "weight": 150,
+                "minLevel": 20,
+                "maxLevel": 24
+            },
+            {
+                "id": 510,
+                "weight": 40,
+                "minLevel": 20,
+                "maxLevel": 24
+            },
+            {
+                "id": 572,
+                "weight": 10,
+                "minLevel": 20,
+                "maxLevel": 24
+            }
+        ],
+        "b2w2Route6": [
+            {
+                "id": 590,
+                "weight": 300,
+                "minLevel": 25,
+                "maxLevel": 29
+            },
+            {
+                "id": 527,
+                "weight": 80,
+                "minLevel": 25,
+                "maxLevel": 29
+            },
+            {
+                "id": 206,
+                "weight": 10,
+                "minLevel": 25,
+                "maxLevel": 29
+            },
+            {
+                "id": 299,
+                "weight": 10,
+                "minLevel": 25,
+                "maxLevel": 29
+            }
+        ],
+        "b2w2Route7": [
+            {
+                "id": 335,
+                "weight": 76,
+                "minLevel": 30,
+                "maxLevel": 34
+            },
+            {
+                "id": 336,
+                "weight": 76,
+                "minLevel": 30,
+                "maxLevel": 34
+            },
+            {
+                "id": 505,
+                "weight": 40,
+                "minLevel": 30,
+                "maxLevel": 34
+            },
+            {
+                "id": 613,
+                "weight": 10,
+                "minLevel": 30,
+                "maxLevel": 34
+            }
+        ],
+        "b2w2Route9": [
+            {
+                "id": 510,
+                "weight": 150,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 89,
+                "weight": 20,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 569,
+                "weight": 20,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 626,
+                "weight": 10,
+                "minLevel": 35,
+                "maxLevel": 39
+            }
+        ],
+        "b2w2Route13": [
+            {
+                "id": 590,
+                "weight": 300,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 114,
+                "weight": 40,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 425,
+                "weight": 40,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 451,
+                "weight": 10,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 363,
+                "weight": 10,
+                "minLevel": 35,
+                "maxLevel": 39
+            }
+        ],
+        "b2w2Route18": [
+            {
+                "id": 99,
+                "weight": 76,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 222,
+                "weight": 76,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 441,
+                "weight": 40,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 149,
+                "weight": 10,
+                "minLevel": 55,
+                "maxLevel": 59
+            }
+        ],
+        "b2w2Route22": [
+            {
+                "id": 591,
+                "weight": 150,
+                "minLevel": 40,
+                "maxLevel": 44
+            },
+            {
+                "id": 279,
+                "weight": 40,
+                "minLevel": 40,
+                "maxLevel": 44
+            },
+            {
+                "id": 619,
+                "weight": 10,
+                "minLevel": 40,
+                "maxLevel": 44
+            }
+        ],
+        "b2w2Route23": [
+            {
+                "id": 335,
+                "weight": 76,
+                "minLevel": 50,
+                "maxLevel": 54
+            },
+            {
+                "id": 336,
+                "weight": 76,
+                "minLevel": 50,
+                "maxLevel": 54
+            },
+            {
+                "id": 55,
+                "weight": 20,
+                "minLevel": 50,
+                "maxLevel": 54
+            },
+            {
+                "id": 359,
+                "weight": 20,
+                "minLevel": 50,
+                "maxLevel": 54
+            },
+            {
+                "id": 207,
+                "weight": 10,
+                "minLevel": 50,
+                "maxLevel": 54
+            }
+        ],
+        "floccesyRanch": [
+            {
+                "id": 183,
+                "weight": 150,
+                "minLevel": 10,
+                "maxLevel": 14
+            },
+            {
+                "id": 507,
+                "weight": 40,
+                "minLevel": 10,
+                "maxLevel": 14
+            },
+            {
+                "id": 206,
+                "weight": 10,
+                "minLevel": 10,
+                "maxLevel": 14
+            }
+        ],
+        "b2w2LostlornForest": [
+            {
+                "id": 415,
+                "weight": 150,
+                "minLevel": 20,
+                "maxLevel": 24
+            },
+            {
+                "id": 542,
+                "weight": 40,
+                "minLevel": 20,
+                "maxLevel": 24
+            },
+            {
+                "id": 127,
+                "weight": 5,
+                "minLevel": 20,
+                "maxLevel": 24
+            },
+            {
+                "id": 214,
+                "weight": 5,
+                "minLevel": 20,
+                "maxLevel": 24
+            }
+        ],
+        "b2w2GiantChasm": [
+            {
+                "id": 35,
+                "weight": 150,
+                "minLevel": 45,
+                "maxLevel": 49
+            },
+            {
+                "id": 215,
+                "weight": 20,
+                "minLevel": 45,
+                "maxLevel": 49
+            },
+            {
+                "id": 375,
+                "weight": 20,
+                "minLevel": 45,
+                "maxLevel": 49
+            },
+            {
+                "id": 132,
+                "weight": 10,
+                "minLevel": 45,
+                "maxLevel": 49
+            }
+        ],
+        "b2w2AbundantShrine": [
+            {
+                "id": 591,
+                "weight": 300,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 436,
+                "weight": 40,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 55,
+                "weight": 40,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 37,
+                "weight": 10,
+                "minLevel": 35,
+                "maxLevel": 39
+            },
+            {
+                "id": 333,
+                "weight": 10,
+                "minLevel": 35,
+                "maxLevel": 39
+            }
+        ],
+        "b2w2PinwheelForest": [
+            {
+                "id": 591,
+                "weight": 112,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 297,
+                "weight": 80,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 308,
+                "weight": 80,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 286,
+                "weight": 38,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 371,
+                "weight": 30,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 12,
+                "weight": 20,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 15,
+                "weight": 20,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 61,
+                "weight": 10,
+                "minLevel": 55,
+                "maxLevel": 59
+            },
+            {
+                "id": 198,
+                "weight": 10,
+                "minLevel": 55,
+                "maxLevel": 59
+            }
+        ]
+    }
+}

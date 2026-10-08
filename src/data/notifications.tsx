@@ -20,7 +20,8 @@ export type NotifyCategory =
     | "captures"
     | "trials"
     | "prizes"
-    | "defeats";
+    | "defeats"
+    | "medals";
 
 export const NOTIFY_CATEGORIES: [NotifyCategory, string, string][] = [
     ["evolutions", "Evolutions", "When one of your Pokémon evolves"],
@@ -36,7 +37,8 @@ export const NOTIFY_CATEGORIES: [NotifyCategory, string, string][] = [
         "Badges, trials and missions cleared, finales won, post-game bosses beaten"
     ],
     ["prizes", "Prizes", "Bug-Catching Contest wins and Lucky Number Show prizes"],
-    ["defeats", "Lost battles", "When your party is defeated or runs out of time"]
+    ["defeats", "Lost battles", "When your party is defeated or runs out of time"],
+    ["medals", "Medals", "When you earn a medal or a medal's next tier"]
 ];
 
 /** Seconds a notification stays up; 0 keeps it until it's dismissed. */

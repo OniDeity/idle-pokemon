@@ -37,6 +37,17 @@ export interface GymDefinition extends TrainerDefinition {
     /** Balls awarded alongside the badge. */
     balls?: Partial<Record<BallId, number>>;
     rewardText: string;
+    /**
+     * A Gym whose Leader depends on the starter (Striaton's triplets: Black and White send out
+     * whichever brother has the type advantage), by starter species.
+     */
+    forStarter?: Record<number, Pick<TrainerDefinition, "name" | "specialty" | "team" | "quote">>;
+}
+
+/** The trial this journey's starter faces: its own Leader, where the Gym has one per starter. */
+export function trialFor(gym: GymDefinition, starter: number): GymDefinition {
+    const leader = gym.forStarter?.[starter];
+    return leader == null ? gym : { ...gym, ...leader };
 }
 
 /**

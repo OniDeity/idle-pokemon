@@ -473,10 +473,18 @@ const layer = createLayer(id, () => {
                     ) : (
                         <Button
                             kind="primary"
-                            disabled={main.partyIds.value.length >= 6 || main.inTrainerBattle.value}
+                            disabled={
+                                main.partyIds.value.length >= main.maxParty.value ||
+                                !main.canJoinParty(speciesId) ||
+                                main.inTrainerBattle.value
+                            }
                             onClick={() => main.addToParty(speciesId)}
                         >
-                            {main.partyIds.value.length >= 6 ? "Party full" : "Add to party"}
+                            {!main.canJoinParty(speciesId)
+                                ? "Not allowed (challenge)"
+                                : main.partyIds.value.length >= main.maxParty.value
+                                  ? "Party full"
+                                  : "Add to party"}
                         </Button>
                     )}
                 </div>
