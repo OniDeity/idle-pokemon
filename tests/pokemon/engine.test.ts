@@ -1,4 +1,4 @@
-import { existsSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 import { requiredSpritePaths } from "../../scripts/fetchSprites";
 import type { BallContext, PartyBattler } from "game/pokemon/balance";
 import {
@@ -1929,5 +1929,29 @@ describe("Fame upgrades", () => {
             firstClear: false
         };
         expect(fameGain({ ...base, fanClub: 10 })).toBe(Math.floor(fameGain(base) * 1.3));
+    });
+});
+
+describe("saved state", () => {
+    test("text and object persistents opt out of Profectus's NaN check", () => {
+        // Profectus NaN-checks persistents by default and reads any string as NaN, which stops
+        // autosaving (v2.11.1's Travel Planner mode did this). Only numbers may keep the check.
+        const files = [
+            "src/data/projEntry.tsx",
+            ...readdirSync("src/data/layers").map(f => `src/data/layers/${f}`)
+        ];
+        for (const file of files) {
+            const source = readFileSync(file, "utf8");
+            for (const match of source.matchAll(
+                /persistent<([^>]+(?:>[^>(]*)?)>\(([\s\S]*?)\);/g
+            )) {
+                const [, type, args] = match;
+                if (type === "number") continue;
+                expect(
+                    args.trim().endsWith("false") || /^\s*(true|false)\s*$/.test(args),
+                    `${file}: persistent<${type}>(${args.trim().slice(0, 40)})`
+                ).toBe(true);
+            }
+        }
     });
 });
