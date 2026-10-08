@@ -388,11 +388,12 @@ export function grottoPool(
 
 /**
  * Stat multipliers for Black 2 and White 2's leaders, tuned with scripts/simulateProgression.ts:
- * twelve regions' Renown, and a first clear takes about 11 hours.
+ * twelve regions' Renown, and a first clear takes 10-12 hours with any starter. Drayden and the
+ * League are the longest walls.
  */
-const UNOVA2_GYM_STRENGTHS = [1.4, 2.4, 2.9, 3.3, 3.0, 3.4, 3.1, 3.0];
-const UNOVA2_ELITE_FOUR_STRENGTH = 2.6;
-const UNOVA2_CHAMPION_STRENGTH = 2.75;
+const UNOVA2_GYM_STRENGTHS = [1.8, 3.0, 3.6, 4.6, 4.4, 5.2, 5.3, 5.4];
+const UNOVA2_ELITE_FOUR_STRENGTH = 4.16;
+const UNOVA2_CHAMPION_STRENGTH = 4.4;
 
 function unova2Gym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">,

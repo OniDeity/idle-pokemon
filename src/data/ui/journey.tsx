@@ -65,7 +65,29 @@ const CAVES = new Set([
     "mtSilver",
     "ruinsOfAlphChambers",
     "canyonEntrance",
-    "navelIsland"
+    "navelIsland",
+    // Unova's
+    "wellspringCave",
+    "relicCastle",
+    "chargestoneCave",
+    "mistraltonCave",
+    "twistMountain",
+    "challengersCave",
+    "unovaVictoryRoad",
+    "giantChasm",
+    "casteliaSewers",
+    "b2w2RelicCastle",
+    "relicPassage",
+    "b2w2ChargestoneCave",
+    "b2w2MistraltonCave",
+    "reversalMountain",
+    "seasideCave",
+    "b2w2GiantChasm",
+    "b2w2VictoryRoad",
+    "b2w2WellspringCave",
+    "b2w2TwistMountain",
+    "clayTunnel",
+    "undergroundRuins"
 ]);
 const FORESTS = new Set([
     "viridianForest",
@@ -78,7 +100,12 @@ const FORESTS = new Set([
     "valenciaIsland",
     "ilexForest",
     "nationalPark",
-    "johtoSafariZone"
+    "johtoSafariZone",
+    "pinwheelForest",
+    "lostlornForest",
+    "b2w2LostlornForest",
+    "b2w2PinwheelForest",
+    "natureSanctuary"
 ]);
 const BUILDINGS = new Set([
     "pokemonTower",
@@ -92,7 +119,18 @@ const BUILDINGS = new Set([
     "moroIsland",
     "tanobyRuins",
     "sproutTower",
-    "burnedTower"
+    "burnedTower",
+    "dreamyard",
+    "coldStorage",
+    "celestialTower",
+    "dragonspiralTower",
+    "p2Laboratory",
+    "virbankComplex",
+    "b2w2CelestialTower",
+    "strangeHouse",
+    "b2w2Dreamyard",
+    "b2w2DragonspiralTower",
+    "b2w2P2Laboratory"
 ]);
 const SEAS = new Set([
     "route19",
@@ -110,7 +148,11 @@ const SEAS = new Set([
     "lakeOfRage",
     "cherrygroveCity",
     "olivineCity",
-    "cianwoodCity"
+    "cianwoodCity",
+    "undellaBay",
+    "b2w2UndellaBay",
+    "b2w2Route21",
+    "b2w2Route17"
 ]);
 
 function terrain(state: BattleState): string {
@@ -378,7 +420,11 @@ function renderScene() {
                         ? "swam out of the seaweed"
                         : state.wild.kind === "honey"
                           ? "jumped out of the Honey Tree"
-                          : "appeared";
+                          : state.wild.kind === "phenomenon"
+                            ? "burst out of the phenomenon"
+                            : state.wild.kind === "grotto"
+                              ? "was waiting in the Hidden Grotto"
+                              : "appeared";
         const shadow = isShadow(state.wild.speciesId);
         const trainerBattle = ZONES_BY_ID[main.zoneId.value]?.trainerBattles === true;
         banner = shadow

@@ -38,6 +38,13 @@ import {
     UNDERGROUND_ITEMS
 } from "game/pokemon/underground";
 import { radarShinyMultiplier } from "game/pokemon/zones";
+import {
+    criticalCaptureFactor,
+    PHENOMENON_CHANCE,
+    SEASON_BATTLES,
+    SEASON_NAMES,
+    SEASON_TYPES
+} from "game/pokemon/unova";
 import type { ZoneRates } from "game/pokemon/balance";
 import { zoneRates } from "game/pokemon/balance";
 import { computed, ref, shallowRef, watch } from "vue";
@@ -337,6 +344,78 @@ const layer = createLayer(id, () => {
                         );
                     })}
                 </div>
+            </Panel>
+        );
+    }
+
+    /**
+     * The C-Gear: Unova's mechanics at a glance. The season and when it turns, how often
+     * phenomena happen, the Pokédex's critical captures, and the Hidden Grotto.
+     */
+    function renderCGear() {
+        const season = main.season.value;
+        const nextSeason = SEASON_BATTLES - (main.battlesWon.value % SEASON_BATTLES);
+        const phenomena =
+            PHENOMENON_CHANCE * (1 + 0.25 * (hof.levels.value.encounterPower ?? 0)) * 100;
+        const factor = criticalCaptureFactor(dex.caughtCount.value);
+        const capture = factor * (1 + 0.25 * (hof.levels.value.capturePower ?? 0));
+        const place = main.zone.value;
+        return (
+            <Panel>
+                {season != null ? (
+                    <div class="pk-small">
+                        🍂 <b>{SEASON_NAMES[season]}</b> ({nextSeason} wild battles until it turns).
+                        In Unova the wild tables change with it, and Deerling and Sawsbuck wear its
+                        coat; elsewhere {SEASON_TYPES[season].join(", ")} Pokémon come out more, and
+                        Deerling wander the grass.
+                    </div>
+                ) : null}
+                {main.mechanicOn("phenomena") ? (
+                    <div class="pk-small">
+                        🌿 Phenomena: {phenomena.toFixed(0)}% of encounters where the grass can
+                        shake or the water ripple bring out a rarer Pokémon at the top of its
+                        levels, or an Audino.
+                    </div>
+                ) : null}
+                {main.mechanicOn("criticalCapture") ? (
+                    <div class="pk-small">
+                        🎯 Critical captures:{" "}
+                        {capture > 0
+                            ? `before each throw, a ${((capture / 6) * 100).toFixed(0)}%-of-normal chance that the catch is certain (it grows with your Pokédex).`
+                            : "they start once your Pokédex has more than 30 species."}
+                    </div>
+                ) : null}
+                {main.mechanicOn("hiddenGrottoes") ? (
+                    <>
+                        <div class="pk-filter-row">
+                            <span>
+                                🕳️ Hidden Grotto{" "}
+                                {main.grottoReady.value
+                                    ? `in ${place.name}: something is waiting inside!`
+                                    : `fills in ${main.grottoBattles.value - main.grottoProgress.value} wild battles`}
+                            </span>
+                            <Button
+                                kind="primary"
+                                disabled={!main.grottoReady.value || main.inTrainerBattle.value}
+                                onClick={main.visitGrotto}
+                            >
+                                Visit
+                            </Button>
+                        </div>
+                        {!main.grottoReady.value ? (
+                            <Bar
+                                value={main.grottoProgress.value}
+                                max={main.grottoBattles.value}
+                                kind="progress"
+                            />
+                        ) : null}
+                        <div class="pk-small pk-muted">
+                            Its Pokémon waits for you and is caught for sure: Black 2 and White 2's
+                            own grottoes have their tables; anywhere else it's one of the place's
+                            Pokémon, one your Pokédex is missing when there is one.
+                        </div>
+                    </>
+                ) : null}
             </Panel>
         );
     }
@@ -896,6 +975,10 @@ const layer = createLayer(id, () => {
 
         let action;
         if (!available) {
+            const notCleared =
+                special.kind === "boss"
+                    ? special.requiresCleared?.filter(r => hof.clearCount(r) === 0)
+                    : undefined;
             const missingItem =
                 special.kind === "legendary" &&
                 special.keyItem != null &&
@@ -912,13 +995,15 @@ const layer = createLayer(id, () => {
             action = (
                 <span class="pk-small pk-muted">
                     🔒{" "}
-                    {fieldNeed != null
-                        ? `Needs ${FIELD_ABILITY_NAMES[fieldNeed.ability]} ×${fieldNeed.power} (a box Pokémon's Field Ability)`
-                        : missingItem && special.kind === "legendary"
-                          ? `Needs the ${KEY_ITEMS[special.keyItem!].name}`
-                          : special.postGame === true
-                            ? `After the ${main.regionDef.value.finaleName}`
-                            : `${special.badgesRequired} ${main.regionDef.value.trialNoun}`}
+                    {notCleared != null && notCleared.length > 0
+                        ? `Clear ${notCleared.map(r => REGIONS[r].name).join(", ")} first`
+                        : fieldNeed != null
+                          ? `Needs ${FIELD_ABILITY_NAMES[fieldNeed.ability]} ×${fieldNeed.power} (a box Pokémon's Field Ability)`
+                          : missingItem && special.kind === "legendary"
+                            ? `Needs the ${KEY_ITEMS[special.keyItem!].name}`
+                            : special.postGame === true
+                              ? `After the ${main.regionDef.value.finaleName}`
+                              : `${special.badgesRequired} ${main.regionDef.value.trialNoun}`}
                 </span>
             );
         } else if (claimed || owned) {
@@ -1019,6 +1104,15 @@ const layer = createLayer(id, () => {
                 { id: "pokegear", label: "Pokégear", show: main.region.value === "johto" },
                 { id: "honey", label: "Honey Trees", show: main.region.value === "sinnoh" },
                 {
+                    id: "cgear",
+                    label: main.grottoReady.value ? "C-Gear (grotto!)" : "C-Gear",
+                    show:
+                        main.mechanicOn("seasons") ||
+                        main.mechanicOn("phenomena") ||
+                        main.mechanicOn("criticalCapture") ||
+                        main.mechanicOn("hiddenGrottoes")
+                },
+                {
                     id: "underground",
                     label: `Underground${
                         main.undergroundWalls.value > 0 ? ` (${main.undergroundWalls.value})` : ""
@@ -1043,6 +1137,8 @@ const layer = createLayer(id, () => {
                         renderHoneyTrees()
                     ) : page === "underground" ? (
                         renderUnderground()
+                    ) : page === "cgear" ? (
+                        renderCGear()
                     ) : (
                         <Panel>
                             <p class="pk-small pk-muted">

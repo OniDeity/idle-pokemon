@@ -365,12 +365,13 @@ export function criticalCaptureChance(chance: number, dexCaught: number, boost =
 
 /**
  * Stat multipliers for Unova's leaders, tuned with scripts/simulateProgression.ts: after Oblivia,
- * Unova's trainers carry eleven regions' Renown, and a first clear takes about 11 hours.
+ * Unova's trainers carry eleven regions' Renown, and a first clear takes about 10-13 hours with
+ * any starter. Drayden and the League (N and Ghetsis last) are the longest walls.
  */
-const UNOVA_GYM_STRENGTHS = [1.4, 2.4, 2.9, 3.3, 3.0, 3.4, 3.1, 3.0];
-const UNOVA_ELITE_FOUR_STRENGTH = 2.6;
-const UNOVA_N_STRENGTH = 2.7;
-const UNOVA_GHETSIS_STRENGTH = 2.8;
+const UNOVA_GYM_STRENGTHS = [1.8, 3.0, 3.6, 4.6, 4.4, 5.4, 5.8, 5.2];
+const UNOVA_ELITE_FOUR_STRENGTH = 3.93;
+const UNOVA_N_STRENGTH = 4.08;
+const UNOVA_GHETSIS_STRENGTH = 4.23;
 
 function unovaGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">,

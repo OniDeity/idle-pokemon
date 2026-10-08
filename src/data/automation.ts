@@ -301,6 +301,11 @@ function autoPoketch() {
     }
 }
 
+/** The C-Gear: visits a filled Hidden Grotto between wild battles. */
+function autoCGear() {
+    if (main.grottoReady.value && main.battle.value.kind === "search") main.visitGrotto();
+}
+
 /** Runs every owned, enabled automation once. */
 export function runAutomation() {
     if (main.starter.value === 0) return;
@@ -308,6 +313,7 @@ export function runAutomation() {
     if (enabled("autoClaim")) autoClaim();
     if (main.inTrainerBattle.value) return;
     if (enabled("autoPoketch")) autoPoketch();
+    if (enabled("autoCGear")) autoCGear();
     if (enabled("autoEvolve")) autoEvolve();
     if (enabled("autoParty")) autoParty();
     if (enabled("autoTravel")) autoTravel();

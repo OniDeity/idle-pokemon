@@ -930,7 +930,8 @@ export type AutomationId =
     | "autoParty"
     | "autoTravel"
     | "autoChallenge"
-    | "autoPoketch";
+    | "autoPoketch"
+    | "autoCGear";
 
 export interface AutomationDefinition {
     id: AutomationId;
@@ -996,6 +997,14 @@ export const AUTOMATIONS: AutomationDefinition[] = [
             "Sinnoh's wrist watch: slathers Honey on every open Honey Tree and shakes the ones with a Pokémon waiting, and digs the Underground's walls as they appear (once the Underground is unlocked).",
         cost: 15,
         sprite: itemSprite("explorer-kit")
+    },
+    {
+        id: "autoCGear",
+        name: "C-Gear",
+        description:
+            "Unova's wireless gear: visits the Hidden Grotto as soon as it fills, between wild battles (once Hidden Grottoes are unlocked).",
+        cost: 15,
+        sprite: itemSprite("xtransceiver")
     }
 ];
 

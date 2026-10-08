@@ -70,13 +70,7 @@ import {
 } from "game/pokemon/regions";
 import type { GymDefinition, TrainerDefinition } from "game/pokemon/trainers";
 import { trialFor } from "game/pokemon/trainers";
-import {
-    criticalCaptureChance,
-    inSeason,
-    SEASON_BATTLES,
-    SEASON_NAMES,
-    seasonAt
-} from "game/pokemon/unova";
+import { criticalCaptureChance, inSeason, SEASON_NAMES, seasonAt } from "game/pokemon/unova";
 import { GROTTO_BATTLES, grottoPool } from "game/pokemon/unova2";
 import type { EncounterKind, RegionId, ZoneExtras } from "game/pokemon/zones";
 import {

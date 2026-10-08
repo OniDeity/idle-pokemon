@@ -7,6 +7,7 @@
  * Usage: npx tsx scripts/simulateProgression.ts [regions=kanto,kanto,orange,sevii] [seed=1]
  *   Each region may name a starter, e.g. "kanto:4,orange:25".
  */
+import { readFileSync, writeFileSync } from "node:fs";
 import type { BonusInputs, HofUpgradeId, PartyBattler } from "../src/game/pokemon/balance";
 import {
     battleXp,
@@ -43,13 +44,32 @@ import { MECHANICS } from "../src/game/pokemon/mechanics";
 import { SPECIAL_ENCOUNTERS } from "../src/game/pokemon/specials";
 import { levelForXp, maxHp, xpForLevel, xpYield } from "../src/game/pokemon/stats";
 import type { TrainerDefinition } from "../src/game/pokemon/trainers";
+import { trialFor } from "../src/game/pokemon/trainers";
+import { criticalCaptureChance, seasonAt } from "../src/game/pokemon/unova";
+import { GROTTO_BATTLES, grottoPool } from "../src/game/pokemon/unova2";
 import type { RegionId } from "../src/game/pokemon/zones";
 import {
+    activePools,
     availableZoneSpecies,
     catchableIn,
     rollEncounter,
     zonesIn
 } from "../src/game/pokemon/zones";
+
+interface SavedCampaign {
+    dex: [number, number][];
+    fame: number;
+    hof: Partial<Record<HofUpgradeId, number>>;
+    enshrined: string[];
+    clears: Partial<Record<RegionId, number>>;
+    totalTime: number;
+    doublesUnlocked: boolean;
+    sinnohEvolutions: boolean;
+    pokeAssistUnlocked: boolean;
+    unovaMechanics: Record<string, boolean>;
+    seed: number;
+    journeys: number;
+}
 
 const plan = (process.argv[2] ?? "kanto,kanto,orange,sevii").split(",").map(part => {
     const [region, starter] = part.split(":");
@@ -124,6 +144,13 @@ let doublesUnlocked = false;
 let sinnohEvolutions = false;
 /** Fiore's Poké Assist, once reached: box Pokémon super effective against a wild one help out. */
 let pokeAssistUnlocked = false;
+/** Unova's mechanics, once reached: the Seasons, phenomena, critical captures, Hidden Grottoes. */
+const unovaMechanics = {
+    seasons: false,
+    phenomena: false,
+    criticalCapture: false,
+    grottoes: false
+};
 
 interface Owned {
     id: number;
@@ -152,8 +179,23 @@ function runJourney(region: RegionDefinition, starter: number) {
         return doublesUnlocked;
     };
     const cap = () => levelCap(region, badges, cleared);
-    // Almia's obstacles open up with the box's Field Abilities.
-    const extras = () => ({ snagged, fieldPowers: fieldPowers(owned.keys()) });
+    let battles = 0;
+    const reached = (id: keyof typeof MECHANICS) =>
+        region.id === MECHANICS[id].region && badges >= MECHANICS[id].trialsRequired;
+    const unova = () => {
+        if (reached("seasons")) unovaMechanics.seasons = true;
+        if (reached("phenomena")) unovaMechanics.phenomena = true;
+        if (reached("criticalCapture")) unovaMechanics.criticalCapture = true;
+        if (reached("hiddenGrottoes")) unovaMechanics.grottoes = true;
+        return unovaMechanics;
+    };
+    // Almia's obstacles open up with the box's Field Abilities; Unova's seasons and phenomena.
+    const extras = () => ({
+        snagged,
+        fieldPowers: fieldPowers(owned.keys()),
+        season: unova().seasons ? seasonAt(battles) : undefined,
+        phenomena: unova().phenomena
+    });
     /** Poké Assist's damage bonus against this wild Pokémon (box Pokémon outside the party). */
     const assist = (target: { species: ReturnType<typeof getSpecies> }, party: Owned[]) => {
         const def = MECHANICS.pokeAssist;
@@ -220,9 +262,10 @@ function runJourney(region: RegionDefinition, starter: number) {
             ? 1 + Number(process.env.RENOWN) * Math.max(0, others - 1)
             : strengthMultiplier(rematchClears, others);
     const nextTrainers = (): TrainerDefinition[] =>
-        (badges < region.trials.length ? [region.trials[badges]] : region.finale(starter)).map(t =>
-            withStrength(t, strength)
-        );
+        (badges < region.trials.length
+            ? [trialFor(region.trials[badges], starter)]
+            : region.finale(starter)
+        ).map(t => withStrength(t, strength));
 
     function chooseParty(): Owned[] {
         const targets = nextTrainers().flatMap(trainerTeam);
@@ -238,7 +281,7 @@ function runJourney(region: RegionDefinition, starter: number) {
             if (owned.has(evo.into)) continue;
             // Later generations' evolutions wait for their region (or its mechanic).
             const into = getSpecies(evo.into).baseSpecies ?? evo.into;
-            if (into > (region.newestSpecies ?? 386) && !sinnohEvolutions) continue;
+            if (into > (region.newestSpecies ?? 386) && into <= 493 && !sinnohEvolutions) continue;
             let ok = evo.method === "level" && o.level >= (evo.level ?? 101);
             // Stones, Link Cables and Soothe Bells are each used up by one evolution; buy one
             // when it's cheap relative to savings, like the auto-evolve automation.
@@ -382,6 +425,20 @@ function runJourney(region: RegionDefinition, starter: number) {
         }
         step++;
 
+        // A Hidden Grotto fills every GROTTO_BATTLES battles; its Pokémon is caught for sure.
+        battles++;
+        if (unova().grottoes && battles % GROTTO_BATTLES === 0) {
+            const entries = activePools(zone, keyItems, extras())
+                .filter(p => p.kind !== "phenomenon")
+                .flatMap(p => p.entries)
+                .filter(e => catchableIn(zone, e.id) && !isShadow(e.id));
+            const pool = grottoPool(zone, entries, id => !dex.has(id));
+            if (pool.length > 0) {
+                const e = pool[Math.floor(rng() * pool.length)];
+                catchSpecies(e.id, e.maxLevel);
+            }
+        }
+
         const bonuses = computeBonuses(bonusInputs());
         const e = rollEncounter(zone, keyItems, rng, hof.roddysRod ?? 0, extras());
         if (!e) break;
@@ -424,7 +481,11 @@ function runJourney(region: RegionDefinition, starter: number) {
 
         if (!owned.has(e.speciesId) && catchableIn(zone, e.speciesId) && region.styler) {
             // Ranger regions capture with the Capture Styler: no balls to buy.
-            if (rng() < catchChance(target.species.captureRate, STYLER_POWER, bonuses.catch)) {
+            const chance = catchChance(target.species.captureRate, STYLER_POWER, bonuses.catch);
+            const critical = unova().criticalCapture
+                ? criticalCaptureChance(chance, dexCaught())
+                : 0;
+            if ((critical > 0 && rng() < critical) || rng() < chance) {
                 catchSpecies(e.speciesId, e.level);
             }
         } else if (!owned.has(e.speciesId) && catchableIn(zone, e.speciesId)) {
@@ -449,7 +510,10 @@ function runJourney(region: RegionDefinition, starter: number) {
                     BALLS[ball].catchMultiplier,
                     bonuses.catch
                 );
-                if (rng() < chance) {
+                const critical = unova().criticalCapture
+                    ? criticalCaptureChance(chance, dexCaught())
+                    : 0;
+                if ((critical > 0 && rng() < critical) || rng() < chance) {
                     catchSpecies(e.speciesId, e.level);
                     if (isShadow(e.speciesId)) snagged[e.speciesId] = true;
                 }
@@ -476,8 +540,26 @@ function spendFame() {
     }
 }
 
+let journeyOffset = 0;
+//   SIM_LOAD=file      start from a campaign saved with SIM_SAVE=file (the permanent state after
+//                     its journeys), so later regions can be tuned without replaying earlier ones
+if (process.env.SIM_LOAD != null) {
+    const saved = JSON.parse(readFileSync(process.env.SIM_LOAD, "utf8")) as SavedCampaign;
+    saved.dex.forEach(([id, n]) => dex.set(id, n));
+    fame = saved.fame;
+    Object.assign(hof, saved.hof);
+    saved.enshrined.forEach(key => enshrined.add(key));
+    Object.assign(clears, saved.clears);
+    totalTime = saved.totalTime;
+    ({ doublesUnlocked, sinnohEvolutions, pokeAssistUnlocked } = saved);
+    Object.assign(unovaMechanics, saved.unovaMechanics);
+    seed = saved.seed;
+    journeyOffset = saved.journeys;
+}
+
 const summary: string[] = [];
-plan.forEach(({ region: id, starter }, i) => {
+plan.forEach(({ region: id, starter }, index) => {
+    const i = index + journeyOffset;
     const region = REGIONS[id];
     const choice = starter ?? region.starters[i % region.starters.length];
     console.log(`Journey ${i + 1}: ${region.name} with ${getSpecies(choice).name}`);
@@ -487,3 +569,21 @@ plan.forEach(({ region: id, starter }, i) => {
     console.log(`  Fame upgrades: ${JSON.stringify(hof)}`);
 });
 console.log(summary.join(" | "));
+
+if (process.env.SIM_SAVE != null) {
+    const saved: SavedCampaign = {
+        dex: [...dex.entries()],
+        fame,
+        hof,
+        enshrined: [...enshrined],
+        clears,
+        totalTime,
+        doublesUnlocked,
+        sinnohEvolutions,
+        pokeAssistUnlocked,
+        unovaMechanics,
+        seed,
+        journeys: journeyOffset + plan.length
+    };
+    writeFileSync(process.env.SIM_SAVE, JSON.stringify(saved));
+}
