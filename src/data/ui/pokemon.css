@@ -1790,3 +1790,10 @@ span.pk-partner-choice {
     gap: 4px;
     margin-top: 4px;
 }
+
+.pk-upgrade-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}

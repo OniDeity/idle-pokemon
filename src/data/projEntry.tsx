@@ -19,7 +19,9 @@ import {
     initialTrainerBattle,
     memberMultiplier,
     effortMultiplier,
+    FAME_EFFECTS,
     HEART_BATTLES,
+    LINEAGE_MAX_EGGS,
     hasMilestone,
     moneyYield,
     stepTrainerBattle,
@@ -341,7 +343,7 @@ export const main = createLayer("main", layer => {
         fieldPowers: fieldPowers.value,
         season: season.value,
         phenomena: mechanicOn("phenomena"),
-        phenomenaBoost: 1 + 0.25 * (fameLevels.value.encounterPower ?? 0)
+        phenomenaBoost: FAME_EFFECTS.encounterPower(fameLevels.value.encounterPower)
     }));
 
     // Transient state: rebuilt on load.
@@ -399,7 +401,10 @@ export const main = createLayer("main", layer => {
     const season = computed(() => (mechanicOn("seasons") ? seasonAt(battlesWon.value) : undefined));
     /** Wild battles per Hidden Grotto (Grotto Power shortens it). */
     const grottoBattles = computed(() =>
-        Math.max(10, Math.round(GROTTO_BATTLES * (1 - 0.1 * (fameLevels.value.grottoPower ?? 0))))
+        Math.max(
+            10,
+            Math.round(GROTTO_BATTLES * FAME_EFFECTS.grottoPower(fameLevels.value.grottoPower))
+        )
     );
     const grottoReady = computed(
         () => mechanicOn("hiddenGrottoes") && grottoProgress.value >= grottoBattles.value
@@ -415,19 +420,27 @@ export const main = createLayer("main", layer => {
                     ? EGG_BATTLES / 2
                     : EGG_BATTLES) *
                     (hasMilestone(dex.caughtCount.value, "Oval Charm") ? 0.75 : 1) *
-                    (1 - 0.1 * (fameLevels.value.flameBody ?? 0))
+                    FAME_EFFECTS.flameBody(fameLevels.value.flameBody)
             )
         )
     );
+    /** Mart Membership (Fame): Poké Mart prices, rounded up. */
+    function martPrice(price: number): number {
+        return Math.ceil(price * FAME_EFFECTS.martPrice(fameLevels.value.martMembership));
+    }
     /** The Masuda Method (Fame): Day Care Eggs are likelier to be shiny. */
-    const eggShinyMultiplier = computed(() => 1 + 0.5 * (fameLevels.value.masudaMethod ?? 0));
+    const eggShinyMultiplier = computed(() =>
+        FAME_EFFECTS.masudaMethod(fameLevels.value.masudaMethod)
+    );
     /** Contest upgrades (Fame): stronger Pokéblocks, shorter and easier contests. */
-    const pokeblockGain = computed(() => POKEBLOCK_GAIN + 5 * (fameLevels.value.pokeblockKit ?? 0));
+    const pokeblockGain = computed(
+        () => POKEBLOCK_GAIN - 10 + FAME_EFFECTS.pokeblockGain(fameLevels.value.pokeblockKit)
+    );
     function contestSeconds(rank: ContestRank): number {
-        return CONTEST_SECONDS[rank] * (1 - 0.1 * (fameLevels.value.contestStar ?? 0));
+        return CONTEST_SECONDS[rank] * FAME_EFFECTS.contestTime(fameLevels.value.contestStar);
     }
     function contestWinChance(id: number, category: ContestCategory, rank: ContestRank) {
-        const bonus = 0.05 * (fameLevels.value.contestStar ?? 0);
+        const bonus = FAME_EFFECTS.contestChance(fameLevels.value.contestStar);
         return Math.min(1, winChance(contestScoreOf(id, category), rank) + bonus);
     }
     /** Extra Fame this journey has earned (the Distortion World). */
@@ -781,12 +794,19 @@ export const main = createLayer("main", layer => {
         eggsHatched.value++;
         medals.count("eggsHatched");
         const babyId = eggSpeciesOf(id);
+        // Breeder's Lineage (Fame): each Egg of the species hatched before helps a little.
+        const bred = hof.eggsBred.value[babyId] ?? 0;
+        const lineage =
+            1 +
+            FAME_EFFECTS.lineage(fameLevels.value.breederLineage) *
+                Math.min(bred, LINEAGE_MAX_EGGS);
+        hof.eggsBred.value = { ...hof.eggsBred.value, [babyId]: bred + 1 };
         // A shiny parent passes its colors on 1 time in 64, as in Gold and Silver.
         const shiny =
             box.value[id]?.shiny === true
-                ? Math.random() < eggShinyMultiplier.value / 64
+                ? Math.random() < (eggShinyMultiplier.value * lineage) / 64
                 : Math.random() <
-                  BASE_SHINY_CHANCE * bonuses.value.shiny * eggShinyMultiplier.value;
+                  BASE_SHINY_CHANCE * bonuses.value.shiny * eggShinyMultiplier.value * lineage;
         const isNew = receivePokemon(babyId, 5, shiny);
         const name = getSpecies(babyId).name;
         const text = `The Day Care man found an Egg! It hatched into ${shiny ? "a shiny " : ""}${name}!`;
@@ -851,6 +871,27 @@ export const main = createLayer("main", layer => {
                 }
             }
         }
+        shareXp(amount * FAME_EFFECTS.expAll(fameLevels.value.expAll), levelCap);
+    }
+
+    /**
+     * Exp. All (Fame): box Pokémon outside the party get a share of the experience, up to the
+     * level cap (no Effort). Written in one go, as the box can be large.
+     */
+    function shareXp(amount: number, levelCap: number) {
+        if (amount <= 0) return;
+        let next: Record<string, BoxEntry> | undefined;
+        const party = new Set(partyIds.value);
+        for (const key of Object.keys(box.value)) {
+            const id = Number(key);
+            const entry = box.value[id];
+            if (entry == null || party.has(id) || entry.level >= levelCap) continue;
+            const species = getSpecies(id);
+            const xp = Math.min(entry.xp + amount, xpForLevel(species.growthRate, levelCap));
+            next ??= { ...box.value };
+            next[id] = { ...entry, xp, level: levelForXp(species.growthRate, xp, levelCap) };
+        }
+        if (next != null) box.value = next;
     }
 
     // ------------------------------------------------------------------
@@ -867,7 +908,7 @@ export const main = createLayer("main", layer => {
         if (price == null || martTier.value < BALLS[id].badgesRequired) return;
         const mechanic = BALLS[id].mechanic;
         if (mechanic != null && !mechanicOn(mechanic)) return;
-        if (!spend(price * count)) return;
+        if (!spend(martPrice(price) * count)) return;
         balls.value = { ...balls.value, [id]: (balls.value[id] ?? 0) + count };
         warnedNoBalls = false;
     }
@@ -880,7 +921,9 @@ export const main = createLayer("main", layer => {
     }
 
     function buyStone(id: StoneId) {
-        if (martTier.value < STONES[id].badgesRequired || !spend(STONES[id].price)) return;
+        if (martTier.value < STONES[id].badgesRequired || !spend(martPrice(STONES[id].price))) {
+            return;
+        }
         stones.value = { ...stones.value, [id]: (stones.value[id] ?? 0) + 1 };
     }
 
@@ -1110,7 +1153,9 @@ export const main = createLayer("main", layer => {
     function seasonBonus(speciesId: number): number {
         const current = season.value;
         const level = fameLevels.value.seasonPower ?? 0;
-        return current != null && level > 0 && inSeason(speciesId, current) ? 1 + 0.1 * level : 1;
+        return current != null && level > 0 && inSeason(speciesId, current)
+            ? 1 + FAME_EFFECTS.seasonPower(level)
+            : 1;
     }
 
     function defeatWild(wild: WildPokemon) {
@@ -1219,7 +1264,7 @@ export const main = createLayer("main", layer => {
      */
     function criticalCapture(chance: number): boolean {
         if (!mechanicOn("criticalCapture") || chance >= 1) return false;
-        const boost = 1 + 0.25 * (fameLevels.value.capturePower ?? 0);
+        const boost = FAME_EFFECTS.capturePower(fameLevels.value.capturePower);
         return Math.random() < criticalCaptureChance(chance, dex.caughtCount.value, boost);
     }
 
@@ -2079,8 +2124,15 @@ export const main = createLayer("main", layer => {
         def.startingKeyItems.forEach(
             item => (keyItems.value = { ...keyItems.value, [item]: true })
         );
-        const level = def.startLevel + 5 * (fameLevels.value.headStart ?? 0);
+        const level = def.startLevel + FAME_EFFECTS.headStart(fameLevels.value.headStart);
         receivePokemon(id, level, false);
+        // The Starter Kit (Fame).
+        const kit = fameLevels.value.starterKit;
+        money.value += FAME_EFFECTS.starterMoney(kit);
+        balls.value = {
+            ...balls.value,
+            pokeBall: (balls.value.pokeBall ?? 0) + FAME_EFFECTS.starterBalls(kit)
+        };
         // Colosseum's Espeon and Umbreon come as a pair.
         if (def.allStarters === true) {
             def.starters
@@ -2128,6 +2180,7 @@ export const main = createLayer("main", layer => {
         feedPokeblock,
         contestRankFor,
         specialTrainers,
+        martPrice,
         contestScoreOf,
         enterContest,
         journeyPartner,

@@ -122,8 +122,16 @@ journeys.
   (each records its region), so a Pokémon is a new face (+5 Fame) once in every region. The
   starter screen suggests a team (strongest non-legendary final forms the region offers, not yet
   in its Hall) and stars partners new there. The simulator keys enshrinement by region too.
-- Fame upgrades with a `mechanic` (Day Care: `flameBody`, `masudaMethod`; Contests:
-  `pokeblockKit`, `contestStar`) show once it's unlocked; the simulator never buys them.
+- Fame upgrades with a `mechanic` (Day Care: `flameBody`, `masudaMethod`, `breederLineage`;
+  Contests: `pokeblockKit`, `contestStar`) show once it's unlocked; the simulator never buys
+  them (nor Exp. All: it doesn't train the box). v2.12: every Fame upgrade's effect goes through
+  `FAME_EFFECTS` (balance.ts) so the game, the sim and the "Now:" line agree; `mastery` levels
+  continue past `maxLevel` (`upgradeTopLevel`, prices ×`MASTERY_COST_GROWTH` a level, smaller
+  steps; reductions multiply by 0.95 so they never reach 0); `tab` sorts the shop; refunds give
+  `REFUND_SHARE`. Head Start has no Mastery (the starter is clamped to the level cap).
+  `hof.eggsBred` counts Eggs by species for Breeder's Lineage. The Journey page's new upgrades
+  wait for `JOURNEY_UPGRADE_ENTRIES` (4) Hall of Fame entries: bought from the start they made
+  the sim's Johto 40% slower (Fame drawn from Champion's Might).
 - Poké Radar (a Pokédex milestone at 250): chains build automatically, so the shiny multiplier
   is capped at ×6 (`radarShinyMultiplier`), not the games' ×41.
 - Notifications go through `notify(text, kind, category)` in `src/data/notifications.tsx`;
