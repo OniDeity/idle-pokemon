@@ -1733,9 +1733,27 @@ export const main = createLayer("main", layer => {
             onWin() {
                 const first = !champion.value;
                 champion.value = true;
+                const team = partyIds.value.map(id => ({ id, ...box.value[id] }));
                 if (first) {
                     clearTeam.value = [...partyIds.value];
-                    hof.recordChampionTeam(partyIds.value.map(id => ({ id, ...box.value[id] })));
+                    hof.recordChampionTeam(team);
+                } else {
+                    // A title defence enshrines its team instead, as long as it doesn't bring
+                    // fewer new faces (post-game catches can join the Hall of Fame this way).
+                    const faces = hof.newFacesIn(partyIds.value).length;
+                    if (faces >= hof.newFacesIn(clearTeam.value).length) {
+                        clearTeam.value = [...partyIds.value];
+                        hof.replaceChampionTeam(team);
+                        addLog({
+                            kind: "info",
+                            text: `This team will enter the Hall of Fame (${faces} new face${faces === 1 ? "" : "s"}).`
+                        });
+                    } else {
+                        addLog({
+                            kind: "info",
+                            text: "Your Hall of Fame team stays: it has more new faces."
+                        });
+                    }
                 }
                 const text = first
                     ? `You conquered the ${regionDef.value.finaleName}! The Hall of Fame awaits.`
@@ -2109,6 +2127,10 @@ export const main = createLayer("main", layer => {
         const choices = new Map<number, boolean>();
         for (const entry of [...hof.entries.value].reverse()) {
             for (const p of entry.team) choices.set(p.id, (choices.get(p.id) ?? false) || p.shiny);
+        }
+        // The Pokémon Bank's, most recent first.
+        for (const p of [...hof.bank.value].reverse()) {
+            choices.set(p.id, (choices.get(p.id) ?? false) || p.shiny);
         }
         return [...choices.entries()].map(([id, shiny]) => ({ id, shiny }));
     });

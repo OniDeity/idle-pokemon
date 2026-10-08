@@ -393,8 +393,8 @@ function renderPartnerPicker(region: RegionDefinition) {
     return (
         <div class="pk-partner-picker">
             <p class="pk-small">
-                <b>Bring a partner</b> from your Hall of Fame (joins at the starters' level; ★ ones
-                aren't in {region.name}'s Hall of Fame yet):
+                <b>Bring a partner</b> from your Hall of Fame or Pokémon Bank (joins at the
+                starters' level; ★ ones aren't in {region.name}'s Hall of Fame yet):
             </p>
             <div class="pk-partner-choices">
                 <button

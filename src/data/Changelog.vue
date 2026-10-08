@@ -5,6 +5,26 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.13 Pokémon Bank</summary>
+                <ul>
+                    <li class="feature">
+                        Post-game Pokémon can join the Hall of Fame: once you're Champion, defend your
+                        title and the winning team is the one enshrined (if it brings at least as
+                        many new faces). The Team Strategist lines up post-game new faces, and the
+                        League Pass defends your title when they'd add Fame and the forecast wins
+                    </li>
+                    <li class="feature">
+                        Pokémon Bank (with Bring a Partner): when you enter the Hall of Fame, deposit
+                        one Pokémon from your box, even one that wasn't on the team. Banked Pokémon
+                        are partner choices for every later journey
+                    </li>
+                    <li class="fix">
+                        The League Pass no longer battles a legendary over and over without Poké
+                        Balls, or one already in your box
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.12.3 Mid-game retune</summary>
                 <ul>
                     <li class="balancing">

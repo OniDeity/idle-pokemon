@@ -1238,7 +1238,7 @@ export const AUTOMATIONS: AutomationDefinition[] = [
         id: "autoChallenge",
         name: "League Pass",
         description:
-            "Challenges the next Gym, quest or finale as soon as the forecast says you'll win, and legendary Pokémon you've caught before and bosses you've beaten before too.",
+            "Challenges the next Gym, quest or finale as soon as the forecast says you'll win, and legendary Pokémon you've caught before and bosses you've beaten before too. After the finale, it defends your title when the Team Strategist's party would bring more new faces to the Hall of Fame.",
         cost: 15,
         sprite: itemSprite("gold-teeth")
     },

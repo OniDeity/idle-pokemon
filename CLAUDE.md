@@ -209,6 +209,12 @@ journeys.
   (`autoContest`, `AutomationDefinition.mechanic` hides it until Contests are unlocked);
   bench training (`hof.trainBench`/`benchSlots`, pure `benchTeam()` in balance.ts) only while
   the best team's forecast loses.
+- Title defences and the Pokémon Bank (v2.13): beating the finale again as Champion replaces
+  this journey's Champions entry team (`hof.replaceChampionTeam`, clear time kept) when it has at
+  least as many new faces (`hof.newFacesIn`) as `main.clearTeam`, so post-game catches can be
+  enshrined. After the finale, Team Strategist (new faces on) builds a finale team and the League
+  Pass defends when it adds new faces. `hof.bank` (one deposit per Hall of Fame entry, picked in
+  `hof.bankDeposit`, shown once `partner` is unlocked) adds to `main.partnerChoices`.
 - Challenges (`challenges.ts`): set on the starter screen in `hof.challengeKeys` (kept between
   journeys), copied into `main.challenges` when the starter is picked. Enforced in
   `main.canJoinParty`/`maxParty`/`trainerStrength`/`fameLevels` and the Mart; HoF entries keep
