@@ -27,7 +27,8 @@ export type MechanicId =
     | "hiddenGrottoes"
     | "tripleBattles"
     | "rotationBattles"
-    | "joinAvenue";
+    | "joinAvenue"
+    | "musicals";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -216,6 +217,15 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 7,
         description:
             "In trainer battles your team rotates: while the best matchup attacks, the sturdiest Pokémon against that opponent takes its hits (then the next sturdiest), so your attacker lasts longer."
+    },
+    musicals: {
+        id: "musicals",
+        name: "Pokémon Musicals",
+        region: "unova",
+        unlockAt: "Nimbasa City's Musical Theater, past the Insect Badge",
+        trialsRequired: 3,
+        description:
+            "A Musical starts every 80 wild battles, in every region: your strongest party Pokémon performs, wearing up to four of your props of the show's theme (Cool, Cute, Elegant or Unique), each a better chance to win. Winners get prize money and a prop from the audience, and the others sometimes do."
     },
     joinAvenue: {
         id: "joinAvenue",

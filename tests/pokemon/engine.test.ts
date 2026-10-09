@@ -1,5 +1,17 @@
 import { existsSync, readdirSync, readFileSync } from "fs";
 import type { Avenue } from "game/pokemon/joinAvenue";
+import type { MusicalTheme } from "game/pokemon/musicals";
+import {
+    MAX_WORN,
+    musicalWinChance,
+    PROP_THEME,
+    PROPS,
+    propsWorn,
+    SHOWS,
+    STARTER_PROPS,
+    THEME_NAMES,
+    thrownProp
+} from "game/pokemon/musicals";
 import {
     avenuePerks,
     MAX_SHOP_RANK,
@@ -725,6 +737,7 @@ describe("generation mechanics", () => {
             "hiddenGrottoes",
             "tripleBattles",
             "rotationBattles",
+            "musicals",
             "joinAvenue"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
@@ -2096,5 +2109,48 @@ describe("Join Avenue", () => {
     test("is met in Black 2 and White 2 past the Insect Badge", () => {
         expect(MECHANICS.joinAvenue.region).toBe("unova2");
         expect(MECHANICS.joinAvenue.trialsRequired).toBe(3);
+    });
+});
+
+describe("Pokémon Musicals", () => {
+    test("props cover every theme, each named once", () => {
+        expect(PROPS.length).toBe(101);
+        expect(new Set(PROPS.map(([name]) => name)).size).toBe(PROPS.length);
+        for (const theme of Object.keys(THEME_NAMES) as MusicalTheme[]) {
+            expect(PROPS.filter(([, t]) => t === theme).length, theme).toBeGreaterThan(15);
+            expect(
+                SHOWS.some(s => s.theme === theme),
+                theme
+            ).toBe(true);
+        }
+        expect(STARTER_PROPS.map(p => PROP_THEME[p])).toEqual([
+            "cool",
+            "cute",
+            "elegant",
+            "unique"
+        ]);
+    });
+
+    test("props of the show's theme raise the chance to win, up to four worn", () => {
+        const owned = Object.fromEntries(
+            PROPS.filter(([, t]) => t === "cute").map(([name]) => [name, true])
+        );
+        expect(propsWorn(owned, "cute")).toBe(MAX_WORN);
+        expect(propsWorn(owned, "cool")).toBe(0);
+        expect(musicalWinChance(0)).toBeCloseTo(0.25);
+        expect(musicalWinChance(MAX_WORN)).toBeCloseTo(0.85);
+    });
+
+    test("the audience throws a missing prop of the show's theme first", () => {
+        const owned = Object.fromEntries(
+            PROPS.filter(([, t]) => t === "cute").map(([name]) => [name, true])
+        );
+        expect(PROP_THEME[thrownProp({}, "elegant", 0.5)!]).toBe("elegant");
+        // Every Cute prop owned: any other missing one.
+        const prop = thrownProp(owned, "cute", 0.5);
+        expect(prop).toBeDefined();
+        expect(owned[prop!]).toBeUndefined();
+        const all = Object.fromEntries(PROPS.map(([name]) => [name, true]));
+        expect(thrownProp(all, "cool", 0.1)).toBeUndefined();
     });
 });

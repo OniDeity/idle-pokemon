@@ -49,6 +49,8 @@ import {
 import type { ZoneRates } from "game/pokemon/balance";
 import { zoneRates } from "game/pokemon/balance";
 import { MAX_SHOP_RANK, SHOP_LIST, shopRank, VISITOR_BATTLES } from "game/pokemon/joinAvenue";
+import type { MusicalTheme } from "game/pokemon/musicals";
+import { MAX_WORN, MUSICAL_BATTLES, PROPS, THEME_NAMES } from "game/pokemon/musicals";
 import {
     MARKET_TASK_WINS,
     MAX_RESIDENTS,
@@ -356,6 +358,28 @@ const layer = createLayer(id, () => {
         );
     }
 
+    /** Pokémon Musicals: the next show, the props by theme, and the last result. */
+    function renderMusical() {
+        const owned = hof.props.value;
+        const total = PROPS.filter(([name]) => owned[name] === true).length;
+        return (
+            <div class="pk-small">
+                🎭 Musical: the next show in {MUSICAL_BATTLES - main.musicalProgress.value} wild
+                battles. Props {total}/{PROPS.length} (
+                {(Object.keys(THEME_NAMES) as MusicalTheme[])
+                    .map(
+                        theme =>
+                            `${THEME_NAMES[theme]} ${PROPS.filter(([n, t]) => t === theme && owned[n] === true).length}`
+                    )
+                    .join(", ")}
+                ); a performer wears up to {MAX_WORN} of the show's theme.
+                {main.lastMusical.value !== "" ? (
+                    <div class="pk-muted">Last show: {main.lastMusical.value}</div>
+                ) : null}
+            </div>
+        );
+    }
+
     /** Join Avenue: its shops, their ranks and perks, and when the next visitor comes. */
     function renderJoinAvenue() {
         const avenue = hof.joinAvenue.value;
@@ -428,6 +452,7 @@ const layer = createLayer(id, () => {
                             : "they start once your Pokédex has more than 30 species."}
                     </div>
                 ) : null}
+                {main.mechanicOn("musicals") ? renderMusical() : null}
                 {main.mechanicOn("hiddenGrottoes") ? (
                     <>
                         <div class="pk-filter-row">
@@ -1174,7 +1199,8 @@ const layer = createLayer(id, () => {
                         main.mechanicOn("seasons") ||
                         main.mechanicOn("phenomena") ||
                         main.mechanicOn("criticalCapture") ||
-                        main.mechanicOn("hiddenGrottoes")
+                        main.mechanicOn("hiddenGrottoes") ||
+                        main.mechanicOn("musicals")
                 },
                 {
                     id: "joinAvenue",

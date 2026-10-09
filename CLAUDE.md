@@ -206,6 +206,10 @@ journeys.
   for good, rank ≤ 10). `avenuePerks()` feeds `main.bonuses` (Café xp, Flower Shop hp),
   `martPrice` (Market) and `eggBattles` (Nursery); the Raffle, Dojo, Beauty Salon and Antique
   Shop act per visitor in `tendJoinAvenue`. The simulator doesn't play it.
+- Pokémon Musicals (v2.17, `musicals.ts`, mechanic `musicals`, BW at 3 badges): a show every
+  `MUSICAL_BATTLES` (`main.musicalProgress`); the strongest party member wears up to `MAX_WORN`
+  props of its theme (`hof.props`, Serebii's 101; Stardom's theme isn't on Serebii, so Cool),
+  `musicalWinChance`, `thrownProp`. Medal `musicalsWon`. Shown on the C-Gear tab.
 - Gen 5 mechanics (`mechanics.ts`): `seasons` (every `SEASON_BATTLES` wild battles; Unova's
   tables use `bySeason`, Deerling/Sawsbuck take the season's form via `seasonForm()`; elsewhere
   `SEASON_TYPES` ×1.5 and seasonal Deerling join walk pools), `phenomena` (an extra

@@ -133,6 +133,17 @@ import {
     RESIDENT_BATTLES,
     RESIDENTS
 } from "game/pokemon/entralink";
+import {
+    MUSICAL_BATTLES,
+    MUSICAL_PRIZE,
+    musicalWinChance,
+    propsWorn,
+    RUNNER_UP_PROP_CHANCE,
+    SHOWS,
+    STARTER_PROPS,
+    THEME_NAMES,
+    thrownProp
+} from "game/pokemon/musicals";
 import type { ShopId } from "game/pokemon/joinAvenue";
 import {
     ANTIQUE_CHANCE,
@@ -341,6 +352,10 @@ export const main = createLayer("main", layer => {
     const residents = persistent<number[]>([], false);
     /** Wild battles since the last resident moved in. */
     const residentProgress = persistent<number>(0);
+    /** Wild battles since the last Pokémon Musical. */
+    const musicalProgress = persistent<number>(0);
+    /** The last Musical's result, for the C-Gear. */
+    const lastMusical = persistent<string>("", false);
     /** Wild battles since Join Avenue's last visitor. */
     const visitorProgress = persistent<number>(0);
     /** Trainers beaten in Black City this journey (its market boss rewards every 25). */
@@ -974,6 +989,51 @@ export const main = createLayer("main", layer => {
         for (const text of news) addLog({ kind: "info", text });
     }
 
+    /**
+     * Pokémon Musicals: a show every MUSICAL_BATTLES wild battles. The strongest party Pokémon
+     * performs in props of the show's theme; the audience throws props.
+     */
+    function tendMusicals() {
+        if (!mechanicOn("musicals")) return;
+        // The Prop Case comes with one prop of each theme.
+        if (STARTER_PROPS.some(p => hof.props.value[p] !== true)) {
+            hof.props.value = {
+                ...hof.props.value,
+                ...Object.fromEntries(STARTER_PROPS.map(p => [p, true]))
+            };
+        }
+        musicalProgress.value++;
+        if (musicalProgress.value < MUSICAL_BATTLES) return;
+        musicalProgress.value = 0;
+        const performer = [...partyIds.value].sort(
+            (a, b) => (box.value[b]?.level ?? 0) - (box.value[a]?.level ?? 0)
+        )[0];
+        if (performer == null) return;
+        const show = SHOWS[Math.floor(Math.random() * SHOWS.length)];
+        const worn = propsWorn(hof.props.value, show.theme);
+        const won = Math.random() < musicalWinChance(worn);
+        const name = getSpecies(performer).name;
+        let text = `${name} performed in "${show.name}" (${THEME_NAMES[show.theme]}) wearing ${worn} prop${worn === 1 ? "" : "s"}`;
+        if (won) {
+            const prize = MUSICAL_PRIZE * (worn + 1);
+            money.value += prize;
+            medals.count("musicalsWon");
+            text += ` and stole the show! ₽${prize.toLocaleString()}`;
+        } else {
+            text += " to warm applause";
+        }
+        if (won || Math.random() < RUNNER_UP_PROP_CHANCE) {
+            const prop = thrownProp(hof.props.value, show.theme, Math.random());
+            if (prop != null) {
+                hof.props.value = { ...hof.props.value, [prop]: true };
+                text += `; the audience threw a ${prop}`;
+            }
+        }
+        text += ".";
+        lastMusical.value = text;
+        addLog({ kind: won ? "badge" : "info", text, speciesId: performer });
+    }
+
     /** Black City's market boss: Ultra Balls for every task, a Master Ball for the fourth. */
     function rewardMarketTask() {
         const task = blackCityWins.value / MARKET_TASK_WINS;
@@ -1361,6 +1421,7 @@ export const main = createLayer("main", layer => {
         }
         tendEntralink();
         tendJoinAvenue();
+        tendMusicals();
         tendDayCare();
         tendUnderground();
         extendRadarChain(wild);
@@ -2454,6 +2515,8 @@ export const main = createLayer("main", layer => {
         residents,
         residentProgress,
         visitorProgress,
+        musicalProgress,
+        lastMusical,
         blackCityWins,
         grottoBattles,
         grottoReady,
