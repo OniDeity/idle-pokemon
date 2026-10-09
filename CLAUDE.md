@@ -193,6 +193,14 @@ journeys.
   stays exact) take the hits. A first try that rotated out at half HP made some battles worse.
   Unova's tuning went to 1.045 and Unova 2's to 1.03 with them (Unova 2 over five seeds:
   7.9 h at 1.01, 10.8 h at 1.03; it's very noisy, ×1.08 came out faster than ×1.05).
+- The Entralink (v2.15, `entralink.ts`): `RESIDENTS` (Fandom's White Forest list) live in
+  `main.residents` (journey state: `FIRST_RESIDENTS` from the start, one more every
+  `RESIDENT_BATTLES`, up to `MAX_RESIDENTS`, oldest out). Zones with `entralink` (White Forest:
+  their Lv. 5 Pokémon; Black City: trainer battles with their final forms) fill from
+  `ZoneExtras.residents` and are empty without it, so they never count toward Pokédex
+  requirements. Black City's market boss rewards every `MARKET_TASK_WINS`. B2W2's Black Tower /
+  White Treehollow split the final forms by first type (random trainers in the games), with an
+  Area 10 boss each.
 - Gen 5 mechanics (`mechanics.ts`): `seasons` (every `SEASON_BATTLES` wild battles; Unova's
   tables use `bySeason`, Deerling/Sawsbuck take the season's form via `seasonForm()`; elsewhere
   `SEASON_TYPES` ×1.5 and seasonal Deerling join walk pools), `phenomena` (an extra

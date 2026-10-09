@@ -1,3 +1,4 @@
+import { cityPool, forestPools } from "./entralink";
 import type { EncounterEntry, EncounterPoolId, FieldAbility, Season } from "./data";
 import {
     enc,
@@ -78,6 +79,11 @@ export interface ZoneDefinition {
     mechanic?: MechanicId;
     /** Pal Park: its Pokémon are the ones migrated from regions cleared after Sinnoh. */
     palPark?: boolean;
+    /**
+     * An Entralink town: White Forest's wild Pokémon or Black City's trainers come from the
+     * journey's residents (ZoneExtras.residents), Black City's at these levels.
+     */
+    entralink?: { town: "forest" | "city"; levels?: [number, number] };
 }
 
 /** Kanto zones from the games, in the order the player reaches them. */
@@ -453,6 +459,8 @@ export interface ZoneExtras {
     phenomena?: boolean;
     /** Multiplies how often phenomena happen (Encounter Power). */
     phenomenaBoost?: number;
+    /** The Entralink towns' residents this journey (indices into RESIDENTS). */
+    residents?: number[];
 }
 
 /** Share of Sinnoh's grass the Poké Radar's patches bring (two slots of twelve, 10% each). */
@@ -495,6 +503,14 @@ function joinPool(existing: EncounterEntry[], added: EncounterEntry[], share: nu
 /** A zone's pools with the journey's swarms and contest added. */
 function poolsWith(zoneId: string, extras: ZoneExtras): ZonePools {
     const pools: ZonePools = { ...zonePools(zoneId) };
+    // The Entralink towns fill with the journey's residents.
+    const town = ZONES_BY_ID[zoneId]?.entralink;
+    if (town?.town === "forest") {
+        Object.assign(pools, forestPools(extras.residents ?? []));
+    } else if (town?.town === "city") {
+        const [min, max] = town.levels ?? [50, 55];
+        pools.walk = cityPool(extras.residents ?? [], min, max);
+    }
     const season = extras.season;
     if (season != null) {
         for (const pool of Object.keys(pools) as EncounterPoolId[]) {
