@@ -8,7 +8,12 @@
  *   Each region may name a starter, e.g. "kanto:4,orange:25".
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import type { BonusInputs, HofUpgradeId, PartyBattler } from "../src/game/pokemon/balance";
+import type {
+    BattleStyle,
+    BonusInputs,
+    HofUpgradeId,
+    PartyBattler
+} from "../src/game/pokemon/balance";
 import {
     battleXp,
     catchChance,
@@ -187,12 +192,17 @@ function awardMedals() {
     }
 }
 
-/** Unova's mechanics, once reached: the Seasons, phenomena, critical captures, Hidden Grottoes. */
+/**
+ * Unova's mechanics, once reached: the Seasons, phenomena, critical captures, Hidden Grottoes,
+ * Triple and Rotation Battles.
+ */
 const unovaMechanics = {
     seasons: false,
     phenomena: false,
     criticalCapture: false,
-    grottoes: false
+    grottoes: false,
+    triples: false,
+    rotation: false
 };
 
 interface Owned {
@@ -234,7 +244,14 @@ function runJourney(region: RegionDefinition, starter: number) {
         if (reached("phenomena")) unovaMechanics.phenomena = true;
         if (reached("criticalCapture")) unovaMechanics.criticalCapture = true;
         if (reached("hiddenGrottoes")) unovaMechanics.grottoes = true;
+        if (reached("tripleBattles")) unovaMechanics.triples = true;
+        if (reached("rotationBattles")) unovaMechanics.rotation = true;
         return unovaMechanics;
+    };
+    /** Double, Triple and Rotation Battles, as far as they're reached. */
+    const style = (): BattleStyle => {
+        const { triples, rotation } = unova();
+        return { doubles: doubles(), triples, rotation };
     };
     // Almia's obstacles open up with the box's Field Abilities; Unova's seasons and phenomena.
     const extras = () => ({
@@ -404,7 +421,7 @@ function runJourney(region: RegionDefinition, starter: number) {
             const t =
                 bonuses.searchTime +
                 maxHp(target) /
-                    wildDps(members, target, bonuses.damage * assist(target, party), doubles());
+                    wildDps(members, target, bonuses.damage * assist(target, party), style());
             xpPerSec += xpYield(target) / t;
         }
         const uncaught = availableZoneSpecies(zoneId, keyItems, extras()).filter(
@@ -442,7 +459,7 @@ function runJourney(region: RegionDefinition, starter: number) {
             const { damage, hp } = computeBonuses(bonusInputs());
             const trainers = nextTrainers();
             const members = party.map(battler);
-            if (trainers.every(t => simulateTrainerBattle(members, t, damage, hp, doubles()).won)) {
+            if (trainers.every(t => simulateTrainerBattle(members, t, damage, hp, style()).won)) {
                 for (const t of trainers) money += t.prizeMoney;
                 countMedal("trainersBeaten", trainers.length);
                 if (badges < region.trials.length) countMedal("trialsWon");
@@ -517,7 +534,7 @@ function runJourney(region: RegionDefinition, starter: number) {
                     party.map(battler),
                     target,
                     bonuses.damage * assist(target, party),
-                    doubles()
+                    style()
                 );
         money += moneyYield(e.level) * bonuses.money * MF;
         countMedal("wildBattles");

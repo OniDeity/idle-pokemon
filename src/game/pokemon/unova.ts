@@ -397,7 +397,8 @@ const UNOVA_GHETSIS_STRENGTH = 3.5;
  * under 10 hours, so every trial and the finale are this much stronger (strengths above are the
  * earlier tuning). The sim is very sensitive here: ×1.05 doubled some runs.
  */
-const UNOVA_TUNING = 1.04;
+// 1.04 in v2.12.3; 1.045 since v2.14's Triple and Rotation Battles (met here at 7 badges).
+const UNOVA_TUNING = 1.045;
 
 function unovaGym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">,

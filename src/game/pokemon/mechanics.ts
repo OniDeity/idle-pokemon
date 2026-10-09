@@ -24,7 +24,9 @@ export type MechanicId =
     | "seasons"
     | "phenomena"
     | "criticalCapture"
-    | "hiddenGrottoes";
+    | "hiddenGrottoes"
+    | "tripleBattles"
+    | "rotationBattles";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -195,6 +197,24 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 1,
         description:
             "A Hidden Grotto fills every 80 wild battles, wherever you are: the Pokémon inside waits for you and is caught for sure. Outside Black 2 and White 2's grottoes, it's one of the place's Pokémon, a species your Pokédex is missing when there is one."
+    },
+    tripleBattles: {
+        id: "tripleBattles",
+        name: "Triple Battles",
+        region: "unova",
+        unlockAt: "Opelucid City's Battle House, past the Freeze Badge",
+        trialsRequired: 7,
+        description:
+            "Three of your Pokémon fight at once: with Double Battles' partner, a second partner (the next strongest still standing) adds a quarter of its usual damage. It isn't attacked either."
+    },
+    rotationBattles: {
+        id: "rotationBattles",
+        name: "Rotation Battles",
+        region: "unova",
+        unlockAt: "Opelucid City's Battle House, past the Freeze Badge",
+        trialsRequired: 7,
+        description:
+            "In trainer battles your team rotates: while the best matchup attacks, the sturdiest Pokémon against that opponent takes its hits (then the next sturdiest), so your attacker lasts longer."
     }
 };
 

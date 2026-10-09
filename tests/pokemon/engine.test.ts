@@ -19,6 +19,7 @@ import {
     simulateTrainerBattle,
     stepTrainerBattle,
     PARTNER_DAMAGE,
+    TRIPLE_PARTNER_DAMAGE,
     trainerTeam,
     wildDps,
     zoneRates
@@ -427,6 +428,52 @@ describe("battles", () => {
         expect(REGIONS.hoenn.trials.find(g => g.doubles)?.name).toBe("Tate & Liza");
     });
 
+    test("triple battles: a second partner adds a quarter of its damage", () => {
+        const team = party([9, 45], [26, 44], [65, 45], [3, 45], [130, 44], [59, 45]);
+        const starmie = trainerTeam(GYMS[1])[1];
+        const dps = team.map(m => memberDps(m, starmie, 1)).sort((a, b) => b - a);
+        expect(wildDps(team, starmie, 1, { doubles: true, triples: true })).toBeCloseTo(
+            dps[0] + PARTNER_DAMAGE * dps[1] + TRIPLE_PARTNER_DAMAGE * dps[2],
+            9
+        );
+        const gym = GYMS[7];
+        const doubles = simulateTrainerBattle(team, gym, 8, 3, { doubles: true });
+        const triples = simulateTrainerBattle(team, gym, 8, 3, { doubles: true, triples: true });
+        expect(triples.time).toBeLessThan(doubles.time);
+    });
+
+    test("rotation battles: the sturdiest Pokémon takes the hits, and stepping stays exact", () => {
+        const team = party([9, 40], [26, 40], [65, 40], [3, 40], [130, 40], [59, 40]);
+        const gym = { ...GYMS[7], timeLimit: 10000 };
+        const plain = simulateTrainerBattle(team, gym, 6, 6, { doubles: true });
+        const rotating = simulateTrainerBattle(team, gym, 6, 6, { doubles: true, rotation: true });
+        expect(plain.won && rotating.won).toBe(true);
+        // The best matchup keeps attacking while a sturdier teammate takes the hits.
+        expect(rotating.time).toBeLessThan(plain.time);
+        expect(rotating.hpRemaining).toBeGreaterThan(plain.hpRemaining);
+
+        const rules = { doubles: true, triples: true, rotation: true };
+        const forecast = simulateTrainerBattle(team, gym, 1.3, 1.2, rules);
+        const enemies = trainerTeam(gym);
+        let state = initialTrainerBattle(team, enemies, 1.2);
+        let done = null;
+        for (let i = 0; i < 200000 && done == null; i++) {
+            const result = stepTrainerBattle(team, enemies, state, 1.3, 0.05, gym.timeLimit, rules);
+            state = result.state;
+            done = result.done;
+        }
+        expect(done).toBe(forecast.reason);
+        expect(state.elapsed).toBeCloseTo(forecast.time, 6);
+        expect(state.partyHp).toEqual(forecast.state.partyHp.map(hp => expect.closeTo(hp, 6)));
+    });
+
+    test("Triple and Rotation Battles are met in Unova at Opelucid", () => {
+        for (const id of ["tripleBattles", "rotationBattles"] as const) {
+            expect(MECHANICS[id].region).toBe("unova");
+            expect(MECHANICS[id].trialsRequired).toBe(7);
+        }
+    });
+
     test("the Elite Four and Champion are beatable with a strong capped team", () => {
         const team = party([9, 65], [135, 65], [65, 65], [94, 65], [149, 65], [112, 65]);
         const { damage, hp } = computeBonuses({
@@ -664,7 +711,9 @@ describe("generation mechanics", () => {
             "seasons",
             "phenomena",
             "criticalCapture",
-            "hiddenGrottoes"
+            "hiddenGrottoes",
+            "tripleBattles",
+            "rotationBattles"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
