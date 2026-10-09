@@ -5,6 +5,20 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.17 Pokémon Musicals</summary>
+                <ul>
+                    <li class="feature">
+                        Pokémon Musicals: met at Nimbasa City's Musical Theater past the Insect
+                        Badge, then on in every region. A show starts every 80 wild battles (Stardom,
+                        Forest Stroll, A Sweet Soirée or Exciting Nimbasa) and your strongest party
+                        Pokémon performs, wearing up to four props of the show's theme (Cool, Cute,
+                        Elegant or Unique): each one is a better chance to win. Winners get prize
+                        money and a prop from the audience, others sometimes a prop. 101 props to
+                        collect, kept for good, and a new Musical Star medal. See the C-Gear tab
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.16 Join Avenue</summary>
                 <ul>
                     <li class="feature">

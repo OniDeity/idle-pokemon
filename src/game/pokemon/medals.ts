@@ -25,6 +25,7 @@ export type MedalStat =
     | "shadowsSnagged"
     | "shadowsPurified"
     | "contestsWon"
+    | "musicalsWon"
     | "tradesMade"
     | "giftsReceived"
     | "grottoesVisited"
@@ -285,6 +286,13 @@ export const MEDALS: MedalDefinition[] = [
         "Contest Star",
         "collection",
         "Win {n} Pokémon Contests.",
+        [1, 20, 100, 400]
+    ),
+    counter(
+        "musicalsWon",
+        "Musical Star",
+        "collection",
+        "Win {n} Pokémon Musicals.",
         [1, 20, 100, 400]
     ),
     {
