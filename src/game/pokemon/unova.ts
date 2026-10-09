@@ -296,6 +296,25 @@ export const UNOVA_ZONES: ZoneDefinition[] = [
         postGame: true,
         blurb: "A great bridge to Route 16, where Swanna's shadows fly overhead.",
         encounters: bridge("marvelousBridge")
+    }),
+    zone({
+        id: "whiteForest",
+        name: "White Forest",
+        badgesRequired: 8,
+        postGame: true,
+        blurb: "A forest town that grows with the Entralink's residents: each brings a Pokémon from another region (all Lv. 5).",
+        encounters: {},
+        entralink: { town: "forest" }
+    }),
+    zone({
+        id: "blackCity",
+        name: "Black City",
+        badgesRequired: 8,
+        postGame: true,
+        blurb: "A city of towers and a busy market: the Entralink's residents battle you here, and the market's boss rewards every 25 wins.",
+        trainerBattles: true,
+        encounters: {},
+        entralink: { town: "city", levels: [50, 55] }
     })
 ];
 
