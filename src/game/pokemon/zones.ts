@@ -19,6 +19,7 @@ import { KANTO_ANIME_ZONES, MORE_KANTO_ANIME_ZONES } from "./kantoAnime";
 import { MORE_ORANGE_ZONES, ORANGE_ZONES } from "./orange";
 import { HOENN_ZONES } from "./hoenn";
 import { HOENN_ANIME_ZONES } from "./hoennAnime";
+import { UNOVA_ANIME_ZONES } from "./unovaAnime";
 import { SINNOH_EXTRAS, SINNOH_ZONES } from "./sinnoh";
 import { ALMIA_ZONES } from "./almia";
 import { FIORE_ZONES } from "./fiore";
@@ -318,6 +319,10 @@ const HOENN_ALL: ZoneDefinition[] = [...HOENN_ZONES, ...HOENN_ANIME_ZONES].sort(
     (a, b) => a.badgesRequired - b.badgesRequired || Number(!!a.postGame) - Number(!!b.postGame)
 );
 
+const UNOVA_ALL: ZoneDefinition[] = [...UNOVA_ZONES, ...UNOVA_ANIME_ZONES].sort(
+    (a, b) => a.badgesRequired - b.badgesRequired || Number(!!a.postGame) - Number(!!b.postGame)
+);
+
 /** Every explorable zone in every region. */
 export const ZONES: ZoneDefinition[] = [
     ...KANTO_ZONES,
@@ -331,7 +336,7 @@ export const ZONES: ZoneDefinition[] = [
     ...FIORE_ZONES,
     ...ALMIA_ZONES,
     ...OBLIVIA_ZONES,
-    ...UNOVA_ZONES,
+    ...UNOVA_ALL,
     ...UNOVA2_ZONES,
     ...CARRIED_POKE_SPOTS
 ];
