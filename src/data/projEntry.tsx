@@ -133,6 +133,17 @@ import {
     RESIDENT_BATTLES,
     RESIDENTS
 } from "game/pokemon/entralink";
+import type { ShopId } from "game/pokemon/joinAvenue";
+import {
+    ANTIQUE_CHANCE,
+    avenuePerks,
+    RAFFLE_MASTER_CHANCE,
+    SHOPS,
+    shopRank,
+    VISITOR_BATTLES,
+    visitorWish,
+    welcome
+} from "game/pokemon/joinAvenue";
 import { runAutomation } from "./automation";
 import { renderJourney } from "./ui/journey";
 import type { NavNode } from "./ui/nav";
@@ -330,6 +341,8 @@ export const main = createLayer("main", layer => {
     const residents = persistent<number[]>([], false);
     /** Wild battles since the last resident moved in. */
     const residentProgress = persistent<number>(0);
+    /** Wild battles since Join Avenue's last visitor. */
+    const visitorProgress = persistent<number>(0);
     /** Trainers beaten in Black City this journey (its market boss rewards every 25). */
     const blackCityWins = persistent<number>(0);
     /** The challenges this journey was started with (Black 2 and White 2's Key System). */
@@ -405,17 +418,22 @@ export const main = createLayer("main", layer => {
         );
     }
 
-    const bonuses = computed(
-        (): Bonuses =>
-            computeBonuses({
-                dexCaught: dex.caughtCount.value,
-                shinyCaught: dex.shinyCount.value,
-                variantsCaught: dex.variantCaught.value,
-                mart: challengeOn("frugal") ? {} : mart.levels.value,
-                hof: fameLevels.value,
-                keyItems: keyItems.value
-            })
+    /** Join Avenue's shops' passive perks (once the mechanic is unlocked). */
+    const avenue = computed(() =>
+        avenuePerks(mechanicOn("joinAvenue") ? hof.joinAvenue.value : {})
     );
+    const bonuses = computed((): Bonuses => {
+        const base = computeBonuses({
+            dexCaught: dex.caughtCount.value,
+            shinyCaught: dex.shinyCount.value,
+            variantsCaught: dex.variantCaught.value,
+            mart: challengeOn("frugal") ? {} : mart.levels.value,
+            hof: fameLevels.value,
+            keyItems: keyItems.value
+        });
+        // Join Avenue's Café and Flower Shop.
+        return { ...base, xp: base.xp * avenue.value.xp, hp: base.hp * avenue.value.hp };
+    });
     const regionDef = computed(() => REGIONS[region.value] ?? REGIONS.kanto);
     /** The season (Black and White's Seasons mechanic), turning every SEASON_BATTLES battles. */
     const season = computed(() => (mechanicOn("seasons") ? seasonAt(battlesWon.value) : undefined));
@@ -440,13 +458,16 @@ export const main = createLayer("main", layer => {
                     ? EGG_BATTLES / 2
                     : EGG_BATTLES) *
                     (hasMilestone(dex.caughtCount.value, "Oval Charm") ? 0.75 : 1) *
-                    FAME_EFFECTS.flameBody(fameLevels.value.flameBody)
+                    FAME_EFFECTS.flameBody(fameLevels.value.flameBody) *
+                    avenue.value.eggBattles
             )
         )
     );
     /** Mart Membership (Fame): Poké Mart prices, rounded up. */
     function martPrice(price: number): number {
-        return Math.ceil(price * FAME_EFFECTS.martPrice(fameLevels.value.martMembership));
+        return Math.ceil(
+            price * FAME_EFFECTS.martPrice(fameLevels.value.martMembership) * avenue.value.martPrice
+        );
     }
     /** The Masuda Method (Fame): Day Care Eggs are likelier to be shiny. */
     const eggShinyMultiplier = computed(() =>
@@ -883,6 +904,76 @@ export const main = createLayer("main", layer => {
         return true;
     }
 
+    /**
+     * Join Avenue: a visitor every VISITOR_BATTLES wild battles opens or ranks up the shop they
+     * want, then the Raffle, Dojo, Beauty Salon and Antique Shop do their part.
+     */
+    function tendJoinAvenue() {
+        if (!mechanicOn("joinAvenue")) return;
+        visitorProgress.value++;
+        if (visitorProgress.value < VISITOR_BATTLES) return;
+        visitorProgress.value = 0;
+        const wish = visitorWish(hof.joinAvenue.value, Math.random());
+        const news: string[] = [];
+        if (wish != null) {
+            const before = shopRank(hof.joinAvenue.value, wish);
+            hof.joinAvenue.value = welcome(hof.joinAvenue.value, wish);
+            news.push(
+                before === 0
+                    ? `A visitor opened a ${SHOPS[wish].name} on Join Avenue!`
+                    : `A visitor made Join Avenue's ${SHOPS[wish].name} rank ${before + 1}.`
+            );
+        }
+        const rank = (id: ShopId) => shopRank(hof.joinAvenue.value, id);
+        // The Raffle: Great Balls, or now and then a Master Ball.
+        if (rank("raffle") > 0) {
+            const master = Math.random() < RAFFLE_MASTER_CHANCE * rank("raffle");
+            const [ball, n]: [BallId, number] = master
+                ? ["masterBall", 1]
+                : ["greatBall", rank("raffle")];
+            balls.value = { ...balls.value, [ball]: (balls.value[ball] ?? 0) + n };
+            if (master) news.push("The Raffle Shop's top prize: a Master Ball!");
+        }
+        // The Dojo: your lowest-level Pokémon below the cap trains (party included).
+        if (rank("dojo") > 0) {
+            const pupil = Object.keys(box.value)
+                .map(Number)
+                .filter(id => (box.value[id]?.level ?? 100) < cap.value)
+                .sort((a, b) => (box.value[a]?.level ?? 0) - (box.value[b]?.level ?? 0))[0];
+            const entry = pupil != null ? box.value[pupil] : undefined;
+            if (pupil != null && entry != null) {
+                const growth = getSpecies(pupil).growthRate;
+                const level = Math.min(cap.value, entry.level + rank("dojo"));
+                setBoxEntry(pupil, {
+                    ...entry,
+                    level,
+                    xp: Math.max(entry.xp, xpForLevel(growth, level))
+                });
+            }
+        }
+        // The Beauty Salon: box Pokémon become friendly.
+        if (rank("salon") > 0) {
+            Object.keys(box.value)
+                .map(Number)
+                .filter(id => box.value[id]?.friend !== true)
+                .slice(0, rank("salon"))
+                .forEach(befriend);
+        }
+        // The Antique Shop: now and then, an evolution item one of your Pokémon needs.
+        if (rank("antiques") > 0 && Math.random() < ANTIQUE_CHANCE * rank("antiques")) {
+            const needed = Object.keys(box.value)
+                .map(Number)
+                .flatMap(id => evolutionsOf(id).filter(e => !owns(evolutionTarget(id, e.into))))
+                .map(e => (e.method === "stone" ? e.stone : e.heldItem))
+                .find((item): item is StoneId => item != null && (stones.value[item] ?? 0) === 0);
+            if (needed != null) {
+                stones.value = { ...stones.value, [needed]: (stones.value[needed] ?? 0) + 1 };
+                news.push(`The Antique Shop found a ${STONES[needed].name} for you.`);
+            }
+        }
+        for (const text of news) addLog({ kind: "info", text });
+    }
+
     /** Black City's market boss: Ultra Balls for every task, a Master Ball for the fourth. */
     function rewardMarketTask() {
         const task = blackCityWins.value / MARKET_TASK_WINS;
@@ -1269,6 +1360,7 @@ export const main = createLayer("main", layer => {
             }
         }
         tendEntralink();
+        tendJoinAvenue();
         tendDayCare();
         tendUnderground();
         extendRadarChain(wild);
@@ -2361,6 +2453,7 @@ export const main = createLayer("main", layer => {
         grottoProgress,
         residents,
         residentProgress,
+        visitorProgress,
         blackCityWins,
         grottoBattles,
         grottoReady,

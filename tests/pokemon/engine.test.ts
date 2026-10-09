@@ -1,4 +1,13 @@
 import { existsSync, readdirSync, readFileSync } from "fs";
+import type { Avenue } from "game/pokemon/joinAvenue";
+import {
+    avenuePerks,
+    MAX_SHOP_RANK,
+    SHOP_LIST,
+    shopRank,
+    visitorWish,
+    welcome
+} from "game/pokemon/joinAvenue";
 import { arrive, finalForm, MAX_RESIDENTS, RESIDENTS, towerSpecies } from "game/pokemon/entralink";
 import { requiredSpritePaths } from "../../scripts/fetchSprites";
 import type { BallContext, PartyBattler } from "game/pokemon/balance";
@@ -715,7 +724,8 @@ describe("generation mechanics", () => {
             "criticalCapture",
             "hiddenGrottoes",
             "tripleBattles",
-            "rotationBattles"
+            "rotationBattles",
+            "joinAvenue"
         ]);
         // Kanto's Headbutt trees (from HeartGold/SoulSilver) wait for the Headbutt mechanic, so
         // they don't change the Pokédex Johto asks for.
@@ -2019,7 +2029,9 @@ describe("the Entralink (Black City and White Forest)", () => {
         const residents = [0, 13, 28];
         const forest = activePools("whiteForest", {}, { residents });
         expect(forest.find(p => p.kind === "walk")?.entries.map(e => e.id)).toEqual([16, 187, 440]);
-        expect(forest.find(p => p.kind === "walk")?.entries.every(e => e.minLevel === 5)).toBe(true);
+        expect(forest.find(p => p.kind === "walk")?.entries.every(e => e.minLevel === 5)).toBe(
+            true
+        );
         // Black City's trainers use the final forms: Pidgeot, Jumpluff, Blissey.
         const city = activePools("blackCity", {}, { residents });
         expect(city.find(p => p.kind === "walk")?.entries.map(e => e.id)).toEqual([18, 189, 242]);
@@ -2052,5 +2064,37 @@ describe("the Entralink (Black City and White Forest)", () => {
             expect(boss?.kind).toBe("boss");
             expect(boss?.region).toBe("unova2");
         }
+    });
+});
+
+describe("Join Avenue", () => {
+    test("visitors open shops and rank them up to the top, then stop", () => {
+        let avenue: Avenue = {};
+        expect(visitorWish(avenue, 0)).toBe(SHOP_LIST[0].id);
+        avenue = welcome(avenue, "cafe");
+        expect(shopRank(avenue, "cafe")).toBe(1);
+        for (let i = 0; i < 20; i++) avenue = welcome(avenue, "cafe");
+        expect(shopRank(avenue, "cafe")).toBe(MAX_SHOP_RANK);
+        // A maxed shop is no longer wished for.
+        for (let roll = 0; roll < 1; roll += 0.01) {
+            expect(visitorWish(avenue, roll)).not.toBe("cafe");
+        }
+        const full = Object.fromEntries(SHOP_LIST.map(s => [s.id, MAX_SHOP_RANK])) as Avenue;
+        expect(visitorWish(full, 0.5)).toBeUndefined();
+    });
+
+    test("perks grow with rank", () => {
+        expect(avenuePerks({})).toEqual({ martPrice: 1, eggBattles: 1, hp: 1, xp: 1 });
+        const perks = avenuePerks({ market: 10, nursery: 10, florist: 5, cafe: 3 });
+        expect(perks.martPrice).toBeCloseTo(0.9);
+        expect(perks.eggBattles).toBeCloseTo(0.7);
+        expect(perks.hp).toBeCloseTo(1.05);
+        expect(perks.xp).toBeCloseTo(1.03);
+        for (const shop of SHOP_LIST) expect(shop.perk(10)).not.toMatch(/NaN|undefined/);
+    });
+
+    test("is met in Black 2 and White 2 past the Insect Badge", () => {
+        expect(MECHANICS.joinAvenue.region).toBe("unova2");
+        expect(MECHANICS.joinAvenue.trialsRequired).toBe(3);
     });
 });

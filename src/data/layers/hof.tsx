@@ -26,6 +26,7 @@ import {
 import type { UpgradeDefinition, UpgradeTab } from "game/pokemon/balance";
 import type { PokemonType } from "game/pokemon/data";
 import { getSpecies, hallOfFameId } from "game/pokemon/data";
+import type { Avenue } from "game/pokemon/joinAvenue";
 import type { MechanicId } from "game/pokemon/mechanics";
 import { MECHANIC_LIST } from "game/pokemon/mechanics";
 import { rankFameMultiplier } from "game/pokemon/medals";
@@ -101,6 +102,8 @@ const layer = createLayer(id, () => {
     const benchSlots = persistent<number>(2);
     /** League Pass setting: also battle legendaries caught before and bosses beaten before. */
     const autoLegends = persistent<boolean>(true);
+    /** Join Avenue's shops and their ranks, kept for good. */
+    const joinAvenue = persistent<Avenue>({}, false);
     /** The Pokémon Bank: one Pokémon deposited per Hall of Fame entry, a partner choice for good. */
     const bank = persistent<BankEntry[]>([], false);
     /** This journey's deposit, picked on the Hall of Fame screen (0 for none). */
@@ -816,6 +819,7 @@ const layer = createLayer(id, () => {
         bossesBeaten,
         bank,
         bankDeposit,
+        joinAvenue,
         newFacesIn,
         replaceChampionTeam,
         eggsBred,

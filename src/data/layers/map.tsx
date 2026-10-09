@@ -48,6 +48,7 @@ import {
 } from "game/pokemon/unova";
 import type { ZoneRates } from "game/pokemon/balance";
 import { zoneRates } from "game/pokemon/balance";
+import { MAX_SHOP_RANK, SHOP_LIST, shopRank, VISITOR_BATTLES } from "game/pokemon/joinAvenue";
 import {
     MARKET_TASK_WINS,
     MAX_RESIDENTS,
@@ -351,6 +352,40 @@ const layer = createLayer(id, () => {
                         );
                     })}
                 </div>
+            </Panel>
+        );
+    }
+
+    /** Join Avenue: its shops, their ranks and perks, and when the next visitor comes. */
+    function renderJoinAvenue() {
+        const avenue = hof.joinAvenue.value;
+        return (
+            <Panel>
+                <div class="pk-filter-row">
+                    <span>
+                        Next visitor in {VISITOR_BATTLES - main.visitorProgress.value} wild battles
+                    </span>
+                </div>
+                <Bar value={main.visitorProgress.value} max={VISITOR_BATTLES} kind="progress" />
+                <p class="pk-small pk-muted">
+                    Each visitor opens the shop they want, or ranks it up (to rank {MAX_SHOP_RANK}).
+                    Shops are kept for good and work in every region.
+                </p>
+                {SHOP_LIST.map(shop => {
+                    const rank = shopRank(avenue, shop.id);
+                    return (
+                        <div class={["pk-shop-row", rank > 0 ? "" : "locked"]}>
+                            <span class="pk-medal-icon">{shop.icon}</span>
+                            <div class="pk-shop-info">
+                                <b>{shop.name}</b>{" "}
+                                <span class="pk-muted pk-small">
+                                    {rank > 0 ? `Rank ${rank}/${MAX_SHOP_RANK}` : "Not open yet"}
+                                </span>
+                                <div class="pk-small">{shop.perk(Math.max(1, rank))}</div>
+                            </div>
+                        </div>
+                    );
+                })}
             </Panel>
         );
     }
@@ -1142,6 +1177,11 @@ const layer = createLayer(id, () => {
                         main.mechanicOn("hiddenGrottoes")
                 },
                 {
+                    id: "joinAvenue",
+                    label: "Join Avenue",
+                    show: main.mechanicOn("joinAvenue")
+                },
+                {
                     id: "underground",
                     label: `Underground${
                         main.undergroundWalls.value > 0 ? ` (${main.undergroundWalls.value})` : ""
@@ -1168,6 +1208,8 @@ const layer = createLayer(id, () => {
                         renderUnderground()
                     ) : page === "cgear" ? (
                         renderCGear()
+                    ) : page === "joinAvenue" ? (
+                        renderJoinAvenue()
                     ) : (
                         <Panel>
                             <p class="pk-small pk-muted">
