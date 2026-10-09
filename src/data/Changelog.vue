@@ -5,6 +5,23 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.14 Triple and Rotation Battles</summary>
+                <ul>
+                    <li class="feature">
+                        Two new Unova mechanics, met at Opelucid City's Battle House (past the
+                        Freeze Badge) and then on in every region: Triple Battles (a second partner
+                        joins Double Battles' with a quarter of its damage) and Rotation Battles (in
+                        trainer battles your sturdiest Pokémon against each opponent takes its hits
+                        while your best matchup attacks)
+                    </li>
+                    <li class="balancing">
+                        Unova (Black/White)'s trainers are a touch stronger (×1.045, was ×1.04) and
+                        Unova (Black 2/White 2)'s more so (×1.03, was ×1.01), so their first clears
+                        stay near 11 hours with the new battle styles
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.13 Pokémon Bank</summary>
                 <ul>
                     <li class="feature">

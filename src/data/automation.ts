@@ -277,9 +277,9 @@ function autoParty() {
 /** Whether this team wins against every trainer, by the forecast. */
 function winsWith(team: number[], trainers: TrainerDefinition[]): boolean {
     const { damage, hp } = main.bonuses.value;
-    const doubles = main.mechanicOn("doubleBattles");
+    const style = main.battleStyle.value;
     const party = team.map(id => main.battlerFor(id));
-    return trainers.every(t => simulateTrainerBattle(party, t, damage, hp, doubles).won);
+    return trainers.every(t => simulateTrainerBattle(party, t, damage, hp, style).won);
 }
 
 /** Training the bench (see benchTeam): new faces first when they're going to the finale. */
@@ -304,7 +304,7 @@ function newFacesParty(
     trainers: TrainerDefinition[]
 ): { team: number[]; count: number; wins: boolean } | undefined {
     const { damage, hp } = main.bonuses.value;
-    const doubles = main.mechanicOn("doubleBattles");
+    const style = main.battleStyle.value;
     // Strongest first; a Gyarados and a Gyarados ♀ are one Hall of Fame entry.
     const fresh = ranked.filter(
         (id, i) =>
@@ -325,7 +325,7 @@ function newFacesParty(
     };
     const wins = (team: number[]) => {
         const party = team.map(id => main.battlerFor(id));
-        return trainers.every(t => simulateTrainerBattle(party, t, damage, hp, doubles).won);
+        return trainers.every(t => simulateTrainerBattle(party, t, damage, hp, style).won);
     };
     if (wanted === 0) return undefined;
     // Training: field them all, win or not; the League Pass waits for the forecast.
@@ -475,9 +475,9 @@ function autoTravel() {
 function autoChallenge() {
     const { damage, hp } = main.bonuses.value;
     const party = main.partyBattlers.value;
-    const doubles = main.mechanicOn("doubleBattles");
+    const style = main.battleStyle.value;
     const loser = (trainers: TrainerDefinition[]) =>
-        trainers.find(t => !simulateTrainerBattle(party, t, damage, hp, doubles).won);
+        trainers.find(t => !simulateTrainerBattle(party, t, damage, hp, style).won);
     const trainers = main.nextTrainers.value;
     let waiting = "";
     if (trainers.length > 0) {

@@ -4,7 +4,13 @@ import type { Layer } from "game/layers";
 import { createLayer } from "game/layers";
 import { persistent } from "game/persistence";
 import type { Player } from "game/player";
-import type { BallContext, Bonuses, PartyBattler, TrainerBattleState } from "game/pokemon/balance";
+import type {
+    BallContext,
+    Bonuses,
+    PartyBattler,
+    TrainerBattleState,
+    BattleStyle
+} from "game/pokemon/balance";
 import {
     BALL_RESTOCK_TARGET,
     BASE_SHINY_CHANCE,
@@ -1039,6 +1045,15 @@ export const main = createLayer("main", layer => {
             : 1;
     }
 
+    /** Double, Triple and Rotation Battles, as far as they're unlocked. */
+    const battleStyle = computed(
+        (): BattleStyle => ({
+            doubles: mechanicOn("doubleBattles"),
+            triples: mechanicOn("tripleBattles"),
+            rotation: mechanicOn("rotationBattles")
+        })
+    );
+
     /** Who fights a wild Pokémon: the best matchup, plus a partner in double battles. */
     function wildFighters(target: BattlerStats): { active: number; partner: number } {
         const party = partyBattlers.value;
@@ -1920,7 +1935,7 @@ export const main = createLayer("main", layer => {
                     partyBattlers.value,
                     target,
                     bonuses.value.damage * pokeAssist(target.species),
-                    mechanicOn("doubleBattles")
+                    battleStyle.value
                 );
                 if (dps <= 0) {
                     return 0;
@@ -1948,7 +1963,7 @@ export const main = createLayer("main", layer => {
                     bonuses.value.damage,
                     dt,
                     trainer.timeLimit,
-                    { doubles: mechanicOn("doubleBattles"), enemyDoubles: trainer.doubles === true }
+                    { ...battleStyle.value, enemyDoubles: trainer.doubles === true }
                 );
                 battle.value = { ...current, state };
                 if (done == null) {
@@ -2202,6 +2217,7 @@ export const main = createLayer("main", layer => {
         feedPokeblock,
         contestRankFor,
         specialTrainers,
+        battleStyle,
         martPrice,
         contestScoreOf,
         enterContest,

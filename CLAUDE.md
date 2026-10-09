@@ -135,7 +135,7 @@ journeys.
   `hof.eggsBred` counts Eggs by species for Breeder's Lineage. The Journey page's new upgrades
   wait for `JOURNEY_UPGRADE_ENTRIES` (4) Hall of Fame entries: bought from the start they made
   the sim's Johto 40% slower (Fame drawn from Champion's Might).
-  v2.12.1: Oblivia, Unova and Unova 2 have `*_TUNING` factors (now 1.04 / 1.04 / 1.01) on every
+  v2.12.1: Oblivia, Unova and Unova 2 have `*_TUNING` factors (now 1.04 / 1.045 / 1.03) on every
   trial and finale trainer, back to ~10-12 h first clears with the new upgrades. Late regions
   are very sensitive: SCALE ×1.05 on all three doubled some runs.
   v2.12.3: Hoenn 1.03, Colosseum 1.13, XD 1.06 (were 8.1 / 6.0 / 8.7 h, now ~11) and Fiore
@@ -186,6 +186,13 @@ journeys.
   `requiresCleared` regions (the World Tournament's Leaders, built from each region's Gym aces).
   Black and White's Relic Castle is split by story stage (entrance / basement at 7 badges /
   post-game depths). Super Rods come with the 8th badge (post-game in the games).
+- Triple and Rotation Battles (v2.14, `tripleBattles`/`rotationBattles`, Unova at 7 badges):
+  battles take a `BattleStyle` (`main.battleStyle`; a plain boolean still means doubles).
+  Triples add a second partner at `TRIPLE_PARTNER_DAMAGE`; Rotation makes the sturdiest member
+  against the current opponent (full HP over incoming damage, fixed per opponent so stepping
+  stays exact) take the hits. A first try that rotated out at half HP made some battles worse.
+  Unova's tuning went to 1.045 and Unova 2's to 1.03 with them (Unova 2 over five seeds:
+  7.9 h at 1.01, 10.8 h at 1.03; it's very noisy, ×1.08 came out faster than ×1.05).
 - Gen 5 mechanics (`mechanics.ts`): `seasons` (every `SEASON_BATTLES` wild battles; Unova's
   tables use `bySeason`, Deerling/Sawsbuck take the season's form via `seasonForm()`; elsewhere
   `SEASON_TYPES` ×1.5 and seasonal Deerling join walk pools), `phenomena` (an extra

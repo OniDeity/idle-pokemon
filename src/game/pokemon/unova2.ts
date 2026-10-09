@@ -399,7 +399,9 @@ const UNOVA2_CHAMPION_STRENGTH = 4.66;
  * under 10 hours, so every trial and the finale are this much stronger (strengths above are the
  * earlier tuning). The sim is very sensitive here: ×1.05 doubled some runs.
  */
-const UNOVA2_TUNING = 1.01;
+// 1.01 in v2.12.1; 1.03 since v2.14's Triple and Rotation Battles (on for this whole journey):
+// five seeds averaged 7.9 h at 1.01 and 10.8 h at 1.03 (single runs 5-15 h).
+const UNOVA2_TUNING = 1.03;
 
 function unova2Gym(
     options: Omit<Parameters<typeof trial>[0], "statMultiplier" | "badgeIcon">,
