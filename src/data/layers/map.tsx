@@ -48,6 +48,12 @@ import {
 } from "game/pokemon/unova";
 import type { ZoneRates } from "game/pokemon/balance";
 import { zoneRates } from "game/pokemon/balance";
+import {
+    MARKET_TASK_WINS,
+    MAX_RESIDENTS,
+    RESIDENT_BATTLES,
+    RESIDENTS
+} from "game/pokemon/entralink";
 import { computed, ref, shallowRef, watch } from "vue";
 import type { NavNode } from "../ui/nav";
 import { mobileClasses, renderNav } from "../ui/nav";
@@ -455,6 +461,25 @@ const layer = createLayer(id, () => {
         );
     }
 
+    /** The Entralink towns: who lives there, and when the next resident moves in. */
+    function renderEntralink(zone: ZoneDefinition) {
+        const living = main.residents.value.map(i => RESIDENTS[i]?.name).filter(n => n != null);
+        const next = RESIDENT_BATTLES - main.residentProgress.value;
+        const wins = main.blackCityWins.value;
+        return (
+            <div class="pk-small">
+                {living.length > 0
+                    ? `Residents (${living.length}/${MAX_RESIDENTS}): ${living.join(", ")}. `
+                    : "Nobody lives here yet. "}
+                The next resident moves in after {next} more wild battle{next === 1 ? "" : "s"}
+                {living.length >= MAX_RESIDENTS ? " (and the longest-staying moves out)" : ""}.
+                {zone.entralink?.town === "city"
+                    ? ` Market boss: ${wins % MARKET_TASK_WINS}/${MARKET_TASK_WINS} wins to the next reward${wins < 3 * MARKET_TASK_WINS ? "" : wins < 4 * MARKET_TASK_WINS ? " (a Master Ball)" : ""}.`
+                    : ""}
+            </div>
+        );
+    }
+
     /** Species in a zone that you've never caught, and can reach now. */
     function newSpecies(zone: ZoneDefinition): number[] {
         return reachable(zone).filter(s => !dex.entry(s).caught);
@@ -768,6 +793,7 @@ const layer = createLayer(id, () => {
                         ) : null}
                         <div class="pk-small pk-muted">{zone.blurb}</div>
                         {zone.palPark === true ? renderPalPark() : null}
+                        {zone.entralink != null ? renderEntralink(zone) : null}
                         {current && main.hasPokeRadar.value && zonePools(zone.id).walk != null
                             ? renderRadar(zone)
                             : null}

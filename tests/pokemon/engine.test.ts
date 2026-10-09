@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "fs";
+import { arrive, finalForm, MAX_RESIDENTS, RESIDENTS, towerSpecies } from "game/pokemon/entralink";
 import { requiredSpritePaths } from "../../scripts/fetchSprites";
 import type { BallContext, PartyBattler } from "game/pokemon/balance";
 import {
@@ -205,8 +206,9 @@ describe("data", () => {
         const ids = new Set(ZONES.map(z => z.id));
         expect(ids.size).toBe(ZONES.length);
         for (const zone of ZONES) {
-            // Pal Park only has what's migrated to it (see the Sinnoh tests).
-            if (zone.palPark === true) continue;
+            // Pal Park only has what's migrated to it (see the Sinnoh tests), and the Entralink
+            // towns only their residents' Pokémon (see the Unova tests).
+            if (zone.palPark === true || zone.entralink != null) continue;
             // Orre's places are trainer battles; some (Mt. Battle) have no Shadow Pokémon to snag.
             const species = zone.trainerBattles
                 ? (zonePools(zone.id).walk ?? []).map(e => e.id)
@@ -1111,8 +1113,14 @@ describe("encounter odds", () => {
             dive: true
         };
         for (const zone of ZONES) {
-            // Pal Park is empty until a region's Pokémon migrate there.
-            const extras = zone.palPark === true ? { palPark: ["kanto" as const] } : {};
+            // Pal Park is empty until a region's Pokémon migrate there, the Entralink towns
+            // until residents move in.
+            const extras =
+                zone.palPark === true
+                    ? { palPark: ["kanto" as const] }
+                    : zone.entralink != null
+                      ? { residents: [0, 5, 12] }
+                      : {};
             const odds = encounterOdds(zone.id, gear, 3, extras);
             const total = [...odds.values()].reduce((a, b) => a + b, 0);
             expect(total, zone.id).toBeCloseTo(1, 6);
@@ -2001,6 +2009,48 @@ describe("saved state", () => {
                     `${file}: persistent<${type}>(${args.trim().slice(0, 40)})`
                 ).toBe(true);
             }
+        }
+    });
+});
+
+describe("the Entralink (Black City and White Forest)", () => {
+    test("residents bring White Forest's Pokémon and Black City's trainers", () => {
+        expect(RESIDENTS.length).toBe(29);
+        const residents = [0, 13, 28];
+        const forest = activePools("whiteForest", {}, { residents });
+        expect(forest.find(p => p.kind === "walk")?.entries.map(e => e.id)).toEqual([16, 187, 440]);
+        expect(forest.find(p => p.kind === "walk")?.entries.every(e => e.minLevel === 5)).toBe(true);
+        // Black City's trainers use the final forms: Pidgeot, Jumpluff, Blissey.
+        const city = activePools("blackCity", {}, { residents });
+        expect(city.find(p => p.kind === "walk")?.entries.map(e => e.id)).toEqual([18, 189, 242]);
+        expect(catchableIn("blackCity", 18)).toBe(false);
+        // Nobody lives there yet: nothing to meet, and nothing for the Pokédex to ask for.
+        expect(activePools("whiteForest", {}, {}).flatMap(p => p.entries)).toEqual([]);
+    });
+
+    test("residents arrive up to ten, then the longest-staying moves out", () => {
+        let town: number[] = [];
+        for (let i = 0; i < MAX_RESIDENTS; i++) town = arrive(town, i * 7);
+        expect(new Set(town).size).toBe(MAX_RESIDENTS);
+        const next = arrive(town, 3);
+        expect(next.length).toBe(MAX_RESIDENTS);
+        expect(next).not.toContain(town[0]);
+        expect(next.slice(0, -1)).toEqual(town.slice(1));
+    });
+
+    test("the Black Tower and White Treehollow split the residents' final forms", () => {
+        const tower = towerSpecies("blackTower");
+        const hollow = towerSpecies("whiteTreehollow");
+        expect(tower.length + hollow.length).toBe(
+            new Set(RESIDENTS.map(r => finalForm(r.forest))).size
+        );
+        expect(tower.some(id => hollow.includes(id))).toBe(false);
+        expect(tower.length).toBeGreaterThanOrEqual(6);
+        expect(hollow.length).toBeGreaterThanOrEqual(6);
+        for (const id of ["blackTowerBoss", "whiteTreehollowBoss"]) {
+            const boss = SPECIAL_ENCOUNTERS.find(s => s.id === id);
+            expect(boss?.kind).toBe("boss");
+            expect(boss?.region).toBe("unova2");
         }
     });
 });

@@ -5,6 +5,24 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.15 Black City and White Forest</summary>
+                <ul>
+                    <li class="feature">
+                        The Entralink's towns, after the League in both Unova journeys: residents
+                        move in as you play (three to start, one every 40 wild battles, ten at most,
+                        then the longest-staying moves out). Each brings a Pokémon from another
+                        region to White Forest (29 residents, all Lv. 5) and battles you in Black
+                        City, whose market boss gives 5 Ultra Balls every 25 wins and a Master Ball
+                        for the fourth task
+                    </li>
+                    <li class="feature">
+                        Black 2 and White 2's Black Tower and White Treehollow: trainers with the
+                        residents' fully grown Pokémon (the city's types in the Tower, nature's in
+                        the Treehollow), each with an Area 10 boss
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.14 Triple and Rotation Battles</summary>
                 <ul>
                     <li class="feature">

@@ -126,6 +126,13 @@ import map from "./layers/map";
 import mart from "./layers/mart";
 import medals from "./layers/medals";
 import party from "./layers/party";
+import {
+    arrive,
+    FIRST_RESIDENTS,
+    MARKET_TASK_WINS,
+    RESIDENT_BATTLES,
+    RESIDENTS
+} from "game/pokemon/entralink";
 import { runAutomation } from "./automation";
 import { renderJourney } from "./ui/journey";
 import type { NavNode } from "./ui/nav";
@@ -319,6 +326,12 @@ export const main = createLayer("main", layer => {
     const radarChain = persistent<RadarChain>({ zoneId: "", speciesId: 0, count: 0 }, false);
     /** Wild battles toward the next Hidden Grotto (Black 2 and White 2's mechanic). */
     const grottoProgress = persistent<number>(0);
+    /** The Entralink towns' residents this journey (indices into RESIDENTS), oldest first. */
+    const residents = persistent<number[]>([], false);
+    /** Wild battles since the last resident moved in. */
+    const residentProgress = persistent<number>(0);
+    /** Trainers beaten in Black City this journey (its market boss rewards every 25). */
+    const blackCityWins = persistent<number>(0);
     /** The challenges this journey was started with (Black 2 and White 2's Key System). */
     const challenges = persistent<ChallengeId[]>([], false);
 
@@ -349,7 +362,8 @@ export const main = createLayer("main", layer => {
         fieldPowers: fieldPowers.value,
         season: season.value,
         phenomena: mechanicOn("phenomena"),
-        phenomenaBoost: FAME_EFFECTS.encounterPower(fameLevels.value.encounterPower)
+        phenomenaBoost: FAME_EFFECTS.encounterPower(fameLevels.value.encounterPower),
+        residents: residents.value
     }));
 
     // Transient state: rebuilt on load.
@@ -826,6 +840,60 @@ export const main = createLayer("main", layer => {
         if (hof.dayCareRotate.value) rotateDayCare();
     }
 
+    /**
+     * The Entralink (Unova journeys): residents move into Black City and White Forest as you
+     * play, and Black City's market boss rewards trainers beaten there.
+     */
+    function tendEntralink() {
+        if (!welcomeResidents()) return;
+        let town = residents.value;
+        residentProgress.value++;
+        if (residentProgress.value >= RESIDENT_BATTLES) {
+            residentProgress.value = 0;
+            const before = town;
+            town = arrive(town, Math.random() * 1e9);
+            const moved = town.find(i => !before.includes(i));
+            const left = before.find(i => !town.includes(i));
+            if (moved != null) {
+                addLog({
+                    kind: "info",
+                    text: `${RESIDENTS[moved].name} moved into Black City and White Forest${
+                        left != null ? `, and ${RESIDENTS[left].name} moved out` : ""
+                    }.`
+                });
+            }
+        }
+        if (town !== residents.value) residents.value = town;
+        if (ZONES_BY_ID[zoneId.value]?.entralink?.town === "city") {
+            blackCityWins.value++;
+            if (blackCityWins.value % MARKET_TASK_WINS === 0) rewardMarketTask();
+        }
+    }
+
+    /**
+     * A Unova journey's first residents, there from the start (an older save's journey gets
+     * them on load). False outside Unova.
+     */
+    function welcomeResidents(): boolean {
+        if (regionDef.value.id !== "unova" && regionDef.value.id !== "unova2") return false;
+        if (starter.value === 0 || residents.value.length >= FIRST_RESIDENTS) return true;
+        let town = residents.value;
+        while (town.length < FIRST_RESIDENTS) town = arrive(town, Math.random() * 1e9);
+        residents.value = town;
+        return true;
+    }
+
+    /** Black City's market boss: Ultra Balls for every task, a Master Ball for the fourth. */
+    function rewardMarketTask() {
+        const task = blackCityWins.value / MARKET_TASK_WINS;
+        const prize: BallId = task === 4 ? "masterBall" : "ultraBall";
+        const count = task === 4 ? 1 : 5;
+        balls.value = { ...balls.value, [prize]: (balls.value[prize] ?? 0) + count };
+        const text = `Black City's market boss: "${task === 4 ? "You've beaten them all! Here, this is my best" : "Good work out there"}." You receive ${count} ${BALLS[prize].name}${count === 1 ? "" : "s"}.`;
+        addLog({ kind: "badge", text });
+        notify(`🏙 ${text}`, "success", "trials");
+    }
+
     /** A Pokémon caught in a Friend Ball evolves by friendship without a Soothe Bell. */
     function befriend(id: number) {
         const entry = box.value[id];
@@ -1200,6 +1268,7 @@ export const main = createLayer("main", layer => {
                 });
             }
         }
+        tendEntralink();
         tendDayCare();
         tendUnderground();
         extendRadarChain(wild);
@@ -2006,6 +2075,7 @@ export const main = createLayer("main", layer => {
             }
         }
         checkMechanics();
+        welcomeResidents();
         if (box.value[493] != null) grantArceusForms();
         if (starter.value === 0 || partyIds.value.length === 0) return;
         runTime.value += diff;
@@ -2289,6 +2359,9 @@ export const main = createLayer("main", layer => {
         fameLevels,
         season,
         grottoProgress,
+        residents,
+        residentProgress,
+        blackCityWins,
         grottoBattles,
         grottoReady,
         visitGrotto,

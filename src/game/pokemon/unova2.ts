@@ -13,6 +13,8 @@ import type { SpecialEncounter } from "./specials";
 import type { GymDefinition, TrainerDefinition, TrainerPokemon } from "./trainers";
 import { timeLimit, trial } from "./trainers";
 import { UNOVA_EXTRAS, UNOVA_GYMS } from "./unova";
+import type { EntralinkTower } from "./entralink";
+import { towerPool, towerSpecies } from "./entralink";
 import type { RegionId, ZoneDefinition } from "./zones";
 
 function zone(options: Omit<ZoneDefinition, "region">): ZoneDefinition {
@@ -362,6 +364,43 @@ export const UNOVA2_ZONES: ZoneDefinition[] = [
         badgesRequired: 8,
         postGame: true,
         blurb: "A protected garden off Undella Town, open only to the Champion."
+    }),
+    zone({
+        id: "b2w2WhiteForest",
+        name: "White Forest",
+        badgesRequired: 8,
+        postGame: true,
+        blurb: "White Forest two years on, home to the White Treehollow. The Entralink's residents still bring Pokémon from other regions (all Lv. 5).",
+        encounters: {},
+        entralink: { town: "forest" }
+    }),
+    zone({
+        id: "b2w2BlackCity",
+        name: "Black City",
+        badgesRequired: 8,
+        postGame: true,
+        blurb: "Black City two years on, home to the Black Tower. Its residents battle you, and the market's boss rewards every 25 wins.",
+        trainerBattles: true,
+        encounters: {},
+        entralink: { town: "city", levels: [55, 60] }
+    }),
+    zone({
+        id: "blackTower",
+        name: "Black Tower",
+        badgesRequired: 8,
+        postGame: true,
+        blurb: "Black City's skyscraper of ten areas, each with trainers and a boss: the residents' city Pokémon, fully grown.",
+        trainerBattles: true,
+        encounters: { walk: towerPool("blackTower", 60, 68) }
+    }),
+    zone({
+        id: "whiteTreehollow",
+        name: "White Treehollow",
+        badgesRequired: 8,
+        postGame: true,
+        blurb: "White Forest's hollow tree of ten areas, each with trainers and a boss: the residents' forest Pokémon, fully grown.",
+        trainerBattles: true,
+        encounters: { walk: towerPool("whiteTreehollow", 60, 68) }
     })
 ];
 
@@ -1437,5 +1476,45 @@ export const UNOVA2_SPECIALS: SpecialEncounter[] = [
         fameBonus: CHAMPIONS_FAME_BONUS,
         prizeBalls: { masterBall: 1 },
         text: "With Kanto, Johto, Hoenn, Sinnoh and Unova cleared, the Champions Tournament opens. Win it for ×1.25 Fame this journey and a Master Ball."
-    }
+    },
+    towerBoss(
+        "blackTower",
+        "Black Tower",
+        "The tenth area's boss has climbed the whole skyscraper. Show the city what you've got!"
+    ),
+    towerBoss(
+        "whiteTreehollow",
+        "White Treehollow",
+        "The tenth area's boss waits at the heart of the tree, with the forest's strongest."
+    )
 ];
+
+/** The Black Tower's or White Treehollow's Area 10 boss, with the six strongest of its Pokémon. */
+function towerBoss(tower: EntralinkTower, place: string, quote: string): SpecialEncounter {
+    const team = towerSpecies(tower)
+        .slice(0, 6)
+        .map(id => ({ id, level: 72 }));
+    return {
+        kind: "boss",
+        id: `${tower}Boss`,
+        region: "unova2",
+        speciesId: team[0].id,
+        level: 72,
+        place: `the ${place} (Area 10)`,
+        badgesRequired: 8,
+        postGame: true,
+        trainer: {
+            id: `${tower}Boss`,
+            name: `${place} Boss`,
+            title: "Area 10",
+            specialty: null,
+            team,
+            timeLimit: timeLimit(team.length),
+            statMultiplier: 3.3,
+            prizeMoney: 7200,
+            quote
+        },
+        prizeBalls: { ultraBall: 10 },
+        text: `After the League, the ${place}'s ten areas open. Its Area 10 boss fields the strongest of the residents' Pokémon.`
+    };
+}
