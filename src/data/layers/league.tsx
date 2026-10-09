@@ -36,7 +36,7 @@ const layer = createLayer(id, () => {
             trainer,
             main.bonuses.value.damage,
             main.bonuses.value.hp,
-            main.mechanicOn("doubleBattles")
+            main.battleStyle.value
         );
     }
 
@@ -239,8 +239,14 @@ const layer = createLayer(id, () => {
                     ) : null}
                     <p class="pk-small pk-muted">
                         {`You automatically send out your best matchup against each opponent, and switch when a Pokémon faints${
-                            main.mechanicOn("doubleBattles")
-                                ? "; with Double Battles, your strongest other Pokémon backs it up"
+                            main.battleStyle.value.triples === true
+                                ? "; with Triple Battles, your two strongest other Pokémon back it up"
+                                : main.battleStyle.value.doubles === true
+                                  ? "; with Double Battles, your strongest other Pokémon backs it up"
+                                  : ""
+                        }${
+                            main.battleStyle.value.rotation === true
+                                ? "; with Rotation Battles, your sturdiest Pokémon takes the hits"
                                 : ""
                         }. Party order breaks ties. Every forecast is exact.`}
                     </p>

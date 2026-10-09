@@ -892,6 +892,47 @@ export function bestMatchup(
  * lands this share of its usual damage (it supports more than it leads).
  */
 export const PARTNER_DAMAGE = 0.5;
+/**
+ * Triple battles (Unova's): a second partner joins the first, with this share of its damage (the
+ * far side of a triple battle only reaches the middle).
+ */
+export const TRIPLE_PARTNER_DAMAGE = 0.25;
+
+/** The battle styles the player's side has unlocked (Double, Triple and Rotation Battles). */
+export interface BattleStyle {
+    doubles?: boolean;
+    triples?: boolean;
+    rotation?: boolean;
+}
+
+/** A battle style from the older on/off "doubles" flag or a full style. */
+export function battleStyle(style: BattleStyle | boolean | undefined): BattleStyle {
+    return typeof style === "boolean" ? { doubles: style } : (style ?? {});
+}
+
+/** Each partner's damage share, in order: one in double battles, two in triple battles. */
+function partnerShares(style: BattleStyle): number[] {
+    if (style.triples === true) return [PARTNER_DAMAGE, TRIPLE_PARTNER_DAMAGE];
+    return style.doubles === true ? [PARTNER_DAMAGE] : [];
+}
+
+/** The strongest other members still standing against this target, strongest first. */
+export function battlePartners(
+    party: PartyBattler[],
+    target: BattlerStats,
+    damageBonus: number,
+    active: number,
+    hp: number[] | null,
+    count: number
+): number[] {
+    if (count <= 0) return [];
+    return party
+        .map((member, i) => ({ i, dps: memberDps(member, target, damageBonus) }))
+        .filter(({ i, dps }) => i !== active && dps > 0 && (hp == null || hp[i] > 0))
+        .sort((a, b) => b.dps - a.dps)
+        .slice(0, count)
+        .map(({ i }) => i);
+}
 
 export function battlePartner(
     party: PartyBattler[],
@@ -900,17 +941,22 @@ export function battlePartner(
     active: number,
     hp: number[] | null
 ): number {
-    let best = -1;
-    let bestDps = 0;
-    party.forEach((member, i) => {
-        if (i === active || (hp != null && hp[i] <= 0)) return;
-        const dps = memberDps(member, target, damageBonus);
-        if (dps > bestDps) {
-            best = i;
-            bestDps = dps;
-        }
-    });
-    return best;
+    return battlePartners(party, target, damageBonus, active, hp, 1)[0] ?? -1;
+}
+
+/** The partners' damage per second beside the active Pokémon, for this battle style. */
+function partnersDps(
+    party: PartyBattler[],
+    target: BattlerStats,
+    damageBonus: number,
+    partners: number[],
+    style: BattleStyle
+): number {
+    const shares = partnerShares(style);
+    return partners.reduce(
+        (sum, i, n) => sum + (shares[n] ?? 0) * memberDps(party[i], target, damageBonus),
+        0
+    );
 }
 
 /**
@@ -921,14 +967,16 @@ export function wildDps(
     party: PartyBattler[],
     target: BattlerStats,
     damageBonus: number,
-    doubles = false
+    styleOrDoubles: BattleStyle | boolean = false
 ) {
+    const style = battleStyle(styleOrDoubles);
     const index = bestMatchup(party, target, damageBonus, null);
     if (index === -1) return 0;
-    const partner = doubles ? battlePartner(party, target, damageBonus, index, null) : -1;
+    const count = partnerShares(style).length;
+    const partners = battlePartners(party, target, damageBonus, index, null, count);
     return (
         memberDps(party[index], target, damageBonus) +
-        (partner === -1 ? 0 : PARTNER_DAMAGE * memberDps(party[partner], target, damageBonus))
+        partnersDps(party, target, damageBonus, partners, style)
     );
 }
 
@@ -959,11 +1007,12 @@ export interface TrainerBattleState {
     elapsed: number;
     /** In double battles, the party member fighting beside the active one (-1 for none). */
     partner?: number;
+    /** Every partner beside the active one (two in triple battles). */
+    partners?: number[];
 }
 
-/** Who fights two at a time: the player (the double battles mechanic) and the trainer. */
-export interface BattleRules {
-    doubles?: boolean;
+/** How the sides fight: the player's battle styles, and a trainer sending two out at once. */
+export interface BattleRules extends BattleStyle {
     enemyDoubles?: boolean;
 }
 
@@ -1013,10 +1062,19 @@ export function stepTrainerBattle(
     rules: BattleRules = {}
 ): { state: TrainerBattleState; done: TrainerBattleOutcome["reason"] | null } {
     let { enemyIndex, enemyHp, active, elapsed } = state;
-    let partner = state.partner ?? -1;
+    let partners = state.partners ?? (state.partner != null ? [state.partner] : []);
     const partyHp = [...state.partyHp];
     let remaining = Math.min(dt, timeLimit - elapsed);
-    const snapshot = () => ({ enemyIndex, enemyHp, active, partyHp, elapsed, partner });
+    const snapshot = () => ({
+        enemyIndex,
+        enemyHp,
+        active,
+        partyHp,
+        elapsed,
+        partner: partners[0] ?? -1,
+        partners
+    });
+    const partnerCount = partnerShares(rules).length;
 
     for (;;) {
         if (enemyIndex >= enemies.length) {
@@ -1037,39 +1095,67 @@ export function stepTrainerBattle(
         }
 
         const member = party[active];
-        partner =
-            rules.doubles === true ? battlePartner(party, enemy, damageBonus, active, partyHp) : -1;
+        partners = battlePartners(party, enemy, damageBonus, active, partyHp, partnerCount);
         const ourDps =
             memberDps(member, enemy, damageBonus) +
-            (partner === -1 ? 0 : PARTNER_DAMAGE * memberDps(party[partner], enemy, damageBonus));
+            partnersDps(party, enemy, damageBonus, partners, rules);
         const second = rules.enemyDoubles === true ? enemies[enemyIndex + 1] : undefined;
-        const theirDps =
-            damagePerHit(enemy, member) * attacksPerSecond(enemy.species) +
-            (second == null ? 0 : damagePerHit(second, member) * attacksPerSecond(second.species));
+        const incoming = (i: number) =>
+            damagePerHit(enemy, party[i]) * attacksPerSecond(enemy.species) +
+            (second == null
+                ? 0
+                : damagePerHit(second, party[i]) * attacksPerSecond(second.species));
+        // Rotation Battles: the sturdiest member takes the hits (the active one otherwise).
+        const tank = rules.rotation === true ? rotationTank(party, partyHp, incoming) : active;
+        const theirDps = incoming(tank);
 
         const toKillEnemy = ourDps > 0 ? enemyHp / ourDps : Infinity;
-        const toLoseActive = theirDps > 0 ? partyHp[active] / theirDps : Infinity;
-        const step = Math.min(toKillEnemy, toLoseActive, remaining);
+        const toLoseTank = theirDps > 0 ? partyHp[tank] / theirDps : Infinity;
+        const step = Math.min(toKillEnemy, toLoseTank, remaining);
 
         enemyHp -= ourDps * step;
-        partyHp[active] -= theirDps * step;
+        partyHp[tank] -= theirDps * step;
         elapsed += step;
         remaining -= step;
 
         const enemyFainted = step === toKillEnemy || enemyHp <= 1e-9;
-        const activeFainted = step === toLoseActive || partyHp[active] <= 1e-9;
-        if (activeFainted) {
-            partyHp[active] = 0;
+        const tankFainted = step === toLoseTank || partyHp[tank] <= 1e-9;
+        if (tankFainted) {
+            partyHp[tank] = 0;
         }
         if (enemyFainted) {
             enemyIndex++;
             enemyHp = enemyIndex < enemies.length ? maxHp(enemies[enemyIndex]) : 0;
         }
-        if (enemyFainted || activeFainted) {
+        if (enemyFainted || (tankFainted && tank === active)) {
             // Send out the best matchup against whoever is on the field now.
             active = -1;
         }
     }
+}
+
+/**
+ * Rotation Battles: the sturdiest member still standing against this opponent (full HP over the
+ * damage it takes) takes its hits until it faints, then the next sturdiest. It's fixed for each
+ * opponent, so real-time stepping stays exact.
+ */
+function rotationTank(
+    party: PartyBattler[],
+    partyHp: number[],
+    incoming: (i: number) => number
+): number {
+    let best = -1;
+    let bestTime = -1;
+    party.forEach((member, i) => {
+        if (partyHp[i] <= 0) return;
+        const dps = incoming(i);
+        const time = dps > 0 ? maxHp(member) / dps : Infinity;
+        if (time > bestTime) {
+            best = i;
+            bestTime = time;
+        }
+    });
+    return best;
 }
 
 /** Resolves a whole trainer battle instantly. The game's real-time battles match this exactly. */
@@ -1078,7 +1164,7 @@ export function simulateTrainerBattle(
     trainer: Pick<TrainerDefinition, "team" | "timeLimit" | "statMultiplier" | "doubles">,
     damageBonus: number,
     hpBonus: number,
-    doubles = false
+    styleOrDoubles: BattleStyle | boolean = false
 ): TrainerBattleOutcome {
     const enemies = trainerTeam(trainer);
     const start = initialTrainerBattle(party, enemies, hpBonus);
@@ -1089,7 +1175,7 @@ export function simulateTrainerBattle(
         damageBonus,
         Infinity,
         trainer.timeLimit,
-        { doubles, enemyDoubles: trainer.doubles === true }
+        { ...battleStyle(styleOrDoubles), enemyDoubles: trainer.doubles === true }
     );
     const total = start.partyHp.reduce((a, b) => a + b, 0);
     const left = state.partyHp.reduce((a, b) => a + Math.max(0, b), 0);
