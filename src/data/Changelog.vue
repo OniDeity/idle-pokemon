@@ -5,6 +5,20 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.16 Join Avenue</summary>
+                <ul>
+                    <li class="feature">
+                        Join Avenue, Black 2 and White 2's arcade: met on Route 4 past the Insect
+                        Badge, then on in every region. A visitor comes every 50 wild battles and
+                        opens or ranks up the shop they want (to rank 10, kept for good): the Raffle
+                        (Great Balls, sometimes a Master Ball), Market (cheaper Poké Mart), Dojo
+                        (trains your lowest-level Pokémon), Beauty Salon (friendship), Nursery
+                        (faster Eggs), Flower Shop (party HP), Antique Shop (evolution items) and
+                        Café (experience). See the Map's Join Avenue tab
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.15 Black City and White Forest</summary>
                 <ul>
                     <li class="feature">
