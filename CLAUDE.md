@@ -259,14 +259,21 @@ journeys.
 
 ## Plans and ideas
 
+- Unova's anime (v2.18, `unovaAnime.ts`): 25 places from Fandom's "Anime locations" ∩ "Unova
+  locations" with wild Pokémon in their debut episode/movie (Fandom's location pages are stubs;
+  the episode pages' cast lists, else their plots). Pre-League tables keep to Gen 5 and to what
+  the games offer by then: a first version with Darmanitan at 1 badge and Haxorus at 6 made the
+  sim's Black/White 3.4-4.7 h. Decolore Islands and the Village of Dragons are post-game.
 - Hoenn's anime (v2.6, `hoennAnime.ts`): 34 places from Fandom's "Anime locations" ∩ "Hoenn
   locations" categories (Bulbapedia is blocked), Meta Groudon (3383, Forina, post-League), Hoenn
   Cap Pikachu (Littleroot gift). Alto Mare's Latios/Latias stay in Johto's anime places.
 - The three Ranger games are done (Fiore, Almia, Oblivia). Not done: Guardian Signs' past
   (time travel) Browser and Ukulele Pichu.
-- Gen 5 (v2.11) is done: both Unova journeys, Seasons, phenomena, critical captures, Hidden
-  Grottoes, Medals and challenges. Not done: Triple/Rotation Battles, Unova anime places,
-  Black City/White Forest, Join Avenue, Musicals.
+- Gen 5 is done: both Unova journeys, Seasons, phenomena, critical captures, Hidden Grottoes,
+  Medals and challenges (v2.11), Triple/Rotation Battles (v2.14), Black City/White Forest
+  (v2.15), Join Avenue (v2.16), Musicals (v2.17) and Unova's anime places (v2.18).
+- Next (the owner's order): Gen 5 side games, Pokémon Conquest first (Ransei), then maybe Dream
+  Radar/Dream World as mechanics and PokéPark 2.
 - Later: Pokémon Conquest with Gen 5 (Unova); Mystery Dungeon after Gen 7 (the owner plans other
   games and romhacks as a "multiverse"). Not wanted: Pokéwalker, Pokéathlon. Not done yet:
   Sinnoh's swarms (PokeAPI's tables are in `sinnohExtras.json`), Sinnoh anime places.

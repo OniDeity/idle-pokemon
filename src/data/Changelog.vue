@@ -5,6 +5,19 @@
         </template>
         <template v-slot:body>
             <details open>
+                <summary>v2.18 Unova's anime places</summary>
+                <ul>
+                    <li class="feature">
+                        25 Unova places from the anime and its three Unova movies join Unova
+                        (Black/White): from the Clock Tower and Litwick Mansion to Milos Island, the
+                        Hero's Ruin and the Village of Dragons, the movies' Eindoak Town, Roshan City
+                        and Pokémon Hills, and after the League the Decolore Islands (Honey Island,
+                        Scalchop Island, Grand Spectrala, Torom Island and more), each with the wild
+                        Pokémon of its episodes
+                    </li>
+                </ul>
+            </details>
+            <details>
                 <summary>v2.17 Pokémon Musicals</summary>
                 <ul>
                     <li class="feature">
