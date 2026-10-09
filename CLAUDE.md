@@ -201,6 +201,11 @@ journeys.
   requirements. Black City's market boss rewards every `MARKET_TASK_WINS`. B2W2's Black Tower /
   White Treehollow split the final forms by first type (random trainers in the games), with an
   Area 10 boss each.
+- Join Avenue (v2.16, `joinAvenue.ts`, mechanic `joinAvenue`, B2W2 at 3 badges): a visitor every
+  `VISITOR_BATTLES` (`main.visitorProgress`) opens or ranks up a shop in `hof.joinAvenue` (kept
+  for good, rank ≤ 10). `avenuePerks()` feeds `main.bonuses` (Café xp, Flower Shop hp),
+  `martPrice` (Market) and `eggBattles` (Nursery); the Raffle, Dojo, Beauty Salon and Antique
+  Shop act per visitor in `tendJoinAvenue`. The simulator doesn't play it.
 - Gen 5 mechanics (`mechanics.ts`): `seasons` (every `SEASON_BATTLES` wild battles; Unova's
   tables use `bySeason`, Deerling/Sawsbuck take the season's form via `seasonForm()`; elsewhere
   `SEASON_TYPES` ×1.5 and seasonal Deerling join walk pools), `phenomena` (an extra

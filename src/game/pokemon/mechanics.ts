@@ -26,7 +26,8 @@ export type MechanicId =
     | "criticalCapture"
     | "hiddenGrottoes"
     | "tripleBattles"
-    | "rotationBattles";
+    | "rotationBattles"
+    | "joinAvenue";
 
 export interface MechanicDefinition {
     id: MechanicId;
@@ -215,6 +216,15 @@ export const MECHANICS: Record<MechanicId, MechanicDefinition> = {
         trialsRequired: 7,
         description:
             "In trainer battles your team rotates: while the best matchup attacks, the sturdiest Pokémon against that opponent takes its hits (then the next sturdiest), so your attacker lasts longer."
+    },
+    joinAvenue: {
+        id: "joinAvenue",
+        name: "Join Avenue",
+        region: "unova2",
+        unlockAt: "Join Avenue on Route 4, past the Insect Badge",
+        trialsRequired: 3,
+        description:
+            "A visitor comes to your avenue every 50 wild battles, in every region, and opens or ranks up the shop they want (to rank 10, kept for good): Raffle, Market, Dojo, Beauty Salon, Nursery, Flower Shop, Antique Shop and Café, each with a perk that grows with its rank."
     }
 };
 
