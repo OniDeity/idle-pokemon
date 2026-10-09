@@ -102,6 +102,8 @@ const layer = createLayer(id, () => {
     const benchSlots = persistent<number>(2);
     /** League Pass setting: also battle legendaries caught before and bosses beaten before. */
     const autoLegends = persistent<boolean>(true);
+    /** Pokémon Musical props, kept for good. */
+    const props = persistent<Record<string, boolean>>({}, false);
     /** Join Avenue's shops and their ranks, kept for good. */
     const joinAvenue = persistent<Avenue>({}, false);
     /** The Pokémon Bank: one Pokémon deposited per Hall of Fame entry, a partner choice for good. */
@@ -820,6 +822,7 @@ const layer = createLayer(id, () => {
         bank,
         bankDeposit,
         joinAvenue,
+        props,
         newFacesIn,
         replaceChampionTeam,
         eggsBred,
